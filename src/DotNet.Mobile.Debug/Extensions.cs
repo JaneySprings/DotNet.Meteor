@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 
@@ -18,10 +19,8 @@ public static class Extensions {
     };
     public static bool HasMonoExtension(this string path) {
         var extension = Path.GetExtension(path);
-
         if (extension == null)
             return false;
-
         return MonoFileExtensions.Contains(extension);
     }
 }
