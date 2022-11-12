@@ -14,6 +14,10 @@ Task("prepare").Does(() => {
 });
 
 Task("build-dotnet")
+   .DoesForEach<FilePath>(GetFiles($"{MonoDebuggerDirectory}/**/*.csproj"), file => {
+      var regex = @"(<NuGetVersionRoslyn\s+Condition=""\$\(NuGetVersionRoslyn\)\s*==\s*''"")(>.+<)(/NuGetVersionRoslyn>)";
+      ReplaceRegexInFiles(file.ToString(), regex, $"$1>{NuGetVersionRoslyn}<$3");
+   })
    .Does(() => DotNetBuild(MobileDebugProjectPath, new DotNetBuildSettings {
       OutputDirectory = ExtensionAssembliesDirectory,
       Configuration = configuration,
@@ -21,10 +25,7 @@ Task("build-dotnet")
          AssemblyVersion = version
       }
    }));
-   // .DoesForEach<DirectoryPath>(GetDirectories($"{ExtensionAssembliesDirectory}/*"), dir => {
-   //    DeleteDirectory(dir, new DeleteDirectorySettings { Recursive = true });
-   // });
-
+   
 Task("vsix").Does(() => {
    Information("Hello Cake!");
 });

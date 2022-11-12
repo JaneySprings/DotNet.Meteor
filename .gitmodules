@@ -1,0 +1,6 @@
+[submodule "src/Mono.Debugger"]
+	path = src/Mono.Debugger
+	url = https://github.com/mono/debugger-libs
+# [submodule "src/NRefactory"]
+# 	path = src/NRefactory
+# 	url = https://github.com/xamarin/NRefactory
