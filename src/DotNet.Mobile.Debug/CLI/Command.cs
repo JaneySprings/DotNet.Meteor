@@ -7,8 +7,8 @@ using XCode.Sdk;
 using DotNet.Mobile.Shared;
 
 namespace DotNet.Mobile.Debug.CLI {
-    public static class Utils {
-        public static void CommandHelp() {
+    public static class Command {
+        public static void Help() {
             Logger.Info($"DotNet.Mobile.Debug.CLI version {Program.Version} for Visual Studio Code");
             Logger.Info("Copyright (C) Nikita Romanov. All rights reserved.");
             Logger.Info("\nCommands:");
@@ -18,27 +18,27 @@ namespace DotNet.Mobile.Debug.CLI {
             Logger.Info(" --start-session      Launch mono debugger session");
             Logger.Info(" --help               Show this help");
         }
-        public static void CommandVersion() {
+        public static void Version() {
             Logger.Info(Program.Version);
         }
-        public static void CommandError(string parameter) {
+        public static void Error(string parameter) {
             Logger.Error($"Unknown parameter: {parameter}");
         }
 
-        public static void CommandAndroidDevices() {
+        public static void AndroidDevices() {
             List<DeviceData> devices = AndroidTool.GetAllDevices();
             Logger.Info(JsonSerializer.Serialize(devices));
         }
-        public static void CommandAppleDevices() {
+        public static void AppleDevices() {
             List<DeviceData> devices = XCodeTool.GetAllDevices();
             Logger.Info(JsonSerializer.Serialize(devices));
         }
-        public static void CommandAllDevices() {
+        public static void AllDevices() {
             List<DeviceData> devices = AndroidTool.GetAllDevices().Concat(XCodeTool.GetAllDevices()).ToList();
             Logger.Info(JsonSerializer.Serialize(devices));
         }
 
-        public static void CommandStartSession() {
+        public static void StartSession() {
             Logger.Info("Starting Mono debugger session...");
             // var debugSession = new MonoDebugSession {
             //     TRACE = true,

@@ -12,18 +12,18 @@ namespace DotNet.Mobile.Debug.CLI {
 
         private static void Main(string[] args) {
             if (args.Length == 0) {
-                Utils.CommandHelp();
+                Command.Help();
                 return;
             }
 
             switch (args[0].ToLower()) {
-                case "--help":              Utils.CommandHelp(); break;
-                case "--version":           Utils.CommandVersion(); break;
-                case "--android-devices":   Utils.CommandAndroidDevices(); break;
-                case "--apple-devices":     Utils.CommandAppleDevices(); break;
-                case "--devices":           Utils.CommandAllDevices(); break;
-                case "--start-session":     Utils.CommandStartSession(); break;
-                default: Utils.CommandError(args[0]); break;
+                case "--help":              Command.Help(); break;
+                case "--version":           Command.Version(); break;
+                case "--android-devices":   Command.AndroidDevices(); break;
+                case "--apple-devices":     Command.AppleDevices(); break;
+                case "--devices":           Command.AllDevices(); break;
+                case "--start-session":     Command.StartSession(); break;
+                default: Command.Error(args[0]); break;
             }
         }
     }
