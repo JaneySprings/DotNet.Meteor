@@ -5,6 +5,7 @@ using System.Text.Json;
 using Android.Sdk;
 using XCode.Sdk;
 using DotNet.Mobile.Shared;
+using DotNet.Mobile.Debug.Session;
 
 namespace DotNet.Mobile.Debug.CLI {
     public static class Command {
@@ -40,11 +41,11 @@ namespace DotNet.Mobile.Debug.CLI {
 
         public static void StartSession() {
             Logger.Info("Starting Mono debugger session...");
-            // var debugSession = new MonoDebugSession {
-            //     TRACE = true,
-            //     TRACE_RESPONSE = true
-            // };
-            // debugSession.Start(Console.OpenStandardInput(), Console.OpenStandardOutput()).Wait();
+            var debugSession = new MonoDebugSession {
+                Trace = true,
+                TraceResponse = true
+            };
+            debugSession.Start(Console.OpenStandardInput(), Console.OpenStandardOutput()).Wait();
         }
     }
 }

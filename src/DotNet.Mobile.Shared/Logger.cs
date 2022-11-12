@@ -4,6 +4,10 @@ namespace DotNet.Mobile.Shared {
             System.Console.WriteLine(message);
         }
 
+        public static void Info(System.Exception ex) {
+            System.Console.WriteLine(ex.Message + "\n" + ex.StackTrace);
+        }
+
         public static void Warning(string message) {
             //TODO: colorize?
             Info(message);
