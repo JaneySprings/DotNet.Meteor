@@ -13,7 +13,7 @@ namespace Android.Sdk {
                 .Append("avds"));
 
             if (result.ExitCode != 0)
-                Logger.Error(string.Join(Environment.NewLine, result.StandardError));
+                throw new Exception(string.Join(Environment.NewLine, result.StandardError));
 
             string output = string.Join(Environment.NewLine, result.StandardOutput) + Environment.NewLine;
             string regex = @"(Name:\s+)(?<name>.*?)(\n).*?" +
@@ -39,7 +39,7 @@ namespace Android.Sdk {
                 .Append("-l"));
 
             if (result.ExitCode != 0)
-                Logger.Error(string.Join(Environment.NewLine, result.StandardError));
+                throw new Exception(string.Join(Environment.NewLine, result.StandardError));
 
             string regex = @"^(?<serial>\S+?)(\s+?)\s+(?<state>\S+)";
             var devices = new List<PhysicalDevice>();

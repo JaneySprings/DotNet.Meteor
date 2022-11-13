@@ -1,21 +1,20 @@
+using System;
+using System.IO;
+
 namespace DotNet.Mobile.Shared {
     public static class Logger {
-        public static void Info(string message) {
-            System.Console.WriteLine(message);
+        private const string Path = "/Users/nromanov/Work/vscode-meteor/extension/log.txt";
+
+        static Logger() {
+            if (File.Exists(Path))
+                File.Delete(Path);
+            using StreamWriter sw = File.CreateText(Path);
+            sw.WriteLine("|" + DateTime.Now.ToString() + "| Start logging");
         }
 
-        public static void Info(System.Exception ex) {
-            System.Console.WriteLine(ex.Message + "\n" + ex.StackTrace);
-        }
-
-        public static void Warning(string message) {
-            //TODO: colorize?
-            Info(message);
-        }
-
-        public static void Error(string message) {
-            System.Console.WriteLine(message);
-            throw new System.Exception(message);
+        public static void Log(string message) {
+            using StreamWriter sw = File.AppendText(Path);
+            sw.WriteLine("|" + DateTime.Now.ToString() + "| " + message);
         }
     }
 }

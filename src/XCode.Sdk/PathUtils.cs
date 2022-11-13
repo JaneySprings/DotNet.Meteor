@@ -13,7 +13,7 @@ namespace XCode.Sdk {
             string path = string.Join(Environment.NewLine, result.StandardOutput)?.Trim();
 
             if (string.IsNullOrEmpty(path))
-                Logger.Error("Could not find XCode path");
+                throw new Exception("Could not find XCode path");
 
             return path;
         }
@@ -23,7 +23,7 @@ namespace XCode.Sdk {
             FileInfo tool = new FileInfo(path);
 
             if (!tool.Exists)
-                Logger.Error("Could not find xcdevice tool");
+                throw new Exception("Could not find xcdevice tool");
 
             return tool;
         }
