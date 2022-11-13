@@ -22,7 +22,7 @@ namespace Android.Sdk {
             );
 
             if (result.ExitCode != 0)
-                Logger.Error(string.Join(Environment.NewLine, result.StandardError));
+                throw new Exception(string.Join(Environment.NewLine, result.StandardError));
 
             return result.StandardOutput.FirstOrDefault();
         }

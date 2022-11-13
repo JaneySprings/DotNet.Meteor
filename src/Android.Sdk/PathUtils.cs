@@ -12,7 +12,7 @@ namespace Android.Sdk {
                 path = Path.Combine(home, "Library", "Android", "Sdk");
 
             if (!Directory.Exists(path))
-                Logger.Error("Could not find Android SDK path");
+                throw new Exception("Could not find Android SDK path");
 
             return path;
         }
@@ -22,7 +22,7 @@ namespace Android.Sdk {
             string path = Path.Combine(sdk, "cmdline-tools", "latest", "bin", "avdmanager");
 
             if (!File.Exists(path))
-                Logger.Error("Could not find avdmanager");
+                throw new Exception("Could not find avdmanager");
 
             return new FileInfo(path);
         }
@@ -32,7 +32,7 @@ namespace Android.Sdk {
             string path = Path.Combine(sdk, "platform-tools", "adb");
 
             if (!File.Exists(path))
-                Logger.Error("Could not find adb");
+                throw new Exception("Could not find adb");
 
             return new FileInfo(path);
         }
