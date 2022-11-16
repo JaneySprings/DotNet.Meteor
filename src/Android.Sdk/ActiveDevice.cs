@@ -3,18 +3,13 @@ using System.Linq;
 using DotNet.Mobile.Shared;
 
 namespace Android.Sdk {
-    public class PhysicalDevice {
+    public class ActiveDevice {
         public string Serial { get; set; }
-        public string Name { get; set; }
         public string State { get; set; }
-        public string Product { get; set; }
-        public string Model { get; set; }
-        public string Device { get; set; }
-        public string TransportId { get; set; }
     }
 
     public static class PhysicalDeviceExtensions {
-        public static string GetAVDName(this PhysicalDevice device) {
+        public static string GetAVDName(this ActiveDevice device) {
             var adb = PathUtils.GetADBTool();
             ProcessResult result = ProcessRunner.Run(adb, new ProcessArgumentBuilder()
                 .Append("-s", device.Serial)
@@ -27,14 +22,13 @@ namespace Android.Sdk {
             return result.StandardOutput.FirstOrDefault();
         }
 
-        public static DeviceData ToDeviceData(this PhysicalDevice device) {
+        public static DeviceData ToDeviceData(this ActiveDevice device) {
             bool isEmulator = device.Serial.Contains("emulator");
             var result = new DeviceData {
                 Serial = device.Serial,
                 Platform = Platform.Android,
                 IsRunning = true,
-                IsEmulator = isEmulator,
-                RuntimeIdentifier = "android-arm64"
+                IsEmulator = isEmulator
             };
 
             if (isEmulator) {

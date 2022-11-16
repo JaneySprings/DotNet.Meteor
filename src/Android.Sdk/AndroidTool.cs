@@ -17,22 +17,22 @@ namespace Android.Sdk {
 
             string output = string.Join(Environment.NewLine, result.StandardOutput) + Environment.NewLine;
             string regex = @"(Name:\s+)(?<name>.*?)(\n).*?" +
-                           @"(Path:\s+)(?<path>.*?)(\n).*?" +
-                           @"(Target:\s+)(?<target>.*?)(\n).*?" +
-                           @"(Based on:\s+)(?<based>.*?)(\sTag/)" +
-                           @"(ABI:\s+)(?<abi>.*?)(\n).*?";
+                           @"(Path:\s+)(?<path>.*?)(\n).*?";
+                        //    @"(Target:\s+)(?<target>.*?)(\n).*?" +
+                        //    @"(Based on:\s+)(?<based>.*?)(\sTag/)" +
+                        //    @"(ABI:\s+)(?<abi>.*?)(\n).*?";
 
             MatchCollection matches = Regex.Matches(output, regex, RegexOptions.Singleline);
             return matches.Select(m => new VirtualDevice {
                 Name = m.Groups["name"].Value,
-                Path = m.Groups["path"].Value,
-                Target = m.Groups["target"].Value,
-                BasedOn = m.Groups["based"].Value,
-                ABI = m.Groups["abi"].Value
+                Path = m.Groups["path"].Value
+                // Target = m.Groups["target"].Value,
+                // BasedOn = m.Groups["based"].Value,
+                // ABI = m.Groups["abi"].Value
             }).ToList();
         }
 
-        public static List<PhysicalDevice> GetActiveDevices() {
+        public static List<ActiveDevice> GetActiveDevices() {
             var adb = PathUtils.GetADBTool();
             ProcessResult result = ProcessRunner.Run(adb, new ProcessArgumentBuilder()
                 .Append("devices")
@@ -42,7 +42,7 @@ namespace Android.Sdk {
                 throw new Exception(string.Join(Environment.NewLine, result.StandardError));
 
             string regex = @"^(?<serial>\S+?)(\s+?)\s+(?<state>\S+)";
-            var devices = new List<PhysicalDevice>();
+            var devices = new List<ActiveDevice>();
 
             foreach (string line in result.StandardOutput) {
                 MatchCollection matches = Regex.Matches(line, regex, RegexOptions.Singleline);
@@ -50,7 +50,7 @@ namespace Android.Sdk {
                 if (matches.Count == 0)
                     continue;
 
-                devices.Add(new PhysicalDevice {
+                devices.Add(new ActiveDevice {
                     Serial = matches.FirstOrDefault().Groups["serial"].Value,
                     State = matches.FirstOrDefault().Groups["state"].Value,
                 });
@@ -60,7 +60,7 @@ namespace Android.Sdk {
         }
 
         public static List<DeviceData> GetAllDevices() {
-            List<PhysicalDevice> runningDevices = GetActiveDevices();
+            List<ActiveDevice> runningDevices = GetActiveDevices();
             List<DeviceData> devices = new List<DeviceData>();
             // Add running devices devices
             devices.AddRange(runningDevices.ConvertAll(d => d.ToDeviceData()));
@@ -75,12 +75,33 @@ namespace Android.Sdk {
                     Platform = Platform.Android,
                     Version = avd.BasedOn,
                     IsEmulator = true,
-                    IsRunning = false,
-                    RuntimeIdentifier = avd.ABI
+                    IsRunning = false
                 });
             }
 
             return devices;
+        }
+
+        public static string AdbShell(string serial, params string[] args) {
+            var emulator = PathUtils.GetADBTool();
+            var result = ProcessRunner.Run(emulator, new ProcessArgumentBuilder()
+                .Append("-s", serial, "shell")
+                .Append(args));
+
+            if (result.ExitCode != 0)
+                throw new Exception(string.Join(Environment.NewLine, result.StandardError));
+
+            return string.Join(Environment.NewLine, result.StandardOutput);
+        }
+
+        public static string RunEmulator(string name) {
+            var emulator = PathUtils.GetEmulatorTool();
+            var process = new ProcessRunner(emulator, new ProcessArgumentBuilder()
+                .Append("-avd")
+                .Append(name));
+
+            process.WaitForExitAsync();
+            return Emulator.WaitForBoot();
         }
     }
 }

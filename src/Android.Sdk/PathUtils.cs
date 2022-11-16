@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using DotNet.Mobile.Shared;
 
 namespace Android.Sdk {
     public static class PathUtils {
@@ -22,7 +21,7 @@ namespace Android.Sdk {
             string path = Path.Combine(sdk, "cmdline-tools", "latest", "bin", "avdmanager");
 
             if (!File.Exists(path))
-                throw new Exception("Could not find avdmanager");
+                throw new Exception("Could not find avdmanager tool");
 
             return new FileInfo(path);
         }
@@ -32,7 +31,17 @@ namespace Android.Sdk {
             string path = Path.Combine(sdk, "platform-tools", "adb");
 
             if (!File.Exists(path))
-                throw new Exception("Could not find adb");
+                throw new Exception("Could not find adb tool");
+
+            return new FileInfo(path);
+        }
+
+        public static FileInfo GetEmulatorTool() {
+            string sdk = GetSdkLocation();
+            string path = Path.Combine(sdk, "emulator", "emulator");
+
+            if (!File.Exists(path))
+                throw new Exception("Could not find emulator tool");
 
             return new FileInfo(path);
         }
