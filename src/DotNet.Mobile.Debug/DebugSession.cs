@@ -1,40 +1,19 @@
 ﻿using System;
-using DotNet.Mobile.Debug.Entities;
 using DotNet.Mobile.Debug.Protocol;
-using DotNet.Mobile.Shared;
 
 namespace DotNet.Mobile.Debug {
-    public abstract class DebugSession : ProtocolServer {
-        private bool _clientLinesStartAt1 = true;
-        private bool _clientPathsAreURI = true;
+    public abstract class DebugSession : Session {
+        protected bool _clientLinesStartAt1 = true;
+        protected bool _clientPathsAreURI = true;
 
-        public void SendResponse(Response response, dynamic body = null) {
-            if (body != null) {
-                response.SetBody(body);
-            }
-            SendMessage(response);
-        }
-
-        public void SendErrorResponse(Response response, int id, string format, dynamic arguments = null, bool user = true, bool telemetry = false) {
-            var msg = new Message(id, format, arguments, user, telemetry);
-            var message = Utilities.ExpandVariables(msg.format, msg.variables);
-            response.SetErrorBody(message, new ErrorResponseBody(msg));
-            SendMessage(response);
-        }
-
-        protected override void DispatchRequest(string command, dynamic args, Response response) {
-            if (args == null) {
-                args = new { };
-            }
-
+// ----- LifeCycle ------------------------------------------------------------------------------------
+        protected override void DispatchRequest(string command, Argument args, Response response) {
             try {
                 switch (command) {
-
                     case "initialize":
-                        if (args.linesStartAt1 != null) {
-                            this._clientLinesStartAt1 = (bool)args.linesStartAt1;
-                        }
-                        var pathFormat = (string)args.pathFormat;
+                        this._clientLinesStartAt1 = args.LinesStartAt1;
+                        var pathFormat = args.PathFormat;
+
                         if (pathFormat != null) {
                             switch (pathFormat) {
                                 case "uri":
@@ -44,7 +23,7 @@ namespace DotNet.Mobile.Debug {
                                     this._clientPathsAreURI = false;
                                     break;
                                 default:
-                                    SendErrorResponse(response, 1015, "initialize: bad value '{_format}' for pathFormat", new { _format = pathFormat });
+                                    SendErrorResponse(response, 1015, $"initialize: bad value '{pathFormat}' for pathFormat");
                                     return;
                             }
                         }
@@ -61,6 +40,7 @@ namespace DotNet.Mobile.Debug {
 
                     case "disconnect":
                         Disconnect(response, args);
+                        Stop();
                         break;
 
                     case "next":
@@ -120,65 +100,62 @@ namespace DotNet.Mobile.Debug {
                         break;
 
                     default:
-#if !EXCLUDE_HOT_RELOAD
-                        if (this.HandleUnknownRequest?.Invoke((command, args, response)) ?? false) {
-                            //This was handled!
-                            break;
-                        }
-#endif
-                        SendErrorResponse(response, 1014, "unrecognized request: {_request}", new { _request = command });
+                        SendErrorResponse(response, 1014, $"unrecognized command: {command}");
                         break;
                 }
             } catch (Exception e) {
-                SendErrorResponse(response, 1104, "error while processing request '{_request}' (exception: {_exception})", new { _request = command, _exception = e.Message });
-            }
-
-            if (command == "disconnect") {
-                Stop();
+                SendErrorResponse(response, 1104, $"error while processing request '{command}' (exception: {e.Message})");
             }
         }
 
-        public Func<(string command, dynamic args, Response response), bool> HandleUnknownRequest;
+        public abstract void Initialize(Response response, Argument args);
 
-        public abstract void Initialize(Response response, dynamic args);
+        public abstract void Launch(Response response, Argument arguments);
 
-        public abstract void Launch(Response response, dynamic arguments);
+        public abstract void Attach(Response response, Argument arguments);
 
-        public abstract void Attach(Response response, dynamic arguments);
+        public abstract void Disconnect(Response response, Argument arguments);
 
-        public abstract void Disconnect(Response response, dynamic arguments);
+        public abstract void SetFunctionBreakpoints(Response response, Argument arguments);
 
-        public virtual void SetFunctionBreakpoints(Response response, dynamic arguments) {
+        public abstract void SetExceptionBreakpoints(Response response, Argument arguments);
+
+        public abstract void SetBreakpoints(Response response, Argument arguments);
+
+        public abstract void Continue(Response response, Argument arguments);
+
+        public abstract void Next(Response response, Argument arguments);
+
+        public abstract void StepIn(Response response, Argument arguments);
+
+        public abstract void StepOut(Response response, Argument arguments);
+
+        public abstract void Pause(Response response, Argument arguments);
+
+        public abstract void StackTrace(Response response, Argument arguments);
+
+        public abstract void Scopes(Response response, Argument arguments);
+
+        public abstract void Variables(Response response, Argument arguments);
+
+        public abstract void Source(Response response, Argument arguments);
+
+        public abstract void Threads(Response response, Argument arguments);
+
+        public abstract void Evaluate(Response response, Argument arguments);
+
+// ---------------------------------------------------------------------------------------------
+
+        public void SendResponse(Response response, object body = null) {
+            response.SetBody(body);
+            SendMessage(response);
         }
 
-        public virtual void SetExceptionBreakpoints(Response response, dynamic arguments) {
+        public void SendErrorResponse(Response response, int id, string message) {
+            var model = new ModelMessage(id, message);
+            response.SetBodyError(message, new BodyError(model));
+            SendMessage(response);
         }
-
-        public abstract void SetBreakpoints(Response response, dynamic arguments);
-
-        public abstract void Continue(Response response, dynamic arguments);
-
-        public abstract void Next(Response response, dynamic arguments);
-
-        public abstract void StepIn(Response response, dynamic arguments);
-
-        public abstract void StepOut(Response response, dynamic arguments);
-
-        public abstract void Pause(Response response, dynamic arguments);
-
-        public abstract void StackTrace(Response response, dynamic arguments);
-
-        public abstract void Scopes(Response response, dynamic arguments);
-
-        public abstract void Variables(Response response, dynamic arguments);
-
-        public abstract void Source(Response response, dynamic arguments);
-
-        public abstract void Threads(Response response, dynamic arguments);
-
-        public abstract void Evaluate(Response response, dynamic arguments);
-
-        // protected
 
         protected int ConvertDebuggerLineToClient(int line) {
             return this._clientLinesStartAt1 ? line : line - 1;
@@ -186,36 +163,6 @@ namespace DotNet.Mobile.Debug {
 
         protected int ConvertClientLineToDebugger(int line) {
             return this._clientLinesStartAt1 ? line : line + 1;
-        }
-
-        protected string ConvertDebuggerPathToClient(string path) {
-            if (this._clientPathsAreURI) {
-                try {
-                    var uri = new System.Uri(path);
-                    return uri.AbsoluteUri;
-                } catch {
-                    return null;
-                }
-            } else {
-                return path;
-            }
-        }
-
-        protected string ConvertClientPathToDebugger(string clientPath) {
-            if (clientPath == null) {
-                return null;
-            }
-
-            if (this._clientPathsAreURI) {
-                if (Uri.IsWellFormedUriString(clientPath, UriKind.Absolute)) {
-                    Uri uri = new Uri(clientPath);
-                    return uri.LocalPath;
-                }
-                Logger.Log("path not well formed: '{0}'", clientPath);
-                return null;
-            } else {
-                return clientPath;
-            }
         }
     }
 }

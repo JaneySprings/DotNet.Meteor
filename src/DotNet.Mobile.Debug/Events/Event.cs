@@ -1,15 +1,21 @@
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using DotNet.Mobile.Debug.Protocol;
 
 namespace DotNet.Mobile.Debug.Events;
 
-public class Event : ProtocolMessage {
-    [JsonProperty(PropertyName = "event")]
-    public string eventType { get; }
-    public dynamic body { get; }
+public class Event : ProtocolBase {
+    public const string ExitedEvent = "exited";
+    public const string InitializedEvent = "initialized";
+    public const string OutputEvent = "output";
+    public const string StoppedEvent = "stopped";
+    public const string TerminatedEvent = "terminated";
+    public const string ThreadEvent = "thread";
 
-    public Event(string type, dynamic bdy = null) : base("event") {
-        eventType = type;
-        body = bdy;
+    [JsonPropertyName("event")] public string EventType { get; set; }
+    [JsonPropertyName("body")] public object Body { get; set; }
+
+    public Event(string type, object body = null) : base("event") {
+        this.EventType = type;
+        this.Body = body;
     }
 }

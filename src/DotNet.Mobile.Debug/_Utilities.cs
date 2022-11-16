@@ -115,29 +115,6 @@ namespace DotNet.Mobile.Debug {
             }
             return fallback;
         }
-
-        public static string ExpandVariables(string format, dynamic variables, bool underscoredOnly = true) {
-            if (string.IsNullOrWhiteSpace(format))
-                return format;
-            if (variables == null) {
-                variables = new { };
-            }
-            Type type = variables.GetType();
-            return VARIABLE.Replace(format, match => {
-                string name = match.Groups[1].Value;
-                if (!underscoredOnly || name.StartsWith("_")) {
-
-                    PropertyInfo property = type.GetProperty(name);
-                    if (property != null) {
-                        object value = property.GetValue(variables, null);
-                        return value.ToString();
-                    }
-                    return '{' + name + ": not found}";
-                }
-                return match.Groups[0].Value;
-            });
-        }
-
         /**
 		 * converts the given absPath into a path that is relative to the given dirPath.
 		 */
