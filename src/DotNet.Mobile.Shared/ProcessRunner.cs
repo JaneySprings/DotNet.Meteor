@@ -11,6 +11,9 @@ namespace DotNet.Mobile.Shared {
         readonly List<string> standardError;
         readonly Process process;
 
+        public int ExitCode => this.process.HasExited ? this.process.ExitCode : -1;
+        public bool HasExited => this.process?.HasExited ?? false;
+
         public static ProcessResult Run(FileInfo exe, ProcessArgumentBuilder builder) {
             var p = new ProcessRunner(exe, builder);
             return p.WaitForExit();
@@ -53,28 +56,8 @@ namespace DotNet.Mobile.Shared {
             }
         }
 
-        public int ExitCode
-            => this.process.HasExited ? this.process.ExitCode : -1;
-
-        public bool HasExited
-            => this.process?.HasExited ?? false;
-
         public void Kill() {
             this.process?.Kill();
-        }
-
-        public void StandardInputWrite(string input) {
-            if (!this.process.StartInfo.RedirectStandardInput)
-                throw new InvalidOperationException();
-
-            this.process.StandardInput.Write(input);
-        }
-
-        public void StandardInputWriteLine(string input) {
-            if (!this.process.StartInfo.RedirectStandardInput)
-                throw new InvalidOperationException();
-
-            this.process.StandardInput.WriteLine(input);
         }
 
         public ProcessResult WaitForExit() {

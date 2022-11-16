@@ -9,7 +9,6 @@ namespace DotNet.Mobile.Shared {
         [JsonPropertyName("version")] public string Version { get; set; }
         [JsonPropertyName("is_emulator")] public bool IsEmulator { get; set; }
         [JsonPropertyName("is_running")] public bool IsRunning { get; set; }
-        [JsonPropertyName("rid")] public string RuntimeIdentifier { get; set; }
     }
 
     public static class Platform {
