@@ -13,7 +13,7 @@ using Mono.Debugging.Client;
 using DotNet.Mobile.Debug.Events;
 using DotNet.Mobile.Debug.Protocol;
 using DotNet.Mobile.Debug.Pipeline;
-using Entity = DotNet.Mobile.Debug.Entities;
+using DotNet.Mobile.Shared;
 
 namespace DotNet.Mobile.Debug {
     public class MonoDebugSession : DebugSession {
@@ -43,7 +43,7 @@ namespace DotNet.Mobile.Debug {
         private Handles<ObjectValue[]> _variableHandles;
         private Handles<StackFrame> _frameHandles;
         private ObjectValue _exception;
-        private Dictionary<int, Entity.Thread> _seenThreads = new();
+        private Dictionary<int, ModelThread> _seenThreads = new();
         private bool _attachMode = false;
         private bool _terminated = false;
         private bool _stderrEOF = true;
@@ -73,13 +73,13 @@ namespace DotNet.Mobile.Debug {
 
             this._session.TargetStopped += (sender, e) => {
                 Stopped();
-                SendEvent(CreateStoppedEvent("step", e.Thread));
+                SendEvent(Event.StoppedEvent, new BodyStopped((int)e.Thread.Id, "step"));
                 this._resumeEvent.Set();
             };
 
             this._session.TargetHitBreakpoint += (sender, e) => {
                 Stopped();
-                SendEvent(CreateStoppedEvent("breakpoint", e.Thread));
+                SendEvent(Event.StoppedEvent, new BodyStopped((int)e.Thread.Id, "breakpoint"));
                 this._resumeEvent.Set();
             };
 
@@ -88,7 +88,7 @@ namespace DotNet.Mobile.Debug {
                 var ex = DebuggerActiveException();
                 if (ex != null) {
                     this._exception = ex.Instance;
-                    SendEvent(CreateStoppedEvent("exception", e.Thread, ex.Message));
+                    SendEvent(Event.StoppedEvent, new BodyStopped((int)e.Thread.Id, "exception", ex.Message));
                 }
                 this._resumeEvent.Set();
             };
@@ -98,7 +98,7 @@ namespace DotNet.Mobile.Debug {
                 var ex = DebuggerActiveException();
                 if (ex != null) {
                     this._exception = ex.Instance;
-                    SendEvent(CreateStoppedEvent("exception", e.Thread, ex.Message));
+                    SendEvent(Event.StoppedEvent, new BodyStopped((int)e.Thread.Id, "exception", ex.Message));
                 }
                 this._resumeEvent.Set();
             };
@@ -134,9 +134,9 @@ namespace DotNet.Mobile.Debug {
             this._session.TargetThreadStarted += (sender, e) => {
                 int tid = (int)e.Thread.Id;
                 lock (this._seenThreads) {
-                    this._seenThreads[tid] = new Entity.Thread(tid, e.Thread.Name);
+                    this._seenThreads[tid] = new ModelThread(tid, e.Thread.Name);
                 }
-                SendEvent(new ThreadEvent("started", tid));
+                SendEvent(Event.ThreadEvent, new BodyThread("started", tid));
             };
 
             this._session.TargetThreadStopped += (sender, e) => {
@@ -144,7 +144,7 @@ namespace DotNet.Mobile.Debug {
                 lock (this._seenThreads) {
                     this._seenThreads.Remove(tid);
                 }
-                SendEvent(new ThreadEvent("exited", tid));
+                SendEvent(Event.ThreadEvent, new BodyThread("exited", tid));
             };
 
             this._session.OutputWriter = (isStdErr, text) => {
@@ -152,53 +152,43 @@ namespace DotNet.Mobile.Debug {
             };
         }
 
-        public override void Initialize(Response response, dynamic args) {
+        public override void Initialize(Response response, Argument args) {
             OperatingSystem os = Environment.OSVersion;
             if (os.Platform != PlatformID.MacOSX && os.Platform != PlatformID.Unix && os.Platform != PlatformID.Win32NT) {
-                SendErrorResponse(response, 3000, "Debugging is not supported on this platform ({_platform}).", new { _platform = os.Platform.ToString() }, true, true);
+                SendErrorResponse(response, 3000, $"Debugging is not supported on this platform ({os.Platform}).");
                 return;
             }
 
-            SendResponse(response, new Capabilities() {
+            SendResponse(response, new BodyCapabilities() {
                 // This debug adapter does not need the configurationDoneRequest.
-                supportsConfigurationDoneRequest = false,
-
+                SupportsConfigurationDoneRequest = false,
                 // This debug adapter does not support function breakpoints.
-                supportsFunctionBreakpoints = false,
-
+                SupportsFunctionBreakpoints = false,
                 // This debug adapter doesn't support conditional breakpoints.
-                supportsConditionalBreakpoints = false,
-
+                SupportsConditionalBreakpoints = false,
                 // This debug adapter does not support a side effect free evaluate request for data hovers.
-                supportsEvaluateForHovers = false,
-
+                SupportsEvaluateForHovers = false,
                 // This debug adapter does not support exception breakpoint filters
-                exceptionBreakpointFilters = new dynamic[0]
+                ExceptionBreakpointFilters = new List<object>()
             });
 
             // Mono Debug is ready to accept breakpoints immediately
-            SendEvent(new InitializedEvent());
+            SendEvent(Event.InitializedEvent, null);
         }
 
-        public override async void Launch(Response response, dynamic args) {
+        public override void Launch(Response response, Argument args) {
             this._attachMode = false;
 
-            SetExceptionBreakpoints(args.__exceptionOptions);
+            SetExceptionOptions(args.ExceptionOptions);
 
             var launchOptions = new LaunchData(args);
-            var valid = launchOptions.Validate();
-
-            if (!valid.success) {
-                SendErrorResponse(response, 3002, valid.message);
-                return;
-            }
 
             int port = launchOptions.DebugPort; // Utilities.FindFreePort(55555);
 
-            var host = getString(args, "address");
+            var host = args.Address;
             IPAddress address = string.IsNullOrWhiteSpace(host) ? IPAddress.Loopback : Utilities.ResolveIPAddress(host);
             if (address == null) {
-                SendErrorResponse(response, 3013, "Invalid address '{address}'.", new { address = address });
+                SendErrorResponse(response, 3013, $"Invalid address '{address}'");
                 return;
             }
 
@@ -211,7 +201,7 @@ namespace DotNet.Mobile.Debug {
         }
         private void Connect(LaunchData options, IPAddress address, int port) {
             lock (this._lock) {
-
+                Logger.Log("Connecting to {0}:{1}", address, port);
                 this._debuggeeKilled = false;
 
                 Mono.Debugging.Soft.SoftDebuggerStartArgs args = null;
@@ -232,20 +222,20 @@ namespace DotNet.Mobile.Debug {
             }
         }
 
-        public override void Attach(Response response, dynamic args) {
+        public override void Attach(Response response, Argument args) {
             this._attachMode = true;
 
-            SetExceptionBreakpoints(args.__exceptionOptions);
+            SetExceptionOptions(args.ExceptionOptions);
 
             // validate argument 'address'
-            var host = getString(args, "address");
+            var host = args.Address;
             if (host == null) {
                 SendErrorResponse(response, 3007, "Property 'address' is missing or empty.");
                 return;
             }
 
             // validate argument 'port'
-            var port = getInt(args, "port", -1);
+            var port = args.Port;
             if (port == -1) {
                 SendErrorResponse(response, 3008, "Property 'port' is missing.");
                 return;
@@ -253,7 +243,7 @@ namespace DotNet.Mobile.Debug {
 
             IPAddress address = Utilities.ResolveIPAddress(host);
             if (address == null) {
-                SendErrorResponse(response, 3013, "Invalid address '{address}'.", new { address = address });
+                SendErrorResponse(response, 3013, $"Invalid address '{address}'");
                 return;
             }
 
@@ -262,9 +252,8 @@ namespace DotNet.Mobile.Debug {
             SendResponse(response);
         }
 
-        public override void Disconnect(Response response, dynamic args) {
+        public override void Disconnect(Response response, Argument args) {
             if (this._attachMode) {
-
                 lock (this._lock) {
                     if (this._session != null) {
                         this._debuggeeExecuting = true;
@@ -274,7 +263,6 @@ namespace DotNet.Mobile.Debug {
                         this._session = null;
                     }
                 }
-
             } else {
                 // Let's not leave dead Mono processes behind...
                 if (this._process != null) {
@@ -285,7 +273,7 @@ namespace DotNet.Mobile.Debug {
                     DebuggerKill();
 
                     while (!this._debuggeeKilled) {
-                        System.Threading.Thread.Sleep(10);
+                        Thread.Sleep(10);
                     }
                 }
             }
@@ -295,10 +283,10 @@ namespace DotNet.Mobile.Debug {
 
         public void SendConsoleEvent(string message) {
             Console.WriteLine(message);
-            SendEvent(new ConsoleOutputEvent(message.TrimEnd() + Environment.NewLine));
+            SendEvent(Event.OutputEvent, new BodyOutput(message.TrimEnd() + Environment.NewLine));
         }
 
-        public override void Continue(Response response, dynamic args) {
+        public override void Continue(Response response, Argument args) {
             WaitForSuspend();
             SendResponse(response);
             lock (this._lock) {
@@ -309,7 +297,7 @@ namespace DotNet.Mobile.Debug {
             }
         }
 
-        public override void Next(Response response, dynamic args) {
+        public override void Next(Response response, Argument args) {
             WaitForSuspend();
             SendResponse(response);
             lock (this._lock) {
@@ -320,7 +308,7 @@ namespace DotNet.Mobile.Debug {
             }
         }
 
-        public override void StepIn(Response response, dynamic args) {
+        public override void StepIn(Response response, Argument args) {
             WaitForSuspend();
             SendResponse(response);
             lock (this._lock) {
@@ -331,7 +319,7 @@ namespace DotNet.Mobile.Debug {
             }
         }
 
-        public override void StepOut(Response response, dynamic args) {
+        public override void StepOut(Response response, Argument args) {
             WaitForSuspend();
             SendResponse(response);
             lock (this._lock) {
@@ -342,46 +330,47 @@ namespace DotNet.Mobile.Debug {
             }
         }
 
-        public override void Pause(Response response, dynamic args) {
+        public override void Pause(Response response, Argument args) {
             SendResponse(response);
             PauseDebugger();
         }
 
-        public override void SetExceptionBreakpoints(Response response, dynamic args) {
-            SetExceptionBreakpoints(args.exceptionOptions);
+        public override void SetExceptionBreakpoints(Response response, Argument args) {
+            SetExceptionOptions(args.ExceptionOptions);
             SendResponse(response);
         }
+        public override void SetFunctionBreakpoints(Response response, Argument arguments) {}
 
-        public override void SetBreakpoints(Response response, dynamic args) {
+        public override void SetBreakpoints(Response response, Argument args) {
             string path = null;
-            if (args.source != null) {
-                string p = (string)args.source.path;
+            if (args.Source != null) {
+                string p = args.Source.Path;
                 if (p != null && p.Trim().Length > 0) {
                     path = p;
                 }
             }
             if (path == null) {
-                SendErrorResponse(response, 3010, "setBreakpoints: property 'source' is empty or misformed", null, false, true);
+                SendErrorResponse(response, 3010, "setBreakpoints: property 'source' is empty or misformed");
                 return;
             }
-            path = ConvertClientPathToDebugger(path);
+            path = path.ConvertClientPathToDebugger(this._clientPathsAreURI);
 
             if (!HasMonoExtension(path)) {
                 // we only support breakpoints in files mono can handle
-                SendResponse(response, new SetBreakpointsResponseBody());
+                SendResponse(response, new BodySetBreakpoints());
                 return;
             }
 
-            var clientLines = args.lines.ToObject<int[]>();
+            var clientLines = args.Lines;
             HashSet<int> lin = new HashSet<int>();
-            for (int i = 0; i < clientLines.Length; i++) {
+            for (int i = 0; i < clientLines.Count; i++) {
                 lin.Add(ConvertClientLineToDebugger(clientLines[i]));
             }
 
             // find all breakpoints for the given path and remember their id and line number
             var bpts = new List<Tuple<int, int>>();
             foreach (var be in this._breakpoints) {
-                var bp = be.Value as Mono.Debugging.Client.Breakpoint;
+                var bp = be.Value as Breakpoint;
                 if (bp != null && bp.FileName == path) {
                     bpts.Add(new Tuple<int, int>((int)be.Key, (int)bp.Line));
                 }
@@ -402,7 +391,7 @@ namespace DotNet.Mobile.Debug {
                 }
             }
 
-            for (int i = 0; i < clientLines.Length; i++) {
+            for (int i = 0; i < clientLines.Count; i++) {
                 var l = ConvertClientLineToDebugger(clientLines[i]);
                 if (!lin2.Contains(l)) {
                     var id = this._nextBreakpointId++;
@@ -411,22 +400,22 @@ namespace DotNet.Mobile.Debug {
                 }
             }
 
-            var breakpoints = new List<Entity.Breakpoint>();
+            var breakpoints = new List<ModelBreakpoint>();
             foreach (var l in clientLines) {
-                breakpoints.Add(new Entity.Breakpoint(true, l));
+                breakpoints.Add(new ModelBreakpoint(true, l));
             }
 
-            SendResponse(response, new SetBreakpointsResponseBody(breakpoints));
+            SendResponse(response, new BodySetBreakpoints(breakpoints));
         }
 
-        public override void StackTrace(Response response, dynamic args) {
+        public override void StackTrace(Response response, Argument args) {
             // HOT RELOAD: Seems that sometimes there's a hang here, look out for this in the future
             // TODO: Getting a stack trace can hang; we need to fix it but for now just return an empty one
             //SendResponse(response, new StackTraceResponseBody(new List<StackFrame>(), 0));
             //return;
 
-            int maxLevels = getInt(args, "levels", 10);
-            int threadReference = getInt(args, "threadId", 0);
+            int maxLevels = args.Levels;
+            int threadReference = args.ThreadId;
 
             WaitForSuspend();
 
@@ -439,30 +428,27 @@ namespace DotNet.Mobile.Debug {
                 }
             }
 
-            var stackFrames = new List<Entity.StackFrame>();
+            var stackFrames = new List<ModelStackFrame>();
             int totalFrames = 0;
-
             var bt = thread.Backtrace;
-            if (bt != null && bt.FrameCount >= 0) {
 
+            if (bt != null && bt.FrameCount >= 0) {
                 totalFrames = bt.FrameCount;
 
                 for (var i = 0; i < Math.Min(totalFrames, maxLevels); i++) {
-
                     var frame = bt.GetFrame(i);
-
                     string path = frame.SourceLocation.FileName;
-
                     var hint = "subtle";
-                    Entity.Source source = null;
+
+                    ModelSource source = null;
                     if (!string.IsNullOrEmpty(path)) {
                         string sourceName = Path.GetFileName(path);
                         if (!string.IsNullOrEmpty(sourceName)) {
                             if (File.Exists(path)) {
-                                source = new Entity.Source(sourceName, ConvertDebuggerPathToClient(path), 0, "normal");
+                                source = new ModelSource(sourceName, path.ConvertDebuggerPathToClient(this._clientPathsAreURI), 0, "normal");
                                 hint = "normal";
                             } else {
-                                source = new Entity.Source(sourceName, null, 1000, "deemphasize");
+                                source = new ModelSource(sourceName, null, 1000, "deemphasize");
                             }
                         }
                     }
@@ -470,51 +456,51 @@ namespace DotNet.Mobile.Debug {
                     var frameHandle = this._frameHandles.Create(frame);
                     string name = frame.SourceLocation.MethodName;
                     int line = frame.SourceLocation.Line;
-                    stackFrames.Add(new Entity.StackFrame(frameHandle, name, source, ConvertDebuggerLineToClient(line), 0, hint));
+                    stackFrames.Add(new ModelStackFrame(frameHandle, name, source, ConvertDebuggerLineToClient(line), 0, hint));
                 }
             }
 
-            SendResponse(response, new StackTraceResponseBody(stackFrames, totalFrames));
+            SendResponse(response, new BodyStackTrace(stackFrames, totalFrames));
         }
 
-        public override void Source(Response response, dynamic arguments) {
+        public override void Source(Response response, Argument arguments) {
             SendErrorResponse(response, 1020, "No source available");
         }
 
-        public override void Scopes(Response response, dynamic args) {
+        public override void Scopes(Response response, Argument args) {
 
-            int frameId = getInt(args, "frameId", 0);
+            int frameId = args.FrameId;
             var frame = this._frameHandles.Get(frameId, null);
 
-            var scopes = new List<Entity.Scope>();
+            var scopes = new List<ModelScope>();
 
             // TODO: I'm not sure if this is the best response in this scenario but it at least avoids an NRE
             if (frame == null) {
-                SendResponse(response, new ScopesResponseBody(scopes));
+                SendResponse(response, new BodyScopes(scopes));
                 return;
             }
 
             if (frame.Index == 0 && this._exception != null) {
-                scopes.Add(new Entity.Scope("Exception", this._variableHandles.Create(new ObjectValue[] { this._exception })));
+                scopes.Add(new ModelScope("Exception", this._variableHandles.Create(new ObjectValue[] { this._exception })));
             }
 
             var locals = new[] { frame.GetThisReference() }.Concat(frame.GetParameters()).Concat(frame.GetLocalVariables()).Where(x => x != null).ToArray();
             if (locals.Length > 0) {
-                scopes.Add(new Entity.Scope("Local", this._variableHandles.Create(locals)));
+                scopes.Add(new ModelScope("Local", this._variableHandles.Create(locals)));
             }
 
-            SendResponse(response, new ScopesResponseBody(scopes));
+            SendResponse(response, new BodyScopes(scopes));
         }
 
-        public override void Variables(Response response, dynamic args) {
-            int reference = getInt(args, "variablesReference", -1);
+        public override void Variables(Response response, Argument args) {
+            int reference = args.VariablesReference;
             if (reference == -1) {
-                SendErrorResponse(response, 3009, "variables: property 'variablesReference' is missing", null, false, true);
+                SendErrorResponse(response, 3009, "variables: property 'variablesReference' is missing");
                 return;
             }
 
             WaitForSuspend();
-            var variables = new List<Entity.Variable>();
+            var variables = new List<ModelVariable>();
 
             ObjectValue[] children;
             if (this._variableHandles.TryGet(reference, out children)) {
@@ -540,39 +526,39 @@ namespace DotNet.Mobile.Debug {
                     }
 
                     if (more) {
-                        variables.Add(new Entity.Variable("...", null, null));
+                        variables.Add(new ModelVariable("...", null, null));
                     }
                 }
             }
 
-            SendResponse(response, new VariablesResponseBody(variables));
+            SendResponse(response, new BodyVariables(variables));
         }
 
-        public override void Threads(Response response, dynamic args) {
-            var threads = new List<Entity.Thread>();
+        public override void Threads(Response response, Argument args) {
+            var threads = new List<ModelThread>();
             var process = this._activeProcess;
             if (process != null) {
-                Dictionary<int, Entity.Thread> d;
+                Dictionary<int, ModelThread> d;
                 lock (this._seenThreads) {
-                    d = new Dictionary<int, Entity.Thread>(this._seenThreads);
+                    d = new Dictionary<int, ModelThread>(this._seenThreads);
                 }
                 foreach (var t in process.GetThreads()) {
                     int tid = (int)t.Id;
-                    d[tid] = new Entity.Thread(tid, t.Name);
+                    d[tid] = new ModelThread(tid, t.Name);
                 }
                 threads = d.Values.ToList();
             }
-            SendResponse(response, new ThreadsResponseBody(threads));
+            SendResponse(response, new BodyThreads(threads));
         }
 
-        public override void Evaluate(Response response, dynamic args) {
+        public override void Evaluate(Response response, Argument args) {
             string error = null;
 
-            var expression = getString(args, "expression");
+            var expression = args.Expression;
             if (expression == null) {
                 error = "expression missing";
             } else {
-                int frameId = getInt(args, "frameId", -1);
+                int frameId = args.FrameId;
                 var frame = this._frameHandles.Get(frameId, null);
                 if (frame != null) {
                     if (frame.ValidateExpression(expression)) {
@@ -594,7 +580,7 @@ namespace DotNet.Mobile.Debug {
                             if (val.HasChildren) {
                                 handle = this._variableHandles.Create(val.GetAllChildren());
                             }
-                            SendResponse(response, new EvaluateResponseBody(val.DisplayValue, handle));
+                            SendResponse(response, new BodyEvaluate(val.DisplayValue, handle));
                             return;
                         }
                     } else {
@@ -604,36 +590,27 @@ namespace DotNet.Mobile.Debug {
                     error = "no active stackframe";
                 }
             }
-            SendErrorResponse(response, 3014, "Evaluate request failed ({_reason}).", new { _reason = error });
+            SendErrorResponse(response, 3014, $"Evaluate request failed ({error}).");
         }
 
         //---- private ------------------------------------------
 
-        private void SetExceptionBreakpoints(dynamic exceptionOptions) {
+        private void SetExceptionOptions(List<ExceptionOption> exceptionOptions) {
             if (exceptionOptions != null) {
-
                 // clear all existig catchpoints
                 foreach (var cp in this._catchpoints) {
                     this._session.Breakpoints.Remove(cp);
                 }
                 this._catchpoints.Clear();
 
-                var exceptions = exceptionOptions.ToObject<dynamic[]>();
-                for (int i = 0; i < exceptions.Length; i++) {
-
-                    var exception = exceptions[i];
-
+                foreach (var exception in exceptionOptions) {
                     string exName = null;
-                    string exBreakMode = exception.breakMode;
+                    string exBreakMode = exception.BreakMode;
 
-                    if (exception.path != null) {
-                        var paths = exception.path.ToObject<dynamic[]>();
-                        var path = paths[0];
-                        if (path.names != null) {
-                            var names = path.names.ToObject<dynamic[]>();
-                            if (names.Length > 0) {
-                                exName = names[0];
-                            }
+                    if (exception.Path != null) {
+                        var path = exception.Path[0];
+                        if (path.Names?.Count > 0) {
+                            exName = path.Names[0];
                         }
                     }
 
@@ -649,27 +626,22 @@ namespace DotNet.Mobile.Debug {
                 if (data[data.Length - 1] != '\n') {
                     data += '\n';
                 }
-                SendEvent(new OutputEvent(category, data));
+                SendEvent(Event.OutputEvent, new BodyOutput(category, data));
             }
         }
 
         private void Terminate(string reason) {
             if (!this._terminated) {
-
                 // wait until we've seen the end of stdout and stderr
                 for (int i = 0; i < 100 && (this._stdoutEOF == false || this._stderrEOF == false); i++) {
-                    System.Threading.Thread.Sleep(100);
+                    Thread.Sleep(100);
                 }
 
-                SendEvent(new TerminatedEvent());
+                SendEvent(Event.TerminatedEvent, null);
 
                 this._terminated = true;
                 this._process = null;
             }
-        }
-
-        private StoppedEvent CreateStoppedEvent(string reason, ThreadInfo ti, string text = null) {
-            return new StoppedEvent((int)ti.Id, reason, text);
         }
 
         private ThreadInfo FindThread(int threadReference) {
@@ -689,7 +661,7 @@ namespace DotNet.Mobile.Debug {
             this._frameHandles.Reset();
         }
 
-        private Entity.Variable CreateVariable(ObjectValue v) {
+        private ModelVariable CreateVariable(ObjectValue v) {
             var dv = v.DisplayValue;
             if (dv == null) {
                 dv = "<error getting value>";
@@ -698,7 +670,7 @@ namespace DotNet.Mobile.Debug {
             if (dv.Length > 1 && dv[0] == '{' && dv[dv.Length - 1] == '}') {
                 dv = dv.Substring(1, dv.Length - 2);
             }
-            return new Entity.Variable(v.Name, dv, v.TypeName, v.HasChildren ? this._variableHandles.Create(v.GetAllChildren()) : 0);
+            return new ModelVariable(v.Name, dv, v.TypeName, v.HasChildren ? this._variableHandles.Create(v.GetAllChildren()) : 0);
         }
 
         private bool HasMonoExtension(string path) {
@@ -708,36 +680,6 @@ namespace DotNet.Mobile.Debug {
                 }
             }
             return false;
-        }
-
-        private static bool getBool(dynamic container, string propertyName, bool dflt = false) {
-            try {
-                return (bool)container[propertyName];
-            } catch (Exception) {
-                // ignore and return default value
-            }
-            return dflt;
-        }
-
-        private static int getInt(dynamic container, string propertyName, int dflt = 0) {
-            try {
-                return (int)container[propertyName];
-            } catch (Exception) {
-                // ignore and return default value
-            }
-            return dflt;
-        }
-
-        private static string getString(dynamic args, string property, string dflt = null) {
-            var s = (string)args[property];
-            if (s == null) {
-                return dflt;
-            }
-            s = s.Trim();
-            if (s.Length == 0) {
-                return dflt;
-            }
-            return s;
         }
 
         //-----------------------
@@ -758,17 +700,6 @@ namespace DotNet.Mobile.Debug {
         private Backtrace DebuggerActiveBacktrace() {
             var thr = DebuggerActiveThread();
             return thr == null ? null : thr.Backtrace;
-        }
-
-        private Mono.Debugging.Client.StackFrame DebuggerActiveFrame() {
-            if (this._activeFrame != null)
-                return this._activeFrame;
-
-            var bt = DebuggerActiveBacktrace();
-            if (bt != null)
-                return this._activeFrame = bt.GetFrame(0);
-
-            return null;
         }
 
         private ExceptionInfo DebuggerActiveException() {
