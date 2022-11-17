@@ -22,8 +22,7 @@ namespace XCode.Sdk {
                     Name = d.Name,
                     Details = d.ModelName + " (" + d.Architecture + ")",
                     Platform = d.GetPlatformType(),
-                    Serial = d.Identifier,
-                    Version = d.OSVersion
+                    Serial = d.Identifier
             }).ToList();
         }
     }
