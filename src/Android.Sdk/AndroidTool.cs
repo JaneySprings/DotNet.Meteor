@@ -73,7 +73,6 @@ namespace Android.Sdk {
                     Details = "Emulator",
                     Serial = null,
                     Platform = Platform.Android,
-                    Version = avd.BasedOn,
                     IsEmulator = true,
                     IsRunning = false
                 });

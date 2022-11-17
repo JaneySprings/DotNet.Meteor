@@ -35,8 +35,6 @@ namespace Android.Sdk {
                     if (newDevice != null)
                         return newDevice.Serial;
                 }
-
-                currentState = newState;
             }
             return null;
         }
