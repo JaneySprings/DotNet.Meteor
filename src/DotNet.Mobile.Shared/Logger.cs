@@ -4,15 +4,15 @@ using System.Reflection;
 
 namespace DotNet.Mobile.Shared {
     public static class Logger {
-        private static readonly string LogFile = Path.Combine(
-            "/Users/nromanov/Work/vscode-meteor/extension", "debug_session.log"
-        );
+        public static string LogStagingDirectory => Path.GetDirectoryName(Assembly.GetExecutingAssembly().FullName);
+        private static readonly string LogFile = Path.Combine(LogStagingDirectory, "session.log");
 
         static Logger() {
-            if (File.Exists(LogFile))
-                File.Delete(LogFile);
+            foreach (var log in Directory.GetFiles($"{LogStagingDirectory}/", "*.log")) {
+                File.Delete(log);
+            }
             using StreamWriter sw = File.CreateText(LogFile);
-            sw.WriteLine("|" + DateTime.Now.ToString() + "| Start logging");
+            sw.WriteLine("|" + DateTime.UtcNow + "| Start logging");
         }
 
         public static void Log(string format, params object[] args) {
