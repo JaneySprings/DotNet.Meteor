@@ -5,6 +5,7 @@ using System.Text.Json;
 using Android.Sdk;
 using XCode.Sdk;
 using DotNet.Mobile.Shared;
+using DotNet.Mobile.Debug.Session;
 
 namespace DotNet.Mobile.Debug.CLI {
     public static class ConsoleUtils {

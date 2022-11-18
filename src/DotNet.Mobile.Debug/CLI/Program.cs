@@ -35,7 +35,7 @@ public class Program {
         },
         {
             "--find-projects", new Tuple<string[], Action<string[]>>(new []{
-                "Find all projects in workspace", "<cwd-path>"
+                "Find all executable projects in workspace", "<cwd-path>"
             }, ConsoleUtils.FindProjects)
         },
         {

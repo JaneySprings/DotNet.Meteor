@@ -2,4 +2,6 @@
 /**/[Oo]bj
 tools
 extension
+node_modules
 /**/.DS_Store
+vsc-extension-quickstart.md
