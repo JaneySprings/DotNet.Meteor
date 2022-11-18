@@ -3,3 +3,5 @@
 
 # Whitelist
 !extension
+!package.json
+!README.md

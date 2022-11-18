@@ -1,4 +1,5 @@
 #addin nuget:?package=Cake.FileHelpers&version=5.0.0
+#addin nuget:?package=Cake.VsCode&version=0.11.1
 #load "env.cake"
 
 var target = Argument("target", "vsix");
@@ -9,11 +10,15 @@ var configuration = Argument("configuration", "release");
 // TASKS
 ///////////////////////////////////////////////////////////////////////////////
 
-Task("prepare").Does(() => {
-   CleanDirectory(ExtensionStagingDirectory);
-});
+Task("up-version")
+   .DoesForEach<FilePath>(GetFiles($"{RootDirectory}/*.json"), file => {
+      var regex = @"^\s\s(""version"":\s+)("".+"")(,)";
+      var options = System.Text.RegularExpressions.RegexOptions.Multiline;
+      ReplaceRegexInFiles(file.ToString(), regex, $"  $1\"{version}\"$3", options);
+   });
 
 Task("build-dotnet")
+   .Does(() => CleanDirectory(ExtensionAssembliesDirectory))
    .DoesForEach<FilePath>(GetFiles($"{MonoDebuggerDirectory}/**/*.csproj"), file => {
       var regex = @"(<NuGetVersionRoslyn\s+Condition=""\$\(NuGetVersionRoslyn\)\s*==\s*''"")(>.+<)(/NuGetVersionRoslyn>)";
       ReplaceRegexInFiles(file.ToString(), regex, $"$1>{NuGetVersionRoslyn}<$3");
@@ -26,9 +31,13 @@ Task("build-dotnet")
       }
    }));
    
-Task("vsix").Does(() => {
-   Information("Hello Cake!");
-});
+Task("vsix")
+   .IsDependentOn("up-version")
+   .IsDependentOn("build-dotnet")
+   .Does(() => VscePackage(new VscePackageSettings {
+      OutputFilePath = ArtifactsDirectory,
+      WorkingDirectory = RootDirectory
+   }));
 
 
 RunTarget(target);

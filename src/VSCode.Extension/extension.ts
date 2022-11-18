@@ -1,22 +1,47 @@
 import * as vscode from 'vscode';
+import { Configuration } from './configuration';
+import * as constants from './constants';
+import { DebuggerUtils } from "./bridge";
+import { Interface } from './interface';
+import { Target } from './configuration';
 
 
 export function activate(context: vscode.ExtensionContext) {
+	if (vscode.workspace.workspaceFolders === undefined) 
+		return;
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "dotnet-meteor" is now active!');
+	fetchWorkspace();
+	fetchDevices();
+	
+	if (Configuration.workspaceProjects.length === 0)
+		return;
+	
+	Interface.initStatusItemCommands();
+	Configuration.selectProject(Configuration.workspaceProjects[0]);
+	Configuration.selectTarget(Target.Debug);
+	Configuration.selectDevice(Configuration.mobileDevices[0]);
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('dotnet-meteor.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from .NET Meteor!');
-	});
-
-	context.subscriptions.push(disposable);
+	context.subscriptions.push(vscode.commands.registerCommand(constants.commandSelectProjectIdentifier, () => {
+		Interface.showQuickPickProject();
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand(constants.commandSelectTargetIdentifier, () => {
+		Interface.showQuickPickTarget();
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand(constants.commandSelectDeviceIdentifier, () => {
+		Interface.showQuickPickDevice();
+	}));
 }
 
 export function deactivate() {}
+
+
+function fetchWorkspace() {
+	const workspacePath = vscode.workspace.workspaceFolders![0].uri.fsPath;
+	Configuration.workspaceProjects = DebuggerUtils.findProjects(workspacePath);
+}
+
+function fetchDevices() {
+	const androidDevices = DebuggerUtils.androidDevices();
+	const appleDevices = DebuggerUtils.appleDevices();
+	Configuration.mobileDevices = androidDevices.concat(appleDevices);
+}
