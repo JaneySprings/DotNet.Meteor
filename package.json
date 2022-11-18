@@ -2,6 +2,7 @@
   "name": "dotnet-meteor",
   "displayName": ".NET Meteor",
   "description": "Run and Debug .NET Mobile Apps",
+  "publisher": "nromanov",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.73.0"
@@ -10,14 +11,22 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:dotnet-meteor.helloWorld"
+    "workspaceContains:**/*.csproj"
   ],
   "main": "./extension/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "dotnet-meteor.helloWorld",
-        "title": "Hello World"
+        "command": "dotnet-meteor.select-project",
+        "title": ".NET Meteor: Select workspace project"
+      },
+      {
+        "command": "dotnet-meteor.select-target",
+        "title": ".NET Meteor: Select project configuration"
+      },
+      {
+        "command": "dotnet-meteor.select-device",
+        "title": ".NET Meteor: Select device"
       }
     ]
   },
