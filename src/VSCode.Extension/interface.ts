@@ -33,21 +33,21 @@ export class Interface {
 
     public static async showQuickPickProject() {
         const items = Configuration.workspaceProjects.map(project => ({
-            label: project.name!,
+            label: project.name,
             detail: project.path,
             item: project
         }));
         const selectedItem = (await vscode.window.showQuickPick(items, { placeHolder: "Select active project" }))?.item;
         
         if (selectedItem !== undefined)
-            Configuration.selectProject(selectedItem);
+            Configuration.performSelectProject(selectedItem);
     }
     public static async showQuickPickTarget() {
         const items = [ Target.Debug, Target.Release ];
         const selectedItem = ( await vscode.window.showQuickPick(items, { placeHolder: "Select configuration" }));
 
         if (selectedItem !== undefined)
-            Configuration.selectTarget(selectedItem as Target);
+            Configuration.performSelectTarget(selectedItem as Target);
     }
     public static async showQuickPickDevice() {
         const items = Configuration.mobileDevices.map(device => ({
@@ -58,7 +58,7 @@ export class Interface {
         const selectedItem = (await vscode.window.showQuickPick(items, { placeHolder: "Select device" }))?.item;
         
         if (selectedItem !== undefined)
-            Configuration.selectDevice(selectedItem);
+            Configuration.performSelectDevice(selectedItem);
     }
 }
 

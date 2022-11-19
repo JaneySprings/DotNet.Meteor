@@ -1,7 +1,7 @@
 
 export class Project {
-    public name: string | undefined;
-    public path: string | undefined;
+    public name!: string;
+    public path!: string;
     public frameworks: string[] | undefined;
 }
 

@@ -17,22 +17,22 @@ export class Configuration {
     public static selectedDevice: Device | undefined;
     public static selectedTarget: Target | undefined;
 
-    public static selectProject(item: Project) {
+    public static performSelectProject(item: Project) {
         Configuration.selectedProject = item;
         Interface.updateProjectsStatusItem();
     }
-    public static selectTarget(target: Target) {
+    public static performSelectTarget(target: Target) {
         Configuration.selectedTarget = target;
         Interface.updateTargetStatusItem();
     }
-    public static selectDevice(item: Device) {
+    public static performSelectDevice(item: Device) {
         Configuration.selectedDevice = item;
         Interface.updateDeviceStatusItem();
     }
-    public static selectDefaults() {
-        Configuration.selectProject(Configuration.workspaceProjects[0]);
-        Configuration.selectTarget(Target.Debug);
-        Configuration.selectDevice(Configuration.mobileDevices[0]);
+    public static performSelectDefaults() {
+        Configuration.performSelectProject(Configuration.workspaceProjects[0]);
+        Configuration.performSelectTarget(Target.Debug);
+        Configuration.performSelectDevice(Configuration.mobileDevices[0]);
     }
 
     public static fetchWorkspace() {
