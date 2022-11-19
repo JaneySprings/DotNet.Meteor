@@ -1,16 +1,20 @@
 import * as vscode from 'vscode';
 import { Configuration, Target } from './configuration';
-import * as constants from './constants';
+import { Command } from './constants';
 
 export class Interface {
-    public static readonly projectStatusItem: vscode.StatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
-    public static readonly targetStatusItem: vscode.StatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 90);
-    public static readonly deviceStatusItem: vscode.StatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 80);
+    public static projectStatusItem: vscode.StatusBarItem
+    public static targetStatusItem: vscode.StatusBarItem
+    public static deviceStatusItem: vscode.StatusBarItem
 
-    public static initStatusItemCommands() {
-        this.projectStatusItem.command = constants.commandSelectProjectIdentifier;
-        this.targetStatusItem.command = constants.commandSelectTargetIdentifier;
-        this.deviceStatusItem.command = constants.commandSelectDeviceIdentifier;
+    public static activate() {
+        this.projectStatusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
+        this.targetStatusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 90);
+        this.deviceStatusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 80);
+
+        this.projectStatusItem.command = Command.selectProject;
+        this.targetStatusItem.command = Command.selectTarget;
+        this.deviceStatusItem.command = Command.selectDevice;
     }
 
     public static updateProjectsStatusItem() {
