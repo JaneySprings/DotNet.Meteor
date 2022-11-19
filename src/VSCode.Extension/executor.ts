@@ -1,4 +1,5 @@
 import { execSync } from 'child_process';
+import * as vscode from 'vscode';
 
 export class ProcessRunner {
     public static run<TModel>(builder: ProcessArgumentBuilder): TModel {

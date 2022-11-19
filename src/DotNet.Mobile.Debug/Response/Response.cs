@@ -9,6 +9,7 @@ public class Response : ProtocolBase {
     [JsonPropertyName("command")] public string Command { get; set; }
     [JsonPropertyName("body")] public object Body { get; set; }
 
+    public Response() {}
     public Response(Request request) : base("response") {
         this.Success = true;
         this.RequestSeq = request.Seq;
