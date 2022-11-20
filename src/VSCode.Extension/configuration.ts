@@ -10,6 +10,7 @@ export enum Target {
 }
 
 export class Configuration {
+    public static debuggingPort: number = DebuggerUtils.freePort();
     public static workspaceProjects: Project[] = [];
     public static mobileDevices: Device[] = [];
 

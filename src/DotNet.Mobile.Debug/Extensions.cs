@@ -6,6 +6,10 @@ using DotNet.Mobile.Shared;
 namespace DotNet.Mobile.Debug;
 
 public static class Extensions {
+    private readonly static string[] MonoExtensions = new String[] {
+        ".cs", ".csx", ".cake", ".fs", ".fsi", ".ml", ".mli", ".fsx", ".fsscript", ".hx"
+    };
+
     public static byte[] ConvertToBytes(this object obj) {
         var encoding = Encoding.UTF8;
         var asJson = JsonSerializer.Serialize(obj);
@@ -48,5 +52,13 @@ public static class Extensions {
         } else {
             return clientPath;
         }
+    }
+
+    public static bool HasMonoExtension(this string path) {
+        foreach (var ext in MonoExtensions) {
+            if (path.EndsWith(ext, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+        return false;
     }
 }

@@ -24,5 +24,18 @@ export class DebuggerUtils {
             .append("--find-projects")
             .append(workspaceRoot));
     }
+
+    public static runEmulator(name: string): string {
+        return ProcessRunner.run<string>(new ProcessArgumentBuilder("dotnet")
+            .append(this.toolPath)
+            .append("--run-emulator")
+            .append(name));
+    }
+
+    public static freePort(): number {
+        return ProcessRunner.run<number>(new ProcessArgumentBuilder("dotnet")
+            .append(this.toolPath)
+            .append("--free-port"));
+    }
 }
   

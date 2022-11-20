@@ -51,8 +51,8 @@ export class Interface {
     }
     public static async showQuickPickDevice() {
         const items = Configuration.mobileDevices.map(device => ({
-            label: `${device.name} • ${device.platform}`,
-            detail: `Serial: ${device.serial}`,
+            label: `${device.is_running ? "▶︎ " : ""}${device.name}`,
+            detail: device.os_version ?? device.platform,
             item: device
         }));
         const selectedItem = (await vscode.window.showQuickPick(items, { placeHolder: "Select device" }))?.item;
@@ -66,4 +66,5 @@ export class Icon {
     public static readonly project = "$(window)"; //todo
     public static readonly target= "$(window)";
     public static readonly device = "$(device-mobile)";
+    public static readonly active = "$(play-circle)";
 }

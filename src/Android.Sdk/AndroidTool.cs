@@ -17,17 +17,17 @@ namespace Android.Sdk {
 
             string output = string.Join(Environment.NewLine, result.StandardOutput) + Environment.NewLine;
             string regex = @"(Name:\s+)(?<name>.*?)(\n).*?" +
-                           @"(Path:\s+)(?<path>.*?)(\n).*?";
+                           @"(Path:\s+)(?<path>.*?)(\n).*?" +
                         //    @"(Target:\s+)(?<target>.*?)(\n).*?" +
-                        //    @"(Based on:\s+)(?<based>.*?)(\sTag/)" +
+                           @"(Based on:\s+)(?<based>.*?)(\sTag/)";
                         //    @"(ABI:\s+)(?<abi>.*?)(\n).*?";
 
             MatchCollection matches = Regex.Matches(output, regex, RegexOptions.Singleline);
             return matches.Select(m => new VirtualDevice {
                 Name = m.Groups["name"].Value,
-                Path = m.Groups["path"].Value
+                Path = m.Groups["path"].Value,
                 // Target = m.Groups["target"].Value,
-                // BasedOn = m.Groups["based"].Value,
+                BasedOn = m.Groups["based"].Value,
                 // ABI = m.Groups["abi"].Value
             }).ToList();
         }
@@ -73,6 +73,7 @@ namespace Android.Sdk {
                     Details = "Emulator",
                     Serial = null,
                     Platform = Platform.Android,
+                    OSVersion = avd.BasedOn,
                     IsEmulator = true,
                     IsRunning = false
                 });
@@ -86,6 +87,15 @@ namespace Android.Sdk {
             var result = ProcessRunner.Run(emulator, new ProcessArgumentBuilder()
                 .Append("-s", serial, "shell")
                 .Append(args));
+
+            return string.Join(Environment.NewLine, result.StandardOutput);
+        }
+
+        public static string AdbForward(string serial, int local, int target) {
+            var emulator = PathUtils.GetADBTool();
+            var result = ProcessRunner.Run(emulator, new ProcessArgumentBuilder()
+                .Append("-s", serial, "forward")
+                .Append($"tcp:{local}", $"tcp:{target}"));
 
             if (result.ExitCode != 0)
                 throw new Exception(string.Join(Environment.NewLine, result.StandardError));

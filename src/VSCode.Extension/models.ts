@@ -1,3 +1,5 @@
+import { Icon } from "./interface";
+
 
 export class Project {
     public name!: string;
@@ -10,6 +12,7 @@ export class Device {
     public details: string | undefined;
     public serial: string | undefined;
     public platform: string | undefined;
-    public isEmulator: boolean | undefined;
-    public isRunning: boolean | undefined;
+    public os_version: string | undefined;
+    public is_emulator: boolean | undefined;
+    public is_running: boolean | undefined;
 }
