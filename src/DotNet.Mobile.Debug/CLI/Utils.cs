@@ -41,7 +41,7 @@ namespace DotNet.Mobile.Debug.CLI {
             if (args.Length < 2)
                 throw new Exception ($"Missing parameter: {Program.CommandHandler[args[0]].Item1[1]}");
             string serial = AndroidTool.RunEmulator(args[1]);
-            Console.WriteLine(serial);
+            Console.WriteLine(JsonSerializer.Serialize(serial));
         }
 
         public static void FindProjects(string[] args) {
@@ -53,7 +53,7 @@ namespace DotNet.Mobile.Debug.CLI {
 
         public static void FreePort(string[] args) {
             int port = Utilities.FindFreePort();
-            Console.WriteLine(port);
+            Console.WriteLine(JsonSerializer.Serialize(port));
         }
 
         public static void StartSession(string[] args) {

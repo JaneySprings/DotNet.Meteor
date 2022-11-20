@@ -46,7 +46,7 @@ public static class WorkspaceAnalyzer {
         // Find in imported project
         var importMatch = new Regex(@"<Import\s+Project\s*=\s*""(.*?)""").Match(content);
         if (importMatch.Success) {
-            var importPath = Path.Combine(Path.GetDirectoryName(projectPath), importMatch.Groups[1].Value.NormalizePath());
+            var importPath = NormalizePath(Path.Combine(Path.GetDirectoryName(projectPath), importMatch.Groups[1].Value));
             var importResult = GetProperty(importPath, propertyName, isEndPoint);
 
             if (importResult != null)
@@ -73,5 +73,9 @@ public static class WorkspaceAnalyzer {
             return null;
 
         return GetDirectoryPropsPath(parentDirectory.FullName);
+    }
+
+    private static string NormalizePath(string path) {
+        return path.Replace('\\', Path.DirectorySeparatorChar);
     }
 }

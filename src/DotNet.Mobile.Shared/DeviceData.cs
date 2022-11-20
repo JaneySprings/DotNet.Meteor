@@ -6,6 +6,7 @@ namespace DotNet.Mobile.Shared {
         [JsonPropertyName("details")] public string Details { get; set; }
         [JsonPropertyName("serial")] public string Serial { get; set; }
         [JsonPropertyName("platform")] public string Platform { get; set; }
+        [JsonPropertyName("os_version")] public string OSVersion { get; set; }
         [JsonPropertyName("is_emulator")] public bool IsEmulator { get; set; }
         [JsonPropertyName("is_running")] public bool IsRunning { get; set; }
     }
