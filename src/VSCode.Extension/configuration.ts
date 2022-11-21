@@ -10,6 +10,7 @@ export enum Target {
 }
 
 export class Configuration {
+    public static workspacePath: string = vscode.workspace.workspaceFolders![0].uri.fsPath;
     public static debuggingPort: number = DebuggerUtils.freePort();
     public static workspaceProjects: Project[] = [];
     public static mobileDevices: Device[] = [];
@@ -37,7 +38,7 @@ export class Configuration {
     }
 
     public static fetchWorkspace() {
-        const workspacePath = vscode.workspace.workspaceFolders![0].uri.fsPath;
+        const workspacePath = Configuration.workspacePath;
         Configuration.workspaceProjects = DebuggerUtils.findProjects(workspacePath);
     }
     public static fetchDevices() {

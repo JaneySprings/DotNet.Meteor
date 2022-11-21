@@ -18,12 +18,40 @@ namespace XCode.Sdk {
             return path;
         }
 
+        public static FileInfo GetMLaunch() {
+            string dotnetPath = Path.Combine("usr", "local", "share", "dotnet");
+            string sdkPath = Path.Combine(dotnetPath, "packs", "Microsoft.iOS.Sdk");
+            FileInfo newestTool = null;
+
+            foreach (string directory in Directory.GetDirectories(sdkPath)) {
+                string mlaunchPath = Path.Combine(directory, "tools", "bin", "mlaunch");
+
+                if (File.Exists(mlaunchPath)) {
+                    var tool = new FileInfo(mlaunchPath);
+
+                    if (newestTool == null || tool.CreationTime > newestTool.CreationTime)
+                        newestTool = tool;
+                }
+            }
+
+            return newestTool;
+        }
         public static FileInfo GetXCDeviceTool() {
             string path = Path.Combine(GetXCodePath(), "usr", "bin", "xcdevice");
             FileInfo tool = new FileInfo(path);
 
             if (!tool.Exists)
                 throw new Exception("Could not find xcdevice tool");
+
+            return tool;
+        }
+
+         public static FileInfo GetXCRunTool() {
+            string path = Path.Combine("/usr", "bin", "xcrun");
+            FileInfo tool = new FileInfo(path);
+
+            if (!tool.Exists)
+                throw new Exception("Could not find xcrun tool");
 
             return tool;
         }
