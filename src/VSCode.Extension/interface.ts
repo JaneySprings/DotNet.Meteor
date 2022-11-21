@@ -18,7 +18,7 @@ export class Interface {
     }
 
     public static updateProjectsStatusItem() {
-        this.projectStatusItem.text = Configuration.selectedProject?.name ?? "No project";
+        this.projectStatusItem.text = `${Icon.project} ${Configuration.selectedProject?.name}`;
         Configuration.workspaceProjects.length === 1 ? this.projectStatusItem.hide() : this.projectStatusItem.show();
     }
     public static updateTargetStatusItem() {
@@ -32,39 +32,44 @@ export class Interface {
 
 
     public static async showQuickPickProject() {
+        const workspace = Configuration.workspacePath;
         const items = Configuration.workspaceProjects.map(project => ({
             label: project.name,
-            detail: project.path,
+            description: project.path.replace(workspace + '/', ''),
+            detail: project.frameworks?.join('  ') ?? "no frameworks",
             item: project
         }));
+
         const selectedItem = (await vscode.window.showQuickPick(items, { placeHolder: "Select active project" }))?.item;
-        
         if (selectedItem !== undefined)
             Configuration.performSelectProject(selectedItem);
     }
     public static async showQuickPickTarget() {
         const items = [ Target.Debug, Target.Release ];
+        
         const selectedItem = ( await vscode.window.showQuickPick(items, { placeHolder: "Select configuration" }));
-
         if (selectedItem !== undefined)
             Configuration.performSelectTarget(selectedItem as Target);
     }
     public static async showQuickPickDevice() {
+        Configuration.fetchDevices();
+
         const items = Configuration.mobileDevices.map(device => ({
-            label: `${device.is_running ? "▶︎ " : ""}${device.name}`,
-            detail: device.os_version ?? device.platform,
+            label: `${device.is_running ? Icon.active : Icon.inactive} ${device.name}`,
+            detail: `${device.details} • ${device.os_version ?? device.platform}`,
             item: device
         }));
+
         const selectedItem = (await vscode.window.showQuickPick(items, { placeHolder: "Select device" }))?.item;
-        
         if (selectedItem !== undefined)
             Configuration.performSelectDevice(selectedItem);
     }
 }
 
 export class Icon {
-    public static readonly project = "$(window)"; //todo
+    public static readonly project = "$(window)";
     public static readonly target= "$(window)";
     public static readonly device = "$(device-mobile)";
-    public static readonly active = "$(play-circle)";
+    public static readonly active = "$(vm-running)";
+    public static readonly inactive = "$(device-mobile)";
 }

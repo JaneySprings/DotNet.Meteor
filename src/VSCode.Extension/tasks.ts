@@ -34,7 +34,7 @@ class DotNetBuildTask {
         const framework = Configuration.selectedProject!.frameworks?.find(it => it.includes(devicePlatform!));
         
         if (!framework) {
-            vscode.window.showErrorMessage(`No framework for ${devicePlatform} found`);
+            vscode.window.showErrorMessage(`No framework for '${devicePlatform}' found`);
             return DotNetBuildTask.emptyTask;
         }
 
@@ -47,6 +47,7 @@ class DotNetBuildTask {
         if (framework.includes('android')) {
             if (!Configuration.selectedDevice!.is_running) {
                 const serial = DebuggerUtils.runEmulator(Configuration.selectedDevice!.name!);
+
                 Configuration.selectedDevice!.serial = serial;
                 Configuration.selectedDevice!.is_running = true;
             }

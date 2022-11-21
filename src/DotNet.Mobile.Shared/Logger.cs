@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace DotNet.Mobile.Shared {
     public static class Logger {
-        public static string LogStagingDirectory => Path.GetDirectoryName(Assembly.GetExecutingAssembly().FullName);
+        public static string LogStagingDirectory => "/Users/nromanov/Work/vscode-meteor/extension";
         private static readonly string LogFile = Path.Combine(LogStagingDirectory, "session.log");
 
         static Logger() {

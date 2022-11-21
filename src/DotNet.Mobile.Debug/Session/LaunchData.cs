@@ -8,6 +8,7 @@ namespace DotNet.Mobile.Debug.Session;
 public class LaunchData {
     public string AppId { get; set; }
     public string AppName { get; set; }
+    public string BundlePath { get; set; }
     public DeviceData Device { get; set; }
     public Project Project { get; set; }
     public Platform Platform { get; set; }
@@ -20,8 +21,10 @@ public class LaunchData {
         AppName = ExtractValueFromProject(Project.Path, "ApplicationTitle");
 
         if (device.Platform.Contains("android", StringComparison.OrdinalIgnoreCase)) {
+            BundlePath = FindAndroidPackage(Path.GetDirectoryName(Project.Path));
             Platform = Platform.Android;
         } else if (device.Platform.Contains("ios", StringComparison.OrdinalIgnoreCase)) {
+            BundlePath = FindApplePackage(Path.GetDirectoryName(Project.Path));
             Platform = Platform.iOS;
         } else {
             Platform = Platform.Undefined;
@@ -37,6 +40,26 @@ public class LaunchData {
            throw new Exception($"Could not find {value} in project file");
 
         return match.Groups[1].Value;
+    }
+
+    private string FindAndroidPackage(string rootDirectory) {
+        var debugDirectory = Path.Combine(rootDirectory, "bin", "Debug");
+        var files = Directory.GetFiles(debugDirectory, "*-Signed.apk", SearchOption.AllDirectories);
+
+        if (files.Length == 0)
+            throw new Exception("Could not find Android package");
+
+        return files[0];
+    }
+
+    private string FindApplePackage(string rootDirectory) {
+        var debugDirectory = Path.Combine(rootDirectory, "bin", "Debug");
+        var directories = Directory.GetDirectories(debugDirectory, "*.app", SearchOption.AllDirectories);
+
+        if (directories.Length == 0)
+            throw new Exception("Could not find ios bundle");
+
+        return directories[0];
     }
 }
 

@@ -4,6 +4,7 @@
     <OutputType>Exe</OutputType>
     <AssemblyName>dotnet-mobile</AssemblyName>
     <PackAsTool>true</PackAsTool>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mono.Debugger\Mono.Debugger.Soft\Mono.Debugger.Soft.csproj" />

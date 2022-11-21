@@ -33,7 +33,7 @@ namespace DotNet.Mobile.Debug.CLI {
             Console.WriteLine(JsonSerializer.Serialize(devices));
         }
         public static void AppleDevices(string[] args) {
-            List<DeviceData> devices = XCodeTool.GetAllDevices();
+            List<DeviceData> devices = XCodeTool.GetSimulators();
             Console.WriteLine(JsonSerializer.Serialize(devices));
         }
 

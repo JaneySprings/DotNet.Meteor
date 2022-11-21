@@ -10,6 +10,7 @@ using DotNet.Mobile.Debug.Events;
 using DotNet.Mobile.Debug.Protocol;
 using DotNet.Mobile.Debug.Pipeline;
 using DotNet.Mobile.Shared;
+using XCode.Sdk;
 using Process = System.Diagnostics.Process;
 
 namespace DotNet.Mobile.Debug.Session;
@@ -45,7 +46,10 @@ public class MonoDebugSession : DebugSession {
     public MonoDebugSession() : base() {
         DebuggerLoggingService.CustomLogger = new MonoLogger();
 
-        this.session.ExceptionHandler = ex => true;
+        this.session.ExceptionHandler = ex => {
+            Logger.Log(ex);
+            return true;
+        };
         this.session.LogWriter = (isStdErr, text) => Logger.Log(text);
         this.session.TargetStopped += (sender, e) => {
             Stopped();
@@ -157,6 +161,11 @@ public class MonoDebugSession : DebugSession {
         }
 
         Connect(launchOptions, address, port);
+
+        if (launchOptions.Platform == Platform.iOS) {
+            XCodeTool.StartDebugSession(launchOptions.BundlePath, launchOptions.Device.Serial, port);
+        }
+
         SendResponse(response);
     }
     private void Connect(LaunchData options, IPAddress address, int port) {
@@ -173,7 +182,7 @@ public class MonoDebugSession : DebugSession {
                 args = new StreamCommandConnectionDebuggerArgs(options.AppName, new IPhoneTcpCommandConnection(IPAddress.Loopback, port)) { MaxConnectionAttempts = 10 };
             }
 
-            SendConsoleEvent($"Debugger is ready and listening...");
+            SendEvent(Event.OutputEvent, new BodyOutput("Debugger is ready and listening..." + Environment.NewLine));
             Logger.Log("Debugger ready at {0}:{1}", address, port);
 
             this.debuggerExecuting = true;
@@ -201,11 +210,6 @@ public class MonoDebugSession : DebugSession {
 
         SendResponse(response);
         Stop();
-    }
-
-    public void SendConsoleEvent(string message) {
-        Console.WriteLine(message);
-        SendEvent(Event.OutputEvent, new BodyOutput(message.TrimEnd() + Environment.NewLine));
     }
 
     public override void Continue(Response response, Argument args) {
