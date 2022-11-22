@@ -34,10 +34,13 @@ Task("build-dotnet")
 Task("vsix")
    .IsDependentOn("up-version")
    .IsDependentOn("build-dotnet")
-   .Does(() => VscePackage(new VscePackageSettings {
-      OutputFilePath = ArtifactsDirectory,
-      WorkingDirectory = RootDirectory
-   }));
+   .Does(() => {
+      CleanDirectory(ArtifactsDirectory);
+      VscePackage(new VscePackageSettings {
+         OutputFilePath = $"{ArtifactsDirectory}/DotNet.Meteor.{version}.vsix",
+         WorkingDirectory = RootDirectory
+      });
+   });
 
 
 RunTarget(target);
