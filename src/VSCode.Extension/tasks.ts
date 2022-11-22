@@ -38,6 +38,8 @@ class DotNetBuildTask {
             return DotNetBuildTask.emptyTask;
         }
 
+        Configuration.fetchDevices();
+
         const command = [
             `dotnet build ${Configuration.selectedProject!.path}`,
             `-c:${Configuration.selectedTarget!}`,
