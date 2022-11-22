@@ -1,47 +1,68 @@
 {
   "name": "dotnet-meteor",
   "displayName": ".NET Meteor",
+  "version": "0.0.1",
   "description": "Run and Debug .NET Mobile Apps",
   "publisher": "nromanov",
-  "version": "0.0.1",
+  "author": "Nikita Romanov",
+  "license": "MIT",
   "engines": {
     "vscode": "^1.73.0"
   },
+  "icon": "img/logo.png",
   "categories": [
-    "Other"
+    "Debuggers"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JaneySprings/VSCode.Meteor"
+  },
+  "bugs": {
+    "url": "https://github.com/JaneySprings/VSCode.Meteor/issues"
+  },
   "activationEvents": [
     "workspaceContains:**/*.csproj"
   ],
   "main": "./extension/extension.js",
   "contributes": {
-    "commands": [{
+    "commands": [
+      {
         "command": "dotnet-meteor.selectActiveProject",
         "title": ".NET Meteor: Select workspace project"
-      },{
+      },
+      {
         "command": "dotnet-meteor.selectActiveConfiguration",
         "title": ".NET Meteor: Select project configuration"
-      },{
+      },
+      {
         "command": "dotnet-meteor.selectActiveDevice",
         "title": ".NET Meteor: Select device"
-      }],
-    "taskDefinitions": [{
+      }
+    ],
+    "taskDefinitions": [
+      {
         "type": "dotnet-meteor.build",
         "required": [],
         "properties": {}
-      }],
-    "breakpoints": [{
+      }
+    ],
+    "breakpoints": [
+      {
         "language": "csharp"
-      },{
+      },
+      {
         "language": "fsharp"
-      }],
-    "debuggers": [{
+      }
+    ],
+    "debuggers": [
+      {
         "type": "dotnet-meteor.debug",
         "label": ".NET Meteor Debugger",
         "program": "./extension/bin/dotnet-mobile.dll",
         "args": [ "--start-session"],
         "runtime": "dotnet",
-        "initialConfigurations": [{
+        "initialConfigurations": [
+          {
             "name": "Debug .NET Mobile App",
             "type": "dotnet-meteor.debug",
             "request": "launch",
