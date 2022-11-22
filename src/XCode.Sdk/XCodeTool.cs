@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
 using System.Text.RegularExpressions;
 using DotNet.Mobile.Shared;
 
@@ -67,7 +68,7 @@ namespace XCode.Sdk {
             var process = new ProcessRunner(tool, new ProcessArgumentBuilder()
                 .Append("--launchsim", $"\"{bundlePath}\"")
                 .Append($"--argument=-monodevelop-port --argument={port} --setenv=__XAMARIN_DEBUG_PORT__={port}")
-                .Append($"--device=:v2:udid={deviceId}")
+                .Append($"--device=:v2:udid={deviceId}"), CancellationToken.None, redirectStandardInput: true
             );
             process.WaitForExitAsync();
         }
