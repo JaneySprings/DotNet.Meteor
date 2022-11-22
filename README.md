@@ -25,8 +25,9 @@ This extension can build and debug .NET 7 / .NET 6 apps for Android and iOS.
     ]
 }
 ```
-2. Select project (if there are several project), select configuration (debug by default) and select device. 
-3. Launch debug by pressing F5. Enjoy!
+2. In status bar, select project (if there are several project), select configuration (debug by default) and select device. 
+3. Launch debug by pressing F5. 
+4. Enjoy!
 
 ## Known Issues
 
