@@ -1,30 +1,31 @@
 import * as vscode from 'vscode';
-import { Configuration } from './configuration';
 import { Command, taskProviderType, debuggerType } from './constants';
-import { Interface } from './interface';
+import { ViewController } from './controller';
 import { DotNetTaskProvider } from './tasks';
 import { DotNetDebuggerConfiguration } from './debug';
 
 
 export function activate(context: vscode.ExtensionContext) {
-	Interface.activate();
+	ViewController.activate();
 
 	if (vscode.workspace.workspaceFolders === undefined) 
 		return;
 
-	Configuration.fetchWorkspace();
-	Configuration.fetchDevices();
+	ViewController.fetchWorkspace();
+	ViewController.fetchDevices();
 	
-	if (Configuration.workspaceProjects.length === 0)
+	if (ViewController.workspaceProjects.length === 0)
 		return;
 	
-	Configuration.performSelectDefaults();
+	ViewController.performSelectDefaults();
 
-	context.subscriptions.push(vscode.commands.registerCommand(Command.selectProject, Interface.showQuickPickProject));
-	context.subscriptions.push(vscode.commands.registerCommand(Command.selectTarget, Interface.showQuickPickTarget));
-	context.subscriptions.push(vscode.commands.registerCommand(Command.selectDevice, Interface.showQuickPickDevice));
+	context.subscriptions.push(vscode.commands.registerCommand(Command.selectProject, ViewController.showQuickPickProject));
+	context.subscriptions.push(vscode.commands.registerCommand(Command.selectTarget, ViewController.showQuickPickTarget));
+	context.subscriptions.push(vscode.commands.registerCommand(Command.selectDevice, ViewController.showQuickPickDevice));
 	// Execution
 	context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider(debuggerType, new DotNetDebuggerConfiguration()));
+	context.subscriptions.push(vscode.debug.onDidTerminateDebugSession(() => ViewController.isDebugging = false));
+	
 	vscode.tasks.registerTaskProvider(taskProviderType, new DotNetTaskProvider());
 }
 

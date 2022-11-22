@@ -1,5 +1,4 @@
 import { Project, Device } from "./models"
-import { Interface } from './interface';
 import { DebuggerUtils } from "./bridge";
 import * as vscode from 'vscode';
 
@@ -10,40 +9,29 @@ export enum Target {
 }
 
 export class Configuration {
-    public static workspacePath: string = vscode.workspace.workspaceFolders![0].uri.fsPath;
-    public static debuggingPort: number = DebuggerUtils.freePort();
-    public static workspaceProjects: Project[] = [];
-    public static mobileDevices: Device[] = [];
+    public static debuggingPort: number;
 
     public static selectedProject: Project | undefined;
     public static selectedDevice: Device | undefined;
     public static selectedTarget: Target | undefined;
 
-    public static performSelectProject(item: Project) {
-        Configuration.selectedProject = item;
-        Interface.updateProjectsStatusItem();
-    }
-    public static performSelectTarget(target: Target) {
-        Configuration.selectedTarget = target;
-        Interface.updateTargetStatusItem();
-    }
-    public static performSelectDevice(item: Device) {
-        Configuration.selectedDevice = item;
-        Interface.updateDeviceStatusItem();
-    }
-    public static performSelectDefaults() {
-        Configuration.performSelectProject(Configuration.workspaceProjects[0]);
-        Configuration.performSelectTarget(Target.Debug);
-        Configuration.performSelectDevice(Configuration.mobileDevices[0]);
+    public static updateDebuggingPort() {
+        Configuration.debuggingPort = DebuggerUtils.freePort();
     }
 
-    public static fetchWorkspace() {
-        const workspacePath = Configuration.workspacePath;
-        Configuration.workspaceProjects = DebuggerUtils.findProjects(workspacePath);
+    public static geWorkspacePath() {
+        return vscode.workspace.workspaceFolders![0].uri.fsPath;
     }
-    public static fetchDevices() {
-        const androidDevices = DebuggerUtils.androidDevices();
-        const appleDevices = DebuggerUtils.appleDevices();
-        Configuration.mobileDevices = androidDevices.concat(appleDevices);
+
+    public static validate(): boolean {
+        if (!Configuration.selectedProject || !Configuration.selectedProject.path) {
+            vscode.window.showErrorMessage('Selected project not found');
+            return false;
+        }
+        if (!Configuration.selectedDevice || !Configuration.selectedDevice.platform) {
+            vscode.window.showErrorMessage('Selected device incorrect');
+            return false;
+        }
+        return true;
     }
 } 
