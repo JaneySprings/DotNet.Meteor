@@ -3,7 +3,6 @@
     <TargetFramework>net7.0</TargetFramework>
     <OutputType>Exe</OutputType>
     <AssemblyName>dotnet-mobile</AssemblyName>
-    <PackAsTool>true</PackAsTool>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
   <ItemGroup>

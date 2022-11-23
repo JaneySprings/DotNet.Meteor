@@ -34,6 +34,9 @@ namespace XCode.Sdk {
                 }
             }
 
+            if (newestTool == null || !newestTool.Exists)
+                throw new Exception("Could not find mlaunch tool");
+
             return newestTool;
         }
         public static FileInfo GetXCDeviceTool() {
