@@ -8,7 +8,7 @@ namespace Android.Sdk {
             string home = Environment.GetEnvironmentVariable("HOME");
 
             if (string.IsNullOrEmpty(path))
-                path = Path.Combine(home, "Library", "Android", "Sdk");
+                path = Path.Combine(home, "Library", "Android", "sdk");
 
             if (!Directory.Exists(path))
                 throw new Exception("Could not find Android SDK path");
@@ -18,12 +18,24 @@ namespace Android.Sdk {
 
         public static FileInfo GetAVDManager() {
             string sdk = GetSdkLocation();
-            string path = Path.Combine(sdk, "cmdline-tools", "latest", "bin", "avdmanager");
+            string tools = Path.Combine(sdk, "cmdline-tools");
+            FileInfo newestTool = null;
 
-            if (!File.Exists(path))
+            foreach (string directory in Directory.GetDirectories(tools)) {
+                string avdPath = Path.Combine(directory, "bin", "avdmanager");
+
+                if (File.Exists(avdPath)) {
+                    var tool = new FileInfo(avdPath);
+
+                    if (newestTool == null || tool.CreationTime > newestTool.CreationTime)
+                        newestTool = tool;
+                }
+            }
+
+            if (newestTool == null || !newestTool.Exists)
                 throw new Exception("Could not find avdmanager tool");
 
-            return new FileInfo(path);
+            return newestTool;
         }
 
         public static FileInfo GetADBTool() {

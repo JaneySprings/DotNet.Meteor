@@ -3,7 +3,7 @@
 #load "env.cake"
 
 var target = Argument("target", "vsix");
-var version = Argument("release-version", "1.0.1");
+var version = Argument("release-version", "1.0.2");
 var configuration = Argument("configuration", "release");
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,7 +29,12 @@ Task("build-dotnet")
       MSBuildSettings = new DotNetMSBuildSettings {
          AssemblyVersion = version
       }
-   }));
+   }))
+   .Does(() => {
+      DeleteFiles(GetFiles($"{ExtensionAssembliesDirectory}/*.pdb"));
+      DeleteFiles(GetFiles($"{ExtensionAssembliesDirectory}/*.deps.json"));
+      DeleteFiles(GetFiles($"{ExtensionAssembliesDirectory}/*.xml"));
+   });
    
 Task("vsix")
    .IsDependentOn("up-version")
