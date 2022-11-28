@@ -19,10 +19,10 @@ export function activate(context: vscode.ExtensionContext) {
 	
 	ViewController.performSelectDefaults();
 
-	context.subscriptions.push(vscode.commands.registerCommand(Command.selectProject, ViewController.showQuickPickProject));
+	context.subscriptions.push(vscode.commands.registerCommand(Command.selectProject,ViewController.showQuickPickProject));
 	context.subscriptions.push(vscode.commands.registerCommand(Command.selectTarget, ViewController.showQuickPickTarget));
 	context.subscriptions.push(vscode.commands.registerCommand(Command.selectDevice, ViewController.showQuickPickDevice));
-	// Execution
+	
 	context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider(debuggerType, new DotNetDebuggerConfiguration()));
 	context.subscriptions.push(vscode.debug.onDidTerminateDebugSession(() => ViewController.isDebugging = false));
 	

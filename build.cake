@@ -3,7 +3,7 @@
 #load "env.cake"
 
 var target = Argument("target", "vsix");
-var version = Argument("release-version", "1.0.2");
+var version = Argument("release-version", "1.0.3");
 var configuration = Argument("configuration", "release");
 
 ///////////////////////////////////////////////////////////////////////////////
