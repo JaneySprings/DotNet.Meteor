@@ -29,18 +29,18 @@ namespace DotNet.Mobile.Debug.CLI {
         }
 
         public static void AndroidDevices(string[] args) {
-            List<DeviceData> devices = AndroidTool.GetAllDevices();
+            List<DeviceData> devices = AndroidTool.AllDevices();
             Console.WriteLine(JsonSerializer.Serialize(devices));
         }
         public static void AppleDevices(string[] args) {
-            List<DeviceData> devices = XCodeTool.GetSimulators();
+            List<DeviceData> devices = XCodeTool.AllDevices();
             Console.WriteLine(JsonSerializer.Serialize(devices));
         }
 
         public static void RunEmulator(string[] args) {
             if (args.Length < 2)
                 throw new Exception ($"Missing parameter: {Program.CommandHandler[args[0]].Item1[1]}");
-            string serial = AndroidTool.RunEmulator(args[1]);
+            string serial = Emulator.Run(args[1]);
             Console.WriteLine(JsonSerializer.Serialize(serial));
         }
 

@@ -163,7 +163,7 @@ public class MonoDebugSession : DebugSession {
         Connect(launchOptions, address, port);
 
         if (launchOptions.Platform == Platform.iOS) {
-            XCodeTool.StartDebugSession(launchOptions.BundlePath, launchOptions.Device.Serial, port);
+            MLaunch.LaunchAppForDebug(launchOptions.BundlePath, launchOptions.Device, port);
         }
 
         SendResponse(response);

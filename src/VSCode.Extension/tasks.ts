@@ -31,33 +31,39 @@ class DotNetTask {
         if (!Configuration.validate())
             return DotNetTask.empty;
     
-        const devicePlatform = Configuration.selectedDevice!.platform;
-        const framework = Configuration.selectedProject!.frameworks?.find(it => it.includes(devicePlatform!));
-        
-        if (!framework) {
-            vscode.window.showErrorMessage(`No framework for '${devicePlatform}' found`);
-            return DotNetTask.empty;
-        }
-
+        const framework = Configuration.getTargetFramework();
         const command = [
             `dotnet build ${Configuration.selectedProject!.path}`,
             `-c:${Configuration.selectedTarget!}`,
             `-f:${framework}`
         ];
         
-        if (Configuration.selectedDevice!.platform?.includes('android') && ViewController.isDebugging) {
-            if (!Configuration.selectedDevice!.is_running) {
-                const serial = DebuggerUtils.runEmulator(Configuration.selectedDevice!.name!);
+        if (!framework) {
+            vscode.window.showErrorMessage(`No supported framework found`);
+            return DotNetTask.empty;
+        }
 
-                Configuration.selectedDevice!.serial = serial;
-                Configuration.selectedDevice!.is_running = true;
+        if (ViewController.isDebugging) {
+            if (Configuration.selectedDevice!.platform?.includes('android')) {
+                if (!Configuration.selectedDevice!.is_running) {
+                    const serial = DebuggerUtils.runEmulator(Configuration.selectedDevice!.name!);
+    
+                    Configuration.selectedDevice!.serial = serial;
+                    Configuration.selectedDevice!.is_running = true;
+                }
+    
+                command.push(`-p:AndroidAttachDebugger=true`);
+                command.push(`-p:AdbTarget=-s%20${Configuration.selectedDevice!.serial}`);
+                command.push(`-p:AndroidSdbTargetPort=${Configuration.debuggingPort}`);
+                command.push(`-p:AndroidSdbHostPort=${Configuration.debuggingPort}`);
+                command.push('-t:Run');
             }
-
-            command.push(`-p:AndroidAttachDebugger=true`);
-            command.push(`-p:AdbTarget=-s%20${Configuration.selectedDevice!.serial}`);
-            command.push(`-p:AndroidSdbTargetPort=${Configuration.debuggingPort}`);
-			command.push(`-p:AndroidSdbHostPort=${Configuration.debuggingPort}`);
-            command.push('-t:Run');
+    
+            if (Configuration.selectedDevice!.platform?.includes('ios')) {
+                if (!Configuration.selectedDevice!.is_emulator) {
+                    command.push(`-p:RuntimeIdentifier=ios-arm64`);
+                }
+            }
         }
 
         return new vscode.Task(
