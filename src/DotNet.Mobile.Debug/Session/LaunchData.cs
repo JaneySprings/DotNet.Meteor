@@ -60,8 +60,8 @@ public class LaunchData {
         if (directories.Length == 0)
             throw new Exception("Could not find ios bundle");
 
-        var armApp = directories.First(it => it.Contains("arm64", StringComparison.OrdinalIgnoreCase));
-        var otherApp = directories.First(it => !it.Contains("arm64", StringComparison.OrdinalIgnoreCase));
+        var armApp = directories.FirstOrDefault(it => it.Contains("arm64", StringComparison.OrdinalIgnoreCase));
+        var otherApp = directories.FirstOrDefault(it => !it.Contains("arm64", StringComparison.OrdinalIgnoreCase));
 
         if (Device.IsEmulator) {
             if (otherApp == null)
