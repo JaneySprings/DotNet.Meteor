@@ -1,7 +1,7 @@
 {
   "name": "dotnet-meteor",
   "displayName": ".NET Meteor",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": "Run and Debug .NET Mobile Apps",
   "publisher": "nromanov",
   "author": "Nikita Romanov",
