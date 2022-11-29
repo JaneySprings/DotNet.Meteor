@@ -4,7 +4,7 @@ using DotNet.Mobile.Shared;
 
 namespace XCode.Sdk {
     public static class PathUtils {
-        public static string GetXCodePath() {
+        public static string XCodePath() {
             ProcessResult result = ProcessRunner.Run(
                 new FileInfo("/usr/bin/xcode-select"),
                 new ProcessArgumentBuilder().Append("-p")
@@ -18,12 +18,44 @@ namespace XCode.Sdk {
             return path;
         }
 
-        public static FileInfo GetSystemProfiler() {
+        public static FileInfo SystemProfilerTool() {
             string path = Path.Combine("/usr", "sbin", "system_profiler");
             var tool = new FileInfo(path);
 
             if (!tool.Exists)
                 throw new Exception("Could not find system_profiler path");
+
+            return tool;
+        }
+
+        public static FileInfo MLaunchTool() {
+            string dotnetPath = Path.Combine("usr", "local", "share", "dotnet");
+            string sdkPath = Path.Combine(dotnetPath, "packs", "Microsoft.iOS.Sdk");
+            FileInfo newestTool = null;
+
+            foreach (string directory in Directory.GetDirectories(sdkPath)) {
+                string mlaunchPath = Path.Combine(directory, "tools", "bin", "mlaunch");
+
+                if (File.Exists(mlaunchPath)) {
+                    var tool = new FileInfo(mlaunchPath);
+
+                    if (newestTool == null || tool.CreationTime > newestTool.CreationTime)
+                        newestTool = tool;
+                }
+            }
+
+            if (newestTool == null || !newestTool.Exists)
+                throw new Exception("Could not find mlaunch tool");
+
+            return newestTool;
+        }
+
+        public static FileInfo XCRunTool() {
+            string path = Path.Combine("/usr", "bin", "xcrun");
+            FileInfo tool = new FileInfo(path);
+
+            if (!tool.Exists)
+                throw new Exception("Could not find xcrun tool");
 
             return tool;
         }

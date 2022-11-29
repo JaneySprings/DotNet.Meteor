@@ -6,7 +6,7 @@ namespace Android.Sdk {
     public static class AndroidTool {
         public static List<DeviceData> VirtualDevicesFast() {
             List<DeviceData> avds = new List<DeviceData>();
-            string avdHome = PathUtils.GetAvdLocation();
+            string avdHome = PathUtils.AvdLocation();
 
             foreach (var file in Directory.GetFiles(avdHome, "*.ini")) {
                 var ini = new IniFile(file);

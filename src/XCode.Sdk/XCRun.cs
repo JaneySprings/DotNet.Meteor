@@ -6,18 +6,8 @@ using DotNet.Mobile.Shared;
 
 namespace XCode.Sdk {
     public static class XCRun {
-        public static FileInfo ToolLocation() {
-            string path = Path.Combine("/usr", "bin", "xcrun");
-            FileInfo tool = new FileInfo(path);
-
-            if (!tool.Exists)
-                throw new Exception("Could not find xcrun tool");
-
-            return tool;
-        }
-
         public static List<DeviceData> Simulators() {
-            FileInfo tool = XCRun.ToolLocation();
+            FileInfo tool = PathUtils.XCRunTool();
             ProcessResult result = ProcessRunner.Run(tool, new ProcessArgumentBuilder()
                 .Append("simctl")
                 .Append("list")
@@ -51,7 +41,7 @@ namespace XCode.Sdk {
         }
 
         public static List<DeviceData> PhysicalDevices() {
-            FileInfo tool = XCRun.ToolLocation();
+            FileInfo tool = PathUtils.XCRunTool();
             ProcessResult result = ProcessRunner.Run(tool, new ProcessArgumentBuilder()
                 .Append("xctrace")
                 .Append("list")
