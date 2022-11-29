@@ -14,7 +14,7 @@ namespace XCode.Sdk {
             );
 
             var output = string.Join(Environment.NewLine, result.StandardOutput);
-            var contentRegex = new Regex(@"^--\s(?<os>.+)\s--\n(?<content>(\s{4}.+\n)*)", RegexOptions.Multiline);
+            var contentRegex = new Regex(@"^--\s(?<os>iOS\s\d+(.\d+)+)\s--\n(?<content>(\s{4}.+\n)*)", RegexOptions.Multiline);
             var deviceRegex = new Regex(@"^\s{4}(?<name>.+)\s\((?<udid>.+)\)\s\((?<state>.+)\)", RegexOptions.Multiline);
             var devices = new List<DeviceData>();
 
