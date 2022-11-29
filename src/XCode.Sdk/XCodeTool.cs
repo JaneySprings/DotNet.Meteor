@@ -1,9 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
-using System.Threading;
 using System.Text.RegularExpressions;
 using DotNet.Mobile.Shared;
 
@@ -12,7 +8,7 @@ namespace XCode.Sdk {
         public static List<DeviceData> PhysicalDevicesFast() {
             var profiler = PathUtils.GetSystemProfiler();
             var devices = new List<DeviceData>();
-            var regex = new Regex(@"(iPhone:)[^,]*?Version:\s+(?<ver>\d+)[^,]*?Serial\sNumber:\s+(?<id>\S+)");
+            var regex = new Regex(@"(iPhone:)[^,]*?Version:\s+(?<ver>\d+.\d+)[^,]*?Serial\sNumber:\s+(?<id>\S+)");
 
             ProcessResult result = ProcessRunner.Run(profiler, new ProcessArgumentBuilder()
                 .Append("SPUSBDataType")
