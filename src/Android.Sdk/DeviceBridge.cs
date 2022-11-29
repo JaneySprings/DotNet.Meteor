@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
@@ -7,19 +6,9 @@ using DotNet.Mobile.Shared;
 
 namespace Android.Sdk {
     public static class DeviceBridge {
-        public static FileInfo ToolLocation() {
-            string sdk = PathUtils.GetSdkLocation();
-            string path = Path.Combine(sdk, "platform-tools", "adb");
-
-            if (!File.Exists(path))
-                throw new Exception("Could not find adb tool");
-
-            return new FileInfo(path);
-        }
-
         public static string Shell(string serial, params string[] args) {
-            var emulator = DeviceBridge.ToolLocation();
-            var result = ProcessRunner.Run(emulator, new ProcessArgumentBuilder()
+            var adb = PathUtils.AdbTool();
+            var result = ProcessRunner.Run(adb, new ProcessArgumentBuilder()
                 .Append("-s", serial, "shell")
                 .Append(args));
 
@@ -27,8 +16,8 @@ namespace Android.Sdk {
         }
 
         public static string Forward(string serial, int local, int target) {
-            var emulator = DeviceBridge.ToolLocation();
-            var result = ProcessRunner.Run(emulator, new ProcessArgumentBuilder()
+            var adb = PathUtils.AdbTool();
+            var result = ProcessRunner.Run(adb, new ProcessArgumentBuilder()
                 .Append("-s", serial, "forward")
                 .Append($"tcp:{local}", $"tcp:{target}"));
 
@@ -39,7 +28,7 @@ namespace Android.Sdk {
         }
 
         public static List<DeviceData> Devices() {
-            var adb = DeviceBridge.ToolLocation();
+            var adb = PathUtils.AdbTool();
             ProcessResult result = ProcessRunner.Run(adb, new ProcessArgumentBuilder()
                 .Append("devices")
                 .Append("-l"));
@@ -72,7 +61,7 @@ namespace Android.Sdk {
         }
 
         public static string EmuName(string serial) {
-            var adb = DeviceBridge.ToolLocation();
+            var adb = PathUtils.AdbTool();
             ProcessResult result = ProcessRunner.Run(adb, new ProcessArgumentBuilder()
                 .Append("-s", serial)
                 .Append("emu", "avd", "name")

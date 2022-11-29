@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using DotNet.Mobile.Shared;
@@ -9,18 +8,9 @@ namespace Android.Sdk {
         private const int AppearingRetryCount = 15;
         private const int SyncRetryCount = 300;
 
-        public static FileInfo ToolLocation() {
-            string sdk = PathUtils.GetSdkLocation();
-            string path = Path.Combine(sdk, "emulator", "emulator");
-
-            if (!File.Exists(path))
-                throw new Exception("Could not find emulator tool");
-
-            return new FileInfo(path);
-        }
 
         public static string Run(string name) {
-            var emulator = Emulator.ToolLocation();
+            var emulator = PathUtils.EmulatorTool();
             var process = new ProcessRunner(emulator, new ProcessArgumentBuilder()
                 .Append("-avd")
                 .Append(name));

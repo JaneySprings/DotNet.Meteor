@@ -6,7 +6,7 @@ using DotNet.Mobile.Shared;
 namespace XCode.Sdk {
     public static class XCodeTool {
         public static List<DeviceData> PhysicalDevicesFast() {
-            var profiler = PathUtils.GetSystemProfiler();
+            var profiler = PathUtils.SystemProfilerTool();
             var devices = new List<DeviceData>();
             var regex = new Regex(@"(iPhone:)[^,]*?Version:\s+(?<ver>\d+.\d+)[^,]*?Serial\sNumber:\s+(?<id>\S+)");
 

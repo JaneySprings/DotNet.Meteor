@@ -1,34 +1,11 @@
-using System;
 using System.IO;
 using System.Threading;
 using DotNet.Mobile.Shared;
 
 namespace XCode.Sdk {
     public static class MLaunch {
-        public static FileInfo ToolLocation() {
-            string dotnetPath = Path.Combine("usr", "local", "share", "dotnet");
-            string sdkPath = Path.Combine(dotnetPath, "packs", "Microsoft.iOS.Sdk");
-            FileInfo newestTool = null;
-
-            foreach (string directory in Directory.GetDirectories(sdkPath)) {
-                string mlaunchPath = Path.Combine(directory, "tools", "bin", "mlaunch");
-
-                if (File.Exists(mlaunchPath)) {
-                    var tool = new FileInfo(mlaunchPath);
-
-                    if (newestTool == null || tool.CreationTime > newestTool.CreationTime)
-                        newestTool = tool;
-                }
-            }
-
-            if (newestTool == null || !newestTool.Exists)
-                throw new Exception("Could not find mlaunch tool");
-
-            return newestTool;
-        }
-
         public static void InstallOnDevice(string bundlePath, DeviceData device) {
-            FileInfo tool = MLaunch.ToolLocation();
+            FileInfo tool = PathUtils.MLaunchTool();
             ProcessRunner.Run(tool, new ProcessArgumentBuilder()
                 .Append($"--installdev", $"\"{bundlePath}\"")
                 .Append($"--devname={device.Serial}")
@@ -36,7 +13,7 @@ namespace XCode.Sdk {
         }
 
         public static void TcpTunnel(DeviceData device, int port) {
-            FileInfo tool = MLaunch.ToolLocation();
+            FileInfo tool = PathUtils.MLaunchTool();
             var proccess = new ProcessRunner(tool, new ProcessArgumentBuilder()
                 .Append($"--tcp-tunnel={port}:{port}")
                 .Append($"--devname={device.Serial}")
@@ -45,7 +22,7 @@ namespace XCode.Sdk {
         }
 
         public static void LaunchAppForDebug(string bundlePath, DeviceData device, int port) {
-            FileInfo tool = MLaunch.ToolLocation();
+            FileInfo tool = PathUtils.MLaunchTool();
 
             if (!device.IsEmulator) {
                 TcpTunnel(device, port);
