@@ -34,6 +34,10 @@ namespace XCode.Sdk {
 
         public static List<DeviceData> AllDevices() {
             var devices = new List<DeviceData>();
+
+            if (RuntimeSystem.IsWindows)
+                return devices;
+
             devices.AddRange(PhysicalDevicesFast());
             devices.AddRange(XCRun.Simulators());
             return devices;

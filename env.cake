@@ -1,11 +1,12 @@
+using _Path = System.IO.Path;
+
 public string RootDirectory => MakeAbsolute(Directory("./")).ToString();
 
-public string ArtifactsDirectory => $"{RootDirectory}/artifacts";
-public string ExtensionStagingDirectory => $"{RootDirectory}/extension";
-public string ExtensionAssembliesDirectory => $"{ExtensionStagingDirectory}/bin";
+public string ArtifactsDirectory => _Path.Combine(RootDirectory, "artifacts");
+public string ExtensionStagingDirectory => _Path.Combine(RootDirectory, "extension");
+public string ExtensionAssembliesDirectory => _Path.Combine(ExtensionStagingDirectory, "bin");
 
-public string MonoDebuggerDirectory => $"{RootDirectory}/src/Mono.Debugger";
-
-public string MobileDebugProjectPath => $"{RootDirectory}/src/DotNet.Mobile.Debug/DotNet.Mobile.Debug.csproj";
+public string MonoDebuggerDirectory => _Path.Combine(RootDirectory, "src", "Mono.Debugger");
+public string MobileDebugProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Mobile.Debug", "DotNet.Mobile.Debug.csproj");
 
 public string NuGetVersionRoslyn => "4.3.1";
