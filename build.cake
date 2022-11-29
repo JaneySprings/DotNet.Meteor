@@ -2,6 +2,8 @@
 #addin nuget:?package=Cake.VsCode&version=0.11.1
 #load "env.cake"
 
+using _Path = System.IO.Path;
+
 var target = Argument("target", "vsix");
 var version = Argument("release-version", "1.0.4");
 var configuration = Argument("configuration", "release");
@@ -11,7 +13,7 @@ var configuration = Argument("configuration", "release");
 ///////////////////////////////////////////////////////////////////////////////
 
 Task("up-version")
-   .DoesForEach<FilePath>(GetFiles($"{RootDirectory}/*.json"), file => {
+   .DoesForEach<FilePath>(GetFiles(_Path.Combine(RootDirectory, "*.json")), file => {
       var regex = @"^\s\s(""version"":\s+)("".+"")(,)";
       var options = System.Text.RegularExpressions.RegexOptions.Multiline;
       ReplaceRegexInFiles(file.ToString(), regex, $"  $1\"{version}\"$3", options);
@@ -19,7 +21,7 @@ Task("up-version")
 
 Task("build-dotnet")
    .Does(() => CleanDirectory(ExtensionAssembliesDirectory))
-   .DoesForEach<FilePath>(GetFiles($"{MonoDebuggerDirectory}/**/*.csproj"), file => {
+   .DoesForEach<FilePath>(GetFiles(_Path.Combine(MonoDebuggerDirectory, "**", "*.csproj")), file => {
       var regex = @"(<NuGetVersionRoslyn\s+Condition=""\$\(NuGetVersionRoslyn\)\s*==\s*''"")(>.+<)(/NuGetVersionRoslyn>)";
       ReplaceRegexInFiles(file.ToString(), regex, $"$1>{NuGetVersionRoslyn}<$3");
    })
@@ -31,9 +33,9 @@ Task("build-dotnet")
       }
    }))
    .Does(() => {
-      DeleteFiles(GetFiles($"{ExtensionAssembliesDirectory}/*.pdb"));
-      DeleteFiles(GetFiles($"{ExtensionAssembliesDirectory}/*.deps.json"));
-      DeleteFiles(GetFiles($"{ExtensionAssembliesDirectory}/*.xml"));
+      DeleteFiles(GetFiles(_Path.Combine(ExtensionAssembliesDirectory, "*.pdb")));
+      DeleteFiles(GetFiles(_Path.Combine(ExtensionAssembliesDirectory, "*.deps.json")));
+      DeleteFiles(GetFiles(_Path.Combine(ExtensionAssembliesDirectory, "*.xml")));
    });
    
 Task("vsix")
@@ -42,7 +44,7 @@ Task("vsix")
    .Does(() => {
       CleanDirectory(ArtifactsDirectory);
       VscePackage(new VscePackageSettings {
-         OutputFilePath = $"{ArtifactsDirectory}/DotNet.Meteor.{version}.vsix",
+         OutputFilePath = _Path.Combine(ArtifactsDirectory, $"DotNet.Meteor.{version}.vsix"),
          WorkingDirectory = RootDirectory
       });
    });
