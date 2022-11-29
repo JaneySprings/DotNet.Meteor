@@ -45,7 +45,7 @@ public abstract class DebugSession : Session {
                 SendErrorResponse(response, 1014, $"unrecognized request '{command}'");
             }
         } catch (Exception e) {
-            SendErrorResponse(response, 1104, $"error while processing request '{command}' (exception: {e.Message})");
+            SendErrorResponse(response, 1104, $"error while processing request '{command}' (exception: {e.Message} -> {e.StackTrace})");
         }
     }
 

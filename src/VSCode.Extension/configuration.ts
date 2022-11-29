@@ -38,7 +38,7 @@ export class Configuration {
             return false;
         }
 
-        if (!ViewController.mobileDevices.some(it => it.serial === Configuration.selectedDevice!.serial)) {
+        if (!ViewController.mobileDevices.some(it => it.name === Configuration.selectedDevice!.name)) {
             vscode.window.showErrorMessage('Selected device does not exists yet');
             return false;
         }
