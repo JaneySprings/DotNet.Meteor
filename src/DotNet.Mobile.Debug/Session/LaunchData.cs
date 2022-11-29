@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using DotNet.Mobile.Shared;
 
@@ -37,7 +38,7 @@ public class LaunchData {
         var match = regex.Match(content);
 
         if (!match.Success)
-           throw new Exception($"Could not find {value} in project file");
+            return Path.GetFileNameWithoutExtension(path);
 
         return match.Groups[1].Value;
     }
@@ -59,7 +60,18 @@ public class LaunchData {
         if (directories.Length == 0)
             throw new Exception("Could not find ios bundle");
 
-        return directories[0];
+        var armApp = directories.First(it => it.Contains("arm64", StringComparison.OrdinalIgnoreCase));
+        var otherApp = directories.First(it => !it.Contains("arm64", StringComparison.OrdinalIgnoreCase));
+
+        if (Device.IsEmulator) {
+            if (otherApp == null)
+                throw new Exception("Could not find bundle for iossimulator");
+            return otherApp;
+        }
+
+        if (armApp == null)
+            throw new Exception("Could not find bundle for ios-arm");
+        return armApp;
     }
 }
 
