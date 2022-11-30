@@ -9,17 +9,10 @@ var version = Argument("release-version", "1.1.0");
 var configuration = Argument("configuration", "release");
 
 ///////////////////////////////////////////////////////////////////////////////
-// TASKS
+// DOTNET
 ///////////////////////////////////////////////////////////////////////////////
 
-Task("up-version")
-   .DoesForEach<FilePath>(GetFiles(_Path.Combine(RootDirectory, "*.json")), file => {
-      var regex = @"^\s\s(""version"":\s+)("".+"")(,)";
-      var options = System.Text.RegularExpressions.RegexOptions.Multiline;
-      ReplaceRegexInFiles(file.ToString(), regex, $"  $1\"{version}\"$3", options);
-   });
-
-Task("build-dotnet")
+Task("build-debugger")
    .Does(() => CleanDirectory(ExtensionAssembliesDirectory))
    .DoesForEach<FilePath>(GetFiles(_Path.Combine(MonoDebuggerDirectory, "**", "*.csproj")), file => {
       var regex = @"(<NuGetVersionRoslyn\s+Condition=""\$\(NuGetVersionRoslyn\)\s*==\s*''"")(>.+<)(/NuGetVersionRoslyn>)";
@@ -37,10 +30,29 @@ Task("build-dotnet")
       DeleteFiles(GetFiles(_Path.Combine(ExtensionAssembliesDirectory, "*.deps.json")));
       DeleteFiles(GetFiles(_Path.Combine(ExtensionAssembliesDirectory, "*.xml")));
    });
-   
+
+Task("build-reload")
+   .Does(() => DotNetBuild(MobileHotReloadProjectPath, new DotNetBuildSettings {
+      Configuration = configuration,
+      MSBuildSettings = new DotNetMSBuildSettings {
+         AssemblyVersion = version
+      }
+   }));
+
+///////////////////////////////////////////////////////////////////////////////
+// TYPESCRIPT
+///////////////////////////////////////////////////////////////////////////////
+
+Task("up-version")
+   .DoesForEach<FilePath>(GetFiles(_Path.Combine(RootDirectory, "*.json")), file => {
+      var regex = @"^\s\s(""version"":\s+)("".+"")(,)";
+      var options = System.Text.RegularExpressions.RegexOptions.Multiline;
+      ReplaceRegexInFiles(file.ToString(), regex, $"  $1\"{version}\"$3", options);
+   });
+
 Task("vsix")
    .IsDependentOn("up-version")
-   .IsDependentOn("build-dotnet")
+   .IsDependentOn("build-debugger")
    .Does(() => {
       CleanDirectory(ArtifactsDirectory);
       VscePackage(new VscePackageSettings {
