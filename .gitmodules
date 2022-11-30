@@ -1,3 +1,6 @@
+[submodule "src/Clancey.Reloadify"]
+	path = src/Clancey.Reloadify
+	url = https://github.com/JaneySprings/Reloadify
 [submodule "src/Mono.Debugger"]
 	path = src/Mono.Debugger
 	url = https://github.com/mono/debugger-libs
