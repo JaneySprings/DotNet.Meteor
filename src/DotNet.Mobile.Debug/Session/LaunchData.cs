@@ -10,13 +10,15 @@ public class LaunchData {
     public string AppId { get; set; }
     public string AppName { get; set; }
     public string BundlePath { get; set; }
+    public string Target { get; set; }
     public DeviceData Device { get; set; }
     public Project Project { get; set; }
     public Platform Platform { get; set; }
 
-    public LaunchData(Project project, DeviceData device) {
+    public LaunchData(Project project, DeviceData device, string target) {
         Project = project;
         Device = device;
+        Target = target;
 
         AppId = ExtractValueFromProject(Project.Path, "ApplicationId");
         AppName = ExtractValueFromProject(Project.Path, "ApplicationTitle");
@@ -44,20 +46,24 @@ public class LaunchData {
     }
 
     private string FindAndroidPackage(string rootDirectory) {
-        var debugDirectory = Path.Combine(rootDirectory, "bin", "Debug");
-        var files = Directory.GetFiles(debugDirectory, "*-Signed.apk", SearchOption.AllDirectories);
+        var binDirectory = Path.Combine(rootDirectory, "bin");
+        var files = Directory
+            .GetFiles(binDirectory, "*-Signed.apk", SearchOption.AllDirectories)
+            .Where(it => it.Contains(Target, StringComparison.OrdinalIgnoreCase));
 
-        if (files.Length == 0)
+        if (!files.Any())
             throw new Exception("Could not find Android package");
 
-        return files[0];
+        return files.First();
     }
 
     private string FindApplePackage(string rootDirectory) {
-        var debugDirectory = Path.Combine(rootDirectory, "bin", "Debug");
-        var directories = Directory.GetDirectories(debugDirectory, "*.app", SearchOption.AllDirectories);
+        var binDirectory = Path.Combine(rootDirectory, "bin");
+        var directories = Directory
+            .GetDirectories(binDirectory, "*.app", SearchOption.AllDirectories)
+            .Where(it => it.Contains(Target, StringComparison.OrdinalIgnoreCase));
 
-        if (directories.Length == 0)
+        if (!directories.Any())
             throw new Exception("Could not find ios bundle");
 
         var armApp = directories.FirstOrDefault(it => it.Contains("arm64", StringComparison.OrdinalIgnoreCase));

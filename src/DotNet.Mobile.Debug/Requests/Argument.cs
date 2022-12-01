@@ -21,4 +21,5 @@ public class Argument {
     [JsonPropertyName("debugging_port")] public int DebuggingPort { get; set; }
     [JsonPropertyName("selected_device")] public DeviceData Device { get; set; }
     [JsonPropertyName("selected_project")] public Project Project { get; set; }
+    [JsonPropertyName("selected_target")] public string Target { get; set; }
 }
