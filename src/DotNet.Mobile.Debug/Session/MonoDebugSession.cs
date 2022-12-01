@@ -149,7 +149,7 @@ public class MonoDebugSession : DebugSession {
     public override void Launch(Response response, Argument args) {
         SetExceptionOptions(args.ExceptionOptions);
 
-        var launchOptions = new LaunchData(args.Project, args.Device);
+        var launchOptions = new LaunchData(args.Project, args.Device, args.Target);
 
         int port = args.DebuggingPort;
         var host = args.Address;
@@ -171,6 +171,9 @@ public class MonoDebugSession : DebugSession {
     private void Connect(LaunchData options, IPAddress address, int port) {
         lock (this.locker) {
             this.debuggerKilled = false;
+
+            if (options.Target.Equals("Release", StringComparison.OrdinalIgnoreCase))
+                return;
 
             SoftDebuggerStartArgs args = null;
             if (options.Platform == Platform.Android) {
