@@ -21,7 +21,9 @@
     "url": "https://github.com/JaneySprings/VSCode.Meteor/issues"
   },
   "activationEvents": [
-    "workspaceContains:**/*.csproj"
+    "onDebugInitialConfigurations",
+    "onLanguage:csharp",
+    "workspaceContains:**/*.{csproj,sln,slnf,csx}"
   ],
   "main": "./extension/extension.js",
   "contributes": {
