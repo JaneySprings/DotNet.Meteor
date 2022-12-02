@@ -22,7 +22,7 @@ export class DebuggerUtils {
         return ProcessRunner.run<Project[]>(new ProcessArgumentBuilder("dotnet")
             .append(this.toolPath)
             .append("--find-projects")
-            .append(workspaceRoot));
+            .append(`"${workspaceRoot}"`));
     }
 
     public static runEmulator(name: string): string {

@@ -33,7 +33,7 @@ class DotNetTask {
     
         const framework = Configuration.getTargetFramework();
         const command = [
-            `dotnet build ${Configuration.selectedProject!.path}`,
+            `dotnet build "${Configuration.selectedProject!.path}"`,
             `-c:${Configuration.selectedTarget!}`,
             `-f:${framework}`
         ];
