@@ -66,6 +66,11 @@ public class Program {
             return;
         }
 
+        if (args[0].Equals("-pt")) {
+            Tests.Performance.Test(args);
+            return;
+        }
+
         if (CommandHandler.TryGetValue(args[0], out var command)) {
             command.Item2.Invoke(args);
         } else {
