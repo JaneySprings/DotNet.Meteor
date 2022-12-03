@@ -15,7 +15,7 @@ namespace DotNet.Mobile.Debug.CLI {
             Console.WriteLine("\nCommands:");
 
             foreach (var command in Program.CommandHandler) {
-                Console.WriteLine("  {0,-30} {1,5}", 
+                Console.WriteLine("  {0,-40} {1,5}",
                     command.Key + " " + string.Join(" ", command.Value.Item1.Skip(1)),
                     command.Value.Item1[0]
                 );
