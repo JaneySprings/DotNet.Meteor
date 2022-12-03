@@ -43,6 +43,8 @@ public abstract class StreamCommandConnection : IDisposable {
             }
         }
 
+        Logger.Log("Sending command to sdb: " + command);
+
         if (ar.Stream != null) {
             ExecuteCommand_BeginWriteCommand(ar);
         } else {

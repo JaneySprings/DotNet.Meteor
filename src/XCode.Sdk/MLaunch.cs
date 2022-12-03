@@ -6,8 +6,8 @@ namespace XCode.Sdk {
         public static void InstallOnDevice(string bundlePath, DeviceData device) {
             FileInfo tool = PathUtils.MLaunchTool();
             ProcessRunner.Execute(tool, new ProcessArgumentBuilder()
-                .Append($"--installdev", $"\"{bundlePath}\"")
-                .Append($"--devname={device.Serial}")
+                .Append("--installdev", $"\"{bundlePath}\"")
+                .Append("--devname", device.Serial)
             );
         }
 
@@ -22,18 +22,28 @@ namespace XCode.Sdk {
 
         public static void LaunchAppForDebug(string bundlePath, DeviceData device, int port) {
             FileInfo tool = PathUtils.MLaunchTool();
+            ProcessRunner process;
 
-            if (!device.IsEmulator) {
+            if (device.IsEmulator) {
+                process = new ProcessRunner(tool, new ProcessArgumentBuilder()
+                    .Append( "--launchsim", $"\"{bundlePath}\"")
+                    .Append( "--argument=-monodevelop-port")
+                    .Append($"--argument={port}")
+                    .Append($"--setenv=__XAMARIN_DEBUG_PORT__={port}")
+                    .Append($"--device=:v2:udid={device.Serial}"), redirectStandardInput: true
+                );
+            } else {
                 TcpTunnel(device, port);
                 InstallOnDevice(bundlePath, device);
+                process = new ProcessRunner(tool, new ProcessArgumentBuilder()
+                    .Append( "--launchdev", $"\"{bundlePath}\"")
+                    .Append( "--devname", device.Serial)
+                    .Append( "--argument=-monodevelop-port")
+                    .Append($"--argument={port}")
+                    .Append($"--setenv=__XAMARIN_DEBUG_PORT__={port}")
+                    .Append( "--wait-for-exit"), redirectStandardInput: true
+                );
             }
-
-            var platform = device.IsEmulator ? "sim" : "dev";
-            var process = new ProcessRunner(tool, new ProcessArgumentBuilder()
-                .Append($"--launch{platform}", $"\"{bundlePath}\"")
-                .Append($"--argument=-monodevelop-port --argument={port} --setenv=__XAMARIN_DEBUG_PORT__={port}")
-                .Append($"--device=:v2:udid={device.Serial}"), redirectStandardInput: true
-            );
             process.Run();
         }
     }
