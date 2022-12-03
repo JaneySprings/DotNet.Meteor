@@ -18,11 +18,18 @@ export class DebuggerUtils {
             .append("--apple-devices"));
     }
 
-    public static findProjects(workspaceRoot: string): Project[] {
+    public static analyzeWorkspace(workspaceRoot: string): Project[] {
         return ProcessRunner.run<Project[]>(new ProcessArgumentBuilder("dotnet")
             .append(this.toolPath)
-            .append("--find-projects")
+            .append("--analyze-workspace")
             .append(`"${workspaceRoot}"`));
+    }
+
+    public static analyzeProject(projectFile: string): Project {
+        return ProcessRunner.run<Project>(new ProcessArgumentBuilder("dotnet")
+            .append(this.toolPath)
+            .append("--analyze-project")
+            .append(`"${projectFile}"`));
     }
 
     public static runEmulator(name: string): string {

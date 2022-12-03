@@ -7,7 +7,7 @@ export class Project {
     public frameworks: string[] | undefined;
 
     public static toDisplayItem(project: Project) {
-        const workspace = Configuration.geWorkspacePath();
+        const workspace = Configuration.workspacePath();
         return ({
             label: project.name,
             description: project.path.replace(workspace + '/', ''),

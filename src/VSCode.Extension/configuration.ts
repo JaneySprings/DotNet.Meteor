@@ -19,11 +19,16 @@ export class Configuration {
         Configuration.debuggingPort = DebuggerUtils.freePort();
     }
 
-    public static geWorkspacePath() {
+    public static updateSelectedProject() {
+        const project = DebuggerUtils.analyzeProject(Configuration.selectedProject!.path);
+        Configuration.selectedProject = project;
+    }
+
+    public static workspacePath() {
         return vscode.workspace.workspaceFolders![0].uri.fsPath;
     }
 
-    public static getTargetFramework(): string | undefined {
+    public static targetFramework(): string | undefined {
         const devicePlatform = Configuration.selectedDevice!.platform;
         return Configuration.selectedProject!.frameworks?.find(it => it.includes(devicePlatform!));
     }

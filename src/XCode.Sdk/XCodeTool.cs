@@ -10,7 +10,7 @@ namespace XCode.Sdk {
             var devices = new List<DeviceData>();
             var regex = new Regex(@"(iPhone:)[^,]*?Version:\s+(?<ver>\d+.\d+)[^,]*?Serial\sNumber:\s+(?<id>\S+)");
 
-            ProcessResult result = ProcessRunner.Run(profiler, new ProcessArgumentBuilder()
+            ProcessResult result = ProcessRunner.Execute(profiler, new ProcessArgumentBuilder()
                 .Append("SPUSBDataType")
             );
             var output = string.Join(Environment.NewLine, result.StandardOutput);
@@ -23,7 +23,7 @@ namespace XCode.Sdk {
                     IsEmulator = false,
                     IsRunning = true,
                     Name = $"iPhone {version}",
-                    Details = "Device",
+                    Details = "iPhone",
                     Platform = Platform.iOS,
                     OSVersion = "Unknown",
                     Serial = serial
