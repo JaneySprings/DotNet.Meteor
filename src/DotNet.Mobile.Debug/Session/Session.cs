@@ -38,6 +38,7 @@ public abstract class Session {
     }
 
     public void Stop() {
+        Logger.Log("Session stopped");
         this.stopRequested = true;
     }
 
