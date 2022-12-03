@@ -1,12 +1,11 @@
 using System.IO;
-using System.Threading;
 using DotNet.Mobile.Shared;
 
 namespace XCode.Sdk {
     public static class MLaunch {
         public static void InstallOnDevice(string bundlePath, DeviceData device) {
             FileInfo tool = PathUtils.MLaunchTool();
-            ProcessRunner.Run(tool, new ProcessArgumentBuilder()
+            ProcessRunner.Execute(tool, new ProcessArgumentBuilder()
                 .Append($"--installdev", $"\"{bundlePath}\"")
                 .Append($"--devname={device.Serial}")
             );
@@ -18,7 +17,7 @@ namespace XCode.Sdk {
                 .Append($"--tcp-tunnel={port}:{port}")
                 .Append($"--devname={device.Serial}")
             );
-            proccess.WaitForExitAsync();
+            proccess.Run();
         }
 
         public static void LaunchAppForDebug(string bundlePath, DeviceData device, int port) {
@@ -33,9 +32,9 @@ namespace XCode.Sdk {
             var process = new ProcessRunner(tool, new ProcessArgumentBuilder()
                 .Append($"--launch{platform}", $"\"{bundlePath}\"")
                 .Append($"--argument=-monodevelop-port --argument={port} --setenv=__XAMARIN_DEBUG_PORT__={port}")
-                .Append($"--device=:v2:udid={device.Serial}"), CancellationToken.None, redirectStandardInput: true
+                .Append($"--device=:v2:udid={device.Serial}"), redirectStandardInput: true
             );
-            process.WaitForExitAsync();
+            process.Run();
         }
     }
 }

@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace DotNet.Mobile.Shared {
     public class ProcessRunner {
@@ -11,18 +8,12 @@ namespace DotNet.Mobile.Shared {
         readonly List<string> standardError;
         readonly Process process;
 
-        public int ExitCode => this.process.HasExited ? this.process.ExitCode : -1;
-        public bool HasExited => this.process?.HasExited ?? false;
-
-        public static ProcessResult Run(FileInfo exe, ProcessArgumentBuilder builder) {
+        public static ProcessResult Execute(FileInfo exe, ProcessArgumentBuilder builder) {
             var p = new ProcessRunner(exe, builder);
             return p.WaitForExit();
         }
 
-        public ProcessRunner(FileInfo executable, ProcessArgumentBuilder builder)
-            : this(executable, builder, System.Threading.CancellationToken.None) { }
-
-        public ProcessRunner(FileInfo executable, ProcessArgumentBuilder builder, System.Threading.CancellationToken cancelToken, bool redirectStandardInput = false) {
+        public ProcessRunner(FileInfo executable, ProcessArgumentBuilder builder, bool redirectStandardInput = false) {
             this.standardOutput = new List<string>();
             this.standardError = new List<string>();
 
@@ -45,15 +36,6 @@ namespace DotNet.Mobile.Shared {
                 if (e.Data != null)
                     this.standardError.Add(e.Data);
             };
-            this.process.Start();
-            this.process.BeginOutputReadLine();
-            this.process.BeginErrorReadLine();
-
-            if (cancelToken != System.Threading.CancellationToken.None) {
-                cancelToken.Register(() => {
-                    try { this.process.Kill(); } catch { }
-                });
-            }
         }
 
         public void Kill() {
@@ -61,19 +43,15 @@ namespace DotNet.Mobile.Shared {
         }
 
         public ProcessResult WaitForExit() {
+            this.Run();
             this.process.WaitForExit();
             return new ProcessResult(this.standardOutput, this.standardError, this.process.ExitCode);
         }
 
-        public Task<ProcessResult> WaitForExitAsync() {
-            var tcs = new TaskCompletionSource<ProcessResult>();
-
-            Task.Run(() => {
-                ProcessResult r = WaitForExit();
-                tcs.TrySetResult(r);
-            });
-
-            return tcs.Task;
+        public void Run() {
+            this.process.Start();
+            this.process.BeginOutputReadLine();
+            this.process.BeginErrorReadLine();
         }
     }
 }

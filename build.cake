@@ -5,7 +5,7 @@
 using _Path = System.IO.Path;
 
 var target = Argument("target", "vsix");
-var version = Argument("release-version", "1.1.4");
+var version = Argument("release-version", "1.1.5");
 var configuration = Argument("configuration", "release");
 
 ///////////////////////////////////////////////////////////////////////////////

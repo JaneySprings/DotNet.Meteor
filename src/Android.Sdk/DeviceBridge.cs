@@ -8,7 +8,7 @@ namespace Android.Sdk {
     public static class DeviceBridge {
         public static string Shell(string serial, params string[] args) {
             var adb = PathUtils.AdbTool();
-            var result = ProcessRunner.Run(adb, new ProcessArgumentBuilder()
+            var result = ProcessRunner.Execute(adb, new ProcessArgumentBuilder()
                 .Append("-s", serial, "shell")
                 .Append(args));
 
@@ -17,7 +17,7 @@ namespace Android.Sdk {
 
         public static string Forward(string serial, int local, int target) {
             var adb = PathUtils.AdbTool();
-            var result = ProcessRunner.Run(adb, new ProcessArgumentBuilder()
+            var result = ProcessRunner.Execute(adb, new ProcessArgumentBuilder()
                 .Append("-s", serial, "forward")
                 .Append($"tcp:{local}", $"tcp:{target}"));
 
@@ -29,7 +29,7 @@ namespace Android.Sdk {
 
         public static List<DeviceData> Devices() {
             var adb = PathUtils.AdbTool();
-            ProcessResult result = ProcessRunner.Run(adb, new ProcessArgumentBuilder()
+            ProcessResult result = ProcessRunner.Execute(adb, new ProcessArgumentBuilder()
                 .Append("devices")
                 .Append("-l"));
 
@@ -62,7 +62,7 @@ namespace Android.Sdk {
 
         public static string EmuName(string serial) {
             var adb = PathUtils.AdbTool();
-            ProcessResult result = ProcessRunner.Run(adb, new ProcessArgumentBuilder()
+            ProcessResult result = ProcessRunner.Execute(adb, new ProcessArgumentBuilder()
                 .Append("-s", serial)
                 .Append("emu", "avd", "name")
             );

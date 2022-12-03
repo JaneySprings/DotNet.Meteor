@@ -28,10 +28,12 @@ class DotNetTask {
     );
 
     public static build(): vscode.Task {
+        Configuration.updateSelectedProject();
+
         if (!Configuration.validate())
             return DotNetTask.empty;
     
-        const framework = Configuration.getTargetFramework();
+        const framework = Configuration.targetFramework();
         const command = [
             `dotnet build "${Configuration.selectedProject!.path}"`,
             `-c:${Configuration.selectedTarget!}`,

@@ -48,8 +48,8 @@ export class ViewController {
 
 
     public static fetchWorkspace() {
-        const workspacePath = Configuration.geWorkspacePath();
-        ViewController.workspaceProjects = DebuggerUtils.findProjects(workspacePath);
+        const workspacePath = Configuration.workspacePath();
+        ViewController.workspaceProjects = DebuggerUtils.analyzeWorkspace(workspacePath);
     }
     public static fetchDevices() {
         const androidDevices = DebuggerUtils.androidDevices();

@@ -8,7 +8,7 @@ namespace Android.Sdk {
     public static class VirtualDeviceManager {
         public static List<DeviceData> VirtualDevices() {
             var avdManager = PathUtils.AvdTool();
-            ProcessResult result = ProcessRunner.Run(avdManager, new ProcessArgumentBuilder()
+            ProcessResult result = ProcessRunner.Execute(avdManager, new ProcessArgumentBuilder()
                 .Append("list")
                 .Append("avds"));
 

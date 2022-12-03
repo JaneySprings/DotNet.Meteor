@@ -15,7 +15,7 @@ namespace Android.Sdk {
                 .Append("-avd")
                 .Append(name));
 
-            process.WaitForExitAsync();
+            process.Run();
             return Emulator.WaitForBoot();
         }
 

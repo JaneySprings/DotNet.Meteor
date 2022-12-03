@@ -34,9 +34,14 @@ public class Program {
             }, ConsoleUtils.FreePort)
         },
         {
-            "--find-projects", new Tuple<string[], Action<string[]>>(new []{
+            "--analyze-workspace", new Tuple<string[], Action<string[]>>(new []{
                 "Find all executable projects in workspace", "<cwd-path>"
-            }, ConsoleUtils.FindProjects)
+            }, ConsoleUtils.AnalyzeWorkspace)
+        },
+        {
+            "--analyze-project", new Tuple<string[], Action<string[]>>(new []{
+                "Get info about specified project", "<project-path>"
+            }, ConsoleUtils.AnalyzeProject)
         },
         {
             "--start-session", new Tuple<string[], Action<string[]>>(new []{

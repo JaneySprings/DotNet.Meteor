@@ -6,7 +6,7 @@ using System.IO;
 namespace DotNet.Mobile.Debug;
 
 public static class WorkspaceAnalyzer {
-    public static List<Project> GetProjects(string workspacePath) {
+    public static List<Project> AnalyzeWorkspace(string workspacePath) {
         var projects = new List<Project>();
         var projectFiles = Directory.GetFiles(workspacePath, "*.csproj", SearchOption.AllDirectories);
 
@@ -14,15 +14,21 @@ public static class WorkspaceAnalyzer {
             if (!GetIsExecutable(projectFile))
                 continue;
 
-            projects.Add(new Project {
-                Name = Path.GetFileNameWithoutExtension(projectFile),
-                Frameworks = GetTargetFrameworks(projectFile),
-                Path = projectFile
-            });
+            projects.Add(AnalyzeProject(projectFile));
         }
 
         return projects;
     }
+
+    public static Project AnalyzeProject(string projectFile) {
+        return new Project {
+            Name = Path.GetFileNameWithoutExtension(projectFile),
+            Frameworks = GetTargetFrameworks(projectFile),
+            Path = projectFile
+        };
+    }
+
+
 
     private static List<string> GetTargetFrameworks(string projectPath) {
         string property = GetProperty(projectPath, "TargetFrameworks");

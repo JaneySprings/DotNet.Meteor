@@ -8,7 +8,7 @@ namespace XCode.Sdk {
     public static class XCRun {
         public static List<DeviceData> Simulators() {
             FileInfo tool = PathUtils.XCRunTool();
-            ProcessResult result = ProcessRunner.Run(tool, new ProcessArgumentBuilder()
+            ProcessResult result = ProcessRunner.Execute(tool, new ProcessArgumentBuilder()
                 .Append("simctl")
                 .Append("list")
             );
@@ -29,7 +29,7 @@ namespace XCode.Sdk {
                         IsEmulator = true,
                         IsRunning = state.Contains("Booted", StringComparison.OrdinalIgnoreCase),
                         Name = deviceMatch.Groups["name"].Value,
-                        Details = "Simulator",
+                        Details = "iPhoneSimulator",
                         Platform = "ios",
                         OSVersion = os,
                         Serial = deviceMatch.Groups["udid"].Value
@@ -42,7 +42,7 @@ namespace XCode.Sdk {
 
         public static List<DeviceData> PhysicalDevices() {
             FileInfo tool = PathUtils.XCRunTool();
-            ProcessResult result = ProcessRunner.Run(tool, new ProcessArgumentBuilder()
+            ProcessResult result = ProcessRunner.Execute(tool, new ProcessArgumentBuilder()
                 .Append("xctrace")
                 .Append("list")
                 .Append("devices")

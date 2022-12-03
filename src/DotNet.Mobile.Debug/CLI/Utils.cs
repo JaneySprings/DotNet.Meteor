@@ -44,11 +44,18 @@ namespace DotNet.Mobile.Debug.CLI {
             Console.WriteLine(JsonSerializer.Serialize(serial));
         }
 
-        public static void FindProjects(string[] args) {
+        public static void AnalyzeWorkspace(string[] args) {
             if (args.Length < 2)
                 throw new Exception ($"Missing parameter: {Program.CommandHandler[args[0]].Item1[1]}");
-            List<Project> projects = WorkspaceAnalyzer.GetProjects(args[1]);
+            List<Project> projects = WorkspaceAnalyzer.AnalyzeWorkspace(args[1]);
             Console.WriteLine(JsonSerializer.Serialize(projects));
+        }
+
+        public static void AnalyzeProject(string[] args) {
+            if (args.Length < 2)
+                throw new Exception ($"Missing parameter: {Program.CommandHandler[args[0]].Item1[1]}");
+            Project project = WorkspaceAnalyzer.AnalyzeProject(args[1]);
+            Console.WriteLine(JsonSerializer.Serialize(project));
         }
 
         public static void FreePort(string[] args) {

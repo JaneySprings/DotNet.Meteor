@@ -5,7 +5,7 @@ using DotNet.Mobile.Shared;
 namespace XCode.Sdk {
     public static class PathUtils {
         public static string XCodePath() {
-            ProcessResult result = ProcessRunner.Run(
+            ProcessResult result = ProcessRunner.Execute(
                 new FileInfo("/usr/bin/xcode-select"),
                 new ProcessArgumentBuilder().Append("-p")
             );
