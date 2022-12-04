@@ -13,7 +13,6 @@ var configuration = Argument("configuration", "release");
 ///////////////////////////////////////////////////////////////////////////////
 
 Task("build-debugger")
-   .Does(() => CleanDirectory(ExtensionAssembliesDirectory))
    .DoesForEach<FilePath>(GetFiles(_Path.Combine(MonoDebuggerDirectory, "**", "*.csproj")), file => {
       var regex = @"(<NuGetVersionRoslyn\s+Condition=""\$\(NuGetVersionRoslyn\)\s*==\s*''"")(>.+<)(/NuGetVersionRoslyn>)";
       ReplaceRegexInFiles(file.ToString(), regex, $"$1>{NuGetVersionRoslyn}<$3");
@@ -39,7 +38,13 @@ Task("build-reload")
 // TYPESCRIPT
 ///////////////////////////////////////////////////////////////////////////////
 
-Task("up-version")
+Task("prepare")
+   .Does(() => {
+      CleanDirectory(ArtifactsDirectory);
+      CleanDirectory(ExtensionStagingDirectory);
+      CleanDirectories(_Path.Combine(RootDirectory, "**", "bin"));
+      CleanDirectories(_Path.Combine(RootDirectory, "**", "obj"));
+   })
    .DoesForEach<FilePath>(GetFiles(_Path.Combine(RootDirectory, "*.json")), file => {
       var regex = @"^\s\s(""version"":\s+)("".+"")(,)";
       var options = System.Text.RegularExpressions.RegexOptions.Multiline;
@@ -47,15 +52,12 @@ Task("up-version")
    });
 
 Task("vsix")
-   .IsDependentOn("up-version")
+   .IsDependentOn("prepare")
    .IsDependentOn("build-debugger")
-   .Does(() => {
-      CleanDirectory(ArtifactsDirectory);
-      VscePackage(new VscePackageSettings {
-         OutputFilePath = _Path.Combine(ArtifactsDirectory, $"DotNet.Meteor.{version}.vsix"),
-         WorkingDirectory = RootDirectory
-      });
-   });
+   .Does(() => VscePackage(new VscePackageSettings {
+      OutputFilePath = _Path.Combine(ArtifactsDirectory, $"DotNet.Meteor.{version}.vsix"),
+      WorkingDirectory = RootDirectory
+   }));
 
 
 RunTarget(target);
