@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace DotNet.Mobile.Shared {
+namespace DotNet.Mobile.Debug {
     public static class Logger {
         public static string LogStagingDirectory => AppDomain.CurrentDomain.BaseDirectory;
         private static readonly string LogFile = Path.Combine(LogStagingDirectory, "session.log");

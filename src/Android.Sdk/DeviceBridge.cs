@@ -68,7 +68,7 @@ namespace Android.Sdk {
             );
 
             if (result.ExitCode != 0)
-                throw new Exception(string.Join(Environment.NewLine, result.StandardError));
+                return string.Empty;
 
             return result.StandardOutput.FirstOrDefault();
         }

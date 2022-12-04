@@ -31,7 +31,7 @@ namespace Android.Sdk {
             foreach(var device in runningDevices) {
                 if (device.IsEmulator) {
                     var name = DeviceBridge.EmuName(device.Serial);
-                    var avd = virtualDevices.Find(x => x.Name == name);
+                    var avd = virtualDevices.Find(x => x.Name.Equals(name));
 
                     if (avd == null)
                         continue;

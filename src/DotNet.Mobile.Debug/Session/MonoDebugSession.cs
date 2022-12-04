@@ -9,7 +9,6 @@ using Mono.Debugging.Soft;
 using DotNet.Mobile.Debug.Events;
 using DotNet.Mobile.Debug.Protocol;
 using DotNet.Mobile.Debug.Pipeline;
-using DotNet.Mobile.Shared;
 using XCode.Sdk;
 using Process = System.Diagnostics.Process;
 
