@@ -22,7 +22,7 @@ steps:
 - script: dotnet cake --target=vsix --release-version=$(version)
   displayName: 'Build VSIX'
 - publish: 'artifacts'
-  displayName: 'Publish'
+  displayName: 'Publish artifacts'
   artifact: Package
 - task: GitHubRelease@1
   inputs:
@@ -31,5 +31,5 @@ steps:
     action: 'create'
     tagSource: 'gitTag'
     assets: 'artifacts/*.vsix'
-    addChangeLog: true 
     changeLogType: 'issueBased'
+    changeLogLabels: '[{ "label" : "bug", "state" : "closed" }]'
