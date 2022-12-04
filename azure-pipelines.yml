@@ -3,12 +3,14 @@ trigger:
   tags:
     include:
     - '*'
-  branches:
-    include:
-    - 'main'
 
 pool:
   vmImage: ubuntu-latest
+
+variables:
+- name : version
+  value: $[ replace(variables['Build.SourceBranch'], 'refs/tags/', '') ] 
+# - group: Tokens
 
 steps:
 - script: npm install
@@ -17,7 +19,7 @@ steps:
   displayName: 'Restore .NET tools'
 - script: npm install -g vsce
   displayName: 'Install VSCode builder'
-- script: dotnet cake --target=vsix
+- script: dotnet cake --target=vsix --release-version=$(version)
   displayName: 'Build VSIX'
 - publish: 'artifacts'
   displayName: 'Publish'
