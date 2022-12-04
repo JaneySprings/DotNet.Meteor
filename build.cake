@@ -28,6 +28,12 @@ Task("build-debugger")
       DeleteFiles(GetFiles(_Path.Combine(ExtensionAssembliesDirectory, "*.xml")));
    });
 
+Task("build-reload")
+   .Does(() => DotNetBuild(MobileHotReloadProjectPath, new DotNetBuildSettings {
+      MSBuildSettings = new DotNetMSBuildSettings { AssemblyVersion = version },
+      Configuration = configuration,
+   }));
+
 ///////////////////////////////////////////////////////////////////////////////
 // TYPESCRIPT
 ///////////////////////////////////////////////////////////////////////////////
