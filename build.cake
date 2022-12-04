@@ -5,7 +5,7 @@
 using _Path = System.IO.Path;
 
 var target = Argument("target", "vsix");
-var version = Argument("release-version", "1.1.5");
+var version = Argument("release-version", "1.0");
 var configuration = Argument("configuration", "release");
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -42,14 +42,14 @@ Task("prepare")
    .DoesForEach<FilePath>(GetFiles(_Path.Combine(RootDirectory, "*.json")), file => {
       var regex = @"^\s\s(""version"":\s+)("".+"")(,)";
       var options = System.Text.RegularExpressions.RegexOptions.Multiline;
-      ReplaceRegexInFiles(file.ToString(), regex, $"  $1\"{version}\"$3", options);
+      ReplaceRegexInFiles(file.ToString(), regex, $"  $1\"{version}.0\"$3", options);
    });
 
 Task("vsix")
    .IsDependentOn("prepare")
    .IsDependentOn("build-debugger")
    .Does(() => VscePackage(new VscePackageSettings {
-      OutputFilePath = _Path.Combine(ArtifactsDirectory, $"DotNet.Meteor.{version}.vsix"),
+      OutputFilePath = _Path.Combine(ArtifactsDirectory, $"DotNet.Meteor.{version}.0.vsix"),
       WorkingDirectory = RootDirectory
    }));
 
