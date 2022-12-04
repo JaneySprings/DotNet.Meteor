@@ -10,8 +10,7 @@ namespace DotNet.Mobile.Debug {
             foreach (var log in Directory.GetFiles($"{LogStagingDirectory}/", "*.log")) {
                 File.Delete(log);
             }
-            using StreamWriter sw = File.CreateText(LogFile);
-            sw.WriteLine("|" + DateTime.UtcNow + "| Start logging");
+            WriteInFile("Session started");
         }
 
         public static void Log(string format, params object[] args) {
