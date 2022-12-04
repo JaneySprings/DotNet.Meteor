@@ -1,6 +1,9 @@
 [submodule "src/Mono.Debugger"]
 	path = src/Mono.Debugger
 	url = https://github.com/mono/debugger-libs
+[submodule "src/Clancey.Reloadify"]
+	path = src/Clancey.Reloadify
+	url = https://github.com/JaneySprings/Reloadify
 # [submodule "src/NRefactory"]
 # 	path = src/NRefactory
 # 	url = https://github.com/xamarin/NRefactory
