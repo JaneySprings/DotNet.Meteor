@@ -31,5 +31,3 @@ steps:
     action: 'create'
     tagSource: 'gitTag'
     assets: 'artifacts/*.vsix'
-    changeLogType: 'issueBased'
-    changeLogLabels: '[{ "label" : "bug", "state" : "closed" }]'
