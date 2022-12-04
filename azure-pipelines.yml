@@ -24,3 +24,12 @@ steps:
 - publish: 'artifacts'
   displayName: 'Publish'
   artifact: Package
+- task: GitHubRelease@1
+  inputs:
+    gitHubConnection: 'JaneySprings'
+    repositoryName: '$(Build.Repository.Name)'
+    action: 'create'
+    tagSource: 'gitTag'
+    assets: 'artifacts/*.vsix'
+    addChangeLog: true 
+    changeLogType: 'issueBased'
