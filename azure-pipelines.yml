@@ -1,14 +1,22 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
-- main
+  batch: true
+  tags:
+    include:
+    - '*'
+  branches:
+    include:
+    - 'main'
 
 pool:
   vmImage: ubuntu-latest
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+- script: npm install
+  displayName: 'Restore Node.js modules'
+- script: dotnet tool restore
+  displayName: 'Restore .NET tools'
+- script: dotnet cake --target=vsix
+  displayName: 'Build VSIX'
+- publish: 'artifacts'
+  displayName: 'Publish'
+  artifact: Package
