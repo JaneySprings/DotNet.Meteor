@@ -26,7 +26,7 @@ steps:
   artifact: Package
 - task: GitHubRelease@1
   inputs:
-    gitHubConnection: 'JaneySprings'
+    gitHubConnection: 'upstream'
     repositoryName: '$(Build.Repository.Name)'
     action: 'create'
     tagSource: 'gitTag'
