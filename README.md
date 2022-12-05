@@ -9,7 +9,7 @@ This VSCode extension allows you to build, debug .NET 7 / .NET 6 apps, and deplo
 # Run the Application
 
 1. Open a project's folder.
-1. Open the Run and Debug VSCode tab and click the 'create a launch.json file'.
+1. Open the Run and Debug VSCode tab and click the '_create a launch.json file_'.
 
     ![image](./img/build-file.png)
     
