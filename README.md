@@ -4,9 +4,9 @@ This VSCode extension allows you to build, debug .NET 7 / .NET 6 apps, and deplo
 
 * Fast and responsive
 * Do not required to install the OmniSharp VSCode Extension
-* Analyzing workspace projects
+* Shows all projects that are exist in the opened workspace
 
-# Usage
+# Run the Application
 
 1. Open a project's folder.
 1. Open the Run and Debug VSCode tab and click the 'create a launch.json file'.
@@ -24,3 +24,8 @@ This VSCode extension allows you to build, debug .NET 7 / .NET 6 apps, and deplo
 
 1. Press F5 to launch the application in the selected configuration (debug, release, etc). 
 1. Enjoy!
+
+## Limitations
+
+* The application's Hot Reload is not available. We are working to implement feature.
+* XAML Intellisence is not available.
