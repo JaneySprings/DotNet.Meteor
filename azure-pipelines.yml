@@ -6,7 +6,7 @@ trigger:
 
 stages:
   - stage: Publish
-    condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/cappuccino_')
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')
     dependsOn: []
     jobs:
       - job: Build
