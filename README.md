@@ -1,30 +1,26 @@
 # .NET Meteor
 
-This extension can build and debug .NET 7 / .NET 6 apps for Android and iOS.
+This VSCode extension allows you to build, debug .NET 7 / .NET 6 apps, and deploy them to Android/iOS devices/emulators.
 
-## Features
-
-* Fast, very responsive
-* No dependencies required
+* Fast and responsive
+* Do not required to install the OmniSharp VSCode Extension
 * Analyzing workspace projects
-* Run and Debug Android/iOS apps on emulator or physical devices
 
 # Usage
 
-1. Create `launch.json` from template or manual:
-```
-{
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Debug .NET Mobile App",
-            "type": "dotnet-meteor.debug",
-            "request": "launch",
-            "preLaunchTask": "dotnet-meteor: Build"
-        }
-    ]
-}
-```
-2. In status bar, select project (if there are several project), select configuration (debug by default) and select device. 
-3. Launch debug by pressing F5. 
-4. Enjoy!
+1. Open a project's folder.
+1. Open the Run and Debug VSCode tab and click the 'create a launch.json file'.
+
+    ![image](https://user-images.githubusercontent.com/12169834/205598333-1987f55f-a70c-402a-8986-1df2f256d9a0.png)
+    
+1. In the opened panel, select the '.NET Meteor Debugger'.
+
+    ![image](https://user-images.githubusercontent.com/12169834/205598820-9767ff89-f64a-4c71-bbb3-9614a0aad254.png)
+    
+1. In the status bar, select a project (if there are several project in your opened folder), select a configuration (the debug is the default), and select a device. 
+1. In the status bar, click the device name and select a target device/emulator from the opened panel.
+
+    ![image](https://user-images.githubusercontent.com/12169834/205599557-9a9a3981-3e39-4d9d-9b0e-c1146f9df21e.png)
+
+1. Press F5 to launch the application in the selected configuration (debug, release, etc). 
+1. Enjoy!
