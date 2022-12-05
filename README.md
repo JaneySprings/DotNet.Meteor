@@ -17,7 +17,7 @@ This VSCode extension allows you to build, debug .NET 7 / .NET 6 apps, and deplo
 
     ![image](./img/debugger.png)
     
-1. In the status bar, select a project (if there are several projects in your opened folder) and a configuration (the debug is the default).
+1. In the status bar, select a project (if your opened folder contains several projects) and a configuration (the debug is the default).
 
     ![image](./img/status-1.png)
 
@@ -26,7 +26,7 @@ This VSCode extension allows you to build, debug .NET 7 / .NET 6 apps, and deplo
 
     ![image](./img/devices.png)
 
-1. Press F5 to launch the application in the selected configuration (debug, release, etc). 
+1. Press F5 to launch the application in the selected configuration (debug, release, etc.). 
 1. Enjoy!
 
 ## Limitations
