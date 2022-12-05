@@ -24,6 +24,11 @@ public class Program {
             }, ConsoleUtils.AppleDevices)
         },
         {
+            "--all-devices", new Tuple<string[], Action<string[]>>(new []{
+                "List of all available devices"
+            }, ConsoleUtils.AllDevices)
+        },
+        {
             "--run-emulator", new Tuple<string[], Action<string[]>>(new []{
                 "Run Android emulator", "<avd-name>"
             }, ConsoleUtils.RunEmulator)

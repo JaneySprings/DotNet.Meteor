@@ -1,30 +1,39 @@
-import * as vscode from 'vscode';
 import { Command, taskProviderType, debuggerType } from './constants';
-import { ViewController } from './controller';
-import { DotNetTaskProvider } from './tasks';
 import { DotNetDebuggerConfiguration } from './debug';
+import { Controller } from './controller';
+import { DotNetTaskProvider } from './tasks';
+import { CommandLine } from './bridge';
+import { Target } from './models';
+import * as vscode from 'vscode';
 
 
 export function activate(context: vscode.ExtensionContext) {
-	ViewController.activate();
-
 	if (vscode.workspace.workspaceFolders === undefined) 
 		return;
-
-	ViewController.fetchWorkspace();
-	ViewController.fetchDevices();
 	
-	if (ViewController.workspaceProjects.length === 0)
-		return;
-	
-	ViewController.performSelectDefaults();
+	Controller.activate();
+	CommandLine.analyzeWorkspaceAsync(items => {
+		if (items.length === 0) 
+			Controller.deactivate();
+		
+		Controller.workspaceProjects = items;
+		Controller.performSelectProject(items[0]);
+		Controller.performSelectTarget(Target.Debug);
+	});
+	CommandLine.mobileDevicesAsync(items => {
+		if (items.length === 0) 
+			Controller.deactivate();
 
-	context.subscriptions.push(vscode.commands.registerCommand(Command.selectProject,ViewController.showQuickPickProject));
-	context.subscriptions.push(vscode.commands.registerCommand(Command.selectTarget, ViewController.showQuickPickTarget));
-	context.subscriptions.push(vscode.commands.registerCommand(Command.selectDevice, ViewController.showQuickPickDevice));
+		Controller.mobileDevices = items
+		Controller.performSelectDevice(items[0]);
+	});
+	
+	context.subscriptions.push(vscode.commands.registerCommand(Command.selectProject,Controller.showQuickPickProject));
+	context.subscriptions.push(vscode.commands.registerCommand(Command.selectTarget, Controller.showQuickPickTarget));
+	context.subscriptions.push(vscode.commands.registerCommand(Command.selectDevice, Controller.showQuickPickDevice));
 	
 	context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider(debuggerType, new DotNetDebuggerConfiguration()));
-	context.subscriptions.push(vscode.debug.onDidTerminateDebugSession(() => ViewController.isDebugging = false));
+	context.subscriptions.push(vscode.debug.onDidTerminateDebugSession(() => Controller.isDebugging = false));
 	
 	vscode.tasks.registerTaskProvider(taskProviderType, new DotNetTaskProvider());
 }

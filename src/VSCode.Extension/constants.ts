@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 export const extensionIdentifier: string = "nromanov.dotnet-meteor";
 export const taskProviderType: string = "dotnet-meteor.build";
 export const debuggerType: string = "dotnet-meteor.debug";
-export const extensionInstance: vscode.Extension<any> | undefined = vscode.extensions.getExtension(extensionIdentifier);
+export const extensionPath: string = vscode.extensions.getExtension(extensionIdentifier)?.extensionPath ?? "?";
 
 export class Command {
     public static readonly selectProject: string = "dotnet-meteor.selectActiveProject";

@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import { taskProviderType } from './constants';
 import { Configuration } from './configuration';
-import { DebuggerUtils } from "./bridge";
-import { ViewController } from './controller';
+import { CommandLine } from "./bridge";
+import { Controller } from './controller';
 
 
 export class DotNetTaskProvider implements vscode.TaskProvider {
@@ -45,10 +45,10 @@ class DotNetTask {
             return DotNetTask.empty;
         }
 
-        if (ViewController.isDebugging) {
+        if (Controller.isDebugging) {
             if (Configuration.selectedDevice!.platform?.includes('android')) {
                 if (!Configuration.selectedDevice!.is_running) {
-                    const serial = DebuggerUtils.runEmulator(Configuration.selectedDevice!.name!);
+                    const serial = CommandLine.runEmulator(Configuration.selectedDevice!.name!);
     
                     Configuration.selectedDevice!.serial = serial;
                     Configuration.selectedDevice!.is_running = true;

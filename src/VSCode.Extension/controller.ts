@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
-import { Project, Device, Icon } from "./models"
-import { Configuration, Target } from './configuration';
-import { DebuggerUtils } from "./bridge";
+import { Target, Project, ProjectItem, Device, DeviceItem, Icon } from "./models"
+import { Configuration } from './configuration';
+import { CommandLine } from "./bridge";
 import { Command } from './constants';
 
 
-export class ViewController {
+export class Controller {
     public static projectStatusItem: vscode.StatusBarItem;
     public static targetStatusItem: vscode.StatusBarItem;
     public static deviceStatusItem: vscode.StatusBarItem;
@@ -23,12 +23,17 @@ export class ViewController {
         this.targetStatusItem.command = Command.selectTarget;
         this.deviceStatusItem.command = Command.selectDevice;
     }
+    public static deactivate() {
+        this.projectStatusItem.dispose();
+        this.targetStatusItem.dispose();
+        this.deviceStatusItem.dispose();
+    }
 
 
     public static performSelectProject(item: Project) {
         Configuration.selectedProject = item;
         this.projectStatusItem.text = `${Icon.project} ${Configuration.selectedProject?.name}`;
-        ViewController.workspaceProjects.length === 1 ? this.projectStatusItem.hide() : this.projectStatusItem.show();
+        Controller.workspaceProjects.length === 1 ? this.projectStatusItem.hide() : this.projectStatusItem.show();
     }
     public static performSelectTarget(target: Target) {
         Configuration.selectedTarget = target;
@@ -40,48 +45,46 @@ export class ViewController {
         this.deviceStatusItem.text = `${Icon.device} ${Configuration.selectedDevice?.name}`;
         this.deviceStatusItem.show();
     }
-    public static performSelectDefaults() {
-        ViewController.performSelectProject(ViewController.workspaceProjects[0]);
-        ViewController.performSelectDevice(ViewController.mobileDevices[0]);
-        ViewController.performSelectTarget(Target.Debug);
-    }
-
-
-    public static fetchWorkspace() {
-        const workspacePath = Configuration.workspacePath();
-        ViewController.workspaceProjects = DebuggerUtils.analyzeWorkspace(workspacePath);
-    }
-    public static fetchDevices() {
-        const androidDevices = DebuggerUtils.androidDevices();
-        const appleDevices = DebuggerUtils.appleDevices();
-        ViewController.mobileDevices = androidDevices.concat(appleDevices);
-    }
 
 
     public static async showQuickPickProject() {
-        const items = ViewController.workspaceProjects.map(project => Project.toDisplayItem(project));
-        const selectedItem = await vscode.window.showQuickPick(items, { placeHolder: "Select active project" });
+        const selectedItem = await vscode.window.showQuickPick(
+            Controller.workspaceProjects.map(project => new ProjectItem(project)), 
+            { placeHolder: "Select active project" }
+        );
 
-        if (selectedItem !== undefined) {
-            ViewController.performSelectProject(selectedItem.item);
-        }
+        if (selectedItem !== undefined) 
+        Controller.performSelectProject(selectedItem.item);
     }
     public static async showQuickPickTarget() {
-        const items = [ Target.Debug, Target.Release ];
-        const selectedItem = await vscode.window.showQuickPick(items, { placeHolder: "Select configuration" });
+        const selectedItem = await vscode.window.showQuickPick(
+            [ Target.Debug, Target.Release ], 
+            { placeHolder: "Select configuration" }
+        );
         
-        if (selectedItem !== undefined) {
-            ViewController.performSelectTarget(selectedItem as Target);
-        }
+        if (selectedItem !== undefined)
+            Controller.performSelectTarget(selectedItem as Target);
     }
     public static async showQuickPickDevice() {
-        ViewController.fetchDevices();
+        const picker = vscode.window.createQuickPick();
+        picker.placeholder = "Fetching devices...";
+        picker.canSelectMany = false;
+        picker.busy = true;
+        picker.show();
 
-        const items = ViewController.mobileDevices.map(device => Device.toDisplayItem(device));
-        const selectedItem = await vscode.window.showQuickPick(items, { placeHolder: "Select device" });
+        picker.onDidAccept(() => {
+            if (picker.selectedItems !== undefined) {
+                const selectedItem = (picker.selectedItems[0] as DeviceItem).item;
+                Controller.performSelectDevice(selectedItem);
+            }
+            picker.hide();
+        });
 
-        if (selectedItem !== undefined) {
-            ViewController.performSelectDevice(selectedItem.item);
-        }
+        CommandLine.mobileDevicesAsync(items => {
+            Controller.mobileDevices = items;
+            picker.items = items.map(device => new DeviceItem(device));
+            picker.placeholder = "Select device";
+            picker.busy = false;
+        });
     }
 }

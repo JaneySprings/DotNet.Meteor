@@ -1,21 +1,34 @@
 import { Configuration } from './configuration';
+import * as vscode from 'vscode';
+
+
+export enum Target {
+    Debug = "Debug",
+    Release = "Release"
+}
 
 
 export class Project {
     public name!: string;
     public path!: string;
     public frameworks: string[] | undefined;
+}
 
-    public static toDisplayItem(project: Project) {
+export class ProjectItem implements vscode.QuickPickItem {
+    label: string;
+    description?: string | undefined;
+    detail?: string | undefined;
+    item: Project;
+
+    constructor(project: Project) {
         const workspace = Configuration.workspacePath();
-        return ({
-            label: project.name,
-            description: project.path.replace(workspace + '/', ''),
-            detail: project.frameworks?.join('  ') ?? "no frameworks",
-            item: project
-        });
+        this.label = project.name;
+        this.description = project.path.replace(workspace + '/', '');
+        this.detail = project.frameworks?.join('  ') ?? "no frameworks";
+        this.item = project;
     }
 }
+
 
 export class Device {
     public name: string | undefined;
@@ -25,15 +38,20 @@ export class Device {
     public os_version: string | undefined;
     public is_emulator: boolean | undefined;
     public is_running: boolean | undefined;
+}
 
-    public static toDisplayItem(device: Device) {
-        return ({
-            label: `${device.is_running ? Icon.active : Icon.inactive} ${device.name}`,
-            detail: `${device.details} • ${device.os_version ?? device.platform}`,
-            item: device
-        })
+export class DeviceItem implements vscode.QuickPickItem {
+    label: string;
+    detail?: string | undefined;
+    item: Device;
+
+    constructor(device: Device) {
+        this.label = `${device.is_running ? Icon.active : Icon.inactive} ${device.name}`;
+        this.detail = `${device.details} • ${device.os_version ?? device.platform}`;
+        this.item = device;
     }
 }
+
 
 export class Icon {
     public static readonly project = "$(window)";

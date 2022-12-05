@@ -37,6 +37,13 @@ namespace DotNet.Mobile.Debug.CLI {
             Console.WriteLine(JsonSerializer.Serialize(devices));
         }
 
+        public static void AllDevices(string[] args) {
+            List<DeviceData> devices = new List<DeviceData>();
+            devices.AddRange(AndroidTool.AllDevices());
+            devices.AddRange(XCodeTool.AllDevices());
+            Console.WriteLine(JsonSerializer.Serialize(devices));
+        }
+
         public static void RunEmulator(string[] args) {
             if (args.Length < 2)
                 throw new Exception ($"Missing parameter: {Program.CommandHandler[args[0]].Item1[1]}");

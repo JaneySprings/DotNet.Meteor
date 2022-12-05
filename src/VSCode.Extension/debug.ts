@@ -1,6 +1,7 @@
 import { WorkspaceFolder, DebugConfiguration } from 'vscode';
-import { Configuration, Target } from './configuration';
-import { ViewController } from './controller';
+import { Configuration } from './configuration';
+import { Controller } from './controller';
+import { Target } from './models';
 import * as vscode from 'vscode';
 
 
@@ -15,8 +16,7 @@ export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationPro
 		}
 
 		Configuration.updateDebuggingPort();
-		ViewController.fetchDevices();
-		ViewController.isDebugging = true;
+		Controller.isDebugging = true;
 		
 		config['selected_project'] = Configuration.selectedProject;
         config['selected_device'] = Configuration.selectedDevice;

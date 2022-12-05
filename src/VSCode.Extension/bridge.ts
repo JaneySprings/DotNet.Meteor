@@ -1,28 +1,23 @@
 import path = require('path');
 import { ProcessRunner, ProcessArgumentBuilder } from './executor';
 import { Project, Device } from './models';
-import { extensionInstance } from './constants';
+import { extensionPath } from './constants';
+import { Configuration } from './configuration';
 
-export class DebuggerUtils {
-    private static toolPath: string = path.join(extensionInstance!.extensionPath, "extension", "bin", "dotnet-mobile.dll");
+export class CommandLine {
+    private static toolPath: string = path.join(extensionPath, "extension", "bin", "dotnet-mobile.dll");
 
-    public static androidDevices(): Device[] {
-        return ProcessRunner.run<Device[]>(new ProcessArgumentBuilder("dotnet")
+    public static mobileDevicesAsync(callback: (items: Device[]) => any) {
+        ProcessRunner.runAsync<Device[]>(new ProcessArgumentBuilder("dotnet")
             .append(this.toolPath)
-            .append("--android-devices"));
+            .append("--all-devices"), callback);
     }
 
-    public static appleDevices(): Device[] {
-        return ProcessRunner.run<Device[]>(new ProcessArgumentBuilder("dotnet")
-            .append(this.toolPath)
-            .append("--apple-devices"));
-    }
-
-    public static analyzeWorkspace(workspaceRoot: string): Project[] {
-        return ProcessRunner.run<Project[]>(new ProcessArgumentBuilder("dotnet")
+    public static analyzeWorkspaceAsync(callback: (items: Project[]) => any) {
+        ProcessRunner.runAsync<Project[]>(new ProcessArgumentBuilder("dotnet")
             .append(this.toolPath)
             .append("--analyze-workspace")
-            .append(`"${workspaceRoot}"`));
+            .append(`"${Configuration.workspacePath()}"`), callback);
     }
 
     public static analyzeProject(projectFile: string): Project {
