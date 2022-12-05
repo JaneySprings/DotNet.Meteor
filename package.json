@@ -1,24 +1,33 @@
 {
   "name": "dotnet-meteor",
-  "displayName": ".NET Meteor",
+  "publisher": "nromanov",
   "version": "1.0.0",
   "description": "Run and Debug .NET Mobile Apps",
-  "publisher": "nromanov",
+  "displayName": ".NET Meteor",
   "author": "Nikita Romanov",
   "license": "MIT",
-  "engines": {
-    "vscode": "^1.73.0"
-  },
   "icon": "img/logo.png",
+  "preview": false,
+  "bugs": {
+    "url": "https://github.com/JaneySprings/DotNet.Meteor/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JaneySprings/DotNet.Meteor.git"
+  },
   "categories": [
     "Debuggers"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/JaneySprings/VSCode.Meteor"
-  },
-  "bugs": {
-    "url": "https://github.com/JaneySprings/VSCode.Meteor/issues"
+  "keywords": [
+    ".NET",
+    ".NET Mobile",
+    "C#",
+    "MAUI",
+    "Xamarin",
+    "dotnet"
+  ],
+  "engines": {
+    "vscode": "^1.73.0"
   },
   "activationEvents": [
     "onDebugInitialConfigurations",
