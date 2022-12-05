@@ -31,5 +31,5 @@ This VSCode extension allows you to build, debug .NET 7 / .NET 6 apps, and deplo
 
 ## Limitations
 
-* The application's Hot Reload is not available. We are working to implement feature.
+* The application's Hot Reload is not available. We are working on implementing this feature.
 * XAML Intellisence is not available.
