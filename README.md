@@ -3,8 +3,8 @@
 This VSCode extension allows you to build, debug .NET 7 / .NET 6 apps, and deploy them to Android/iOS devices/emulators.
 
 * Fast and responsive
-* Do not required to install the OmniSharp VSCode Extension
-* Shows all projects that are exist in the opened workspace
+* Do not require to install the OmniSharp VSCode Extension
+* Shows all projects that exist in the opened workspace
 
 # Run the Application
 
@@ -17,7 +17,7 @@ This VSCode extension allows you to build, debug .NET 7 / .NET 6 apps, and deplo
 
     ![image](./img/debugger.png)
     
-1. In the status bar, select a project (if there are several project in your opened folder) and a configuration (the debug is the default).
+1. In the status bar, select a project (if there are several projects in your opened folder) and a configuration (the debug is the default).
 
     ![image](./img/status-1.png)
 
@@ -32,4 +32,4 @@ This VSCode extension allows you to build, debug .NET 7 / .NET 6 apps, and deplo
 ## Limitations
 
 * The application's Hot Reload is not available. We are working on implementing this feature.
-* XAML Intellisence is not available.
+* XAML IntelliSense is not available.
