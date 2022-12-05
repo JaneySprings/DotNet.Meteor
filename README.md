@@ -1,6 +1,6 @@
 # .NET Meteor
 
-This VSCode extension allows you to build, debug .NET 7 / .NET 6 apps, and deploy them to Android/iOS devices/emulators.
+This VSCode extension allows you to build, debug .NET 7 / .NET 6 apps, and deploy them to Android/iOS devices or emulators.
 
 * Fast and responsive
 * Do not require to install the OmniSharp VSCode Extension
