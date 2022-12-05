@@ -1,13 +1,8 @@
-import { Project, Device } from "./models"
-import { DebuggerUtils } from "./bridge";
+import { Project, Device, Target } from "./models"
+import { CommandLine } from "./bridge";
 import * as vscode from 'vscode';
-import { ViewController } from "./controller";
+import { Controller } from "./controller";
 
-
-export enum Target {
-    Debug = "Debug",
-    Release = "Release"
-}
 
 export class Configuration {
     public static debuggingPort: number;
@@ -16,11 +11,11 @@ export class Configuration {
     public static selectedTarget: Target | undefined;
 
     public static updateDebuggingPort() {
-        Configuration.debuggingPort = DebuggerUtils.freePort();
+        Configuration.debuggingPort = CommandLine.freePort();
     }
 
     public static updateSelectedProject() {
-        const project = DebuggerUtils.analyzeProject(Configuration.selectedProject!.path);
+        const project = CommandLine.analyzeProject(Configuration.selectedProject!.path);
         Configuration.selectedProject = project;
     }
 
@@ -43,7 +38,7 @@ export class Configuration {
             return false;
         }
 
-        if (!ViewController.mobileDevices.some(it => it.name === Configuration.selectedDevice!.name)) {
+        if (!Controller.mobileDevices.some(it => it.name === Configuration.selectedDevice!.name)) {
             vscode.window.showErrorMessage('Selected device does not exists yet');
             return false;
         }
