@@ -11,16 +11,20 @@ This VSCode extension allows you to build, debug .NET 7 / .NET 6 apps, and deplo
 1. Open a project's folder.
 1. Open the Run and Debug VSCode tab and click the 'create a launch.json file'.
 
-    ![image](https://user-images.githubusercontent.com/12169834/205600520-16776677-3a08-4fd2-9728-cf9508e708f1.png)
+    ![image](./img/build-file.png)
     
 1. In the opened panel, select the '.NET Meteor Debugger'.
 
-    ![image](https://user-images.githubusercontent.com/12169834/205598820-9767ff89-f64a-4c71-bbb3-9614a0aad254.png)
+    ![image](./img/debugger.png)
     
-1. In the status bar, select a project (if there are several project in your opened folder), select a configuration (the debug is the default), and select a device. 
-1. In the status bar, click the device name and select a target device/emulator from the opened panel.
+1. In the status bar, select a project (if there are several project in your opened folder) and a configuration (the debug is the default).
 
-    ![image](https://user-images.githubusercontent.com/12169834/205600586-f39b198b-dda2-4880-9d6f-0bd7453783fa.png)
+    ![image](./img/status-1.png)
+
+    
+3. In the status bar, click the device name and select a target device/emulator from the opened panel.
+
+    ![image](./img/devices.png)
 
 1. Press F5 to launch the application in the selected configuration (debug, release, etc). 
 1. Enjoy!
