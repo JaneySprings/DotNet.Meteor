@@ -41,6 +41,10 @@ internal static class Performance {
             var r = XCRun.Simulators();
             Console.WriteLine("Found {0} simulators", r.Count);
         });
+        DoTimed("Apple Simulators SimCtl Fast Fetch", () => {
+            var r = XCodeTool.SimulatorsFast();
+            Console.WriteLine("Found {0} simulators", r.Count);
+        });
     }
     private static void AppleDevicesFetchTest() {
         DoTimed("Apple Devices Fast Fetch", () => {
