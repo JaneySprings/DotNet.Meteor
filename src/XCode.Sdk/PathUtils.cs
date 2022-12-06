@@ -18,6 +18,16 @@ namespace XCode.Sdk {
             return path;
         }
 
+        public static string SimulatorsLocation() {
+            string home = Environment.GetEnvironmentVariable("HOME");
+            string path = Path.Combine(home, "Library", "Developer", "CoreSimulator", "Devices");
+
+            if (string.IsNullOrEmpty(path))
+                throw new Exception("Could not find simulator path");
+
+            return path;
+        }
+
         public static FileInfo SystemProfilerTool() {
             string path = Path.Combine("/usr", "sbin", "system_profiler");
             var tool = new FileInfo(path);
