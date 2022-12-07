@@ -3,6 +3,7 @@ import { Configuration } from './configuration';
 import { Controller } from './controller';
 import { Target } from './models';
 import * as vscode from 'vscode';
+import { CommandLine } from './bridge';
 
 
 export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationProvider {
@@ -14,8 +15,11 @@ export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationPro
 			vscode.window.showErrorMessage("Debugging is not supported in release configuration");
 			return undefined;
 		}
+		
+		const actualDevice = CommandLine.deviceInfo(Configuration.selectedDevice);
 
 		Configuration.updateDebuggingPort();
+		Configuration.selectedDevice = actualDevice;
 		Controller.isDebugging = true;
 		
 		config['selected_project'] = Configuration.selectedProject;
