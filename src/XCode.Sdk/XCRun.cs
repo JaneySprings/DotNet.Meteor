@@ -8,10 +8,10 @@ namespace XCode.Sdk {
     public static class XCRun {
         public static List<DeviceData> Simulators() {
             FileInfo tool = PathUtils.XCRunTool();
-            ProcessResult result = ProcessRunner.Execute(tool, new ProcessArgumentBuilder()
+            ProcessResult result = new ProcessRunner(tool, new ProcessArgumentBuilder()
                 .Append("simctl")
-                .Append("list")
-            );
+                .Append("list"))
+                .WaitForExit();
 
             var output = string.Join(Environment.NewLine, result.StandardOutput);
             var contentRegex = new Regex(@"^--\s(?<os>iOS\s\d+(.\d+)+)\s--\n(?<content>(\s{4}.+\n)*)", RegexOptions.Multiline);
@@ -42,11 +42,11 @@ namespace XCode.Sdk {
 
         public static List<DeviceData> PhysicalDevices() {
             FileInfo tool = PathUtils.XCRunTool();
-            ProcessResult result = ProcessRunner.Execute(tool, new ProcessArgumentBuilder()
+            ProcessResult result = new ProcessRunner(tool, new ProcessArgumentBuilder()
                 .Append("xctrace")
                 .Append("list")
-                .Append("devices")
-            );
+                .Append("devices"))
+                .WaitForExit();
 
             var output = string.Join(Environment.NewLine, result.StandardOutput) + Environment.NewLine;
             var contentRegex = new Regex(@"^==\sDevices(\sOffline)*\s==\n(?<content>[^,]+?^\n)", RegexOptions.Multiline);

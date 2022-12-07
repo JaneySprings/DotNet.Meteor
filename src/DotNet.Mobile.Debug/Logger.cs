@@ -7,9 +7,9 @@ namespace DotNet.Mobile.Debug {
         private static readonly string LogFile = Path.Combine(LogStagingDirectory, "session.log");
 
         static Logger() {
-            foreach (var log in Directory.GetFiles($"{LogStagingDirectory}/", "*.log")) {
-                File.Delete(log);
-            }
+            if (File.Exists(LogFile))
+                File.Delete(LogFile);
+
             WriteInFile("Session started");
         }
 

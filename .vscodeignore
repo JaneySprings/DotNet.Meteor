@@ -1,5 +1,7 @@
 # Ignore everything
 *
+.vscode
+.config
 
 # Whitelist
 !extension
