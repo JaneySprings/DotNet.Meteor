@@ -3,13 +3,14 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using DotNet.Mobile.Shared;
 using DotNet.Mobile.Debug.Events;
 using DotNet.Mobile.Debug.Protocol;
 using System.Text.Json;
 
 namespace DotNet.Mobile.Debug.Session;
 
-public abstract class Session {
+public abstract class Session: IProcessLogger {
     private const int InputBufferSize = 4096;
     private int sequenceNumber = 1;
     private int bodyLength = -1;
@@ -48,6 +49,15 @@ public abstract class Session {
     protected void SendResponse(Response response, object body = null) {
         response.SetBody(body);
         SendMessage(response);
+    }
+
+    protected void SendOutput(string category, string data) {
+        if (!String.IsNullOrEmpty(data)) {
+            if (data[data.Length - 1] != '\n') {
+                data += '\n';
+            }
+            SendEvent(Event.OutputEvent, new BodyOutput(category, data));
+        }
     }
 
     protected void SendErrorResponse(Response response, int id, string message) {
@@ -107,5 +117,13 @@ public abstract class Session {
             }
             break;
         }
+    }
+
+    public void OnOutputDataReceived(string stdout) {
+        SendEvent(Event.OutputEvent, new BodyOutput(stdout + Environment.NewLine));
+    }
+
+    public void OnErrorDataReceived(string stderr) {
+        SendEvent(Event.OutputEvent, new BodyOutput(stderr + Environment.NewLine));
     }
 }

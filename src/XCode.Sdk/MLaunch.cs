@@ -1,26 +1,26 @@
 using System.IO;
+using System.Diagnostics;
 using DotNet.Mobile.Shared;
 
 namespace XCode.Sdk {
     public static class MLaunch {
         public static void InstallOnDevice(string bundlePath, DeviceData device) {
             FileInfo tool = PathUtils.MLaunchTool();
-            ProcessRunner.Execute(tool, new ProcessArgumentBuilder()
+            new ProcessRunner(tool, new ProcessArgumentBuilder()
                 .Append("--installdev", $"\"{bundlePath}\"")
-                .Append("--devname", device.Serial)
-            );
+                .Append("--devname", device.Serial))
+                .WaitForExit();
         }
 
-        public static void TcpTunnel(DeviceData device, int port) {
+        public static Process TcpTunnel(DeviceData device, int port) {
             FileInfo tool = PathUtils.MLaunchTool();
-            var proccess = new ProcessRunner(tool, new ProcessArgumentBuilder()
+            return new ProcessRunner(tool, new ProcessArgumentBuilder()
                 .Append($"--tcp-tunnel={port}:{port}")
-                .Append($"--devname={device.Serial}")
-            );
-            proccess.Run();
+                .Append($"--devname={device.Serial}"))
+                .Start();
         }
 
-        public static void LaunchAppForDebug(string bundlePath, DeviceData device, int port) {
+        public static Process LaunchAppForDebug(string bundlePath, DeviceData device, int port, IProcessLogger logger = null) {
             FileInfo tool = PathUtils.MLaunchTool();
             ProcessRunner process;
 
@@ -30,10 +30,10 @@ namespace XCode.Sdk {
                     .Append( "--argument=-monodevelop-port")
                     .Append($"--argument={port}")
                     .Append($"--setenv=__XAMARIN_DEBUG_PORT__={port}")
-                    .Append($"--device=:v2:udid={device.Serial}"), redirectStandardInput: true
+                    .Append($"--device=:v2:udid={device.Serial}"),
+                    logger
                 );
             } else {
-                TcpTunnel(device, port);
                 InstallOnDevice(bundlePath, device);
                 process = new ProcessRunner(tool, new ProcessArgumentBuilder()
                     .Append( "--launchdev", $"\"{bundlePath}\"")
@@ -41,10 +41,11 @@ namespace XCode.Sdk {
                     .Append( "--argument=-monodevelop-port")
                     .Append($"--argument={port}")
                     .Append($"--setenv=__XAMARIN_DEBUG_PORT__={port}")
-                    .Append( "--wait-for-exit"), redirectStandardInput: true
+                    .Append( "--wait-for-exit"),
+                    logger
                 );
             }
-            process.Run();
+            return process.Start();
         }
     }
 }

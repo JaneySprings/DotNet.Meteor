@@ -8,12 +8,7 @@ namespace DotNet.Mobile.Shared {
         readonly List<string> standardError;
         readonly Process process;
 
-        public static ProcessResult Execute(FileInfo exe, ProcessArgumentBuilder builder) {
-            var p = new ProcessRunner(exe, builder);
-            return p.WaitForExit();
-        }
-
-        public ProcessRunner(FileInfo executable, ProcessArgumentBuilder builder, bool redirectStandardInput = false) {
+        public ProcessRunner(FileInfo executable, ProcessArgumentBuilder builder, IProcessLogger logger = null) {
             this.standardOutput = new List<string>();
             this.standardError = new List<string>();
 
@@ -24,34 +19,36 @@ namespace DotNet.Mobile.Shared {
             this.process.StartInfo.UseShellExecute = false;
             this.process.StartInfo.RedirectStandardOutput = true;
             this.process.StartInfo.RedirectStandardError = true;
-
-            if (redirectStandardInput)
-                this.process.StartInfo.RedirectStandardInput = true;
+            this.process.StartInfo.RedirectStandardInput = true;
 
             this.process.OutputDataReceived += (s, e) => {
-                if (e.Data != null)
+                if (e.Data != null) {
                     this.standardOutput.Add(e.Data);
+                    logger?.OnOutputDataReceived(e.Data);
+                }
             };
             this.process.ErrorDataReceived += (s, e) => {
-                if (e.Data != null)
+                if (e.Data != null) {
                     this.standardError.Add(e.Data);
+                    logger?.OnErrorDataReceived(e.Data);
+                }
             };
         }
 
         public void Kill() {
             this.process?.Kill();
         }
-
-        public ProcessResult WaitForExit() {
-            this.Run();
-            this.process.WaitForExit();
-            return new ProcessResult(this.standardOutput, this.standardError, this.process.ExitCode);
-        }
-
-        public void Run() {
+        public Process Start() {
             this.process.Start();
             this.process.BeginOutputReadLine();
             this.process.BeginErrorReadLine();
+            return this.process;
+        }
+
+        public ProcessResult WaitForExit() {
+            this.Start();
+            this.process.WaitForExit();
+            return new ProcessResult(this.standardOutput, this.standardError, this.process.ExitCode);
         }
     }
 }

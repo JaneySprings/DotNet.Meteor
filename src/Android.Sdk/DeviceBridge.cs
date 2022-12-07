@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using DotNet.Mobile.Shared;
@@ -8,18 +9,20 @@ namespace Android.Sdk {
     public static class DeviceBridge {
         public static string Shell(string serial, params string[] args) {
             var adb = PathUtils.AdbTool();
-            var result = ProcessRunner.Execute(adb, new ProcessArgumentBuilder()
+            var result = new ProcessRunner(adb, new ProcessArgumentBuilder()
                 .Append("-s", serial, "shell")
-                .Append(args));
+                .Append(args))
+                .WaitForExit();
 
             return string.Join(Environment.NewLine, result.StandardOutput);
         }
 
         public static string Forward(string serial, int local, int target) {
             var adb = PathUtils.AdbTool();
-            var result = ProcessRunner.Execute(adb, new ProcessArgumentBuilder()
+            var result = new ProcessRunner(adb, new ProcessArgumentBuilder()
                 .Append("-s", serial, "forward")
-                .Append($"tcp:{local}", $"tcp:{target}"));
+                .Append($"tcp:{local}", $"tcp:{target}"))
+                .WaitForExit();
 
             if (result.ExitCode != 0)
                 throw new Exception(string.Join(Environment.NewLine, result.StandardError));
@@ -29,9 +32,10 @@ namespace Android.Sdk {
 
         public static List<DeviceData> Devices() {
             var adb = PathUtils.AdbTool();
-            ProcessResult result = ProcessRunner.Execute(adb, new ProcessArgumentBuilder()
+            ProcessResult result = new ProcessRunner(adb, new ProcessArgumentBuilder()
                 .Append("devices")
-                .Append("-l"));
+                .Append("-l"))
+                .WaitForExit();
 
             if (result.ExitCode != 0)
                 throw new Exception(string.Join(Environment.NewLine, result.StandardError));
@@ -62,15 +66,30 @@ namespace Android.Sdk {
 
         public static string EmuName(string serial) {
             var adb = PathUtils.AdbTool();
-            ProcessResult result = ProcessRunner.Execute(adb, new ProcessArgumentBuilder()
+            ProcessResult result = new ProcessRunner(adb, new ProcessArgumentBuilder()
                 .Append("-s", serial)
-                .Append("emu", "avd", "name")
-            );
+                .Append("emu", "avd", "name"))
+                .WaitForExit();
 
             if (result.ExitCode != 0)
                 return string.Empty;
 
             return result.StandardOutput.FirstOrDefault();
+        }
+
+        public static Process Logcat(string serial, IProcessLogger logger) {
+            var adb = PathUtils.AdbTool();
+            new ProcessRunner(adb, new ProcessArgumentBuilder()
+                .Append("-s", serial)
+                .Append("logcat")
+                .Append("-c"))
+                .WaitForExit();
+
+            return new ProcessRunner(adb, new ProcessArgumentBuilder()
+                .Append("-s", serial)
+                .Append("logcat"),
+                logger
+            ).Start();
         }
     }
 }

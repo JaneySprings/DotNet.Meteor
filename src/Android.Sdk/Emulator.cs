@@ -8,14 +8,13 @@ namespace Android.Sdk {
         private const int AppearingRetryCount = 15;
         private const int SyncRetryCount = 300;
 
-
         public static string Run(string name) {
             var emulator = PathUtils.EmulatorTool();
             var process = new ProcessRunner(emulator, new ProcessArgumentBuilder()
                 .Append("-avd")
                 .Append(name));
 
-            process.Run();
+            process.Start();
             return Emulator.WaitForBoot();
         }
 

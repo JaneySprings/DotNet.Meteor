@@ -9,6 +9,7 @@ using Mono.Debugging.Soft;
 using DotNet.Mobile.Debug.Events;
 using DotNet.Mobile.Debug.Protocol;
 using DotNet.Mobile.Debug.Pipeline;
+using Android.Sdk;
 using XCode.Sdk;
 using Process = System.Diagnostics.Process;
 
@@ -25,9 +26,9 @@ public class MonoDebugSession : DebugSession {
     private volatile bool debuggerKilled = true;
     private readonly object locker = new object();
 
-    private Process process;
     private ObjectValue exception;
     private ProcessInfo activeProcess;
+    private readonly List<Process> processes = new List<Process>();
     private readonly AutoResetEvent resumeEvent = new AutoResetEvent(false);
     private readonly List<Catchpoint> catchpoints = new List<Catchpoint>();
     private readonly Handles<StackFrame> frameHandles = new Handles<StackFrame>();
@@ -162,7 +163,17 @@ public class MonoDebugSession : DebugSession {
         Connect(launchOptions, address, port);
 
         if (launchOptions.Platform == Platform.iOS) {
-            MLaunch.LaunchAppForDebug(launchOptions.BundlePath, launchOptions.Device, port);
+            if (!launchOptions.Device.IsEmulator) {
+                var tunnel = MLaunch.TcpTunnel(launchOptions.Device, port);
+                this.processes.Add(tunnel);
+            }
+            var deviceProccess = MLaunch.LaunchAppForDebug(launchOptions.BundlePath, launchOptions.Device, port, this);
+            this.processes.Add(deviceProccess);
+        }
+
+        if (launchOptions.Platform == Platform.Android) {
+            var logger = DeviceBridge.Logcat(launchOptions.Device.Serial, this);
+            this.processes.Add(logger);
         }
 
         SendResponse(response);
@@ -197,17 +208,16 @@ public class MonoDebugSession : DebugSession {
     }
 
     public override void Disconnect(Response response, Argument args) {
-        // Let's not leave dead Mono processes behind...
-        if (this.process != null) {
-            this.process.Kill();
-            this.process = null;
-        } else {
-            PauseDebugger();
-            DebuggerKill();
+        foreach(var process in this.processes)
+            process.Kill();
 
-            while (!this.debuggerKilled) {
-                Thread.Sleep(10);
-            }
+        this.processes.Clear();
+
+        PauseDebugger();
+        DebuggerKill();
+
+        while (!this.debuggerKilled) {
+            Thread.Sleep(100);
         }
 
         SendResponse(response);
@@ -538,15 +548,6 @@ public class MonoDebugSession : DebugSession {
         }
     }
 
-    private void SendOutput(string category, string data) {
-        if (!String.IsNullOrEmpty(data)) {
-            if (data[data.Length - 1] != '\n') {
-                data += '\n';
-            }
-            SendEvent(Event.OutputEvent, new BodyOutput(category, data));
-        }
-    }
-
     private void Terminate(string reason) {
         Logger.Log("Terminating debugger: " + reason);
         if (!this.terminated) {
@@ -556,9 +557,7 @@ public class MonoDebugSession : DebugSession {
             }
 
             SendEvent(Event.TerminatedEvent, null);
-
             this.terminated = true;
-            this.process = null;
         }
     }
 

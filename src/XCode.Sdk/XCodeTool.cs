@@ -12,9 +12,9 @@ namespace XCode.Sdk {
             var devices = new List<DeviceData>();
             var regex = new Regex(@"(iPhone:)[^,]*?Version:\s+(?<ver>\d+.\d+)[^,]*?Serial\sNumber:\s+(?<id>\S+)");
 
-            ProcessResult result = ProcessRunner.Execute(profiler, new ProcessArgumentBuilder()
-                .Append("SPUSBDataType")
-            );
+            ProcessResult result = new ProcessRunner(profiler, new ProcessArgumentBuilder()
+                .Append("SPUSBDataType"))
+                .WaitForExit();
             var output = string.Join(Environment.NewLine, result.StandardOutput);
 
             foreach (Match match in regex.Matches(output)) {
