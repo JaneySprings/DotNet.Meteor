@@ -17,8 +17,8 @@ export class CommandLine {
         return ProcessRunner.run<Device>(new ProcessArgumentBuilder("dotnet")
             .append(this.toolPath)
             .append("--device")
-            .append(device.platform ?? '')
-            .append(device.name ?? ''));
+            .append(`"${device.platform}"`)
+            .append(`"${device.name}"`));
     }
 
     public static analyzeWorkspaceAsync(callback: (items: Project[]) => any) {
@@ -39,7 +39,7 @@ export class CommandLine {
         return ProcessRunner.run<string>(new ProcessArgumentBuilder("dotnet")
             .append(this.toolPath)
             .append("--run-emulator")
-            .append(name));
+            .append(`"${name}"`));
     }
 
     public static freePort(): number {
