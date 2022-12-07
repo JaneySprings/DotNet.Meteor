@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 
 export const extensionIdentifier: string = "nromanov.dotnet-meteor";
-export const taskProviderType: string = "dotnet-meteor.build";
 export const debuggerType: string = "dotnet-meteor.debug";
 export const extensionPath: string = vscode.extensions.getExtension(extensionIdentifier)?.extensionPath ?? "?";
 

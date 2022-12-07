@@ -16,8 +16,8 @@ export class Project {
 
 export class ProjectItem implements vscode.QuickPickItem {
     label: string;
-    description?: string | undefined;
-    detail?: string | undefined;
+    description: string;
+    detail: string;
     item: Project;
 
     constructor(project: Project) {
@@ -42,7 +42,7 @@ export class Device {
 
 export class DeviceItem implements vscode.QuickPickItem {
     label: string;
-    detail?: string | undefined;
+    detail: string;
     item: Device;
 
     constructor(device: Device) {

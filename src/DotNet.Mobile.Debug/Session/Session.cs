@@ -35,14 +35,14 @@ public abstract class Session: IProcessLogger {
             if (read == 0)
                 break;
         }
+        Logger.Log("Session ended");
     }
 
     public void Stop() {
-        Logger.Log("Session stopped");
         this.stopRequested = true;
     }
 
-    public void SendEvent(string type, object body) {
+    protected void SendEvent(string type, object body) {
         SendMessage(new Event(type, body));
     }
 

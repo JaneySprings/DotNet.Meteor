@@ -1,7 +1,8 @@
-import { Command, taskProviderType, debuggerType } from './constants';
+import { Command, debuggerType } from './constants';
 import { DotNetDebuggerConfiguration } from './debug';
 import { Controller } from './controller';
-import { DotNetTaskProvider } from './tasks';
+import { DotNetPublishTaskProvider } from './publish';
+import { DotNetBuildTaskProvider } from './build';
 import { CommandLine } from './bridge';
 import { Target } from './models';
 import * as vscode from 'vscode';
@@ -35,7 +36,8 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider(debuggerType, new DotNetDebuggerConfiguration()));
 	context.subscriptions.push(vscode.debug.onDidTerminateDebugSession(() => Controller.isDebugging = false));
 	
-	vscode.tasks.registerTaskProvider(taskProviderType, new DotNetTaskProvider());
+	vscode.tasks.registerTaskProvider(DotNetPublishTaskProvider.type, new DotNetPublishTaskProvider());
+	vscode.tasks.registerTaskProvider(DotNetBuildTaskProvider.type, new DotNetBuildTaskProvider());
 }
 
 export function deactivate() {}

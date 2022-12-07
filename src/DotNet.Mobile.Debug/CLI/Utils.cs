@@ -38,7 +38,7 @@ namespace DotNet.Mobile.Debug.CLI {
         }
 
         public static void AllDevices(string[] args) {
-            List<DeviceData> devices = new List<DeviceData>();
+            var devices = new List<DeviceData>();
             devices.AddRange(AndroidTool.AllDevices());
             devices.AddRange(XCodeTool.AllDevices());
             Console.WriteLine(JsonSerializer.Serialize(devices));

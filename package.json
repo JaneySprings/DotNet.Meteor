@@ -55,6 +55,11 @@
         "type": "dotnet-meteor.build",
         "required": [],
         "properties": {}
+      },
+      {
+        "type": "dotnet-meteor.publish",
+        "required": [],
+        "properties": {}
       }
     ],
     "breakpoints": [
@@ -77,7 +82,7 @@
             "name": "Debug .NET Mobile App",
             "type": "dotnet-meteor.debug",
             "request": "launch",
-            "preLaunchTask": "dotnet-meteor: Build"
+            "preLaunchTask": "dotnet-meteor: build"
           }
         ]
       }

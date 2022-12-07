@@ -208,11 +208,6 @@ public class MonoDebugSession : DebugSession {
     }
 
     public override void Disconnect(Response response, Argument args) {
-        foreach(var process in this.processes)
-            process.Kill();
-
-        this.processes.Clear();
-
         PauseDebugger();
         DebuggerKill();
 
@@ -551,11 +546,6 @@ public class MonoDebugSession : DebugSession {
     private void Terminate(string reason) {
         Logger.Log("Terminating debugger: " + reason);
         if (!this.terminated) {
-            // wait until we've seen the end of stdout and stderr
-            for (int i = 0; i < 100; i++) {
-                Thread.Sleep(100);
-            }
-
             SendEvent(Event.TerminatedEvent, null);
             this.terminated = true;
         }
@@ -619,6 +609,11 @@ public class MonoDebugSession : DebugSession {
 
     private void DebuggerKill() {
         lock (this.locker) {
+            foreach(var process in this.processes)
+                process.Kill();
+
+            this.processes.Clear();
+
             if (this.session != null) {
                 this.debuggerExecuting = true;
 

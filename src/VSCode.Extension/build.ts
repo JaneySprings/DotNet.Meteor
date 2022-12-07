@@ -1,37 +1,25 @@
 import * as vscode from 'vscode';
-import { taskProviderType } from './constants';
 import { Configuration } from './configuration';
 import { CommandLine } from "./bridge";
 import { Controller } from './controller';
 
 
-export class DotNetTaskProvider implements vscode.TaskProvider {
-    provideTasks(token: vscode.CancellationToken): vscode.ProviderResult<vscode.Task[]> {
-        return [ DotNetTask.build() ];
-    }
-    resolveTask(task: vscode.Task, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Task> {
-        return DotNetTask.build();
-    }
-}
-
 class DotNetTaskDefinition implements vscode.TaskDefinition {
-    public name: string = "dotnet-meteor build";
-    public type: string = taskProviderType;
+    public name: string = DotNetBuildTaskProvider.action;
+    public type: string = DotNetBuildTaskProvider.type;
 }
 
-class DotNetTask {
-    public static readonly title: string = "Build";
-    public static readonly source: string = "dotnet-meteor";
+export class DotNetBuildTaskProvider implements vscode.TaskProvider {
+    public static source: string = 'dotnet-meteor';
+    public static action: string = 'build';
+    public static type: string = `${DotNetBuildTaskProvider.source}.${DotNetBuildTaskProvider.action}`
 
-    private static readonly empty: vscode.Task = new vscode.Task(
-        new DotNetTaskDefinition(), vscode.TaskScope.Workspace, DotNetTask.title, DotNetTask.source
-    );
-
-    public static build(): vscode.Task {
+    resolveTask(task: vscode.Task, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Task> { return task; }
+    provideTasks(token: vscode.CancellationToken): vscode.ProviderResult<vscode.Task[]> {
         Configuration.updateSelectedProject();
 
         if (!Configuration.validate())
-            return DotNetTask.empty;
+            return [];
     
         const framework = Configuration.targetFramework();
         const command = [
@@ -42,7 +30,7 @@ class DotNetTask {
         
         if (!framework) {
             vscode.window.showErrorMessage(`No supported framework found`);
-            return DotNetTask.empty;
+            return [];
         }
 
         if (Controller.isDebugging) {
@@ -67,13 +55,15 @@ class DotNetTask {
                 }
             }
         }
-
-        return new vscode.Task(
-            new DotNetTaskDefinition(), 
-            vscode.TaskScope.Workspace, 
-            DotNetTask.title, 
-            DotNetTask.source, 
-            new vscode.ShellExecution(command.join(' '))
-        );
+        
+        return [ 
+            new vscode.Task(
+                new DotNetTaskDefinition(), 
+                vscode.TaskScope.Workspace, 
+                DotNetBuildTaskProvider.action, 
+                DotNetBuildTaskProvider.source,
+                new vscode.ShellExecution(command.join(' '))
+            )
+        ];
     }
 }
