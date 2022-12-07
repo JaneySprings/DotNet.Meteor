@@ -6,9 +6,9 @@ import { Controller } from "./controller";
 
 export class Configuration {
     public static debuggingPort: number;
-    public static selectedProject: Project | undefined;
-    public static selectedDevice: Device | undefined;
-    public static selectedTarget: Target | undefined;
+    public static selectedProject: Project;
+    public static selectedDevice: Device;
+    public static selectedTarget: Target;
 
     public static updateDebuggingPort() {
         Configuration.debuggingPort = CommandLine.freePort();

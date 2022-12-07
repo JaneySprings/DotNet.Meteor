@@ -13,6 +13,14 @@ export class CommandLine {
             .append("--all-devices"), callback);
     }
 
+    public static deviceInfo(device: Device): Device {
+        return ProcessRunner.run<Device>(new ProcessArgumentBuilder("dotnet")
+            .append(this.toolPath)
+            .append("--device")
+            .append(device.platform ?? '')
+            .append(device.name ?? ''));
+    }
+
     public static analyzeWorkspaceAsync(callback: (items: Project[]) => any) {
         ProcessRunner.runAsync<Project[]>(new ProcessArgumentBuilder("dotnet")
             .append(this.toolPath)

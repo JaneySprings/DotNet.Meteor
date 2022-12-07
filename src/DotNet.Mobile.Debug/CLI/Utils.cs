@@ -6,6 +6,7 @@ using Android.Sdk;
 using XCode.Sdk;
 using DotNet.Mobile.Shared;
 using DotNet.Mobile.Debug.Session;
+using Platform = DotNet.Mobile.Shared.Platform;
 
 namespace DotNet.Mobile.Debug.CLI {
     public static class ConsoleUtils {
@@ -28,6 +29,7 @@ namespace DotNet.Mobile.Debug.CLI {
             Console.WriteLine($"Unknown parameter: {args[0]}");
         }
 
+
         public static void AndroidDevices(string[] args) {
             List<DeviceData> devices = AndroidTool.AllDevices();
             Console.WriteLine(JsonSerializer.Serialize(devices));
@@ -36,19 +38,29 @@ namespace DotNet.Mobile.Debug.CLI {
             List<DeviceData> devices = XCodeTool.AllDevices();
             Console.WriteLine(JsonSerializer.Serialize(devices));
         }
-
         public static void AllDevices(string[] args) {
             var devices = new List<DeviceData>();
             devices.AddRange(AndroidTool.AllDevices());
             devices.AddRange(XCodeTool.AllDevices());
             Console.WriteLine(JsonSerializer.Serialize(devices));
         }
-
-        public static void RunEmulator(string[] args) {
+        public static void DeviceInfo(string[] args) {
             if (args.Length < 2)
-                throw new Exception ($"Missing parameter: {Program.CommandHandler[args[0]].Item1[1]}");
-            string serial = Emulator.Run(args[1]);
-            Console.WriteLine(JsonSerializer.Serialize(serial));
+                throw new Exception ($"Missing parameter: {Program.CommandHandler[args[0]].Item1[1]} {Program.CommandHandler[args[0]].Item1[2]}");
+            if (args.Length < 3)
+                throw new Exception ($"Missing parameter: {Program.CommandHandler[args[0]].Item1[2]}");
+
+            var devices = new List<DeviceData>();
+
+            if (args[1].Equals(Platform.Android))
+                devices.AddRange(AndroidTool.AllDevices());
+            else if (args[1].Equals(Platform.iOS))
+                devices.AddRange(XCodeTool.AllDevices());
+
+            var device = devices.Find(d => d.Name.Equals(args[2]));
+            device ??= new DeviceData();
+
+            Console.WriteLine(JsonSerializer.Serialize(device));
         }
 
         public static void AnalyzeWorkspace(string[] args) {
@@ -57,7 +69,6 @@ namespace DotNet.Mobile.Debug.CLI {
             List<Project> projects = WorkspaceAnalyzer.AnalyzeWorkspace(args[1]);
             Console.WriteLine(JsonSerializer.Serialize(projects));
         }
-
         public static void AnalyzeProject(string[] args) {
             if (args.Length < 2)
                 throw new Exception ($"Missing parameter: {Program.CommandHandler[args[0]].Item1[1]}");
@@ -65,11 +76,17 @@ namespace DotNet.Mobile.Debug.CLI {
             Console.WriteLine(JsonSerializer.Serialize(project));
         }
 
+
+        public static void RunEmulator(string[] args) {
+            if (args.Length < 2)
+                throw new Exception ($"Missing parameter: {Program.CommandHandler[args[0]].Item1[1]}");
+            string serial = Emulator.Run(args[1]);
+            Console.WriteLine(JsonSerializer.Serialize(serial));
+        }
         public static void FreePort(string[] args) {
             int port = Utilities.FindFreePort();
             Console.WriteLine(JsonSerializer.Serialize(port));
         }
-
         public static void StartSession(string[] args) {
             Console.WriteLine("Starting Mono debugger session...");
             var debugSession = new MonoDebugSession();
