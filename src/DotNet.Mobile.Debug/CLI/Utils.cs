@@ -83,6 +83,10 @@ namespace DotNet.Mobile.Debug.CLI {
             string serial = Emulator.Run(args[1]);
             Console.WriteLine(JsonSerializer.Serialize(serial));
         }
+        public static void AndroidSdkPath(string[] args) {
+            string path = Android.Sdk.PathUtils.SdkLocation();
+            Console.WriteLine(JsonSerializer.Serialize(path));
+        }
         public static void FreePort(string[] args) {
             int port = Utilities.FindFreePort();
             Console.WriteLine(JsonSerializer.Serialize(port));

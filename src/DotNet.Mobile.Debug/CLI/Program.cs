@@ -39,6 +39,11 @@ public class Program {
             }, ConsoleUtils.RunEmulator)
         },
         {
+            "--android-sdk-path", new Tuple<string[], Action<string[]>>(new []{
+                "Get actual Android SDK path"
+            }, ConsoleUtils.AndroidSdkPath)
+        },
+        {
             "--free-port", new Tuple<string[], Action<string[]>>(new []{
                 "Find first available port"
             }, ConsoleUtils.FreePort)

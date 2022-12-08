@@ -17,6 +17,7 @@ export class DotNetBuildTaskProvider implements vscode.TaskProvider {
     resolveTask(task: vscode.Task, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Task> { return task; }
     provideTasks(token: vscode.CancellationToken): vscode.ProviderResult<vscode.Task[]> {
         Configuration.updateSelectedProject();
+        Configuration.updateAndroidSdk();
 
         if (!Configuration.validate())
             return [];
@@ -33,26 +34,26 @@ export class DotNetBuildTaskProvider implements vscode.TaskProvider {
             return [];
         }
 
-        if (Controller.isDebugging) {
-            if (Configuration.selectedDevice!.platform?.includes('android')) {
+        
+        if (Configuration.selectedDevice!.platform?.includes('android')) {
+            if (Controller.isDebugging) {
                 if (!Configuration.selectedDevice!.is_running) {
                     const serial = CommandLine.runEmulator(Configuration.selectedDevice!.name!);
-    
                     Configuration.selectedDevice!.serial = serial;
                     Configuration.selectedDevice!.is_running = true;
                 }
-    
+                command.push('-t:Run');
                 command.push(`-p:AndroidAttachDebugger=true`);
                 command.push(`-p:AdbTarget=-s%20${Configuration.selectedDevice!.serial}`);
                 command.push(`-p:AndroidSdbTargetPort=${Configuration.debuggingPort}`);
                 command.push(`-p:AndroidSdbHostPort=${Configuration.debuggingPort}`);
-                command.push('-t:Run');
             }
-    
-            if (Configuration.selectedDevice!.platform?.includes('ios')) {
-                if (!Configuration.selectedDevice!.is_emulator) {
-                    command.push(`-p:RuntimeIdentifier=ios-arm64`);
-                }
+            command.push(`-p:AndroidSdkDirectory="${Configuration.androidSdk}"`);
+        }
+
+        if (Configuration.selectedDevice!.platform?.includes('ios')) {
+            if (!Configuration.selectedDevice!.is_emulator) {
+                command.push(`-p:RuntimeIdentifier=ios-arm64`);
             }
         }
         

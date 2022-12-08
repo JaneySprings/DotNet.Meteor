@@ -5,6 +5,7 @@ import { Controller } from "./controller";
 
 
 export class Configuration {
+    public static androidSdk: string;
     public static debuggingPort: number;
     public static selectedProject: Project;
     public static selectedDevice: Device;
@@ -12,6 +13,9 @@ export class Configuration {
 
     public static updateDebuggingPort() {
         Configuration.debuggingPort = CommandLine.freePort();
+    }
+    public static updateAndroidSdk() {
+        Configuration.androidSdk = CommandLine.androidSdk();
     }
 
     public static updateSelectedProject() {
