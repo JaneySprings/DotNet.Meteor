@@ -16,7 +16,6 @@ using Process = System.Diagnostics.Process;
 namespace DotNet.Mobile.Debug.Session;
 
 public class MonoDebugSession : DebugSession {
-    private const int MAX_CHILDREN = 100;
     private const int MAX_CONNECTION_ATTEMPTS = 20;
     private const int CONNECTION_ATTEMPT_INTERVAL = 500;
 
@@ -427,29 +426,17 @@ public class MonoDebugSession : DebugSession {
         var variables = new List<ModelVariable>();
 
         if (this.variableHandles.TryGet(reference, out ObjectValue[] children) && children?.Length > 0) {
-            bool more = false;
-
-            if (children.Length > MAX_CHILDREN) {
-                children = children.Take(MAX_CHILDREN).ToArray();
-                more = true;
-            }
-
             if (children.Length < 20) {
                 // Wait for all values at once.
                 WaitHandle.WaitAll(children.Select(x => x.WaitHandle).ToArray());
                 foreach (var v in children) {
                     variables.Add(CreateVariable(v));
                 }
-            }
-            else {
+            } else {
                 foreach (var v in children) {
                     v.WaitHandle.WaitOne();
                     variables.Add(CreateVariable(v));
                 }
-            }
-
-            if (more) {
-                variables.Add(new ModelVariable("...", null, null));
             }
         }
 
