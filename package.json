@@ -23,13 +23,13 @@
     ".NET Mobile",
     "C#",
     "MAUI",
-    "Xamarin",
     "dotnet"
   ],
   "engines": {
     "vscode": "^1.73.0"
   },
   "activationEvents": [
+    "onDebugResolve:dotnet-meteor.debug",
     "onDebugInitialConfigurations",
     "onLanguage:csharp",
     "workspaceContains:**/*.{csproj,sln,slnf,csx}"
