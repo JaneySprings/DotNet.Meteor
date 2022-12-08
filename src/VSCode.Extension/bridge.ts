@@ -41,6 +41,11 @@ export class CommandLine {
             .append("--run-emulator")
             .append(`"${name}"`));
     }
+    public static androidSdk(): string {
+        return ProcessRunner.run<string>(new ProcessArgumentBuilder("dotnet")
+            .append(this.toolPath)
+            .append("--android-sdk-path"));
+    }
 
     public static freePort(): number {
         return ProcessRunner.run<number>(new ProcessArgumentBuilder("dotnet")

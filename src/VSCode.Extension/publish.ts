@@ -15,6 +15,7 @@ export class DotNetPublishTaskProvider implements vscode.TaskProvider {
     resolveTask(task: vscode.Task, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Task> { return task; }
     provideTasks(token: vscode.CancellationToken): vscode.ProviderResult<vscode.Task[]> {
         Configuration.updateSelectedProject();
+        Configuration.updateAndroidSdk();
 
         if (!Configuration.validate())
             return [];
@@ -29,6 +30,10 @@ export class DotNetPublishTaskProvider implements vscode.TaskProvider {
         if (!framework) {
             vscode.window.showErrorMessage(`No supported framework found`);
             return [];
+        }
+
+        if (Configuration.selectedDevice!.platform?.includes('android')) {
+            command.push(`-p:AndroidSdkDirectory=${Configuration.androidSdk}`);
         }
 
         if (Configuration.selectedDevice!.platform?.includes('ios')) {
