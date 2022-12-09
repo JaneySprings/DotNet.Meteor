@@ -16,12 +16,12 @@ public class Program {
         {
             "--android-devices", new Tuple<string[], Action<string[]>>(new []{
                 "List of all available Android devices"
-            }, ConsoleUtils.AndroidDevices)
+            }, AndroidCommand.AndroidDevicesAsJson)
         },
         {
             "--apple-devices", new Tuple<string[], Action<string[]>>(new []{
                 "List of all available Apple devices"
-            }, ConsoleUtils.AppleDevices)
+            }, AppleCommand.AppleDevicesAsJson)
         },
         {
             "--all-devices", new Tuple<string[], Action<string[]>>(new []{
@@ -36,12 +36,12 @@ public class Program {
         {
             "--run-emulator", new Tuple<string[], Action<string[]>>(new []{
                 "Run Android emulator", "<avd-name>"
-            }, ConsoleUtils.RunEmulator)
+            }, AndroidCommand.RunEmulator)
         },
         {
             "--android-sdk-path", new Tuple<string[], Action<string[]>>(new []{
                 "Get actual Android SDK path"
-            }, ConsoleUtils.AndroidSdkPath)
+            }, AndroidCommand.AndroidSdkPath)
         },
         {
             "--free-port", new Tuple<string[], Action<string[]>>(new []{

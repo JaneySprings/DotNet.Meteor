@@ -5,29 +5,31 @@ using DotNet.Mobile.Shared;
 namespace Android.Sdk {
     public static class PathUtils {
         public static string ExecExtension => RuntimeSystem.IsWindows ? ".exe" : "";
+        public static string HomeDirectory => RuntimeSystem.IsWindows
+            ? Environment.GetEnvironmentVariable("HOMEPATH")
+            : Environment.GetEnvironmentVariable("HOME");
+
 
         public static string SdkLocation() {
             string path = Environment.GetEnvironmentVariable("ANDROID_SDK_ROOT");
-            string home = RuntimeSystem.IsWindows
-                ? Environment.GetEnvironmentVariable("HOMEPATH")
-                : Environment.GetEnvironmentVariable("HOME");
 
-            if (string.IsNullOrEmpty(path))
-                path = RuntimeSystem.IsWindows
-                ? Path.Combine(home, "AppData", "Local", "Android", "Sdk")
-                : Path.Combine(home, "Library", "Android", "sdk");
+            if (string.IsNullOrEmpty(path)) {
+                if (RuntimeSystem.IsWindows)
+                    path = InvariantSdk(HomeDirectory, "AppData", "Local", "Android");
+                else if (RuntimeSystem.IsMacOS)
+                    path = InvariantSdk(HomeDirectory, "Library", "Android");
+                else
+                    path = InvariantSdk(HomeDirectory, "Android");
+            }
 
-            if (!Directory.Exists(path))
+            if (string.IsNullOrEmpty(path) || !Directory.Exists(path))
                 throw new Exception("Could not find Android SDK path");
 
             return path;
         }
 
         public static string AvdLocation() {
-            string home = RuntimeSystem.IsWindows
-                ? Environment.GetEnvironmentVariable("HOMEPATH")
-                : Environment.GetEnvironmentVariable("HOME");
-            return Path.Combine(home, ".android", "avd");
+            return Path.Combine(HomeDirectory, ".android", "avd");
         }
 
         public static FileInfo AdbTool() {
@@ -70,6 +72,21 @@ namespace Android.Sdk {
                 throw new Exception("Could not find avdmanager tool");
 
             return newestTool;
+        }
+
+
+        private static string InvariantSdk(params string[] tokens) {
+            string basePath = Path.Combine(tokens);
+            string lowercased = Path.Combine(basePath, "sdk");
+            string uppercased = Path.Combine(basePath, "Sdk");
+
+            if (Directory.Exists(lowercased))
+                return lowercased;
+
+            if (Directory.Exists(uppercased))
+                return uppercased;
+
+            return null;
         }
     }
 }

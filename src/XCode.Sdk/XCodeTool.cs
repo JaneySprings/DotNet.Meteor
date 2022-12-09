@@ -72,10 +72,6 @@ namespace XCode.Sdk {
 
         public static List<DeviceData> AllDevices() {
             var devices = new List<DeviceData>();
-
-            if (RuntimeSystem.IsWindows)
-                return devices;
-
             devices.AddRange(PhysicalDevicesFast().OrderBy(x => x.Name));
             devices.AddRange(SimulatorsFast().OrderBy(x => x.Name));
             return devices;
