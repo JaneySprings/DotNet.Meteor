@@ -6,7 +6,7 @@ using _Path = System.IO.Path;
 
 var target = Argument("target", "vsix");
 var version = Argument("release-version", "1.0");
-var configuration = Argument("configuration", "release");
+var configuration = Argument("configuration", "debug");
 
 ///////////////////////////////////////////////////////////////////////////////
 // DOTNET
@@ -21,7 +21,10 @@ Task("build-debugger")
       MSBuildSettings = new DotNetMSBuildSettings { AssemblyVersion = version },
       OutputDirectory = ExtensionAssembliesDirectory,
       Configuration = configuration,
-   }))
+   }));
+
+Task("clean-debugger")
+   .WithCriteria(configuration.Equals("release"))
    .Does(() => {
       DeleteFiles(GetFiles(_Path.Combine(ExtensionAssembliesDirectory, "*.pdb")));
       DeleteFiles(GetFiles(_Path.Combine(ExtensionAssembliesDirectory, "*.deps.json")));
@@ -48,6 +51,7 @@ Task("prepare")
 Task("vsix")
    .IsDependentOn("prepare")
    .IsDependentOn("build-debugger")
+   .IsDependentOn("clean-debugger")
    .Does(() => VscePackage(new VscePackageSettings {
       OutputFilePath = _Path.Combine(ArtifactsDirectory, $"DotNet.Meteor.{version}.0.vsix"),
       WorkingDirectory = RootDirectory

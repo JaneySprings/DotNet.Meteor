@@ -30,7 +30,7 @@ namespace Android.Sdk {
             return string.Join(Environment.NewLine, result.StandardOutput);
         }
 
-        public static List<DeviceData> Devices() {
+        public static List<string> Devices() {
             var adb = PathUtils.AdbTool();
             ProcessResult result = new ProcessRunner(adb, new ProcessArgumentBuilder()
                 .Append("devices")
@@ -41,24 +41,14 @@ namespace Android.Sdk {
                 throw new Exception(string.Join(Environment.NewLine, result.StandardError));
 
             string regex = @"^(?<serial>\S+?)(\s+?)\s+(?<state>\S+)";
-            var devices = new List<DeviceData>();
+            var devices = new List<string>();
 
             foreach (string line in result.StandardOutput) {
                 MatchCollection matches = Regex.Matches(line, regex, RegexOptions.Singleline);
                 if (matches.Count == 0)
                     continue;
 
-                string serial = matches.FirstOrDefault().Groups["serial"].Value;
-
-                devices.Add(new DeviceData {
-                    Name = serial,
-                    Serial = serial,
-                    Details = "Device",
-                    OSVersion = "Unknown",
-                    Platform = Platform.Android,
-                    IsEmulator = serial.StartsWith("emulator-"),
-                    IsRunning = true
-                });
+                devices.Add(matches.FirstOrDefault().Groups["serial"].Value);
             }
 
             return devices;
@@ -75,6 +65,10 @@ namespace Android.Sdk {
                 return string.Empty;
 
             return result.StandardOutput.FirstOrDefault();
+        }
+
+        public static string DevName(string serial) {
+            return Shell(serial, "getprop", "ro.product.model");
         }
 
         public static Process Logcat(string serial, IProcessLogger logger) {
