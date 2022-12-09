@@ -1,5 +1,6 @@
 using DotNet.Mobile.Shared;
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 
 namespace Android.Sdk {
@@ -28,24 +29,32 @@ namespace Android.Sdk {
             var runningDevices = DeviceBridge.Devices();
             var allDevices = new List<DeviceData>();
 
-            foreach(var device in runningDevices) {
-                if (device.IsEmulator) {
-                    var name = DeviceBridge.EmuName(device.Serial);
+            foreach(var serial in runningDevices) {
+                if (serial.StartsWith("emulator-")) {
+                    var name = DeviceBridge.EmuName(serial);
                     var avd = virtualDevices.Find(x => x.Name.Equals(name));
 
                     if (avd == null)
                         continue;
 
                     virtualDevices.Remove(avd);
-                    avd.Serial = device.Serial;
+                    avd.Serial = serial;
                     avd.IsRunning = true;
                     allDevices.Add(avd);
                 } else {
-                    allDevices.Add(device);
+                    allDevices.Add(new DeviceData {
+                        Name = DeviceBridge.Shell(serial, "getprop", "ro.product.model"),
+                        OSVersion = $"android-{DeviceBridge.Shell(serial, "getprop", "ro.build.version.sdk")}",
+                        Platform = Platform.Android,
+                        Details = "Device",
+                        IsEmulator = false,
+                        IsRunning = true,
+                        Serial = serial
+                    });
                 }
             }
 
-            allDevices.AddRange(virtualDevices);
+            allDevices.AddRange(virtualDevices.OrderBy(x => x.Name));
             return allDevices;
         }
     }

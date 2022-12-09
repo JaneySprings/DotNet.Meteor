@@ -5,8 +5,7 @@ using DotNet.Mobile.Shared;
 
 namespace Android.Sdk {
     public static class Emulator {
-        private const int AppearingRetryCount = 15;
-        private const int SyncRetryCount = 300;
+        private const int AppearingRetryCount = 120; //seconds
 
         public static string Run(string name) {
             var emulator = PathUtils.EmulatorTool();
@@ -24,14 +23,10 @@ namespace Android.Sdk {
             if (serial == null)
                 throw new Exception("Emulator started but no serial number was found");
 
-            for (int i = 0; i < SyncRetryCount; i++) {
+            while (DeviceBridge.Shell(serial, "getprop", "sys.boot_completed").Contains("1"))
                 Thread.Sleep(1000);
 
-                if (DeviceBridge.Shell(serial, "getprop", "sys.boot_completed").Contains("1"))
-                    return serial;
-            }
-
-            return null;
+            return serial;
         }
 
         private static string WaitForSerial() {
@@ -42,9 +37,9 @@ namespace Android.Sdk {
                 var newState = DeviceBridge.Devices();
 
                 if (newState.Count > currentState.Count) {
-                    var newDevice = newState.Find(d => !currentState.Any(c => c.Serial == d.Serial));
-                    if (newDevice != null)
-                        return newDevice.Serial;
+                    var newSerial = newState.Find(n => !currentState.Any(o => n.Equals(o)));
+                    if (newSerial != null)
+                        return newSerial;
                 }
             }
             return null;

@@ -76,8 +76,8 @@ namespace XCode.Sdk {
             if (RuntimeSystem.IsWindows)
                 return devices;
 
-            devices.AddRange(PhysicalDevicesFast());
-            devices.AddRange(SimulatorsFast());
+            devices.AddRange(PhysicalDevicesFast().OrderBy(x => x.Name));
+            devices.AddRange(SimulatorsFast().OrderBy(x => x.Name));
             return devices;
         }
     }
