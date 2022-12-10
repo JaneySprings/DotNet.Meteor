@@ -21,6 +21,13 @@ export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationPro
 		Configuration.updateDebuggingPort();
 		Configuration.selectedDevice = actualDevice;
 		Controller.isDebugging = true;
+
+		if (!config.type && !config.request && !config.name) {
+			config.type = 'dotnet-meteor.debug';
+			config.name = 'Debug .NET Mobile App';
+			config.request = 'launch';
+			config.preLaunchTask = 'dotnet-meteor: build';
+		}
 		
 		config['selected_project'] = Configuration.selectedProject;
         config['selected_device'] = Configuration.selectedDevice;

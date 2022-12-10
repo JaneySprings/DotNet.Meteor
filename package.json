@@ -8,29 +8,21 @@
   "license": "MIT",
   "icon": "img/logo.png",
   "preview": false,
-  "bugs": {
-    "url": "https://github.com/JaneySprings/DotNet.Meteor/issues"
-  },
+  "bugs": { "url": "https://github.com/JaneySprings/DotNet.Meteor/issues" },
   "repository": {
     "type": "git",
     "url": "https://github.com/JaneySprings/DotNet.Meteor.git"
   },
-  "categories": [
-    "Debuggers"
-  ],
+  "categories": [ "Debuggers" ],
   "keywords": [
-    ".NET",
-    ".NET Mobile",
     "C#",
+    ".NET",
     "MAUI",
     "dotnet"
   ],
-  "engines": {
-    "vscode": "^1.73.0"
-  },
+  "engines": { "vscode": "^1.73.0" },
   "activationEvents": [
-    "onDebugResolve:dotnet-meteor.debug",
-    "onDebugInitialConfigurations",
+    "onDebug",
     "onLanguage:csharp",
     "workspaceContains:**/*.{csproj,sln,slnf,csx}"
   ],
@@ -63,17 +55,14 @@
       }
     ],
     "breakpoints": [
-      {
-        "language": "csharp"
-      },
-      {
-        "language": "fsharp"
-      }
+      { "language": "csharp" },
+      { "language": "fsharp" }
     ],
     "debuggers": [
       {
         "type": "dotnet-meteor.debug",
         "label": ".NET Meteor Debugger",
+        "languages": [ "csharp", "fsharp", "xaml", "xml" ],
         "program": "./extension/bin/dotnet-mobile.dll",
         "args": [ "--start-session"],
         "runtime": "dotnet",
@@ -90,8 +79,8 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./tsconfig.json",
-    "watch": "tsc -watch -p ./tsconfig-dev.json"
+    "compile": "tsc -p ./src/VSCode.Extension/tsconfig.json",
+    "watch": "tsc -watch -p ./src/VSCode.Extension/tsconfig-dev.json"
   },
   "devDependencies": {
     "@types/vscode": "^1.73.0",
