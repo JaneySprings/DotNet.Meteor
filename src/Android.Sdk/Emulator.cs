@@ -23,7 +23,7 @@ namespace Android.Sdk {
             if (serial == null)
                 throw new Exception("Emulator started but no serial number was found");
 
-            while (DeviceBridge.Shell(serial, "getprop", "sys.boot_completed").Contains("1"))
+            while (!DeviceBridge.Shell(serial, "getprop", "sys.boot_completed").Contains("1"))
                 Thread.Sleep(1000);
 
             return serial;

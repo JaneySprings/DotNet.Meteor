@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace DotNet.Mobile.Shared {
     public class ProcessArgumentBuilder {
@@ -11,7 +10,7 @@ namespace DotNet.Mobile.Shared {
         }
 
         public ProcessArgumentBuilder Append(params string[] args) {
-            args.ToList().ForEach(arg => this.args.Add(arg));
+            this.args.AddRange(args);
             return this;
         }
 
@@ -21,7 +20,7 @@ namespace DotNet.Mobile.Shared {
         }
 
         public override string ToString() {
-            return string.Join(" ", this.args);
+            return string.Join(' ', this.args);
         }
     }
 }

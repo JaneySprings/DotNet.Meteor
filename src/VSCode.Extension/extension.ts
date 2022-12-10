@@ -32,12 +32,11 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand(Command.selectProject,Controller.showQuickPickProject));
 	context.subscriptions.push(vscode.commands.registerCommand(Command.selectTarget, Controller.showQuickPickTarget));
 	context.subscriptions.push(vscode.commands.registerCommand(Command.selectDevice, Controller.showQuickPickDevice));
-	
-	context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider(debuggerType, new DotNetDebuggerConfiguration()));
 	context.subscriptions.push(vscode.debug.onDidTerminateDebugSession(() => Controller.isDebugging = false));
 	
 	vscode.tasks.registerTaskProvider(DotNetPublishTaskProvider.type, new DotNetPublishTaskProvider());
 	vscode.tasks.registerTaskProvider(DotNetBuildTaskProvider.type, new DotNetBuildTaskProvider());
+	vscode.debug.registerDebugConfigurationProvider(debuggerType, new DotNetDebuggerConfiguration());
 }
 
 export function deactivate() {}
