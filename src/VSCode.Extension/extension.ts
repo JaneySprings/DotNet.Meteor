@@ -1,10 +1,10 @@
-import { Command, debuggerType } from './constants';
 import { DotNetDebuggerConfiguration } from './debug';
-import { Controller } from './controller';
 import { DotNetPublishTaskProvider } from './publish';
 import { DotNetBuildTaskProvider } from './build';
+import { Controller } from './controller';
 import { CommandLine } from './bridge';
 import { Target } from './models';
+import * as res from './resources';
 import * as vscode from 'vscode';
 
 
@@ -29,13 +29,11 @@ export function activate(context: vscode.ExtensionContext) {
 		Controller.performSelectDevice(items[0]);
 	});
 	
-	context.subscriptions.push(vscode.commands.registerCommand(Command.selectProject,Controller.showQuickPickProject));
-	context.subscriptions.push(vscode.commands.registerCommand(Command.selectTarget, Controller.showQuickPickTarget));
-	context.subscriptions.push(vscode.commands.registerCommand(Command.selectDevice, Controller.showQuickPickDevice));
+	context.subscriptions.push(vscode.commands.registerCommand(res.commandIdSelectActiveProject, Controller.showQuickPickProject));
+	context.subscriptions.push(vscode.commands.registerCommand(res.commandIdSelectActiveConfiguration, Controller.showQuickPickTarget));
+	context.subscriptions.push(vscode.commands.registerCommand(res.commandIdSelectActiveDevice, Controller.showQuickPickDevice));
 	
-	vscode.tasks.registerTaskProvider(DotNetPublishTaskProvider.type, new DotNetPublishTaskProvider());
-	vscode.tasks.registerTaskProvider(DotNetBuildTaskProvider.type, new DotNetBuildTaskProvider());
-	vscode.debug.registerDebugConfigurationProvider(debuggerType, new DotNetDebuggerConfiguration());
+	vscode.debug.registerDebugConfigurationProvider(res.debuggerMeteorId, new DotNetDebuggerConfiguration());
+	vscode.tasks.registerTaskProvider(res.taskIdPublish, new DotNetPublishTaskProvider());
+	vscode.tasks.registerTaskProvider(res.taskIdBuild, new DotNetBuildTaskProvider());
 }
-
-export function deactivate() {}

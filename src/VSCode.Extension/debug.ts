@@ -1,8 +1,9 @@
 import { WorkspaceFolder, DebugConfiguration } from 'vscode';
 import { Configuration } from './configuration';
-import { Target } from './models';
-import * as vscode from 'vscode';
 import { CommandLine } from './bridge';
+import { Target } from './models';
+import * as res from './resources';
+import * as vscode from 'vscode';
 
 
 export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationProvider {
@@ -11,20 +12,20 @@ export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationPro
 									token?: vscode.CancellationToken): Promise<DebugConfiguration | undefined> {
 		
 		if (config.noDebug === undefined && Configuration.selectedTarget === Target.Release) {
-			vscode.window.showErrorMessage("Debugging is not supported in release configuration");
+			vscode.window.showErrorMessage(res.messageDebugNotSupported);
 			return undefined;
 		}
 		
 		const actualDevice = CommandLine.deviceInfo(Configuration.selectedDevice);
 
-		Configuration.updateDebuggingPort();
 		Configuration.selectedDevice = actualDevice;
+		Configuration.updateDebuggingPort();
 
 		if (!config.type && !config.request && !config.name) {
-			config.type = 'dotnet-meteor.debug';
-			config.name = 'Debug .NET Mobile App';
+			config.preLaunchTask = res.taskTitleBuild;
+			config.name = res.debuggerMeteorTitle;
+			config.type = res.debuggerMeteorId;
 			config.request = 'launch';
-			config.preLaunchTask = 'dotnet-meteor: build';
 		}
 		
 		config['selected_project'] = Configuration.selectedProject;

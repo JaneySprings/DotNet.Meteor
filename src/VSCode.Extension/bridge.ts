@@ -1,11 +1,14 @@
 import path = require('path');
 import { ProcessRunner, ProcessArgumentBuilder } from './executor';
 import { Project, Device } from './models';
-import { extensionPath } from './constants';
 import { Configuration } from './configuration';
+import * as res from './resources';
+import * as vscode from 'vscode';
 
 export class CommandLine {
-    private static toolPath: string = path.join(extensionPath, "extension", "bin", "dotnet-mobile.dll");
+    private static toolPath: string = path.join(
+        vscode.extensions.getExtension(`${res.extensionPublisher}.${res.extensionId}`)?.extensionPath ?? "?",
+        "extension", "bin", "dotnet-mobile.dll");
 
     public static mobileDevicesAsync(callback: (items: Device[]) => any) {
         ProcessRunner.runAsync<Device[]>(new ProcessArgumentBuilder("dotnet")

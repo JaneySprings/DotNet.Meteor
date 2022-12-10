@@ -2,8 +2,8 @@
   "name": "dotnet-meteor",
   "publisher": "nromanov",
   "version": "1.0.0",
-  "description": "Run and Debug .NET Mobile Apps",
-  "displayName": ".NET Meteor",
+  "description": "%extension.description%",
+  "displayName": "%extension.displayName%",
   "author": "Nikita Romanov",
   "license": "MIT",
   "icon": "img/logo.png",
@@ -30,26 +30,26 @@
   "contributes": {
     "commands": [
       {
-        "command": "dotnet-meteor.selectActiveProject",
-        "title": ".NET Meteor: Select workspace project"
+        "command": "%command.id.selectActiveProject%",
+        "title": "%command.title.selectActiveProject%"
       },
       {
-        "command": "dotnet-meteor.selectActiveConfiguration",
-        "title": ".NET Meteor: Select project configuration"
+        "command": "%command.id.selectActiveConfiguration%",
+        "title": "%command.title.selectActiveConfiguration%"
       },
       {
-        "command": "dotnet-meteor.selectActiveDevice",
-        "title": ".NET Meteor: Select device"
+        "command": "%command.id.selectActiveDevice%",
+        "title": "%command.title.selectActiveDevice%"
       }
     ],
     "taskDefinitions": [
       {
-        "type": "dotnet-meteor.build",
+        "type": "%task.id.build%",
         "required": [],
         "properties": {}
       },
       {
-        "type": "dotnet-meteor.publish",
+        "type": "%task.id.publish%",
         "required": [],
         "properties": {}
       }
@@ -60,18 +60,18 @@
     ],
     "debuggers": [
       {
-        "type": "dotnet-meteor.debug",
-        "label": ".NET Meteor Debugger",
+        "type": "%debugger.meteor.id%",
+        "label": "%debugger.meteor.title%",
         "languages": [ "csharp", "fsharp", "xaml", "xml" ],
         "program": "./extension/bin/dotnet-mobile.dll",
         "args": [ "--start-session"],
         "runtime": "dotnet",
         "initialConfigurations": [
           {
-            "name": "Debug .NET Mobile App",
-            "type": "dotnet-meteor.debug",
+            "name": "%debugger.meteor.title%",
+            "type": "%debugger.meteor.id%",
             "request": "launch",
-            "preLaunchTask": "dotnet-meteor: build"
+            "preLaunchTask": "%task.title.build%"
           }
         ]
       }

@@ -1,0 +1,22 @@
+{
+	"extension.displayName": ".NET Meteor",
+	"extension.description": "Run and Debug .NET Mobile Apps",
+
+	"command.title.selectActiveProject": ".NET Meteor: Select workspace project",
+	"command.id.selectActiveProject": "dotnet-meteor.selectActiveProject",
+
+	"command.title.selectActiveConfiguration": ".NET Meteor: Select project configuration",
+	"command.id.selectActiveConfiguration": "dotnet-meteor.selectActiveConfiguration",
+
+	"command.title.selectActiveDevice": ".NET Meteor: Select device",
+	"command.id.selectActiveDevice": "dotnet-meteor.selectActiveDevice",
+
+	"task.id.build": "dotnet-meteor.build",
+	"task.title.build": "dotnet-meteor: Build",
+
+	"task.id.publish": "dotnet-meteor.publish",
+	"task.title.publish": "dotnet-meteor: Publish",
+
+	"debugger.meteor.id": "dotnet-meteor.debugger",
+	"debugger.meteor.title": ".NET Meteor Debugger"
+}
