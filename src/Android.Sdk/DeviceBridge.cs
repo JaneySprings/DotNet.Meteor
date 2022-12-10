@@ -81,7 +81,8 @@ namespace Android.Sdk {
 
             return new ProcessRunner(adb, new ProcessArgumentBuilder()
                 .Append("-s", serial)
-                .Append("logcat"),
+                .Append("logcat")
+                .Append("-v", "tag"),
                 logger
             ).Start();
         }

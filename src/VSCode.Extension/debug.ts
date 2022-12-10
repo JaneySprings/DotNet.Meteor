@@ -1,6 +1,5 @@
 import { WorkspaceFolder, DebugConfiguration } from 'vscode';
 import { Configuration } from './configuration';
-import { Controller } from './controller';
 import { Target } from './models';
 import * as vscode from 'vscode';
 import { CommandLine } from './bridge';
@@ -20,7 +19,6 @@ export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationPro
 
 		Configuration.updateDebuggingPort();
 		Configuration.selectedDevice = actualDevice;
-		Controller.isDebugging = true;
 
 		if (!config.type && !config.request && !config.name) {
 			config.type = 'dotnet-meteor.debug';

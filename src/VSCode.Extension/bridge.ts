@@ -35,12 +35,6 @@ export class CommandLine {
             .append(`"${projectFile}"`));
     }
 
-    public static runEmulator(name: string): string {
-        return ProcessRunner.run<string>(new ProcessArgumentBuilder("dotnet")
-            .append(this.toolPath)
-            .append("--run-emulator")
-            .append(`"${name}"`));
-    }
     public static androidSdk(): string {
         return ProcessRunner.run<string>(new ProcessArgumentBuilder("dotnet")
             .append(this.toolPath)
