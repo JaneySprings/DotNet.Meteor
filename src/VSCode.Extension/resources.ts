@@ -27,3 +27,11 @@ export const messageDeviceNotExists = "Selected device does not exists yet";
 export const messageNoFrameworkFound = "No supported framework found";
 export const messageNoProjectFound = "Selected project not found";
 export const messageNoDeviceFound = "Selected device incorrect";
+
+export const configId = "dotnetMeteor";
+
+export const configIdMonoSdbDebuggerPortAndroid = "monoSdbDebuggerPortAndroid";
+export const configDefaultMonoSdbDebuggerPortAndroid = 10000;
+
+export const configIdMonoSdbDebuggerPortApple = "monoSdbDebuggerPortApple";
+export const configDefaultMonoSdbDebuggerPortApple = 55551;

@@ -7,18 +7,24 @@ import * as vscode from 'vscode';
 
 export class Configuration {
     public static androidSdk: string;
-    public static debuggingPort: number;
     public static selectedProject: Project;
     public static selectedDevice: Device;
     public static selectedTarget: Target;
 
-    public static updateDebuggingPort() {
-        Configuration.debuggingPort = CommandLine.freePort();
+    public static getDebuggingPort(): number {
+        if (Configuration.selectedDevice!.platform?.includes('android')) 
+            return vscode.workspace.getConfiguration(res.configId)
+                .get(res.configIdMonoSdbDebuggerPortAndroid) ?? res.configDefaultMonoSdbDebuggerPortAndroid;
+        
+        if (Configuration.selectedDevice!.platform?.includes('ios')) 
+            return vscode.workspace.getConfiguration(res.configId)
+                .get(res.configIdMonoSdbDebuggerPortApple) ?? res.configDefaultMonoSdbDebuggerPortApple;
+
+        return -1;
     }
     public static updateAndroidSdk() {
         Configuration.androidSdk = CommandLine.androidSdk();
     }
-
     public static updateSelectedProject() {
         const project = CommandLine.analyzeProject(Configuration.selectedProject!.path);
         Configuration.selectedProject = project;

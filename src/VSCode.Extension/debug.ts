@@ -11,6 +11,7 @@ export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationPro
 									config: DebugConfiguration, 
 									token?: vscode.CancellationToken): Promise<DebugConfiguration | undefined> {
 		
+		if (!Configuration.validate()) return undefined;
 		if (config.noDebug === undefined && Configuration.selectedTarget === Target.Release) {
 			vscode.window.showErrorMessage(res.messageDebugNotSupported);
 			return undefined;
@@ -19,7 +20,6 @@ export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationPro
 		const actualDevice = CommandLine.deviceInfo(Configuration.selectedDevice);
 
 		Configuration.selectedDevice = actualDevice;
-		Configuration.updateDebuggingPort();
 
 		if (!config.type && !config.request && !config.name) {
 			config.preLaunchTask = res.taskTitleBuild;
@@ -31,7 +31,7 @@ export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationPro
 		config['selected_project'] = Configuration.selectedProject;
         config['selected_device'] = Configuration.selectedDevice;
 		config['selected_target'] = Configuration.selectedTarget;
-		config['debugging_port'] = Configuration.debuggingPort;
+		config['debugging_port'] = Configuration.getDebuggingPort();
 		
         return config;
 	}

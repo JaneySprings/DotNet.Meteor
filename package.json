@@ -22,7 +22,6 @@
   ],
   "engines": { "vscode": "^1.73.0" },
   "activationEvents": [
-    "onDebug",
     "onLanguage:csharp",
     "workspaceContains:**/*.{csproj,sln,slnf,csx}"
   ],
@@ -75,7 +74,22 @@
           }
         ]
       }
-    ]
+    ],
+    "configuration": {
+      "title": "%configuration.title%",
+      "properties": {
+        "dotnetMeteor.monoSdbDebuggerPortAndroid": {
+          "type": "integer",
+          "default": 10000,
+          "description": "%configuration.description.monoSdbDebuggerPortAndroid%"
+        },
+        "dotnetMeteor.monoSdbDebuggerPortApple": {
+          "type": "integer",
+          "default": 55551,
+          "description": "%configuration.description.monoSdbDebuggerPortApple%"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

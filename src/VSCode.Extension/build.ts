@@ -21,7 +21,8 @@ export class DotNetBuildTaskProvider implements vscode.TaskProvider {
         const command = [
             `dotnet build "${Configuration.selectedProject!.path}"`,
             `-c:${Configuration.selectedTarget!}`,
-            `-f:${framework}`
+            `-f:${framework}`,
+            `-t:Build`
         ];
         
         if (!framework) {

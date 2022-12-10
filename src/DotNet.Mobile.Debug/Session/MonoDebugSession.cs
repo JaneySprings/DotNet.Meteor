@@ -147,12 +147,16 @@ public class MonoDebugSession : DebugSession {
         SetExceptionOptions(args.ExceptionOptions);
 
         var configuration = new LaunchData(args.Project, args.Device, args.Target);
-        int port = args.DebuggingPort;
+        var port = args.DebuggingPort;
         var host = args.Address;
 
         IPAddress address = string.IsNullOrWhiteSpace(host) ? IPAddress.Loopback : Utilities.ResolveIPAddress(host);
         if (address == null) {
             SendErrorResponse(response, 3013, $"Invalid address '{address}'");
+            return;
+        }
+        if (port < 1) {
+            SendErrorResponse(response, 3013, $"Invalid port '{port}'");
             return;
         }
 

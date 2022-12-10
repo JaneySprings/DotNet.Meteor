@@ -18,5 +18,9 @@
 	"task.title.publish": "dotnet-meteor: Publish",
 
 	"debugger.meteor.id": "dotnet-meteor.debugger",
-	"debugger.meteor.title": ".NET Meteor Debugger"
+	"debugger.meteor.title": ".NET Meteor Debugger",
+
+	"configuration.title": ".NET Meteor configuration",
+	"configuration.description.monoSdbDebuggerPortAndroid": "Default port for Mono SDB debugger for Android platform",
+	"configuration.description.monoSdbDebuggerPortApple": "Default port for Mono SDB debugger for Apple platform"
 }
