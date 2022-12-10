@@ -68,10 +68,6 @@ namespace DotNet.Mobile.Debug.CLI {
         }
 
 
-        public static void FreePort(string[] args) {
-            int port = Utilities.FindFreePort();
-            Console.WriteLine(JsonSerializer.Serialize(port));
-        }
         public static void StartSession(string[] args) {
             Console.WriteLine("Starting Mono debugger session...");
             var debugSession = new MonoDebugSession();

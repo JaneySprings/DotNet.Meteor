@@ -43,11 +43,5 @@ export class CommandLine {
             .append(this.toolPath)
             .append("--android-sdk-path"));
     }
-
-    public static freePort(): number {
-        return ProcessRunner.run<number>(new ProcessArgumentBuilder("dotnet")
-            .append(this.toolPath)
-            .append("--free-port"));
-    }
 }
   
