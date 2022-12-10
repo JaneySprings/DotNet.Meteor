@@ -6,7 +6,7 @@ using System.IO;
 namespace DotNet.Mobile.Debug;
 
 public static class WorkspaceAnalyzer {
-    public static List<Project> AnalyzeWorkspace(string workspacePath) {
+    public static IEnumerable<Project> AnalyzeWorkspace(string workspacePath) {
         var projects = new List<Project>();
         var projectFiles = Directory.GetFiles(workspacePath, "*.csproj", SearchOption.AllDirectories);
 
@@ -14,10 +14,12 @@ public static class WorkspaceAnalyzer {
             if (!GetIsExecutable(projectFile))
                 continue;
 
-            projects.Add(AnalyzeProject(projectFile));
+            var project = AnalyzeProject(projectFile);
+            if (project.Frameworks?.Find(it => it.Contains("net", System.StringComparison.OrdinalIgnoreCase) && it.Contains('-')) != null)
+                projects.Add(project);
         }
 
-        return projects;
+        return projects.OrderBy(x => x.Name);
     }
 
     public static Project AnalyzeProject(string projectFile) {
@@ -32,6 +34,10 @@ public static class WorkspaceAnalyzer {
 
     private static List<string> GetTargetFrameworks(string projectPath) {
         string property = GetProperty(projectPath, "TargetFrameworks");
+
+        if (property == null)
+            property = GetProperty(projectPath, "TargetFramework");
+
         return property?.Split(';')?.Where(it => !string.IsNullOrEmpty(it))?.ToList();
     }
 

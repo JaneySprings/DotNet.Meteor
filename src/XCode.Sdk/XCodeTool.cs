@@ -27,7 +27,6 @@ namespace XCode.Sdk {
                     Name = $"iPhone {version}",
                     Details = "iPhone",
                     Platform = Platform.iOS,
-                    OSVersion = "Unknown",
                     Serial = serial
                 });
             }

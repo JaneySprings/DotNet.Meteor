@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Diagnostics;
 using Android.Sdk;
 using XCode.Sdk;
@@ -60,7 +61,7 @@ internal static class Performance {
     private static void WorkspaceFetchTest(string path) {
         DoTimed("Workspace Projects Fetch", () => {
             var r = WorkspaceAnalyzer.AnalyzeWorkspace(path);
-            Console.WriteLine("Found {0} projects", r.Count);
+            Console.WriteLine("Found {0} projects", r.Count());
         });
     }
 

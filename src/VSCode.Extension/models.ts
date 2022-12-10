@@ -24,7 +24,7 @@ export class ProjectItem implements vscode.QuickPickItem {
         const workspace = Configuration.workspacePath();
         this.label = project.name;
         this.description = project.path.replace(workspace + '/', '');
-        this.detail = project.frameworks?.join('  ') ?? "netstandard";
+        this.detail = project.frameworks?.join('  ') ?? "frameworks not found";
         this.item = project;
     }
 }

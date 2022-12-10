@@ -44,11 +44,6 @@ public class Program {
             }, AndroidCommand.AndroidSdkPath)
         },
         {
-            "--free-port", new Tuple<string[], Action<string[]>>(new []{
-                "Find first available port"
-            }, ConsoleUtils.FreePort)
-        },
-        {
             "--analyze-workspace", new Tuple<string[], Action<string[]>>(new []{
                 "Find all executable projects in workspace", "<cwd-path>"
             }, ConsoleUtils.AnalyzeWorkspace)
