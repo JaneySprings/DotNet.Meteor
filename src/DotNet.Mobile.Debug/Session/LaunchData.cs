@@ -11,6 +11,7 @@ public class LaunchData {
     public string AppName { get; set; }
     public string BundlePath { get; set; }
     public string Target { get; set; }
+    public string Framework { get; set; }
     public DeviceData Device { get; set; }
     public Project Project { get; set; }
     public Platform Platform { get; set; }
@@ -22,6 +23,7 @@ public class LaunchData {
 
         AppId = ExtractValueFromProject(Project.Path, "ApplicationId");
         AppName = ExtractValueFromProject(Project.Path, "ApplicationTitle");
+        Framework = FindTargetFramework();
 
         if (device.Platform.Contains("android", StringComparison.OrdinalIgnoreCase)) {
             BundlePath = FindAndroidPackage(Path.GetDirectoryName(Project.Path));
@@ -43,6 +45,11 @@ public class LaunchData {
             return Path.GetFileNameWithoutExtension(path);
 
         return match.Groups[1].Value;
+    }
+
+    private string FindTargetFramework() {
+        var frameworks = this.Project.Frameworks;
+        return frameworks.First(it => it.Contains(this.Device.Platform, StringComparison.OrdinalIgnoreCase));
     }
 
     private string FindAndroidPackage(string rootDirectory) {

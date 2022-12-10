@@ -1,7 +1,5 @@
 import * as vscode from 'vscode';
 import { Configuration } from './configuration';
-import { CommandLine } from "./bridge";
-import { Controller } from './controller';
 
 
 class DotNetTaskDefinition implements vscode.TaskDefinition {
@@ -34,20 +32,7 @@ export class DotNetBuildTaskProvider implements vscode.TaskProvider {
             return [];
         }
 
-        
         if (Configuration.selectedDevice!.platform?.includes('android')) {
-            if (Controller.isDebugging) {
-                if (!Configuration.selectedDevice!.is_running) {
-                    const serial = CommandLine.runEmulator(Configuration.selectedDevice!.name!);
-                    Configuration.selectedDevice!.serial = serial;
-                    Configuration.selectedDevice!.is_running = true;
-                }
-                command.push('-t:Run');
-                command.push(`-p:AndroidAttachDebugger=true`);
-                command.push(`-p:AdbTarget=-s%20${Configuration.selectedDevice!.serial}`);
-                command.push(`-p:AndroidSdbTargetPort=${Configuration.debuggingPort}`);
-                command.push(`-p:AndroidSdbHostPort=${Configuration.debuggingPort}`);
-            }
             command.push(`-p:AndroidSdkDirectory="${Configuration.androidSdk}"`);
         }
 

@@ -1,6 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using DotNet.Mobile.Debug.Protocol;
+using System.Diagnostics;
+using DotNet.Mobile.Shared;
+using Microsoft.Sdk;
+using Android.Sdk;
+using XCode.Sdk;
 
 namespace DotNet.Mobile.Debug.Session;
 
@@ -67,4 +72,35 @@ public abstract class DebugSession : Session {
     public abstract void Source(Response response, Argument arguments);
     public abstract void Threads(Response response, Argument arguments);
     public abstract void Evaluate(Response response, Argument arguments);
+
+
+    protected void LaunchApplication(LaunchData configuration, int port, List<Process> processes) {
+        if (configuration.Platform == Platform.Android) {
+            if (configuration.Device.IsEmulator && !configuration.Device.IsRunning)
+                configuration.Device.Serial = Emulator.Run(configuration.Device.Name);
+
+            var androidSdk = Android.Sdk.PathUtils.SdkLocation();
+            DotNetRunner.Execute(new ProcessArgumentBuilder()
+                .Append("build", $"\"{configuration.Project.Path}\"")
+                .Append( "-t:_Run")
+                .Append($"-f:{configuration.Framework}")
+                .Append( "-p:AndroidAttachDebugger=true")
+                .Append($"-p:AdbTarget=-s%20{configuration.Device.Serial}")
+                .Append($"-p:AndroidSdbTargetPort={port}")
+                .Append($"-p:AndroidSdbHostPort={port}")
+                .Append($"-p:AndroidSdkDirectory=\"{androidSdk}\""), this);
+
+            var logger = DeviceBridge.Logcat(configuration.Device.Serial, this);
+            processes.Add(logger);
+        }
+
+        if (configuration.Platform == Platform.iOS) {
+            if (!configuration.Device.IsEmulator) {
+                var tunnel = MLaunch.TcpTunnel(configuration.Device, port);
+                processes.Add(tunnel);
+            }
+            var deviceProccess = MLaunch.LaunchAppForDebug(configuration.BundlePath, configuration.Device, port, this);
+            processes.Add(deviceProccess);
+        }
+    }
 }

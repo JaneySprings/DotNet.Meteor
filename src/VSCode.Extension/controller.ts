@@ -11,7 +11,6 @@ export class Controller {
     public static deviceStatusItem: vscode.StatusBarItem;
     public static workspaceProjects: Project[];
     public static mobileDevices: Device[];
-    public static isDebugging: Boolean;
 
     
     public static activate() {

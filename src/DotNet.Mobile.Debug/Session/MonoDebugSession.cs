@@ -9,8 +9,6 @@ using Mono.Debugging.Soft;
 using DotNet.Mobile.Debug.Events;
 using DotNet.Mobile.Debug.Protocol;
 using DotNet.Mobile.Debug.Pipeline;
-using Android.Sdk;
-using XCode.Sdk;
 using Process = System.Diagnostics.Process;
 
 namespace DotNet.Mobile.Debug.Session;
@@ -148,8 +146,7 @@ public class MonoDebugSession : DebugSession {
     public override void Launch(Response response, Argument args) {
         SetExceptionOptions(args.ExceptionOptions);
 
-        var launchOptions = new LaunchData(args.Project, args.Device, args.Target);
-
+        var configuration = new LaunchData(args.Project, args.Device, args.Target);
         int port = args.DebuggingPort;
         var host = args.Address;
 
@@ -159,22 +156,8 @@ public class MonoDebugSession : DebugSession {
             return;
         }
 
-        Connect(launchOptions, address, port);
-
-        if (launchOptions.Platform == Platform.iOS) {
-            if (!launchOptions.Device.IsEmulator) {
-                var tunnel = MLaunch.TcpTunnel(launchOptions.Device, port);
-                this.processes.Add(tunnel);
-            }
-            var deviceProccess = MLaunch.LaunchAppForDebug(launchOptions.BundlePath, launchOptions.Device, port, this);
-            this.processes.Add(deviceProccess);
-        }
-
-        if (launchOptions.Platform == Platform.Android) {
-            var logger = DeviceBridge.Logcat(launchOptions.Device.Serial, this);
-            this.processes.Add(logger);
-        }
-
+        LaunchApplication(configuration, port, this.processes);
+        Connect(configuration, address, port);
         SendResponse(response);
     }
     private void Connect(LaunchData options, IPAddress address, int port) {
