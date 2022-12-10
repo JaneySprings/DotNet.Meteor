@@ -1,8 +1,8 @@
-import * as vscode from 'vscode';
 import { Target, Project, ProjectItem, Device, DeviceItem, Icon } from "./models"
 import { Configuration } from './configuration';
 import { CommandLine } from "./bridge";
-import { Command } from './constants';
+import * as res from './resources';
+import * as vscode from 'vscode';
 
 
 export class Controller {
@@ -18,9 +18,9 @@ export class Controller {
         this.targetStatusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 90);
         this.deviceStatusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 80);
 
-        this.projectStatusItem.command = Command.selectProject;
-        this.targetStatusItem.command = Command.selectTarget;
-        this.deviceStatusItem.command = Command.selectDevice;
+        this.targetStatusItem.command = res.commandIdSelectActiveConfiguration;
+        this.projectStatusItem.command = res.commandIdSelectActiveProject;
+        this.deviceStatusItem.command = res.commandIdSelectActiveDevice;
     }
     public static deactivate() {
         this.projectStatusItem.dispose();
@@ -49,7 +49,7 @@ export class Controller {
     public static async showQuickPickProject() {
         const selectedItem = await vscode.window.showQuickPick(
             Controller.workspaceProjects.map(project => new ProjectItem(project)), 
-            { placeHolder: "Select active project" }
+            { placeHolder: res.commandTitleSelectActiveProject }
         );
 
         if (selectedItem !== undefined) 
@@ -58,7 +58,7 @@ export class Controller {
     public static async showQuickPickTarget() {
         const selectedItem = await vscode.window.showQuickPick(
             [ Target.Debug, Target.Release ], 
-            { placeHolder: "Select configuration" }
+            { placeHolder: res.commandTitleSelectActiveConfiguration }
         );
         
         if (selectedItem !== undefined)
@@ -82,7 +82,7 @@ export class Controller {
         CommandLine.mobileDevicesAsync(items => {
             Controller.mobileDevices = items;
             picker.items = items.map(device => new DeviceItem(device));
-            picker.placeholder = "Select device";
+            picker.placeholder = res.commandTitleSelectActiveDevice;
             picker.busy = false;
         });
     }

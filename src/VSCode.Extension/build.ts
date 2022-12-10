@@ -1,17 +1,14 @@
-import * as vscode from 'vscode';
 import { Configuration } from './configuration';
+import * as res from './resources';
+import * as vscode from 'vscode';
 
 
 class DotNetTaskDefinition implements vscode.TaskDefinition {
-    public name: string = DotNetBuildTaskProvider.action;
-    public type: string = DotNetBuildTaskProvider.type;
+    public name: string = res.taskActionBuild;
+    public type: string = res.taskIdBuild;
 }
 
 export class DotNetBuildTaskProvider implements vscode.TaskProvider {
-    public static source: string = 'dotnet-meteor';
-    public static action: string = 'build';
-    public static type: string = `${DotNetBuildTaskProvider.source}.${DotNetBuildTaskProvider.action}`
-
     resolveTask(task: vscode.Task, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Task> { return task; }
     provideTasks(token: vscode.CancellationToken): vscode.ProviderResult<vscode.Task[]> {
         Configuration.updateSelectedProject();
@@ -28,7 +25,7 @@ export class DotNetBuildTaskProvider implements vscode.TaskProvider {
         ];
         
         if (!framework) {
-            vscode.window.showErrorMessage(`No supported framework found`);
+            vscode.window.showErrorMessage(res.messageNoFrameworkFound);
             return [];
         }
 
@@ -46,8 +43,8 @@ export class DotNetBuildTaskProvider implements vscode.TaskProvider {
             new vscode.Task(
                 new DotNetTaskDefinition(), 
                 vscode.TaskScope.Workspace, 
-                DotNetBuildTaskProvider.action, 
-                DotNetBuildTaskProvider.source,
+                res.taskActionBuild, 
+                res.extensionId,
                 new vscode.ShellExecution(command.join(' '))
             )
         ];

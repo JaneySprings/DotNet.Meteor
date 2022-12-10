@@ -1,7 +1,8 @@
 import { Project, Device, Target } from "./models"
-import { CommandLine } from "./bridge";
-import * as vscode from 'vscode';
 import { Controller } from "./controller";
+import { CommandLine } from "./bridge";
+import * as res from './resources';
+import * as vscode from 'vscode';
 
 
 export class Configuration {
@@ -34,16 +35,15 @@ export class Configuration {
 
     public static validate(): boolean {
         if (!Configuration.selectedProject || !Configuration.selectedProject.path) {
-            vscode.window.showErrorMessage('Selected project not found');
+            vscode.window.showErrorMessage(res.messageNoProjectFound);
             return false;
         }
         if (!Configuration.selectedDevice || !Configuration.selectedDevice.platform) {
-            vscode.window.showErrorMessage('Selected device incorrect');
+            vscode.window.showErrorMessage(res.messageNoDeviceFound);
             return false;
         }
-
         if (!Controller.mobileDevices.some(it => it.name === Configuration.selectedDevice!.name)) {
-            vscode.window.showErrorMessage('Selected device does not exists yet');
+            vscode.window.showErrorMessage(res.messageDeviceNotExists);
             return false;
         }
 

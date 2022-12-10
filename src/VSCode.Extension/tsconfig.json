@@ -4,7 +4,7 @@
 		"target": "ES2020",
 		"outDir": "../../extension",
 		"sourceMap": false,
-		"rootDir": "src/VSCode.Extension",
+		"rootDir": "./",
 		"strict": true,
 		"lib": [
 			"ES2020"
