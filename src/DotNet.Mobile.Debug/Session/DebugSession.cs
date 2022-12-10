@@ -82,7 +82,7 @@ public abstract class DebugSession : Session {
             var androidSdk = Android.Sdk.PathUtils.SdkLocation();
             DotNetRunner.Execute(new ProcessArgumentBuilder()
                 .Append("build", $"\"{configuration.Project.Path}\"")
-                .Append( "-t:_Run")
+                .Append( "-t:_Upload;_Run")
                 .Append($"-f:{configuration.Framework}")
                 .Append( "-p:AndroidAttachDebugger=true")
                 .Append($"-p:AdbTarget=-s%20{configuration.Device.Serial}")

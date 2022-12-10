@@ -57,7 +57,7 @@ namespace DotNet.Mobile.Debug.CLI {
         public static void AnalyzeWorkspace(string[] args) {
             if (args.Length < 2)
                 throw new Exception ($"Missing parameter: {Program.CommandHandler[args[0]].Item1[1]}");
-            List<Project> projects = WorkspaceAnalyzer.AnalyzeWorkspace(args[1]);
+            IEnumerable<Project> projects = WorkspaceAnalyzer.AnalyzeWorkspace(args[1]);
             Console.WriteLine(JsonSerializer.Serialize(projects));
         }
         public static void AnalyzeProject(string[] args) {
