@@ -1,9 +1,10 @@
-# Ignore everything
+# Ignore 
 *
-.vscode
-.config
+*/**
+**/.DS_Store
 
-# Whitelist
+# Include
+!img
 !extension
 !package.json
 !package.nls*.json
