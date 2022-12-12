@@ -18,7 +18,7 @@ namespace Microsoft.Sdk {
             string dotnet = Environment.GetEnvironmentVariable("DOTNET_SDK_ROOT");
 
             if (!string.IsNullOrEmpty(dotnet)) {
-                var tool = new FileInfo(Path.Combine(dotnet, "dotnet"));
+                var tool = new FileInfo(Path.Combine(dotnet, "dotnet" + RuntimeSystem.ExecExtension));
                 if (tool.Exists) return tool;
             }
 
@@ -26,7 +26,7 @@ namespace Microsoft.Sdk {
             var locations = path.Split(Path.PathSeparator).Where(it => it.Contains("dotnet"));
 
             foreach(var location in locations) {
-                var tool = new FileInfo(Path.Combine(location, "dotnet"));
+                var tool = new FileInfo(Path.Combine(location, "dotnet" + RuntimeSystem.ExecExtension));
                 if (tool.Exists) return tool;
             }
 

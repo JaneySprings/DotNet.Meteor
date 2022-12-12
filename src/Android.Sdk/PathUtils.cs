@@ -4,22 +4,16 @@ using DotNet.Mobile.Shared;
 
 namespace Android.Sdk {
     public static class PathUtils {
-        public static string ExecExtension => RuntimeSystem.IsWindows ? ".exe" : "";
-        public static string HomeDirectory => RuntimeSystem.IsWindows
-            ? Environment.GetEnvironmentVariable("HOMEPATH")
-            : Environment.GetEnvironmentVariable("HOME");
-
-
         public static string SdkLocation() {
             string path = Environment.GetEnvironmentVariable("ANDROID_SDK_ROOT");
 
             if (string.IsNullOrEmpty(path)) {
                 if (RuntimeSystem.IsWindows)
-                    path = InvariantSdk(HomeDirectory, "AppData", "Local", "Android");
+                    path = InvariantSdk(RuntimeSystem.HomeDirectory, "AppData", "Local", "Android");
                 else if (RuntimeSystem.IsMacOS)
-                    path = InvariantSdk(HomeDirectory, "Library", "Android");
+                    path = InvariantSdk(RuntimeSystem.HomeDirectory, "Library", "Android");
                 else
-                    path = InvariantSdk(HomeDirectory, "Android");
+                    path = InvariantSdk(RuntimeSystem.HomeDirectory, "Android");
             }
 
             if (string.IsNullOrEmpty(path) || !Directory.Exists(path))
@@ -29,12 +23,12 @@ namespace Android.Sdk {
         }
 
         public static string AvdLocation() {
-            return Path.Combine(HomeDirectory, ".android", "avd");
+            return Path.Combine(RuntimeSystem.HomeDirectory, ".android", "avd");
         }
 
         public static FileInfo AdbTool() {
             string sdk = PathUtils.SdkLocation();
-            string path = Path.Combine(sdk, "platform-tools", "adb" + ExecExtension);
+            string path = Path.Combine(sdk, "platform-tools", "adb" + RuntimeSystem.ExecExtension);
 
             if (!File.Exists(path))
                 throw new Exception("Could not find adb tool");
@@ -44,7 +38,7 @@ namespace Android.Sdk {
 
         public static FileInfo EmulatorTool() {
             string sdk = PathUtils.SdkLocation();
-            string path = Path.Combine(sdk, "emulator", "emulator" + ExecExtension);
+            string path = Path.Combine(sdk, "emulator", "emulator" + RuntimeSystem.ExecExtension);
 
             if (!File.Exists(path))
                 throw new Exception("Could not find emulator tool");
@@ -58,7 +52,7 @@ namespace Android.Sdk {
             FileInfo newestTool = null;
 
             foreach (string directory in Directory.GetDirectories(tools)) {
-                string avdPath = Path.Combine(directory, "bin", "avdmanager" + ExecExtension);
+                string avdPath = Path.Combine(directory, "bin", "avdmanager" + RuntimeSystem.ExecExtension);
 
                 if (File.Exists(avdPath)) {
                     var tool = new FileInfo(avdPath);
