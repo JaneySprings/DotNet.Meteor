@@ -80,16 +80,20 @@ public abstract class DebugSession : Session {
                 configuration.Device.Serial = Emulator.Run(configuration.Device.Name);
 
             var androidSdk = Android.Sdk.PathUtils.SdkLocation();
-            DotNetRunner.Execute(new ProcessArgumentBuilder()
+            var arguments = new ProcessArgumentBuilder()
                 .Append("build", $"\"{configuration.Project.Path}\"")
                 .Append( "-t:_Upload;_Run")
                 .Append($"-f:{configuration.Framework}")
-                .Append( "-p:AndroidAttachDebugger=true")
-                .Append($"-p:AdbTarget=-s%20{configuration.Device.Serial}")
-                .Append($"-p:AndroidSdbTargetPort={port}")
-                .Append($"-p:AndroidSdbHostPort={port}")
-                .Append($"-p:AndroidSdkDirectory=\"{androidSdk}\""), this);
+                .Append($"-p:AndroidSdkDirectory=\"{androidSdk}\"")
+                .Append($"-p:AdbTarget=-s%20{configuration.Device.Serial}");
 
+            if (configuration.Target.Equals("debug", StringComparison.OrdinalIgnoreCase)) {
+                arguments.Append( "-p:AndroidAttachDebugger=true")
+                    .Append($"-p:AndroidSdbTargetPort={port}")
+                    .Append($"-p:AndroidSdbHostPort={port}");
+            }
+
+            DotNetRunner.Execute(arguments, this);
             var logger = DeviceBridge.Logcat(configuration.Device.Serial, this);
             processes.Add(logger);
         }
