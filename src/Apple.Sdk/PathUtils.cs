@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using DotNet.Mobile.Shared;
 
-namespace XCode.Sdk {
+namespace Apple.Sdk {
     public static class PathUtils {
         public static string XCodePath() {
             var selector = new FileInfo(Path.Combine("/usr", "bin", "xcode-select"));

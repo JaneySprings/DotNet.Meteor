@@ -2,7 +2,7 @@ using System.IO;
 using System.Diagnostics;
 using DotNet.Mobile.Shared;
 
-namespace XCode.Sdk {
+namespace Apple.Sdk {
     public static class MLaunch {
         public static void InstallOnDevice(string bundlePath, DeviceData device) {
             FileInfo tool = PathUtils.MLaunchTool();

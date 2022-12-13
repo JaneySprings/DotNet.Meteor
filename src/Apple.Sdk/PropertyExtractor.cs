@@ -1,7 +1,7 @@
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace XCode.Sdk {
+namespace Apple.Sdk {
     public class PropertyExtractor {
         private string content;
 

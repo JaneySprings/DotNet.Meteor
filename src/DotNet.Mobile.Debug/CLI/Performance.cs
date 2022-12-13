@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Diagnostics;
 using Android.Sdk;
-using XCode.Sdk;
+using Apple.Sdk;
 
 namespace DotNet.Mobile.Debug.Tests;
 
@@ -43,13 +43,13 @@ internal static class Performance {
             Console.WriteLine("Found {0} simulators", r.Count);
         });
         DoTimed("Apple Simulators SimCtl Fast Fetch", () => {
-            var r = XCodeTool.SimulatorsFast();
+            var r = AppleTool.SimulatorsFast();
             Console.WriteLine("Found {0} simulators", r.Count);
         });
     }
     private static void AppleDevicesFetchTest() {
         DoTimed("Apple Devices Fast Fetch", () => {
-            var r = XCodeTool.PhysicalDevicesFast();
+            var r = AppleTool.PhysicalDevicesFast();
             Console.WriteLine("Found {0} devices", r.Count);
         });
         DoTimed("Apple Devices XCTrace Fetch", () => {
