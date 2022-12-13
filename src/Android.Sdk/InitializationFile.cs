@@ -1,18 +1,21 @@
 using System.Linq;
 using System.IO;
 
-namespace DotNet.Mobile.Shared {
+namespace Android.Sdk {
     public class IniFile {
         private string[] content;
 
-        public IniFile(string path) {
+        public static IniFile FromPath(string path) {
             if (!File.Exists(path))
                 throw new FileNotFoundException("Could not find file", path);
+            return new IniFile(path);
+        }
+        private IniFile(string path) {
             content = File.ReadAllLines(path);
         }
 
         public string GetField(string name) {
-            var record = content.FirstOrDefault(it => it.StartsWith(name));
+            var record = content.First(it => it.StartsWith(name));
 
             if (record == null)
                 return null;

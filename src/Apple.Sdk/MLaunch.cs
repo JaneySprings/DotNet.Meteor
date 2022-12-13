@@ -7,7 +7,7 @@ namespace Apple.Sdk {
         public static void InstallOnDevice(string bundlePath, DeviceData device) {
             FileInfo tool = PathUtils.MLaunchTool();
             new ProcessRunner(tool, new ProcessArgumentBuilder()
-                .Append("--installdev", $"\"{bundlePath}\"")
+                .Append("--installdev").AppendQuoted(bundlePath)
                 .Append("--devname", device.Serial))
                 .WaitForExit();
         }
@@ -26,7 +26,7 @@ namespace Apple.Sdk {
 
             if (device.IsEmulator) {
                 process = new ProcessRunner(tool, new ProcessArgumentBuilder()
-                    .Append( "--launchsim", $"\"{bundlePath}\"")
+                    .Append( "--launchsim").AppendQuoted(bundlePath)
                     .Append( "--argument=-monodevelop-port")
                     .Append($"--argument={port}")
                     .Append($"--setenv=__XAMARIN_DEBUG_PORT__={port}")
@@ -36,8 +36,8 @@ namespace Apple.Sdk {
             } else {
                 InstallOnDevice(bundlePath, device);
                 process = new ProcessRunner(tool, new ProcessArgumentBuilder()
-                    .Append( "--launchdev", $"\"{bundlePath}\"")
-                    .Append( "--devname", device.Serial)
+                    .Append( "--launchdev").AppendQuoted(bundlePath)
+                    .Append($"--devname=${device.Serial}")
                     .Append( "--argument=-monodevelop-port")
                     .Append($"--argument={port}")
                     .Append($"--setenv=__XAMARIN_DEBUG_PORT__={port}")

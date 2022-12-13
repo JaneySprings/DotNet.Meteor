@@ -10,7 +10,7 @@ namespace Android.Sdk {
             string avdHome = PathUtils.AvdLocation();
 
             foreach (var file in Directory.GetFiles(avdHome, "*.ini")) {
-                var ini = new IniFile(file);
+                var ini = IniFile.FromPath(file);
                 avds.Add(new DeviceData {
                     Name = Path.GetFileNameWithoutExtension(file),
                     Details = "Emulator",

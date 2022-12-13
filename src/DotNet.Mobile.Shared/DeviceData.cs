@@ -9,6 +9,9 @@ namespace DotNet.Mobile.Shared {
         [JsonPropertyName("os_version")] public string OSVersion { get; set; }
         [JsonPropertyName("is_emulator")] public bool IsEmulator { get; set; }
         [JsonPropertyName("is_running")] public bool IsRunning { get; set; }
+
+        public bool IsAndroid => Platform.Contains("android", System.StringComparison.OrdinalIgnoreCase);
+        public bool IsIPhone => Platform.Contains("ios", System.StringComparison.OrdinalIgnoreCase);
     }
 
     public static class Platform {

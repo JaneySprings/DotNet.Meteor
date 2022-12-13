@@ -12,35 +12,35 @@ export class CommandLine {
 
     public static mobileDevicesAsync(callback: (items: Device[]) => any) {
         ProcessRunner.runAsync<Device[]>(new ProcessArgumentBuilder("dotnet")
-            .append(this.toolPath)
+            .appendQuoted(this.toolPath)
             .append("--all-devices"), callback);
     }
 
     public static deviceInfo(device: Device): Device {
         return ProcessRunner.run<Device>(new ProcessArgumentBuilder("dotnet")
-            .append(this.toolPath)
+            .appendQuoted(this.toolPath)
             .append("--device")
-            .append(`"${device.platform}"`)
-            .append(`"${device.name}"`));
+            .appendQuoted(device.platform ?? "")
+            .appendQuoted(device.name ?? ""));
     }
 
     public static analyzeWorkspaceAsync(callback: (items: Project[]) => any) {
         ProcessRunner.runAsync<Project[]>(new ProcessArgumentBuilder("dotnet")
-            .append(this.toolPath)
+            .appendQuoted(this.toolPath)
             .append("--analyze-workspace")
-            .append(`"${Configuration.workspacePath()}"`), callback);
+            .appendQuoted(Configuration.workspacePath()), callback);
     }
 
     public static analyzeProject(projectFile: string): Project {
         return ProcessRunner.run<Project>(new ProcessArgumentBuilder("dotnet")
-            .append(this.toolPath)
+            .appendQuoted(this.toolPath)
             .append("--analyze-project")
-            .append(`"${projectFile}"`));
+            .appendQuoted(projectFile));
     }
 
     public static androidSdk(): string {
         return ProcessRunner.run<string>(new ProcessArgumentBuilder("dotnet")
-            .append(this.toolPath)
+            .appendQuoted(this.toolPath)
             .append("--android-sdk-path"));
     }
 }

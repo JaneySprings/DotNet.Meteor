@@ -31,6 +31,7 @@ export class DotNetBuildTaskProvider implements vscode.TaskProvider {
         }
 
         if (Configuration.selectedDevice!.platform?.includes('android')) {
+            command.push(`-p:EmbedAssembliesIntoApk=true`);
             command.push(`-p:AndroidSdkDirectory="${Configuration.androidSdk}"`);
         }
 

@@ -5,7 +5,7 @@ using System.Diagnostics;
 using DotNet.Mobile.Shared;
 using Microsoft.Sdk;
 using Android.Sdk;
-using XCode.Sdk;
+using Apple.Sdk;
 
 namespace DotNet.Mobile.Debug.Session;
 
@@ -81,9 +81,10 @@ public abstract class DebugSession : Session {
 
             var androidSdk = Android.Sdk.PathUtils.SdkLocation();
             var arguments = new ProcessArgumentBuilder()
-                .Append("build", $"\"{configuration.Project.Path}\"")
-                .Append( "-t:_Upload;_Run")
+                .Append("build").AppendQuoted(configuration.Project.Path)
+                .Append( "-t:_Run")
                 .Append($"-f:{configuration.Framework}")
+                .Append($"-p:PackageName={configuration.AppId}")
                 .Append($"-p:AndroidSdkDirectory=\"{androidSdk}\"")
                 .Append($"-p:AdbTarget=-s%20{configuration.Device.Serial}");
 
@@ -93,6 +94,8 @@ public abstract class DebugSession : Session {
                     .Append($"-p:AndroidSdbHostPort={port}");
             }
 
+            DeviceBridge.Uninstall(configuration.Device.Serial, configuration.AppId, this);
+            DeviceBridge.Install(configuration.Device.Serial, configuration.BundlePath, this);
             DotNetRunner.Execute(arguments, this);
             var logger = DeviceBridge.Logcat(configuration.Device.Serial, this);
             processes.Add(logger);
