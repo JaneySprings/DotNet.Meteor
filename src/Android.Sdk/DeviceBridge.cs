@@ -10,7 +10,8 @@ namespace Android.Sdk {
         public static string Shell(string serial, params string[] args) {
             var adb = PathUtils.AdbTool();
             var result = new ProcessRunner(adb, new ProcessArgumentBuilder()
-                .Append("-s", serial, "shell")
+                .Append("-s", serial)
+                .Append("shell")
                 .Append(args))
                 .WaitForExit();
 
@@ -20,14 +21,37 @@ namespace Android.Sdk {
         public static string Forward(string serial, int local, int target) {
             var adb = PathUtils.AdbTool();
             var result = new ProcessRunner(adb, new ProcessArgumentBuilder()
-                .Append("-s", serial, "forward")
-                .Append($"tcp:{local}", $"tcp:{target}"))
+                .Append("-s", serial)
+                .Append("forward")
+                .Append($"tcp:{local}")
+                .Append($"tcp:{target}"))
                 .WaitForExit();
 
             if (result.ExitCode != 0)
                 throw new Exception(string.Join(Environment.NewLine, result.StandardError));
 
             return string.Join(Environment.NewLine, result.StandardOutput);
+        }
+
+        public static void Install(string serial, string apk, IProcessLogger logger = null) {
+            var adb = PathUtils.AdbTool();
+            var arguments = new ProcessArgumentBuilder()
+                .Append("-s", serial)
+                .Append("install")
+                .Append("-r").AppendQuoted(apk);
+
+            var result = new ProcessRunner(adb, arguments, logger).WaitForExit();
+            if (result.ExitCode != 0)
+                throw new Exception(string.Join(Environment.NewLine, result.StandardError));
+        }
+
+        public static void Uninstall(string serial, string pkg, IProcessLogger logger = null) {
+            var adb = PathUtils.AdbTool();
+            var argument = new ProcessArgumentBuilder()
+                .Append("-s", serial)
+                .Append("uninstall")
+                .Append(pkg);
+            new ProcessRunner(adb, argument, logger).WaitForExit();
         }
 
         public static List<string> Devices() {
@@ -79,12 +103,11 @@ namespace Android.Sdk {
                 .Append("-c"))
                 .WaitForExit();
 
-            return new ProcessRunner(adb, new ProcessArgumentBuilder()
+            var arguments = new ProcessArgumentBuilder()
                 .Append("-s", serial)
                 .Append("logcat")
-                .Append("-v", "tag"),
-                logger
-            ).Start();
+                .Append("-v", "tag");
+            return new ProcessRunner(adb, arguments, logger).Start();
         }
     }
 }

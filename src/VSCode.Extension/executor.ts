@@ -27,10 +27,12 @@ export class ProcessArgumentBuilder {
         this.args.push(command);
     }
 
-    public append(...params: string[]): ProcessArgumentBuilder {
-        for (let i = 0; i < params.length; i++) {
-            this.args.push(params[i]);
-        }
+    public append(arg: string): ProcessArgumentBuilder {
+        this.args.push(arg);
+        return this;
+    }
+    public appendQuoted(arg: string): ProcessArgumentBuilder {
+        this.args.push(`"${arg}"`);
         return this;
     }
     public build(): string {
