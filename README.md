@@ -5,7 +5,7 @@ This VSCode extension allows you to build, debug .NET 7 / .NET 6 mobile apps (in
 * Fast and responsive.
 * Do not require to install the OmniSharp VSCode Extension.
 * Shows all projects that exist in the opened workspace.
-* Works on Windows, MacOS, and Linux (tested on Ubuntu)
+* Works on Windows, MacOS, and Linux (tested on Ubuntu).
 
 # Run the Application
 
