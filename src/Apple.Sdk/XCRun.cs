@@ -4,7 +4,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using DotNet.Mobile.Shared;
 
-namespace XCode.Sdk {
+namespace Apple.Sdk {
     public static class XCRun {
         public static List<DeviceData> Simulators() {
             FileInfo tool = PathUtils.XCRunTool();
