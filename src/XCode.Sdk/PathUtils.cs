@@ -5,7 +5,7 @@ using DotNet.Mobile.Shared;
 namespace XCode.Sdk {
     public static class PathUtils {
         public static string XCodePath() {
-            var selector = new FileInfo("/usr/bin/xcode-select");
+            var selector = new FileInfo(Path.Combine("/usr", "bin", "xcode-select"));
             ProcessResult result = new ProcessRunner(selector, new ProcessArgumentBuilder()
                 .Append("-p"))
                 .WaitForExit();
@@ -39,7 +39,7 @@ namespace XCode.Sdk {
         }
 
         public static FileInfo MLaunchTool() {
-            string dotnetPath = Path.Combine("usr", "local", "share", "dotnet");
+            string dotnetPath = Path.Combine("/usr", "local", "share", "dotnet");
             string sdkPath = Path.Combine(dotnetPath, "packs", "Microsoft.iOS.Sdk");
             FileInfo newestTool = null;
 
