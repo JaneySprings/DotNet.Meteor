@@ -76,7 +76,7 @@ public abstract class DebugSession : Session {
 
     protected void LaunchApplication(LaunchData configuration, int port, List<Process> processes) {
         if (configuration.Platform == Platform.Android) {
-            if (configuration.Device.IsEmulator && !configuration.Device.IsRunning)
+            if (configuration.Device.IsEmulator)
                 configuration.Device.Serial = Emulator.Run(configuration.Device.Name);
 
             var androidSdk = Android.Sdk.PathUtils.SdkLocation();

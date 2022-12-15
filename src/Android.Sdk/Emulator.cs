@@ -8,6 +8,10 @@ namespace Android.Sdk {
         private const int AppearingRetryCount = 120; //seconds
 
         public static string Run(string name) {
+            var serial = SerialIfRunning(name);
+            if (serial != null)
+                return serial;
+
             var emulator = PathUtils.EmulatorTool();
             var process = new ProcessRunner(emulator, new ProcessArgumentBuilder()
                 .Append("-avd")
@@ -43,6 +47,11 @@ namespace Android.Sdk {
                 }
             }
             return null;
+        }
+
+        private static string SerialIfRunning(string avdName) {
+            var serials = DeviceBridge.Devices().Where(it => it.StartsWith("emulator-"));
+            return serials.FirstOrDefault(it => DeviceBridge.EmuName(it).Equals(avdName));
         }
     }
 }

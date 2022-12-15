@@ -160,9 +160,9 @@ public class MonoDebugSession : DebugSession {
             return;
         }
 
+        SendResponse(response);
         LaunchApplication(configuration, port, this.processes);
         Connect(configuration, address, port);
-        SendResponse(response);
     }
     private void Connect(LaunchData options, IPAddress address, int port) {
         lock (this.locker) {
