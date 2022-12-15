@@ -16,7 +16,7 @@ namespace Apple.Sdk {
             var tool = PathUtils.MLaunchTool();
             var arguments = new ProcessArgumentBuilder()
                 .Append( "--launchdev").AppendQuoted(bundlePath)
-                .Append($"--devname=${serial}")
+                .Append($"--devname={serial}")
                 .Append( "--argument=-monodevelop-port")
                 .Append($"--argument={port}")
                 .Append($"--setenv=__XAMARIN_DEBUG_PORT__={port}")
