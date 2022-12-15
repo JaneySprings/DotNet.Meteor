@@ -15,6 +15,9 @@ namespace Android.Sdk {
                 .Append(args))
                 .WaitForExit();
 
+            if (result.ExitCode != 0)
+                string.Join(Environment.NewLine, result.StandardError);
+
             return string.Join(Environment.NewLine, result.StandardOutput);
         }
 
@@ -52,6 +55,11 @@ namespace Android.Sdk {
                 .Append("uninstall")
                 .Append(pkg);
             new ProcessRunner(adb, argument, logger).WaitForExit();
+        }
+
+        public static void Launch(string serial, string pkg, IProcessLogger logger = null) {
+            string result = Shell(serial, "monkey", "-p", pkg, "1");
+            logger?.OnOutputDataReceived(result);
         }
 
         public static List<string> Devices() {
