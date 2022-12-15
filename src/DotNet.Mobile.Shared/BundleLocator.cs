@@ -3,20 +3,15 @@ using System.IO;
 using System.Linq;
 
 namespace DotNet.Mobile.Shared {
-    public static class BundleFinder {
-        public static string FindBundle(string rootDirectory, DeviceData device, string target) {
-            if (device.IsAndroid)
-                return FindAndroidPackage(rootDirectory, target);
-            if (device.IsIPhone)
-                return FindApplePackage(rootDirectory, target, device.IsEmulator);
-            throw new Exception("Could not find bundle");
-        }
-
-        private static string FindAndroidPackage(string rootDirectory, string target) {
-            var binDirectory = Path.Combine(rootDirectory, "bin");
+    public static class BundleLocator {
+        public static string FindAndroidPackage(string root, string target, string framework) {
+            var binDirectory = Path.Combine(root, "bin");
             var files = Directory
                 .GetFiles(binDirectory, "*-Signed.apk", SearchOption.AllDirectories)
-                .Where(it => it.Contains(target, StringComparison.OrdinalIgnoreCase));
+                .Where(it =>
+                    it.Contains(target, StringComparison.OrdinalIgnoreCase) &&
+                    it.Contains(framework, StringComparison.OrdinalIgnoreCase)
+                );
 
             if (!files.Any())
                 throw new Exception("Could not find Android package");
@@ -24,11 +19,14 @@ namespace DotNet.Mobile.Shared {
             return files.FirstOrDefault();
         }
 
-        private static string FindApplePackage(string rootDirectory, string target, bool isSimulator) {
+        public static string FindAppleBundle(string rootDirectory, string target, string framework, bool isSimulator) {
             var binDirectory = Path.Combine(rootDirectory, "bin");
             var directories = Directory
                 .GetDirectories(binDirectory, "*.app", SearchOption.AllDirectories)
-                .Where(it => it.Contains(target, StringComparison.OrdinalIgnoreCase));
+                .Where(it =>
+                    it.Contains(target, StringComparison.OrdinalIgnoreCase) &&
+                    it.Contains(framework, StringComparison.OrdinalIgnoreCase)
+                );
 
             if (!directories.Any())
                 throw new Exception("Could not find ios bundle");
@@ -46,5 +44,8 @@ namespace DotNet.Mobile.Shared {
                 throw new Exception("Could not find bundle for ios-arm");
             return armApp;
         }
+
+
+
     }
 }

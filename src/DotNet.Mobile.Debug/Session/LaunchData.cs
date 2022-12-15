@@ -13,19 +13,24 @@ public class LaunchData {
     public string Framework { get; set; }
     public DeviceData Device { get; set; }
     public Project Project { get; set; }
-    public Platform Platform { get; set; }
+
+    public bool IsDebug => Target.Equals("debug", StringComparison.OrdinalIgnoreCase);
 
 
     public LaunchData(Project project, DeviceData device, string target) {
         Project = project;
         Device = device;
         Target = target;
-        Platform = device.IsAndroid ? Platform.Android :
-                   device.IsIPhone ? Platform.iOS : Platform.Undefined;
 
-        BundlePath = BundleFinder.FindBundle(Path.GetDirectoryName(project.Path), device, target);
         Framework = Project.Frameworks.First(it =>
             it.Contains(Device.Platform, StringComparison.OrdinalIgnoreCase)
+        );
+
+        if (device.IsAndroid) BundlePath = BundleLocator.FindAndroidPackage(
+            Path.GetDirectoryName(project.Path), target, Framework
+        );
+        if (device.IsIPhone) BundlePath = BundleLocator.FindAppleBundle(
+            Path.GetDirectoryName(project.Path), target, Framework, device.IsEmulator
         );
 
         if (File.Exists(project.Path)) {
@@ -35,10 +40,4 @@ public class LaunchData {
             projectFile.Free();
         }
     }
-}
-
-public enum Platform {
-    Android,
-    iOS,
-    Undefined
 }

@@ -75,39 +75,48 @@ public abstract class DebugSession : Session {
 
 
     protected void LaunchApplication(LaunchData configuration, int port, List<Process> processes) {
-        if (configuration.Platform == Platform.Android) {
-            if (configuration.Device.IsEmulator)
-                configuration.Device.Serial = Emulator.Run(configuration.Device.Name);
+        if (configuration.Device.IsAndroid)
+            LaunchAndroid(configuration, port, processes);
 
+        if (configuration.Device.IsIPhone)
+            LaunchApple(configuration, port, processes);
+    }
+
+
+    private void LaunchApple(LaunchData configuration, int port, List<Process> processes) {
+        if (!configuration.Device.IsEmulator) {
+            MLaunch.InstallOnDevice(configuration.BundlePath, configuration.Device.Serial, this);
+            processes.Add(MLaunch.TcpTunnel(configuration.Device.Serial, port));
+            processes.Add(MLaunch.LaunchOnDevice(configuration.BundlePath, configuration.Device.Serial, port, this));
+        } else {
+            processes.Add(MLaunch.LaunchOnSimulator(configuration.BundlePath, configuration.Device.Serial, port, this));
+        }
+    }
+
+    private void LaunchAndroid(LaunchData configuration, int port, List<Process> processes) {
+        if (configuration.Device.IsEmulator)
+            configuration.Device.Serial = Emulator.Run(configuration.Device.Name);
+
+        DeviceBridge.Uninstall(configuration.Device.Serial, configuration.AppId, this);
+        DeviceBridge.Install(configuration.Device.Serial, configuration.BundlePath, this);
+
+        if (configuration.IsDebug) {
             var androidSdk = Android.Sdk.PathUtils.SdkLocation();
             var arguments = new ProcessArgumentBuilder()
                 .Append("build").AppendQuoted(configuration.Project.Path)
                 .Append( "-t:_Run")
                 .Append($"-f:{configuration.Framework}")
-                .Append($"-p:PackageName={configuration.AppId}")
                 .Append($"-p:AndroidSdkDirectory=\"{androidSdk}\"")
-                .Append($"-p:AdbTarget=-s%20{configuration.Device.Serial}");
-
-            if (configuration.Target.Equals("debug", StringComparison.OrdinalIgnoreCase)) {
-                arguments.Append( "-p:AndroidAttachDebugger=true")
-                    .Append($"-p:AndroidSdbTargetPort={port}")
-                    .Append($"-p:AndroidSdbHostPort={port}");
-            }
-
-            DeviceBridge.Uninstall(configuration.Device.Serial, configuration.AppId, this);
-            DeviceBridge.Install(configuration.Device.Serial, configuration.BundlePath, this);
+                .Append($"-p:AdbTarget=-s%20{configuration.Device.Serial}")
+                .Append( "-p:AndroidAttachDebugger=true")
+                .Append($"-p:AndroidSdbTargetPort={port}")
+                .Append($"-p:AndroidSdbHostPort={port}");
             DotNetRunner.Execute(arguments, this);
-            var logger = DeviceBridge.Logcat(configuration.Device.Serial, this);
-            processes.Add(logger);
+        } else {
+            DeviceBridge.Launch(configuration.Device.Serial, configuration.AppId, this);
         }
 
-        if (configuration.Platform == Platform.iOS) {
-            if (!configuration.Device.IsEmulator) {
-                var tunnel = MLaunch.TcpTunnel(configuration.Device, port);
-                processes.Add(tunnel);
-            }
-            var deviceProccess = MLaunch.LaunchAppForDebug(configuration.BundlePath, configuration.Device, port, this);
-            processes.Add(deviceProccess);
-        }
+        var logger = DeviceBridge.Logcat(configuration.Device.Serial, this);
+        processes.Add(logger);
     }
 }

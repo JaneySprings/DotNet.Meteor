@@ -172,12 +172,12 @@ public class MonoDebugSession : DebugSession {
                 return;
 
             SoftDebuggerStartArgs args = null;
-            if (options.Platform == Platform.Android) {
+            if (options.Device.IsAndroid) {
                 args = new SoftDebuggerConnectArgs(options.AppName, address, port) {
                     MaxConnectionAttempts = MAX_CONNECTION_ATTEMPTS,
                     TimeBetweenConnectionAttempts = CONNECTION_ATTEMPT_INTERVAL
                 };
-            } else if (options.Platform == Platform.iOS) {
+            } else if (options.Device.IsIPhone) {
                 args = new StreamCommandConnectionDebuggerArgs(options.AppName, new IPhoneTcpCommandConnection(IPAddress.Loopback, port)) { MaxConnectionAttempts = 10 };
             }
 
