@@ -11,6 +11,8 @@ export const commandTitleSelectActiveConfiguration = ".NET Meteor: Select projec
 export const commandIdSelectActiveDevice = "dotnet-meteor.selectActiveDevice";
 export const commandTitleSelectActiveDevice = ".NET Meteor: Select device";
 
+export const commandIdFocusOnDebug = "workbench.debug.action.focusRepl";
+
 export const taskIdBuild = "dotnet-meteor.build";
 export const taskTitleBuild = "dotnet-meteor: Build";
 export const taskActionBuild = "Build";

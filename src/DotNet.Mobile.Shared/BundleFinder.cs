@@ -21,7 +21,7 @@ namespace DotNet.Mobile.Shared {
             if (!files.Any())
                 throw new Exception("Could not find Android package");
 
-            return files.First();
+            return files.FirstOrDefault();
         }
 
         private static string FindApplePackage(string rootDirectory, string target, bool isSimulator) {

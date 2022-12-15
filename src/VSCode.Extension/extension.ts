@@ -33,6 +33,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand(res.commandIdSelectActiveConfiguration, Controller.showQuickPickTarget));
 	context.subscriptions.push(vscode.commands.registerCommand(res.commandIdSelectActiveDevice, Controller.showQuickPickDevice));
 	
+	vscode.debug.onDidStartDebugSession(() => vscode.commands.executeCommand(res.commandIdFocusOnDebug));
 	vscode.debug.registerDebugConfigurationProvider(res.debuggerMeteorId, new DotNetDebuggerConfiguration());
 	vscode.tasks.registerTaskProvider(res.taskIdPublish, new DotNetPublishTaskProvider());
 	vscode.tasks.registerTaskProvider(res.taskIdBuild, new DotNetBuildTaskProvider());

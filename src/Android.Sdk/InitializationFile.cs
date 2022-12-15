@@ -15,7 +15,7 @@ namespace Android.Sdk {
         }
 
         public string GetField(string name) {
-            var record = content.First(it => it.StartsWith(name));
+            var record = content.FirstOrDefault(it => it.StartsWith(name));
 
             if (record == null)
                 return null;

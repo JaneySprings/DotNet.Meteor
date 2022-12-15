@@ -17,10 +17,6 @@ export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationPro
 			return undefined;
 		}
 		
-		const actualDevice = CommandLine.deviceInfo(Configuration.selectedDevice);
-
-		Configuration.selectedDevice = actualDevice;
-
 		if (!config.type && !config.request && !config.name) {
 			config.preLaunchTask = res.taskTitleBuild;
 			config.name = res.debuggerMeteorTitle;

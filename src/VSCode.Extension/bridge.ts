@@ -16,14 +16,6 @@ export class CommandLine {
             .append("--all-devices"), callback);
     }
 
-    public static deviceInfo(device: Device): Device {
-        return ProcessRunner.run<Device>(new ProcessArgumentBuilder("dotnet")
-            .appendQuoted(this.toolPath)
-            .append("--device")
-            .appendQuoted(device.platform ?? "")
-            .appendQuoted(device.name ?? ""));
-    }
-
     public static analyzeWorkspaceAsync(callback: (items: Project[]) => any) {
         ProcessRunner.runAsync<Project[]>(new ProcessArgumentBuilder("dotnet")
             .appendQuoted(this.toolPath)

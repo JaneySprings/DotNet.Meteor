@@ -34,26 +34,6 @@ namespace DotNet.Mobile.Debug.CLI {
             devices.AddRange(AppleCommand.AppleDevices());
             Console.WriteLine(JsonSerializer.Serialize(devices));
         }
-        public static void DeviceInfo(string[] args) {
-            if (args.Length < 2)
-                throw new Exception ($"Missing parameter: {Program.CommandHandler[args[0]].Item1[1]} {Program.CommandHandler[args[0]].Item1[2]}");
-            if (args.Length < 3)
-                throw new Exception ($"Missing parameter: {Program.CommandHandler[args[0]].Item1[2]}");
-
-            var devices = new List<DeviceData>();
-
-            if (args[1].Equals(Platform.Android))
-                devices.AddRange(AndroidCommand.AndroidDevices());
-            else if (args[1].Equals(Platform.iOS))
-                devices.AddRange(AppleCommand.AppleDevices());
-
-            var device = devices.Find(d => d.Name.Equals(args[2]));
-            device ??= new DeviceData();
-
-            Console.WriteLine(JsonSerializer.Serialize(device));
-        }
-
-
         public static void AnalyzeWorkspace(string[] args) {
             if (args.Length < 2)
                 throw new Exception ($"Missing parameter: {Program.CommandHandler[args[0]].Item1[1]}");
@@ -66,8 +46,6 @@ namespace DotNet.Mobile.Debug.CLI {
             Project project = WorkspaceAnalyzer.AnalyzeProject(args[1]);
             Console.WriteLine(JsonSerializer.Serialize(project));
         }
-
-
         public static void StartSession(string[] args) {
             Console.WriteLine("Starting Mono debugger session...");
             var debugSession = new MonoDebugSession();
