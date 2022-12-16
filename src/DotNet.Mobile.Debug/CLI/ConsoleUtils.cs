@@ -4,7 +4,8 @@ using System.Linq;
 using System.Text.Json;
 using DotNet.Mobile.Shared;
 using DotNet.Mobile.Debug.Session;
-using Platform = DotNet.Mobile.Shared.Platform;
+using Apple.Sdk;
+using Android.Sdk;
 
 namespace DotNet.Mobile.Debug.CLI {
     public static class ConsoleUtils {
@@ -30,22 +31,39 @@ namespace DotNet.Mobile.Debug.CLI {
 
         public static void AllDevices(string[] args) {
             var devices = new List<DeviceData>();
-            devices.AddRange(AndroidCommand.AndroidDevices());
-            devices.AddRange(AppleCommand.AppleDevices());
+            devices.AddRange(AndroidTool.AllDevices());
+
+            if (RuntimeSystem.IsWindows) {
+                //TODO: Add windows PC
+            }
+
+            if (RuntimeSystem.IsMacOS) {
+                devices.Add(SystemProfiler.MacDevice());
+                devices.AddRange(AppleTool.AllMobileDevices());
+            }
+
             Console.WriteLine(JsonSerializer.Serialize(devices));
         }
+
+        public static void AndroidSdkPath(string[] args) {
+            string path = Android.Sdk.PathUtils.SdkLocation();
+            Console.WriteLine(JsonSerializer.Serialize(path));
+        }
+
         public static void AnalyzeWorkspace(string[] args) {
             if (args.Length < 2)
                 throw new Exception ($"Missing parameter: {Program.CommandHandler[args[0]].Item1[1]}");
             IEnumerable<Project> projects = WorkspaceAnalyzer.AnalyzeWorkspace(args[1]);
             Console.WriteLine(JsonSerializer.Serialize(projects));
         }
+
         public static void AnalyzeProject(string[] args) {
             if (args.Length < 2)
                 throw new Exception ($"Missing parameter: {Program.CommandHandler[args[0]].Item1[1]}");
             Project project = WorkspaceAnalyzer.AnalyzeProject(args[1]);
             Console.WriteLine(JsonSerializer.Serialize(project));
         }
+
         public static void StartSession(string[] args) {
             Console.WriteLine("Starting Mono debugger session...");
             var debugSession = new MonoDebugSession();

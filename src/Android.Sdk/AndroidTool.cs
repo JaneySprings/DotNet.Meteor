@@ -13,11 +13,12 @@ namespace Android.Sdk {
                 var ini = IniFile.FromPath(file);
                 avds.Add(new DeviceData {
                     Name = Path.GetFileNameWithoutExtension(file),
-                    Details = "Emulator",
+                    Details = Details.AndroidEmulator,
                     Platform = Platform.Android,
                     OSVersion = ini.GetField("target") ?? "Unknown",
                     IsEmulator = true,
-                    IsRunning = false
+                    IsRunning = false,
+                    IsMobile = true
                 });
                 ini.Free();
             }
@@ -46,9 +47,10 @@ namespace Android.Sdk {
                         Name = DeviceBridge.Shell(serial, "getprop", "ro.product.model"),
                         OSVersion = $"android-{DeviceBridge.Shell(serial, "getprop", "ro.build.version.sdk")}",
                         Platform = Platform.Android,
-                        Details = "Device",
+                        Details = Details.AndroidDevice,
                         IsEmulator = false,
                         IsRunning = true,
+                        IsMobile = true,
                         Serial = serial
                     });
                 }

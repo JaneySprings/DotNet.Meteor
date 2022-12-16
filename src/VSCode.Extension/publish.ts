@@ -29,12 +29,14 @@ export class DotNetPublishTaskProvider implements vscode.TaskProvider {
             return [];
         }
 
-        if (Configuration.selectedDevice!.platform?.includes('android')) {
-            command.push(`-p:AndroidSdkDirectory=${Configuration.androidSdk}`);
+        if (Configuration.isAndroid()) {
+            command.push(`-p:AndroidSdkDirectory="${Configuration.androidSdk}"`);
         }
-
-        if (Configuration.selectedDevice!.platform?.includes('ios')) {
+        if (Configuration.isIOS()) {
             command.push(`-p:RuntimeIdentifier=ios-arm64`);
+        }
+        if (Configuration.isMacCatalyst() && Configuration.selectedDevice!.is_arm) {
+            command.push(`-p:RuntimeIdentifier=maccatalyst-arm64`);
         }
         
         return [ 

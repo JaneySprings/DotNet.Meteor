@@ -22,6 +22,19 @@ export class Configuration {
 
         return -1;
     }
+
+
+    public static isAndroid(): boolean {
+        return Configuration.selectedDevice.platform?.includes('android') ?? false;
+    }
+    public static isIOS(): boolean {
+        return Configuration.selectedDevice.platform?.includes('ios') ?? false;
+    }
+    public static isMacCatalyst(): boolean {
+        return Configuration.selectedDevice.platform?.includes('maccatalyst') ?? false;
+    }
+
+
     public static updateAndroidSdk() {
         Configuration.androidSdk = CommandLine.androidSdk();
     }
@@ -39,6 +52,7 @@ export class Configuration {
         return Configuration.selectedProject!.frameworks?.find(it => it.includes(devicePlatform!));
     }
 
+    
     public static validate(): boolean {
         if (!Configuration.selectedProject || !Configuration.selectedProject.path) {
             vscode.window.showErrorMessage(res.messageNoProjectFound);

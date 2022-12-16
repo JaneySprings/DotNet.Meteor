@@ -14,29 +14,14 @@ public class Program {
 
     public static readonly Dictionary<string, Tuple<string[], Action<string[]>>> CommandHandler = new() {
         {
-            "--android-devices", new Tuple<string[], Action<string[]>>(new []{
-                "List of all available Android devices"
-            }, AndroidCommand.AndroidDevicesAsJson)
-        },
-        {
-            "--apple-devices", new Tuple<string[], Action<string[]>>(new []{
-                "List of all available Apple devices"
-            }, AppleCommand.AppleDevicesAsJson)
-        },
-        {
             "--all-devices", new Tuple<string[], Action<string[]>>(new []{
                 "List of all available devices"
             }, ConsoleUtils.AllDevices)
         },
         {
-            "--run-emulator", new Tuple<string[], Action<string[]>>(new []{
-                "Run Android emulator", "<avd-name>"
-            }, AndroidCommand.RunEmulator)
-        },
-        {
             "--android-sdk-path", new Tuple<string[], Action<string[]>>(new []{
                 "Get actual Android SDK path"
-            }, AndroidCommand.AndroidSdkPath)
+            }, ConsoleUtils.AndroidSdkPath)
         },
         {
             "--analyze-workspace", new Tuple<string[], Action<string[]>>(new []{

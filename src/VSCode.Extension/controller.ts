@@ -41,7 +41,8 @@ export class Controller {
     }
     public static performSelectDevice(item: Device) {
         Configuration.selectedDevice = item;
-        this.deviceStatusItem.text = `${Icon.device} ${Configuration.selectedDevice?.name}`;
+        const icon = item.is_mobile ? Icon.device : Icon.computer;
+        this.deviceStatusItem.text = `${icon} ${Configuration.selectedDevice?.name}`;
         this.deviceStatusItem.show();
     }
 

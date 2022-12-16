@@ -38,6 +38,8 @@ export class Device {
     public os_version: string | undefined;
     public is_emulator: boolean | undefined;
     public is_running: boolean | undefined;
+    public is_mobile: boolean | undefined;
+    public is_arm: boolean | undefined;
 }
 
 export class DeviceItem implements vscode.QuickPickItem {
@@ -57,6 +59,7 @@ export class Icon {
     public static readonly project = "$(window)";
     public static readonly target= "$(window)";
     public static readonly device = "$(device-mobile)";
+    public static readonly computer = "$(vm)";
     public static readonly active = "$(vm-running)";
     public static readonly inactive = "$(device-mobile)";
 }
