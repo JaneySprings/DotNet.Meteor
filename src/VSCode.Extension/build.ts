@@ -1,3 +1,4 @@
+import { ProcessArgumentBuilder } from './executor';
 import { Configuration } from './configuration';
 import * as res from './resources';
 import * as vscode from 'vscode';
@@ -18,12 +19,12 @@ export class DotNetBuildTaskProvider implements vscode.TaskProvider {
             return [];
     
         const framework = Configuration.targetFramework();
-        const command = [
-            `dotnet build "${Configuration.selectedProject!.path}"`,
-            `-c:${Configuration.selectedTarget!}`,
-            `-f:${framework}`,
-            `-t:Build`
-        ];
+        const builder = new ProcessArgumentBuilder('dotnet')
+            .append('build')
+            .appendQuoted(Configuration.selectedProject.path)
+            .append(`-c:${Configuration.selectedTarget}`)
+            .append(`-f:${framework}`)
+            .append(`-t:Build`);
         
         if (!framework) {
             vscode.window.showErrorMessage(res.messageNoFrameworkFound);
@@ -31,14 +32,14 @@ export class DotNetBuildTaskProvider implements vscode.TaskProvider {
         }
 
         if (Configuration.isAndroid()) {
-            command.push(`-p:EmbedAssembliesIntoApk=true`);
-            command.push(`-p:AndroidSdkDirectory="${Configuration.androidSdk}"`);
+            builder.append('-p:EmbedAssembliesIntoApk=true');
+            builder.append(`-p:AndroidSdkDirectory="${Configuration.androidSdk}"`);
         }
         if (Configuration.isIOS() && !Configuration.selectedDevice!.is_emulator) {
-            command.push(`-p:RuntimeIdentifier=ios-arm64`);
+            builder.append('-p:RuntimeIdentifier=ios-arm64');
         }
         if (Configuration.isMacCatalyst() && Configuration.selectedDevice!.is_arm) {
-            command.push(`-p:RuntimeIdentifier=maccatalyst-arm64`);
+            builder.append('-p:RuntimeIdentifier=maccatalyst-arm64');
         }
         
         return [ 
@@ -47,7 +48,7 @@ export class DotNetBuildTaskProvider implements vscode.TaskProvider {
                 vscode.TaskScope.Workspace, 
                 res.taskActionBuild, 
                 res.extensionId,
-                new vscode.ShellExecution(command.join(' '))
+                new vscode.ShellExecution(builder.build())
             )
         ];
     }

@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
@@ -37,7 +38,7 @@ namespace Apple.Sdk {
                     IsRunning = extractor.Extract("state", "integer")?.Equals("3") == true,
                     Name = extractor.Extract("name") ?? "Unknown",
                     Details = Details.iOSSimulator,
-                    Platform = Platform.iOS,
+                    Platform = Platforms.iOS,
                     OSVersion = osVersion,
                     Serial = extractor.Extract("UDID")
                 });

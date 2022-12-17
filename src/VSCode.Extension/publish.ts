@@ -1,3 +1,4 @@
+import { ProcessArgumentBuilder } from './executor';
 import { Configuration } from './configuration';
 import * as res from './resources';
 import * as vscode from 'vscode';
@@ -18,11 +19,11 @@ export class DotNetPublishTaskProvider implements vscode.TaskProvider {
             return [];
     
         const framework = Configuration.targetFramework();
-        const command = [
-            `dotnet publish "${Configuration.selectedProject!.path}"`,
-            `-c:${Configuration.selectedTarget!}`,
-            `-f:${framework}`
-        ];
+        const builder = new ProcessArgumentBuilder('dotnet')
+            .append('publish')
+            .appendQuoted(Configuration.selectedProject.path)
+            .append(`-c:${Configuration.selectedTarget}`)
+            .append(`-f:${framework}`)
         
         if (!framework) {
             vscode.window.showErrorMessage(res.messageNoFrameworkFound);
@@ -30,13 +31,13 @@ export class DotNetPublishTaskProvider implements vscode.TaskProvider {
         }
 
         if (Configuration.isAndroid()) {
-            command.push(`-p:AndroidSdkDirectory="${Configuration.androidSdk}"`);
+            builder.append(`-p:AndroidSdkDirectory="${Configuration.androidSdk}"`);
         }
         if (Configuration.isIOS()) {
-            command.push(`-p:RuntimeIdentifier=ios-arm64`);
+            builder.append('-p:RuntimeIdentifier=ios-arm64');
         }
         if (Configuration.isMacCatalyst() && Configuration.selectedDevice!.is_arm) {
-            command.push(`-p:RuntimeIdentifier=maccatalyst-arm64`);
+            builder.append('-p:RuntimeIdentifier=maccatalyst-arm64');
         }
         
         return [ 
@@ -45,7 +46,7 @@ export class DotNetPublishTaskProvider implements vscode.TaskProvider {
                 vscode.TaskScope.Workspace, 
                 res.taskActionPublish, 
                 res.extensionId,
-                new vscode.ShellExecution(command.join(' '))
+                new vscode.ShellExecution(builder.build())
             )
         ];
     }

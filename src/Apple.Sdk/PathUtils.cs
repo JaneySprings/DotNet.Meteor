@@ -69,5 +69,15 @@ namespace Apple.Sdk {
 
             return tool;
         }
+
+        public static FileInfo OpenTool() {
+            string path = Path.Combine("/usr", "bin", "open");
+            FileInfo tool = new FileInfo(path);
+
+            if (!tool.Exists)
+                throw new Exception("Could not find open tool");
+
+            return tool;
+        }
     }
 }

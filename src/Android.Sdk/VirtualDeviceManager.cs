@@ -24,7 +24,7 @@ namespace Android.Sdk {
             return matches.Select(m => new DeviceData {
                 Name = m.Groups["name"].Value,
                 Details = Details.AndroidEmulator,
-                Platform = Platform.Android,
+                Platform = Platforms.Android,
                 OSVersion = m.Groups["based"].Value,
                 IsEmulator = true,
                 IsRunning = false,

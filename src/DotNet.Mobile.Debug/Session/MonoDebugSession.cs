@@ -147,7 +147,7 @@ public class MonoDebugSession : DebugSession {
         SetExceptionOptions(args.ExceptionOptions);
 
         var configuration = new LaunchData(args.Project, args.Device, args.Target);
-        var port = args.DebuggingPort;
+        var port = args.DebuggingPort == 0 ? Utilities.FindFreePort() : args.DebuggingPort;
         var host = args.Address;
 
         IPAddress address = string.IsNullOrWhiteSpace(host) ? IPAddress.Loopback : Utilities.ResolveIPAddress(host);
@@ -177,7 +177,7 @@ public class MonoDebugSession : DebugSession {
                     MaxConnectionAttempts = MAX_CONNECTION_ATTEMPTS,
                     TimeBetweenConnectionAttempts = CONNECTION_ATTEMPT_INTERVAL
                 };
-            } else if (options.Device.IsIPhone) {
+            } else if (options.Device.IsIPhone || options.Device.IsMacCatalyst) {
                 args = new StreamCommandConnectionDebuggerArgs(options.AppName, new IPhoneTcpCommandConnection(IPAddress.Loopback, port)) { MaxConnectionAttempts = 10 };
             }
 

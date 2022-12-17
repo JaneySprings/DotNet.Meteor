@@ -26,7 +26,7 @@ namespace Apple.Sdk {
                     IsMobile = true,
                     Name = $"iPhone {version}",
                     Details = Details.iOSDevice,
-                    Platform = Platform.iOS,
+                    Platform = Platforms.iOS,
                     Serial = serial
                 });
             }
@@ -59,7 +59,7 @@ namespace Apple.Sdk {
                 Name = name,
                 OSVersion = version,
                 Details = Details.MacCatalyst,
-                Platform = Platform.MacCatalyst
+                Platform = Platforms.MacCatalyst
             };
         }
 

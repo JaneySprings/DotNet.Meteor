@@ -35,6 +35,10 @@ namespace DotNet.Mobile.Shared {
             };
         }
 
+        public void SetEnvironmentVariable(string key, string value) {
+            this.process.StartInfo.EnvironmentVariables[key] = value;
+        }
+
         public void Kill() {
             this.process?.Kill();
         }

@@ -12,13 +12,16 @@ export class Configuration {
     public static selectedTarget: Target;
 
     public static getDebuggingPort(): number {
-        if (Configuration.selectedDevice!.platform?.includes('android')) 
+        if (Configuration.isAndroid()) 
             return vscode.workspace.getConfiguration(res.configId)
                 .get(res.configIdMonoSdbDebuggerPortAndroid) ?? res.configDefaultMonoSdbDebuggerPortAndroid;
         
-        if (Configuration.selectedDevice!.platform?.includes('ios')) 
+        if (Configuration.isIOS()) 
             return vscode.workspace.getConfiguration(res.configId)
                 .get(res.configIdMonoSdbDebuggerPortApple) ?? res.configDefaultMonoSdbDebuggerPortApple;
+
+        if (Configuration.isMacCatalyst())
+            return 0;
 
         return -1;
     }

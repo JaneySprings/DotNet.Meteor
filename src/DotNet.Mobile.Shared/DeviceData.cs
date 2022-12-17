@@ -13,14 +13,16 @@ namespace DotNet.Mobile.Shared {
         [JsonPropertyName("is_arm")] public bool IsArm { get; set; }
 
 
-        [JsonIgnore] public bool IsAndroid => Platform.Contains("android", System.StringComparison.OrdinalIgnoreCase);
-        [JsonIgnore] public bool IsIPhone => Platform.Contains("ios", System.StringComparison.OrdinalIgnoreCase);
+        [JsonIgnore] public bool IsAndroid => Platform.Equals(Platforms.Android);
+        [JsonIgnore] public bool IsIPhone => Platform.Contains(Platforms.iOS);
+        [JsonIgnore] public bool IsMacCatalyst => Platform.Contains(Platforms.MacCatalyst);
     }
 
-    public static class Platform {
+    public static class Platforms {
         public const string Android = "android";
         public const string iOS = "ios";
         public const string MacCatalyst = "maccatalyst";
+        public const string Windows = "windows";
     }
 
     public static class Details {
@@ -31,5 +33,6 @@ namespace DotNet.Mobile.Shared {
         public const string iOSDevice = "iPhone";
 
         public const string MacCatalyst = "Mac";
+        public const string Windows = "Windows";
     }
 }

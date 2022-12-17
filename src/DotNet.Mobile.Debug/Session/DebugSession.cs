@@ -80,6 +80,9 @@ public abstract class DebugSession : Session {
 
         if (configuration.Device.IsIPhone)
             LaunchApple(configuration, port, processes);
+
+        if (configuration.Device.IsMacCatalyst)
+            LaunchMacCatalyst(configuration, port);
     }
 
 
@@ -91,6 +94,19 @@ public abstract class DebugSession : Session {
         } else {
             processes.Add(MLaunch.LaunchOnSimulator(configuration.BundlePath, configuration.Device.Serial, port, this));
         }
+    }
+
+    private void LaunchMacCatalyst(LaunchData configuration, int port) {
+        var tool = Apple.Sdk.PathUtils.OpenTool();
+        var processRunner = new ProcessRunner(tool, new ProcessArgumentBuilder()
+            .AppendQuoted(configuration.BundlePath)
+        );
+        processRunner.SetEnvironmentVariable("__XAMARIN_DEBUG_HOSTS__", "127.0.0.1");
+        processRunner.SetEnvironmentVariable("__XAMARIN_DEBUG_PORT__", port.ToString());
+        var result = processRunner.WaitForExit();
+
+        if (result.ExitCode != 0)
+            throw new Exception(string.Join(Environment.NewLine, result.StandardError));
     }
 
     private void LaunchAndroid(LaunchData configuration, int port, List<Process> processes) {
@@ -111,7 +127,7 @@ public abstract class DebugSession : Session {
                 .Append( "-p:AndroidAttachDebugger=true")
                 .Append($"-p:AndroidSdbTargetPort={port}")
                 .Append($"-p:AndroidSdbHostPort={port}");
-            DotNetRunner.Execute(arguments, this);
+            DotNetTool.Execute(arguments, this);
         } else {
             DeviceBridge.Launch(configuration.Device.Serial, configuration.AppId, this);
         }

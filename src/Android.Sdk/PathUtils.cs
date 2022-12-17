@@ -71,16 +71,7 @@ namespace Android.Sdk {
 
         private static string InvariantSdk(params string[] tokens) {
             string basePath = Path.Combine(tokens);
-            string lowercased = Path.Combine(basePath, "sdk");
-            string uppercased = Path.Combine(basePath, "Sdk");
-
-            if (Directory.Exists(lowercased))
-                return lowercased;
-
-            if (Directory.Exists(uppercased))
-                return uppercased;
-
-            return null;
+            return DotNet.Mobile.Shared.PathUtils.Invariant(basePath, "sdk", "Sdk");
         }
     }
 }

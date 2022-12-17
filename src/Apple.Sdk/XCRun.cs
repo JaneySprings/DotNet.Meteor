@@ -31,7 +31,7 @@ namespace Apple.Sdk {
                         IsRunning = state.Contains("Booted", StringComparison.OrdinalIgnoreCase),
                         Name = deviceMatch.Groups["name"].Value,
                         Details = Details.iOSSimulator,
-                        Platform = Platform.iOS,
+                        Platform = Platforms.iOS,
                         OSVersion = os,
                         Serial = deviceMatch.Groups["udid"].Value
                     });
@@ -64,7 +64,7 @@ namespace Apple.Sdk {
                         IsMobile = true,
                         Name = deviceMatch.Groups["name"].Value,
                         Details = Details.iOSDevice,
-                        Platform = Platform.iOS,
+                        Platform = Platforms.iOS,
                         OSVersion = deviceMatch.Groups["os"].Value,
                         Serial = deviceMatch.Groups["udid"].Value
                     });

@@ -14,7 +14,7 @@ namespace Android.Sdk {
                 avds.Add(new DeviceData {
                     Name = Path.GetFileNameWithoutExtension(file),
                     Details = Details.AndroidEmulator,
-                    Platform = Platform.Android,
+                    Platform = Platforms.Android,
                     OSVersion = ini.GetField("target") ?? "Unknown",
                     IsEmulator = true,
                     IsRunning = false,
@@ -46,7 +46,7 @@ namespace Android.Sdk {
                     allDevices.Add(new DeviceData {
                         Name = DeviceBridge.Shell(serial, "getprop", "ro.product.model"),
                         OSVersion = $"android-{DeviceBridge.Shell(serial, "getprop", "ro.build.version.sdk")}",
-                        Platform = Platform.Android,
+                        Platform = Platforms.Android,
                         Details = Details.AndroidDevice,
                         IsEmulator = false,
                         IsRunning = true,

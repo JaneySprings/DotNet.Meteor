@@ -34,9 +34,8 @@ namespace DotNet.Mobile.Debug.CLI {
             devices.AddRange(AndroidTool.AllDevices());
 
             if (RuntimeSystem.IsWindows) {
-                //TODO: Add windows PC
+                devices.Add(WindowsTool.WindowsDevice());
             }
-
             if (RuntimeSystem.IsMacOS) {
                 devices.Add(SystemProfiler.MacDevice());
                 devices.AddRange(AppleTool.AllMobileDevices());
