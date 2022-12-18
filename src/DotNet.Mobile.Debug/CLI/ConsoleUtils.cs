@@ -31,14 +31,14 @@ namespace DotNet.Mobile.Debug.CLI {
 
         public static void AllDevices(string[] args) {
             var devices = new List<DeviceData>();
-            devices.AddRange(AndroidTool.AllDevices());
+            AndroidTool.TryGetDevices(devices);
 
             if (RuntimeSystem.IsWindows) {
                 devices.Add(WindowsTool.WindowsDevice());
             }
             if (RuntimeSystem.IsMacOS) {
-                devices.Add(SystemProfiler.MacDevice());
-                devices.AddRange(AppleTool.AllMobileDevices());
+                devices.Add(AppleTool.MacDevice());
+                AppleTool.TryGetDevices(devices);
             }
 
             Console.WriteLine(JsonSerializer.Serialize(devices));

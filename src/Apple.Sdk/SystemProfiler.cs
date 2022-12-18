@@ -33,37 +33,7 @@ namespace Apple.Sdk {
             return devices;
         }
 
-        public static DeviceData MacDevice() {
-            var profiler = PathUtils.SystemProfilerTool();
-            string version = null;
-            string name = null;
-
-            ProcessResult result = new ProcessRunner(profiler, new ProcessArgumentBuilder()
-                .Append("SPSoftwareDataType"))
-                .WaitForExit();
-
-            var output = string.Join(Environment.NewLine, result.StandardOutput);
-            var nameMatch = new Regex(@"Computer Name: *(?<name>.+)").Match(output);
-            var versionMatch = new Regex(@"System Version: *(?<os>.+)").Match(output);
-
-            if (nameMatch.Success)
-                name = nameMatch.Groups["name"].Value;
-            if (versionMatch.Success)
-                version = versionMatch.Groups["os"].Value;
-
-            return new DeviceData {
-                IsEmulator = false,
-                IsRunning = true,
-                IsMobile = false,
-                IsArm = IsArch64(),
-                Name = name,
-                OSVersion = version,
-                Details = Details.MacCatalyst,
-                Platform = Platforms.MacCatalyst
-            };
-        }
-
-        private static bool IsArch64() {
+        public static bool IsArch64() {
             var profiler = PathUtils.SystemProfilerTool();
             ProcessResult result = new ProcessRunner(profiler, new ProcessArgumentBuilder()
                 .Append("SPHardwareDataType"))

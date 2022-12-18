@@ -59,5 +59,14 @@ namespace Android.Sdk {
             allDevices.AddRange(virtualDevices.OrderBy(x => x.Name));
             return allDevices;
         }
+
+        public static bool TryGetDevices(List<DeviceData> devices) {
+            try {
+                devices.AddRange(AllDevices());
+                return true;
+            } catch {
+                return false;
+            }
+        }
     }
 }

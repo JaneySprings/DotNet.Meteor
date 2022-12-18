@@ -13,8 +13,6 @@ export class DotNetBuildTaskProvider implements vscode.TaskProvider {
     resolveTask(task: vscode.Task, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Task> { return task; }
     provideTasks(token: vscode.CancellationToken): vscode.ProviderResult<vscode.Task[]> {
         Configuration.updateSelectedProject();
-        Configuration.updateAndroidSdk();
-
         if (!Configuration.validate())
             return [];
     
@@ -33,13 +31,17 @@ export class DotNetBuildTaskProvider implements vscode.TaskProvider {
 
         if (Configuration.isAndroid()) {
             builder.append('-p:EmbedAssembliesIntoApk=true');
-            builder.append(`-p:AndroidSdkDirectory="${Configuration.androidSdk}"`);
+            builder.append(`-p:AndroidSdkDirectory="${Configuration.getAndroidSdkDirectory()}"`);
         }
         if (Configuration.isIOS() && !Configuration.selectedDevice!.is_emulator) {
             builder.append('-p:RuntimeIdentifier=ios-arm64');
         }
         if (Configuration.isMacCatalyst() && Configuration.selectedDevice!.is_arm) {
             builder.append('-p:RuntimeIdentifier=maccatalyst-arm64');
+        }
+        if (Configuration.isWindows()) {
+            builder.append('-p:WindowsPackageType=None');
+            builder.append('-p:WinUISDKReferences=false');
         }
         
         return [ 

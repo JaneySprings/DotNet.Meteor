@@ -179,7 +179,7 @@ public class MonoDebugSession : DebugSession {
                 };
             } else if (options.Device.IsIPhone || options.Device.IsMacCatalyst) {
                 args = new StreamCommandConnectionDebuggerArgs(options.AppName, new IPhoneTcpCommandConnection(IPAddress.Loopback, port)) { MaxConnectionAttempts = 10 };
-            }
+            } else { return; }
 
             SendEvent(Event.OutputEvent, new BodyOutput("Debugger is ready and listening..." + Environment.NewLine));
             Logger.Log("Debugger ready at {0}:{1}", address, port);

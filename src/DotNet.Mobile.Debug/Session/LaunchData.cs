@@ -23,18 +23,18 @@ public class LaunchData {
         Device = device;
         Target = target;
 
-        Framework = Project.Frameworks.First(it =>
-            it.Contains(Device.Platform, StringComparison.OrdinalIgnoreCase)
-        );
-        BundlePath = DotNetTool.BuildedAppPath(
-            Path.GetDirectoryName(project.Path), Framework, IsDebug, Device
-        );
-
         if (File.Exists(project.Path)) {
             var projectFile = ProjectFile.FromPath(project.Path);
             AppId = projectFile.ValueFromProperty("ApplicationId");
             AppName = projectFile.ValueFromProperty("ApplicationTitle");
             projectFile.Free();
         }
+
+        Framework = Project.Frameworks.First(it =>
+            it.Contains(Device.Platform, StringComparison.OrdinalIgnoreCase)
+        );
+        BundlePath = DotNetTool.BuildedAppPath(
+            Path.GetDirectoryName(project.Path), Framework, AppName, IsDebug, Device
+        );
     }
 }

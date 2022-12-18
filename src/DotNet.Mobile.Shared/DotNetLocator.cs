@@ -5,7 +5,7 @@ using DotNet.Mobile.Shared;
 
 namespace Microsoft.Sdk {
     public abstract class DotNetLocator {
-        public static string BuildedAppPath(string root, string framework, bool isDebug, DeviceData device) {
+        public static string BuildedAppPath(string root, string framework, string appName, bool isDebug, DeviceData device) {
             string basePath = Path.Combine(root, "bin");
             string targetPath = isDebug
                 ? PathUtils.Invariant(basePath, "Debug", "debug")
@@ -25,6 +25,8 @@ namespace Microsoft.Sdk {
                 return AppleBundle(targetPath, !device.IsEmulator);
             if (device.IsMacCatalyst)
                 return MacCatalystBundle(targetPath, device.IsArm);
+            if (device.IsWindows)
+                return WindowsProgram(targetPath, appName);
 
             throw new Exception("Not supported device");
         }
@@ -33,6 +35,13 @@ namespace Microsoft.Sdk {
             var files = Directory.GetFiles(targetDirectory,  "*-Signed.apk", SearchOption.TopDirectoryOnly);
             if (!files.Any())
                 throw new FileNotFoundException($"Could not find adnroid package in {targetDirectory}");
+            return files.FirstOrDefault();
+        }
+
+        private static string WindowsProgram(string targetDirectory, string appName) {
+            var files = Directory.GetFiles(targetDirectory, $"{appName}.exe", SearchOption.AllDirectories);
+            if (!files.Any())
+                throw new FileNotFoundException($"Could not find windows program in {targetDirectory}");
             return files.FirstOrDefault();
         }
 

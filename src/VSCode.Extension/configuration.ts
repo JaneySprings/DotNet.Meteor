@@ -6,11 +6,13 @@ import * as vscode from 'vscode';
 
 
 export class Configuration {
-    public static androidSdk: string;
     public static selectedProject: Project;
     public static selectedDevice: Device;
     public static selectedTarget: Target;
 
+    public static getAndroidSdkDirectory() {
+        return CommandLine.androidSdk();
+    }
     public static getDebuggingPort(): number {
         if (Configuration.isAndroid()) 
             return vscode.workspace.getConfiguration(res.configId)
@@ -20,12 +22,11 @@ export class Configuration {
             return vscode.workspace.getConfiguration(res.configId)
                 .get(res.configIdMonoSdbDebuggerPortApple) ?? res.configDefaultMonoSdbDebuggerPortApple;
 
-        if (Configuration.isMacCatalyst())
+        if (Configuration.isMacCatalyst() || Configuration.isWindows())
             return 0;
 
         return -1;
     }
-
 
     public static isAndroid(): boolean {
         return Configuration.selectedDevice.platform?.includes('android') ?? false;
@@ -36,20 +37,18 @@ export class Configuration {
     public static isMacCatalyst(): boolean {
         return Configuration.selectedDevice.platform?.includes('maccatalyst') ?? false;
     }
-
-
-    public static updateAndroidSdk() {
-        Configuration.androidSdk = CommandLine.androidSdk();
+    public static isWindows(): boolean {
+        return Configuration.selectedDevice.platform?.includes('windows') ?? false;
     }
+
+
     public static updateSelectedProject() {
         const project = CommandLine.analyzeProject(Configuration.selectedProject!.path);
         Configuration.selectedProject = project;
     }
-
     public static workspacePath() {
         return vscode.workspace.workspaceFolders![0].uri.fsPath;
     }
-
     public static targetFramework(): string | undefined {
         const devicePlatform = Configuration.selectedDevice!.platform;
         return Configuration.selectedProject!.frameworks?.find(it => it.includes(devicePlatform!));

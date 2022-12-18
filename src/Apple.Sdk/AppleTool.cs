@@ -48,11 +48,36 @@ namespace Apple.Sdk {
             return devices;
         }
 
-        public static List<DeviceData> AllMobileDevices() {
+        public static DeviceData MacDevice() {
+            var tokens = Environment.OSVersion.VersionString.Split(' ');
+            var osVersion = $"MacOS {tokens.Last()}";
+
+            return new DeviceData {
+                IsEmulator = false,
+                IsRunning = true,
+                IsMobile = false,
+                IsArm = SystemProfiler.IsArch64(),
+                Name = Environment.MachineName,
+                OSVersion = osVersion,
+                Details = Details.MacCatalyst,
+                Platform = Platforms.MacCatalyst
+            };
+        }
+
+        public static List<DeviceData> AllDevices() {
             var devices = new List<DeviceData>();
             devices.AddRange(SystemProfiler.PhysicalDevices().OrderBy(x => x.Name));
             devices.AddRange(SimulatorsFast().OrderBy(x => x.Name));
             return devices;
+        }
+
+        public static bool TryGetDevices(List<DeviceData> devices) {
+            try {
+                devices.AddRange(AllDevices());
+                return true;
+            } catch {
+                return false;
+            }
         }
     }
 }

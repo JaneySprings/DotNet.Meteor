@@ -13,8 +13,6 @@ export class DotNetPublishTaskProvider implements vscode.TaskProvider {
     resolveTask(task: vscode.Task, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Task> { return task; }
     provideTasks(token: vscode.CancellationToken): vscode.ProviderResult<vscode.Task[]> {
         Configuration.updateSelectedProject();
-        Configuration.updateAndroidSdk();
-
         if (!Configuration.validate())
             return [];
     
@@ -31,7 +29,7 @@ export class DotNetPublishTaskProvider implements vscode.TaskProvider {
         }
 
         if (Configuration.isAndroid()) {
-            builder.append(`-p:AndroidSdkDirectory="${Configuration.androidSdk}"`);
+            builder.append(`-p:AndroidSdkDirectory="${Configuration.getAndroidSdkDirectory()}"`);
         }
         if (Configuration.isIOS()) {
             builder.append('-p:RuntimeIdentifier=ios-arm64');

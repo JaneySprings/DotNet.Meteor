@@ -16,6 +16,7 @@ namespace DotNet.Mobile.Shared {
         [JsonIgnore] public bool IsAndroid => Platform.Equals(Platforms.Android);
         [JsonIgnore] public bool IsIPhone => Platform.Contains(Platforms.iOS);
         [JsonIgnore] public bool IsMacCatalyst => Platform.Contains(Platforms.MacCatalyst);
+        [JsonIgnore] public bool IsWindows => Platform.Contains(Platforms.Windows);
     }
 
     public static class Platforms {

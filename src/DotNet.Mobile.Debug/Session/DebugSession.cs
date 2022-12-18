@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using DotNet.Mobile.Debug.Protocol;
 using System.Diagnostics;
 using DotNet.Mobile.Shared;
@@ -83,6 +84,9 @@ public abstract class DebugSession : Session {
 
         if (configuration.Device.IsMacCatalyst)
             LaunchMacCatalyst(configuration, port);
+
+        if (configuration.Device.IsWindows)
+            LaunchWindows(configuration, processes);
     }
 
 
@@ -107,6 +111,13 @@ public abstract class DebugSession : Session {
 
         if (result.ExitCode != 0)
             throw new Exception(string.Join(Environment.NewLine, result.StandardError));
+    }
+
+    private void LaunchWindows(LaunchData configuration, List<Process> processes) {
+        var program = new FileInfo(configuration.BundlePath);
+        var process = new ProcessRunner(program, new ProcessArgumentBuilder(), this)
+            .Start();
+        processes.Add(process);
     }
 
     private void LaunchAndroid(LaunchData configuration, int port, List<Process> processes) {

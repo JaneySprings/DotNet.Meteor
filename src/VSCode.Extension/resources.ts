@@ -25,6 +25,7 @@ export const debuggerMeteorId = "dotnet-meteor.debugger";
 export const debuggerMeteorTitle = ".NET Meteor Debugger";
 
 export const messageDebugNotSupported = "Debugging is not supported in release configuration";
+export const messageDebugNotSupportedWin = "Mono Debugger is not supported for Windows";
 export const messageDeviceNotExists = "Selected device does not exists yet";
 export const messageNoFrameworkFound = "No supported framework found";
 export const messageNoProjectFound = "Selected project not found";
