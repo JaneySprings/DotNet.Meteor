@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using Mono.Debugger.Soft;
 using Mono.Debugging.Client;
 using Mono.Debugging.Soft;
@@ -9,9 +10,9 @@ namespace DotNet.Mobile.Debug.Pipeline;
 class StreamCommandConnectionDebuggerArgs : SoftDebuggerStartArgs, ISoftDebuggerConnectionProvider {
     readonly string appName;
 
-    public StreamCommandConnectionDebuggerArgs(string appName, StreamCommandConnection commandConnection) {
+    public StreamCommandConnectionDebuggerArgs(string appName, IPAddress address, int port) {
         this.appName = appName;
-        CommandConnection = commandConnection;
+        CommandConnection = new IPhoneTcpCommandConnection(address, port);
     }
 
     public StreamCommandConnection CommandConnection { get; }

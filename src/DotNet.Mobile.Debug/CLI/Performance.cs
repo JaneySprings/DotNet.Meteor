@@ -49,7 +49,7 @@ internal static class Performance {
     }
     private static void AppleDevicesFetchTest() {
         DoTimed("Apple Devices Fast Fetch", () => {
-            var r = AppleTool.PhysicalDevicesFast();
+            var r = SystemProfiler.PhysicalDevices();
             Console.WriteLine("Found {0} devices", r.Count);
         });
         DoTimed("Apple Devices XCTrace Fetch", () => {

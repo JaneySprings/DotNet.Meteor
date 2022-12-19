@@ -23,11 +23,12 @@ namespace Android.Sdk {
             MatchCollection matches = Regex.Matches(output, regex, RegexOptions.Singleline);
             return matches.Select(m => new DeviceData {
                 Name = m.Groups["name"].Value,
-                Details = "Emulator",
-                Platform = Platform.Android,
+                Details = Details.AndroidEmulator,
+                Platform = Platforms.Android,
                 OSVersion = m.Groups["based"].Value,
                 IsEmulator = true,
-                IsRunning = false
+                IsRunning = false,
+                IsMobile = true
             }).ToList();
         }
     }

@@ -13,7 +13,7 @@ using Process = System.Diagnostics.Process;
 
 namespace DotNet.Mobile.Debug.Session;
 
-public class MonoDebugSession : DebugSession {
+public partial class MonoDebugSession : DebugSession {
     private const int MAX_CONNECTION_ATTEMPTS = 20;
     private const int CONNECTION_ATTEMPT_INTERVAL = 500;
 
@@ -147,7 +147,7 @@ public class MonoDebugSession : DebugSession {
         SetExceptionOptions(args.ExceptionOptions);
 
         var configuration = new LaunchData(args.Project, args.Device, args.Target);
-        var port = args.DebuggingPort;
+        var port = args.DebuggingPort == 0 ? Utilities.FindFreePort() : args.DebuggingPort;
         var host = args.Address;
 
         IPAddress address = string.IsNullOrWhiteSpace(host) ? IPAddress.Loopback : Utilities.ResolveIPAddress(host);
@@ -167,25 +167,29 @@ public class MonoDebugSession : DebugSession {
     private void Connect(LaunchData options, IPAddress address, int port) {
         lock (this.locker) {
             this.debuggerKilled = false;
+            SoftDebuggerStartArgs arguments = null;
 
-            if (options.Target.Equals("Release", StringComparison.OrdinalIgnoreCase))
+            if (!options.IsDebug)
                 return;
 
-            SoftDebuggerStartArgs args = null;
             if (options.Device.IsAndroid) {
-                args = new SoftDebuggerConnectArgs(options.AppName, address, port) {
+                arguments = new SoftDebuggerConnectArgs(options.AppName, address, port) {
                     MaxConnectionAttempts = MAX_CONNECTION_ATTEMPTS,
                     TimeBetweenConnectionAttempts = CONNECTION_ATTEMPT_INTERVAL
                 };
-            } else if (options.Device.IsIPhone) {
-                args = new StreamCommandConnectionDebuggerArgs(options.AppName, new IPhoneTcpCommandConnection(IPAddress.Loopback, port)) { MaxConnectionAttempts = 10 };
+            }
+            if (options.Device.IsIPhone || options.Device.IsMacCatalyst) {
+                arguments = new StreamCommandConnectionDebuggerArgs(options.AppName, IPAddress.Loopback, port) {
+                    MaxConnectionAttempts = MAX_CONNECTION_ATTEMPTS
+                };
             }
 
-            SendEvent(Event.OutputEvent, new BodyOutput("Debugger is ready and listening..." + Environment.NewLine));
-            Logger.Log("Debugger ready at {0}:{1}", address, port);
+            if (arguments == null)
+                return;
 
             this.debuggerExecuting = true;
-            this.session.Run(new SoftDebuggerStartInfo(args), this.debuggerSessionOptions);
+            this.session.Run(new SoftDebuggerStartInfo(arguments), this.debuggerSessionOptions);
+            OnOutputDataReceived("Debugger is ready and listening...");
         }
     }
 

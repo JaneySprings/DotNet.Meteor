@@ -4,17 +4,16 @@ using System.Linq;
 using DotNet.Mobile.Shared;
 
 namespace Microsoft.Sdk {
-    public static class DotNetRunner {
-
+    public static class DotNetTool {
         public static void Execute(ProcessArgumentBuilder builder, IProcessLogger logger = null) {
-            var dotnet = DotNetTool();
+            var dotnet = DotNetLocation();
             var result = new ProcessRunner(dotnet, builder, logger).WaitForExit();
 
             if (result.ExitCode != 0)
                 throw new Exception(string.Join(Environment.NewLine, result.StandardError));
         }
 
-        public static FileInfo DotNetTool() {
+        public static FileInfo DotNetLocation() {
             string dotnet = Environment.GetEnvironmentVariable("DOTNET_SDK_ROOT");
 
             if (!string.IsNullOrEmpty(dotnet)) {

@@ -1,6 +1,5 @@
 import { WorkspaceFolder, DebugConfiguration } from 'vscode';
 import { Configuration } from './configuration';
-import { CommandLine } from './bridge';
 import { Target } from './models';
 import * as res from './resources';
 import * as vscode from 'vscode';
@@ -12,9 +11,15 @@ export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationPro
 									token?: vscode.CancellationToken): Promise<DebugConfiguration | undefined> {
 		
 		if (!Configuration.validate()) return undefined;
-		if (config.noDebug === undefined && Configuration.selectedTarget === Target.Release) {
-			vscode.window.showErrorMessage(res.messageDebugNotSupported);
-			return undefined;
+		if (config.noDebug === undefined) {
+			if (Configuration.isWindows()) {
+				vscode.window.showErrorMessage(res.messageDebugNotSupportedWin);
+				return undefined;
+			}
+			if (Configuration.selectedTarget === Target.Release) {
+				vscode.window.showErrorMessage(res.messageDebugNotSupported);
+				return undefined;
+			}
 		}
 		
 		if (!config.type && !config.request && !config.name) {

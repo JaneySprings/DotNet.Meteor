@@ -27,10 +27,11 @@ namespace Apple.Sdk {
 
                     devices.Add(new DeviceData {
                         IsEmulator = true,
+                        IsMobile = true,
                         IsRunning = state.Contains("Booted", StringComparison.OrdinalIgnoreCase),
                         Name = deviceMatch.Groups["name"].Value,
-                        Details = "iPhoneSimulator",
-                        Platform = "ios",
+                        Details = Details.iOSSimulator,
+                        Platform = Platforms.iOS,
                         OSVersion = os,
                         Serial = deviceMatch.Groups["udid"].Value
                     });
@@ -60,9 +61,10 @@ namespace Apple.Sdk {
                     devices.Add(new DeviceData {
                         IsEmulator = false,
                         IsRunning = true,
+                        IsMobile = true,
                         Name = deviceMatch.Groups["name"].Value,
-                        Details = "Device",
-                        Platform = "ios",
+                        Details = Details.iOSDevice,
+                        Platform = Platforms.iOS,
                         OSVersion = deviceMatch.Groups["os"].Value,
                         Serial = deviceMatch.Groups["udid"].Value
                     });
