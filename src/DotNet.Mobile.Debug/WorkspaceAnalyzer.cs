@@ -33,12 +33,25 @@ public static class WorkspaceAnalyzer {
 
 
     private static List<string> GetTargetFrameworks(string projectPath) {
-        string property = GetProperty(projectPath, "TargetFrameworks");
+        var frameworks = new List<string>();
 
-        if (property == null)
-            property = GetProperty(projectPath, "TargetFramework");
+        var singleFramework = GetProperty(projectPath, "TargetFramework");
+        if (!string.IsNullOrEmpty(singleFramework)) {
+            frameworks.Add(singleFramework);
+            return frameworks;
+        }
 
-        return property?.Split(';')?.Where(it => !string.IsNullOrEmpty(it))?.ToList();
+        var multipleFrameworks = GetProperty(projectPath, "TargetFrameworks");
+        if (!string.IsNullOrEmpty(multipleFrameworks)) {
+            foreach (var framework in multipleFrameworks.Split(';')) {
+                if (frameworks.Contains(framework) || framework.StartsWith("$("))
+                    continue;
+                frameworks.Add(framework);
+            }
+            return frameworks;
+        }
+
+        return null;
     }
 
     private static bool GetIsExecutable(string projectPath) {
@@ -52,9 +65,11 @@ public static class WorkspaceAnalyzer {
 
         string content = File.ReadAllText(projectPath);
         // Find in current project
-        var propertyMatch = new Regex($@"<{propertyName}>(.*?)<\/{propertyName}>").Match(content);
-        if (propertyMatch.Success)
-            return propertyMatch.Groups[1].Value;
+        var propertyMatch = new Regex($@"<{propertyName}\s?.*>(.*?)<\/{propertyName}>\s*\n").Matches(content);
+        if (propertyMatch.Count > 0) {
+            var matches = propertyMatch.Select(it => it.Groups[1].Value).ToList();
+            return string.Join(';', matches);
+        }
         // Find in imported project
         var importMatch = new Regex(@"<Import\s+Project\s*=\s*""(.*?)""").Match(content);
         if (importMatch.Success) {

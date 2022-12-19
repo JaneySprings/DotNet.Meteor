@@ -13,11 +13,12 @@ namespace Android.Sdk {
                 var ini = IniFile.FromPath(file);
                 avds.Add(new DeviceData {
                     Name = Path.GetFileNameWithoutExtension(file),
-                    Details = "Emulator",
-                    Platform = Platform.Android,
+                    Details = Details.AndroidEmulator,
+                    Platform = Platforms.Android,
                     OSVersion = ini.GetField("target") ?? "Unknown",
                     IsEmulator = true,
-                    IsRunning = false
+                    IsRunning = false,
+                    IsMobile = true
                 });
                 ini.Free();
             }
@@ -45,10 +46,11 @@ namespace Android.Sdk {
                     allDevices.Add(new DeviceData {
                         Name = DeviceBridge.Shell(serial, "getprop", "ro.product.model"),
                         OSVersion = $"android-{DeviceBridge.Shell(serial, "getprop", "ro.build.version.sdk")}",
-                        Platform = Platform.Android,
-                        Details = "Device",
+                        Platform = Platforms.Android,
+                        Details = Details.AndroidDevice,
                         IsEmulator = false,
                         IsRunning = true,
+                        IsMobile = true,
                         Serial = serial
                     });
                 }
@@ -56,6 +58,15 @@ namespace Android.Sdk {
 
             allDevices.AddRange(virtualDevices.OrderBy(x => x.Name));
             return allDevices;
+        }
+
+        public static bool TryGetDevices(List<DeviceData> devices) {
+            try {
+                devices.AddRange(AllDevices());
+                return true;
+            } catch {
+                return false;
+            }
         }
     }
 }

@@ -9,11 +9,11 @@ namespace Android.Sdk {
 
             if (string.IsNullOrEmpty(path)) {
                 if (RuntimeSystem.IsWindows)
-                    path = InvariantSdk(RuntimeSystem.HomeDirectory, "AppData", "Local", "Android");
+                    path = Path.Combine(RuntimeSystem.HomeDirectory, "AppData", "Local", "Android", "Sdk");
                 else if (RuntimeSystem.IsMacOS)
-                    path = InvariantSdk(RuntimeSystem.HomeDirectory, "Library", "Android");
+                    path = Path.Combine(RuntimeSystem.HomeDirectory, "Library", "Android", "Sdk");
                 else
-                    path = InvariantSdk(RuntimeSystem.HomeDirectory, "Android");
+                    path = Path.Combine(RuntimeSystem.HomeDirectory, "Android", "Sdk");
             }
 
             if (string.IsNullOrEmpty(path) || !Directory.Exists(path))
@@ -66,21 +66,6 @@ namespace Android.Sdk {
                 throw new Exception("Could not find avdmanager tool");
 
             return newestTool;
-        }
-
-
-        private static string InvariantSdk(params string[] tokens) {
-            string basePath = Path.Combine(tokens);
-            string lowercased = Path.Combine(basePath, "sdk");
-            string uppercased = Path.Combine(basePath, "Sdk");
-
-            if (Directory.Exists(lowercased))
-                return lowercased;
-
-            if (Directory.Exists(uppercased))
-                return uppercased;
-
-            return null;
         }
     }
 }
