@@ -4,7 +4,7 @@ using System.Linq;
 using DotNet.Mobile.Shared;
 
 namespace Microsoft.Sdk {
-    public class DotNetTool: DotNetLocator {
+    public static class DotNetTool {
         public static void Execute(ProcessArgumentBuilder builder, IProcessLogger logger = null) {
             var dotnet = DotNetLocation();
             var result = new ProcessRunner(dotnet, builder, logger).WaitForExit();

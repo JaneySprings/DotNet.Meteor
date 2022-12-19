@@ -13,7 +13,7 @@ using Process = System.Diagnostics.Process;
 
 namespace DotNet.Mobile.Debug.Session;
 
-public class MonoDebugSession : DebugSession {
+public partial class MonoDebugSession : DebugSession {
     private const int MAX_CONNECTION_ATTEMPTS = 20;
     private const int CONNECTION_ATTEMPT_INTERVAL = 500;
 

@@ -1,8 +1,8 @@
 import { Project, Device, Target } from "./models"
+import { window, workspace } from 'vscode';
 import { Controller } from "./controller";
 import { CommandLine } from "./bridge";
 import * as res from './resources';
-import * as vscode from 'vscode';
 
 
 export class Configuration {
@@ -15,11 +15,11 @@ export class Configuration {
     }
     public static getDebuggingPort(): number {
         if (Configuration.isAndroid()) 
-            return vscode.workspace.getConfiguration(res.configId)
+            return workspace.getConfiguration(res.configId)
                 .get(res.configIdMonoSdbDebuggerPortAndroid) ?? res.configDefaultMonoSdbDebuggerPortAndroid;
         
         if (Configuration.isIOS()) 
-            return vscode.workspace.getConfiguration(res.configId)
+            return workspace.getConfiguration(res.configId)
                 .get(res.configIdMonoSdbDebuggerPortApple) ?? res.configDefaultMonoSdbDebuggerPortApple;
 
         if (Configuration.isMacCatalyst() || Configuration.isWindows())
@@ -47,7 +47,7 @@ export class Configuration {
         Configuration.selectedProject = project;
     }
     public static workspacePath() {
-        return vscode.workspace.workspaceFolders![0].uri.fsPath;
+        return workspace.workspaceFolders![0].uri.fsPath;
     }
     public static targetFramework(): string | undefined {
         const devicePlatform = Configuration.selectedDevice!.platform;
@@ -57,15 +57,15 @@ export class Configuration {
     
     public static validate(): boolean {
         if (!Configuration.selectedProject || !Configuration.selectedProject.path) {
-            vscode.window.showErrorMessage(res.messageNoProjectFound);
+            window.showErrorMessage(res.messageNoProjectFound);
             return false;
         }
         if (!Configuration.selectedDevice || !Configuration.selectedDevice.platform) {
-            vscode.window.showErrorMessage(res.messageNoDeviceFound);
+            window.showErrorMessage(res.messageNoDeviceFound);
             return false;
         }
         if (!Controller.mobileDevices.some(it => it.name === Configuration.selectedDevice!.name)) {
-            vscode.window.showErrorMessage(res.messageDeviceNotExists);
+            window.showErrorMessage(res.messageDeviceNotExists);
             return false;
         }
 

@@ -1,5 +1,5 @@
 import { Configuration } from './configuration';
-import * as vscode from 'vscode';
+import { QuickPickItem } from 'vscode';
 
 
 export enum Target {
@@ -14,7 +14,7 @@ export class Project {
     public frameworks: string[] | undefined;
 }
 
-export class ProjectItem implements vscode.QuickPickItem {
+export class ProjectItem implements QuickPickItem {
     label: string;
     description: string;
     detail: string;
@@ -42,7 +42,7 @@ export class Device {
     public is_arm: boolean | undefined;
 }
 
-export class DeviceItem implements vscode.QuickPickItem {
+export class DeviceItem implements QuickPickItem {
     label: string;
     detail: string;
     item: Device;
