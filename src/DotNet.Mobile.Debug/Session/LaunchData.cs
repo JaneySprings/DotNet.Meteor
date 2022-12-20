@@ -17,17 +17,14 @@ public class LaunchData {
     public bool IsDebug => Target.Equals("debug", StringComparison.OrdinalIgnoreCase);
 
     public LaunchData(Project project, DeviceData device, string target) {
-        var projectFile = ProjectFile.FromPath(project.Path);
         Project = project;
         Device = device;
         Target = target;
-        AppId = projectFile.ValueFromProperty("ApplicationId");
-        AppName = projectFile.ValueFromProperty("ApplicationTitle");
+        AppId = MSBuild.GetProperty(project.Path, "ApplicationId");
+        AppName = MSBuild.GetProperty(project.Path, "ApplicationTitle");
         Framework = Project.Frameworks.First(it =>
             it.Contains(Device.Platform, StringComparison.OrdinalIgnoreCase)
         );
-
-        projectFile.Free();
         ExecutablePath = LocateExecutable();
     }
 
@@ -57,11 +54,11 @@ public class LaunchData {
         if (Device.IsIPhone) {
             var archDirectories = Directory.GetDirectories(frameworkDirectory);
             var armDirectory = archDirectories.FirstOrDefault(it => it.Contains("arm64", StringComparison.OrdinalIgnoreCase));
-            var intelDirectory = archDirectories.FirstOrDefault(it => !it.Contains("arm64", StringComparison.OrdinalIgnoreCase));
+            var intelDirectory = archDirectories.FirstOrDefault(it => it.Contains("simulator", StringComparison.OrdinalIgnoreCase));
 
             if (!Device.IsEmulator) {
                 if (armDirectory == null)
-                    throw new DirectoryNotFoundException("Could not find arm64 directory");
+                    throw new DirectoryNotFoundException($"Could not find arm64 directory in {frameworkDirectory}");
 
                 var armBundleDirectories = Directory.GetDirectories(armDirectory, "*.app", SearchOption.TopDirectoryOnly);
                 if (!armBundleDirectories.Any())
@@ -71,7 +68,7 @@ public class LaunchData {
             }
 
             if (intelDirectory == null)
-                throw new DirectoryNotFoundException("Could not find x86-64 directory");
+                throw new DirectoryNotFoundException($"Could not find x86-64 directory in {frameworkDirectory}");
 
             var intelBundledirectories = Directory.GetDirectories(intelDirectory, "*.app", SearchOption.TopDirectoryOnly);
             if (!intelBundledirectories.Any())
@@ -83,7 +80,7 @@ public class LaunchData {
         if (Device.IsMacCatalyst) {
             var archDirectories = Directory.GetDirectories(frameworkDirectory);
             var armDirectory = archDirectories.FirstOrDefault(it => it.Contains("arm64", StringComparison.OrdinalIgnoreCase));
-            var intelDirectory = archDirectories.FirstOrDefault(it => !it.Contains("arm64", StringComparison.OrdinalIgnoreCase));
+            var intelDirectory = archDirectories.FirstOrDefault(it => it.Contains("x64", StringComparison.OrdinalIgnoreCase));
 
             if (Device.IsArm && armDirectory != null) {
                 var armBundleDirectories = Directory.GetDirectories(armDirectory, "*.app", SearchOption.TopDirectoryOnly);
@@ -92,7 +89,7 @@ public class LaunchData {
             }
 
             if (intelDirectory == null)
-                throw new DirectoryNotFoundException("Could not find x86-64 directory");
+                throw new DirectoryNotFoundException($"Could not find x86-64 directory in {frameworkDirectory}");
 
             var intelBundledirectories = Directory.GetDirectories(intelDirectory, "*.app", SearchOption.TopDirectoryOnly);
             if (!intelBundledirectories.Any())
