@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using DotNet.Mobile.Shared;
 
-namespace Microsoft.Sdk {
+namespace DotNet.Mobile.Shared {
     public static class DotNetTool {
         public static void Execute(ProcessArgumentBuilder builder, IProcessLogger logger = null) {
             var dotnet = DotNetLocation();

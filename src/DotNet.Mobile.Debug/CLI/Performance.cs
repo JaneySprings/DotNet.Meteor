@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Diagnostics;
+using DotNet.Mobile.Shared;
 using Android.Sdk;
 using Apple.Sdk;
 

@@ -23,8 +23,8 @@ export class ProjectItem implements QuickPickItem {
     constructor(project: Project) {
         const workspace = Configuration.workspacePath();
         this.label = project.name;
-        this.description = project.path.replace(workspace + '/', '');
-        this.detail = project.frameworks?.join('  ') ?? "frameworks not found";
+        this.detail = project.path.replace(workspace + '/', '');
+        this.description = project.frameworks?.join('  ') ?? "frameworks not found";
         this.item = project;
     }
 }

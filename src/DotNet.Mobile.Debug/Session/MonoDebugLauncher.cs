@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
 using DotNet.Mobile.Shared;
-using Microsoft.Sdk;
 using Android.Sdk;
 using Apple.Sdk;
 
