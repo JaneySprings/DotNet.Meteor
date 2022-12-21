@@ -46,8 +46,8 @@ export class Configuration {
         const project = CommandLine.analyzeProject(Configuration.selectedProject!.path);
         Configuration.selectedProject = project;
     }
-    public static workspacePath() {
-        return workspace.workspaceFolders![0].uri.fsPath;
+    public static workspacesPath(): string[] {
+        return workspace.workspaceFolders!.map(it => it.uri.fsPath);
     }
     public static targetFramework(): string | undefined {
         const devicePlatform = Configuration.selectedDevice!.platform;

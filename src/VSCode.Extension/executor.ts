@@ -35,6 +35,10 @@ export class ProcessArgumentBuilder {
         this.args.push(`"${arg}"`);
         return this;
     }
+    public appendRangeQuoted(arg: string[]): ProcessArgumentBuilder {
+        arg.forEach(a => this.args.push(`"${a}"`));
+        return this;
+    }
     public build(): string {
         return this.args.join(" ");
     }

@@ -20,7 +20,7 @@ export class CommandLine {
         ProcessRunner.runAsync<Project[]>(new ProcessArgumentBuilder("dotnet")
             .appendQuoted(this.toolPath)
             .append("--analyze-workspace")
-            .appendQuoted(Configuration.workspacePath()), callback);
+            .appendRangeQuoted(Configuration.workspacesPath()), callback);
     }
 
     public static analyzeProject(projectFile: string): Project {
