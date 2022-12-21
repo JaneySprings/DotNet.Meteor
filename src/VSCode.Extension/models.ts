@@ -1,4 +1,3 @@
-import { Configuration } from './configuration';
 import { QuickPickItem } from 'vscode';
 
 
@@ -21,9 +20,8 @@ export class ProjectItem implements QuickPickItem {
     item: Project;
 
     constructor(project: Project) {
-        const workspace = Configuration.workspacePath();
         this.label = project.name;
-        this.detail = project.path.replace(workspace + '/', '');
+        this.detail = project.path;
         this.description = project.frameworks?.join('  ') ?? "frameworks not found";
         this.item = project;
     }
