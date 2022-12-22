@@ -1,6 +1,6 @@
 {
 	"extension.displayName": ".NET Meteor",
-	"extension.description": "Run and Debug .NET Mobile Apps",
+	"extension.description": "Run and Debug .NET 7 / .NET 6 Apps",
 
 	"command.title.selectActiveProject": ".NET Meteor: Select workspace project",
 	"command.id.selectActiveProject": "dotnet-meteor.selectActiveProject",

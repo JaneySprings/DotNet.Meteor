@@ -1,6 +1,6 @@
-import { DotNetDebuggerConfiguration } from './debug';
-import { DotNetPublishTaskProvider } from './publish';
-import { DotNetBuildTaskProvider } from './build';
+import { DotNetDebuggerConfiguration } from './tasks/debug';
+import { DotNetPublishTaskProvider } from './tasks/publish';
+import { DotNetBuildTaskProvider } from './tasks/build';
 import { Controller } from './controller';
 import { CommandLine } from './bridge';
 import { Target } from './models';

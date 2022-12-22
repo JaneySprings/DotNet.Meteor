@@ -18,7 +18,7 @@ export class Configuration {
             return workspace.getConfiguration(res.configId)
                 .get(res.configIdMonoSdbDebuggerPortAndroid) ?? res.configDefaultMonoSdbDebuggerPortAndroid;
         
-        if (Configuration.isIOS()) 
+        if (Configuration.isApple()) 
             return workspace.getConfiguration(res.configId)
                 .get(res.configIdMonoSdbDebuggerPortApple) ?? res.configDefaultMonoSdbDebuggerPortApple;
 
@@ -31,7 +31,7 @@ export class Configuration {
     public static isAndroid(): boolean {
         return Configuration.selectedDevice.platform?.includes('android') ?? false;
     }
-    public static isIOS(): boolean {
+    public static isApple(): boolean {
         return Configuration.selectedDevice.platform?.includes('ios') ?? false;
     }
     public static isMacCatalyst(): boolean {
