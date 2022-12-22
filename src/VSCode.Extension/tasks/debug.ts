@@ -1,7 +1,7 @@
 import { WorkspaceFolder, DebugConfiguration } from 'vscode';
-import { Configuration } from './configuration';
-import { Target } from './models';
-import * as res from './resources';
+import { Configuration } from '../configuration';
+import { Target } from '../models';
+import * as res from '../resources';
 import * as vscode from 'vscode';
 
 

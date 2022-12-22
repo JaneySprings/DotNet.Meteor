@@ -1,6 +1,6 @@
-import { ProcessArgumentBuilder } from './executor';
-import { Configuration } from './configuration';
-import * as res from './resources';
+import { ProcessArgumentBuilder } from '../executor';
+import { Configuration } from '../configuration';
+import * as res from '../resources';
 import * as vscode from 'vscode';
 
 
@@ -31,7 +31,7 @@ export class DotNetPublishTaskProvider implements vscode.TaskProvider {
         if (Configuration.isAndroid()) {
             builder.append(`-p:AndroidSdkDirectory="${Configuration.getAndroidSdkDirectory()}"`);
         }
-        if (Configuration.isIOS()) {
+        if (Configuration.isApple()) {
             builder.append('-p:RuntimeIdentifier=ios-arm64');
         }
         if (Configuration.isMacCatalyst() && Configuration.selectedDevice!.is_arm) {
