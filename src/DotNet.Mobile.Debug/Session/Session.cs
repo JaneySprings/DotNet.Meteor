@@ -51,15 +51,6 @@ public abstract class Session: IProcessLogger {
         SendMessage(response);
     }
 
-    protected void SendOutput(string category, string data) {
-        if (!String.IsNullOrEmpty(data)) {
-            if (data[data.Length - 1] != '\n') {
-                data += '\n';
-            }
-            SendEvent(Event.OutputEvent, new BodyOutput(category, data));
-        }
-    }
-
     protected void SendErrorResponse(Response response, int id, string message) {
         var model = new ModelMessage(id, message);
         response.SetBodyError(message, new BodyError(model));
@@ -120,10 +111,10 @@ public abstract class Session: IProcessLogger {
     }
 
     public void OnOutputDataReceived(string stdout) {
-        SendEvent(Event.OutputEvent, new BodyOutput(stdout + Environment.NewLine));
+        SendEvent(Event.OutputEvent, new BodyOutput("stdout", stdout + Environment.NewLine));
     }
 
     public void OnErrorDataReceived(string stderr) {
-        SendEvent(Event.OutputEvent, new BodyOutput(stderr + Environment.NewLine));
+        SendEvent(Event.OutputEvent, new BodyOutput("stderr", stderr + Environment.NewLine));
     }
 }
