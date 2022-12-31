@@ -99,16 +99,13 @@ public partial class MonoDebugSession : DebugSession {
             }
             SendEvent(Event.ThreadEvent, new BodyThread("exited", tid));
         };
-        this.session.OutputWriter = (isStdErr, text) => SendOutput(isStdErr ? "stderr" : "stdout", text);
+        this.session.OutputWriter = (isStdErr, text) => {
+            if (isStdErr) OnErrorDataReceived(text);
+            else OnOutputDataReceived(text);
+        };
     }
 
     public override void Initialize(Response response, Argument args) {
-        OperatingSystem os = Environment.OSVersion;
-        if (os.Platform != PlatformID.MacOSX && os.Platform != PlatformID.Unix && os.Platform != PlatformID.Win32NT) {
-            SendErrorResponse(response, 3000, $"Debugging is not supported on this platform ({os.Platform}).");
-            return;
-        }
-
         this.clientLinesStartAt1 = args.LinesStartAt1;
         var pathFormat = args.PathFormat;
 
@@ -548,11 +545,17 @@ public partial class MonoDebugSession : DebugSession {
 
     private ModelVariable CreateVariable(ObjectValue v) {
         var dv = v.DisplayValue ?? "<error getting value>";
+        int childrenReference = 0;
 
         if (dv.Length > 1 && dv[0] == '{' && dv[dv.Length - 1] == '}')
             dv = dv.Substring(1, dv.Length - 2);
 
-        return new ModelVariable(v.Name, dv, v.TypeName, v.HasChildren ? this.variableHandles.Create(v.GetAllChildren()) : 0);
+        if (v.HasChildren) {
+            var objectValues = v.GetAllChildren();
+            childrenReference = this.variableHandles.Create(objectValues);
+        }
+
+        return new ModelVariable(v.Name, dv, v.TypeName, childrenReference);
     }
 
     private void WaitForSuspend() {
