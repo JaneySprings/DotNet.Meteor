@@ -10,7 +10,6 @@ namespace DotNet.Mobile.Shared {
                 IsEmulator = false,
                 IsRunning = true,
                 IsMobile = false,
-                IsArm = false, //todo: check this
                 Name = Environment.MachineName,
                 OSVersion = osVersion,
                 Details = Details.Windows,

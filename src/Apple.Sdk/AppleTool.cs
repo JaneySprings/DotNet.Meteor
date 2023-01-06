@@ -49,6 +49,7 @@ namespace Apple.Sdk {
         }
 
         public static DeviceData MacDevice() {
+            var runtime = SystemProfiler.IsArch64() ? Runtimes.MacArm64 : Runtimes.Unspecified;
             var tokens = Environment.OSVersion.VersionString.Split(' ');
             var osVersion = $"MacOS {tokens.Last()}";
 
@@ -56,10 +57,10 @@ namespace Apple.Sdk {
                 IsEmulator = false,
                 IsRunning = true,
                 IsMobile = false,
-                IsArm = SystemProfiler.IsArch64(),
-                Name = Environment.MachineName,
+                RuntimeId = runtime,
                 OSVersion = osVersion,
                 Details = Details.MacCatalyst,
+                Name = Environment.MachineName,
                 Platform = Platforms.MacCatalyst
             };
         }

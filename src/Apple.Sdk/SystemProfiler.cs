@@ -24,6 +24,7 @@ namespace Apple.Sdk {
                     IsEmulator = false,
                     IsRunning = true,
                     IsMobile = true,
+                    RuntimeId = Runtimes.iOSArm64,
                     Name = $"iPhone {version}",
                     Details = Details.iOSDevice,
                     Platform = Platforms.iOS,

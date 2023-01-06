@@ -1,103 +1,92 @@
 ﻿using System;
 using System.IO;
+using System.Xml;
 using System.Linq;
 using DotNet.Mobile.Shared;
+using System.Collections.Generic;
 
 namespace DotNet.Mobile.Debug.Session;
 
 public class LaunchData {
     public string AppId { get; }
     public string AppName { get; }
-    public string Target { get; }
     public string Framework { get; }
     public string ExecutablePath { get; }
     public DeviceData Device { get; }
     public Project Project { get; }
-
-    public bool IsDebug => Target.Equals("debug", StringComparison.OrdinalIgnoreCase);
+    public bool IsDebug { get; }
 
     public LaunchData(Project project, DeviceData device, string target) {
         Project = project;
         Device = device;
-        Target = target;
-        AppId = MSBuild.GetProperty(project.Path, "ApplicationId");
-        AppName = MSBuild.GetProperty(project.Path, "ApplicationTitle");
-        Framework = Project.Frameworks.First(it =>
-            it.Contains(Device.Platform, StringComparison.OrdinalIgnoreCase)
-        );
+
+        IsDebug = target.Equals("debug", StringComparison.OrdinalIgnoreCase);
+        Framework = Project.Frameworks.First(it => it.Contains(Device.Platform, StringComparison.OrdinalIgnoreCase));
+        Project.Load(new Dictionary<string, string> {
+            { "Configuration", target },
+            { "TargetFramework", Framework },
+            { "RuntimeIdentifier", Device.RuntimeId }
+        });
+
+        AppName = Project.EvaluateProperty("ApplicationTitle", "AssemblyName");
+        AppId = FindApplicationId();
+
+        if (string.IsNullOrEmpty(AppId))
+            AppId = Project.EvaluateProperty("ApplicationId", null, $"{AppName}.{AppName}");
+
         ExecutablePath = LocateExecutable();
     }
 
     private string LocateExecutable() {
         var rootDirectory = Path.GetDirectoryName(Project.Path);
-        var frameworkDirectory = IsDebug
-            ? Path.Combine(rootDirectory, "bin", "Debug", Framework)
-            : Path.Combine(rootDirectory, "bin", "Release", Framework);
+        var outputDirectory = Path.Combine(rootDirectory, Project.EvaluateProperty("OutputPath"));
 
-        if (!Directory.Exists(frameworkDirectory))
-            throw new Exception($"Framework directory not found: {frameworkDirectory}");
+        if (!Directory.Exists(outputDirectory))
+            throw new DirectoryNotFoundException($"Could not find output directory {outputDirectory}");
 
         if (Device.IsAndroid) {
-            var files = Directory.GetFiles(frameworkDirectory,  "*-Signed.apk", SearchOption.TopDirectoryOnly);
+            var files = Directory.GetFiles(outputDirectory, $"{AppId}-Signed.apk", SearchOption.TopDirectoryOnly);
             if (!files.Any())
-                throw new FileNotFoundException($"Could not find adnroid package in {frameworkDirectory}");
+                throw new FileNotFoundException($"Could not find android package in {outputDirectory}");
             return files.FirstOrDefault();
         }
 
         if (Device.IsWindows) {
-            var files = Directory.GetFiles(frameworkDirectory, $"{AppName}.exe", SearchOption.AllDirectories);
+            var files = Directory.GetFiles(outputDirectory, $"{AppName}.exe", SearchOption.AllDirectories);
             if (!files.Any())
-                throw new FileNotFoundException($"Could not find windows program in {frameworkDirectory}");
+                throw new FileNotFoundException($"Could not find windows program in {outputDirectory}");
             return files.FirstOrDefault();
         }
 
-        if (Device.IsIPhone) {
-            var archDirectories = Directory.GetDirectories(frameworkDirectory);
-            var armDirectory = archDirectories.FirstOrDefault(it => it.Contains("arm64", StringComparison.OrdinalIgnoreCase));
-            var intelDirectory = archDirectories.FirstOrDefault(it => it.Contains("simulator", StringComparison.OrdinalIgnoreCase));
-
-            if (!Device.IsEmulator) {
-                if (armDirectory == null)
-                    throw new DirectoryNotFoundException($"Could not find arm64 directory in {frameworkDirectory}");
-
-                var armBundleDirectories = Directory.GetDirectories(armDirectory, "*.app", SearchOption.TopDirectoryOnly);
-                if (!armBundleDirectories.Any())
-                    throw new DirectoryNotFoundException($"Could not find iOS bundle in {armDirectory}");
-
-                return armBundleDirectories.FirstOrDefault();
-            }
-
-            if (intelDirectory == null)
-                throw new DirectoryNotFoundException($"Could not find x86-64 directory in {frameworkDirectory}");
-
-            var intelBundledirectories = Directory.GetDirectories(intelDirectory, "*.app", SearchOption.TopDirectoryOnly);
-            if (!intelBundledirectories.Any())
-                throw new DirectoryNotFoundException($"Could not find iOS bundle in {intelDirectory}");
-
-            return intelBundledirectories.FirstOrDefault();
-        }
-
-        if (Device.IsMacCatalyst) {
-            var archDirectories = Directory.GetDirectories(frameworkDirectory);
-            var armDirectory = archDirectories.FirstOrDefault(it => it.Contains("arm64", StringComparison.OrdinalIgnoreCase));
-            var intelDirectory = archDirectories.FirstOrDefault(it => it.Contains("x64", StringComparison.OrdinalIgnoreCase));
-
-            if (Device.IsArm && armDirectory != null) {
-                var armBundleDirectories = Directory.GetDirectories(armDirectory, "*.app", SearchOption.TopDirectoryOnly);
-                if (armBundleDirectories.Any())
-                    return armBundleDirectories.FirstOrDefault();
-            }
-
-            if (intelDirectory == null)
-                throw new DirectoryNotFoundException($"Could not find x86-64 directory in {frameworkDirectory}");
-
-            var intelBundledirectories = Directory.GetDirectories(intelDirectory, "*.app", SearchOption.TopDirectoryOnly);
-            if (!intelBundledirectories.Any())
-                throw new DirectoryNotFoundException($"Could not find Mac bundle in {intelDirectory}");
-
-            return intelBundledirectories.FirstOrDefault();
+        if (Device.IsIPhone || Device.IsMacCatalyst) {
+            var bundle = Directory.GetDirectories(outputDirectory, $"{AppName}.app", SearchOption.TopDirectoryOnly);
+            if (!bundle.Any())
+                throw new DirectoryNotFoundException($"Could not find .app bundle in {outputDirectory}");
+            return bundle.FirstOrDefault();
         }
 
         return null;
+    }
+
+    private string FindApplicationId() {
+        if (!Device.IsAndroid)
+            return null;
+
+        var rootDirectory = Path.GetDirectoryName(Project.Path);
+        var manifestPaths = Directory.GetFiles(rootDirectory, "AndroidManifest.xml", SearchOption.AllDirectories);
+
+        if (!manifestPaths.Any())
+            return null;
+
+        var xml = new XmlDocument();
+        xml.Load(manifestPaths.FirstOrDefault());
+
+        var manifestNode = xml.SelectSingleNode("/manifest");
+        var packageAttr = manifestNode.Attributes["package"];
+
+        if (packageAttr == null)
+            return null;
+
+        return packageAttr.Value;
     }
 }

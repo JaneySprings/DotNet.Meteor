@@ -3,8 +3,8 @@ using System.IO;
 
 namespace DotNet.Mobile.Debug {
     public static class Logger {
-        public static string LogStagingDirectory => AppDomain.CurrentDomain.BaseDirectory;
-        private static readonly string LogFile = Path.Combine(LogStagingDirectory, "session.log");
+        private static string LogStagingDirectory => AppDomain.CurrentDomain.BaseDirectory;
+        public static readonly string LogFile = Path.Combine(LogStagingDirectory, "session.log");
 
         static Logger() {
             if (File.Exists(LogFile))
