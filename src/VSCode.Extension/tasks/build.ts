@@ -29,15 +29,12 @@ export class DotNetBuildTaskProvider implements vscode.TaskProvider {
             return [];
         }
 
+        if (Configuration.selectedDevice.runtime_id) {
+            builder.append(`-p:RuntimeIdentifier=${Configuration.selectedDevice.runtime_id}`);
+        }
         if (Configuration.isAndroid()) {
             builder.append('-p:EmbedAssembliesIntoApk=true');
             builder.append(`-p:AndroidSdkDirectory="${Configuration.getAndroidSdkDirectory()}"`);
-        }
-        if (Configuration.isApple() && !Configuration.selectedDevice!.is_emulator) {
-            builder.append('-p:RuntimeIdentifier=ios-arm64');
-        }
-        if (Configuration.isMacCatalyst() && Configuration.selectedDevice!.is_arm) {
-            builder.append('-p:RuntimeIdentifier=maccatalyst-arm64');
         }
         if (Configuration.isWindows()) {
             builder.append('-p:WindowsPackageType=None');

@@ -34,10 +34,10 @@ export class Device {
     public serial: string | undefined;
     public platform: string | undefined;
     public os_version: string | undefined;
+    public runtime_id: string | undefined;
     public is_emulator: boolean | undefined;
     public is_running: boolean | undefined;
     public is_mobile: boolean | undefined;
-    public is_arm: boolean | undefined;
 }
 
 export class DeviceItem implements QuickPickItem {

@@ -69,7 +69,12 @@ public partial class MonoDebugSession {
                 .Append( "-p:AndroidAttachDebugger=true")
                 .Append($"-p:AndroidSdbTargetPort={port}")
                 .Append($"-p:AndroidSdbHostPort={port}");
-            DotNetTool.Execute(arguments, this);
+
+            var result = new ProcessRunner(Shared.PathUtils.DotNetTool(), arguments, this)
+                .WaitForExit();
+
+            if (result.ExitCode != 0)
+                throw new Exception(string.Join(Environment.NewLine, result.StandardError));
         } else {
             DeviceBridge.Launch(configuration.Device.Serial, configuration.AppId, this);
         }

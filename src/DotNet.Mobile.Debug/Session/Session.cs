@@ -71,7 +71,7 @@ public abstract class Session: IProcessLogger {
     private void Dispatch(string req) {
         var request = JsonSerializer.Deserialize<Request>(req)!;
 
-        Logger.Log($"IDE_Request[request.command]: {req}");
+        Logger.Log($"IDE_Request: {req}");
 
         var response = new Response(request);
         DispatchRequest(request.Command, request.Arguments, response);
