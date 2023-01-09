@@ -37,9 +37,10 @@ public class LaunchData {
         ExecutablePath = LocateExecutable();
     }
 
+    // TODO: Remove ._Normalize() after MSBuild Api bug fix
     private string LocateExecutable() {
         var rootDirectory = Path.GetDirectoryName(Project.Path);
-        var outputDirectory = Path.Combine(rootDirectory, Project.EvaluateProperty("OutputPath"));
+        var outputDirectory = Path.Combine(rootDirectory, Project.EvaluateProperty("OutputPath"))._Normalize();
 
         if (!Directory.Exists(outputDirectory))
             throw new DirectoryNotFoundException($"Could not find output directory {outputDirectory}");
