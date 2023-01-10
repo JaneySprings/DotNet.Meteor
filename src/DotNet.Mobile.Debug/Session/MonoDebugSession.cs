@@ -170,13 +170,13 @@ public partial class MonoDebugSession : DebugSession {
                 return;
 
             if (options.Device.IsAndroid) {
-                arguments = new SoftDebuggerConnectArgs(options.ExecutableName, address, port) {
+                arguments = new SoftDebuggerConnectArgs(options.Project.Name, address, port) {
                     MaxConnectionAttempts = MAX_CONNECTION_ATTEMPTS,
                     TimeBetweenConnectionAttempts = CONNECTION_ATTEMPT_INTERVAL
                 };
             }
             if (options.Device.IsIPhone || options.Device.IsMacCatalyst) {
-                arguments = new StreamCommandConnectionDebuggerArgs(options.ExecutableName, IPAddress.Loopback, port) {
+                arguments = new StreamCommandConnectionDebuggerArgs(options.Project.Name, IPAddress.Loopback, port) {
                     MaxConnectionAttempts = MAX_CONNECTION_ATTEMPTS
                 };
             }

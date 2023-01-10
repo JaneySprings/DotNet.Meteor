@@ -11,18 +11,15 @@ namespace DotNet.Mobile.Shared {
             var projects = new List<Project>();
 
             foreach (var projectFile in projectFiles) {
-                try {
-                    var project = new Project(projectFile);
-                    project.Load();
+                var project = new Project(projectFile);
+                var outputType = project.EvaluateProperty("OutputType");
 
-                    string outputType = project.EvaluateProperty("OutputType");
-                    if (outputType?.Contains("exe", StringComparison.OrdinalIgnoreCase) == false)
-                        continue;
+                if (outputType?.Contains("exe", StringComparison.OrdinalIgnoreCase) == false)
+                    continue;
 
-                    project.Frameworks = TargetFrameworks(project);
-                    if (project.Frameworks?.Find(it => it.Contains("net", StringComparison.OrdinalIgnoreCase) && it.Contains('-')) != null)
-                        projects.Add(project);
-                } catch { continue; }
+                project.Frameworks = TargetFrameworks(project);
+                if (project.Frameworks?.Find(it => it.Contains("net", StringComparison.OrdinalIgnoreCase) && it.Contains('-')) != null)
+                    projects.Add(project);
             }
 
             return projects.OrderBy(x => x.Name);

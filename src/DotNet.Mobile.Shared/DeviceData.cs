@@ -14,9 +14,9 @@ namespace DotNet.Mobile.Shared {
 
 
         [JsonIgnore] public bool IsAndroid => Platform.Equals(Platforms.Android);
-        [JsonIgnore] public bool IsIPhone => Platform.Contains(Platforms.iOS);
-        [JsonIgnore] public bool IsMacCatalyst => Platform.Contains(Platforms.MacCatalyst);
-        [JsonIgnore] public bool IsWindows => Platform.Contains(Platforms.Windows);
+        [JsonIgnore] public bool IsIPhone => Platform.Equals(Platforms.iOS);
+        [JsonIgnore] public bool IsMacCatalyst => Platform.Equals(Platforms.MacCatalyst);
+        [JsonIgnore] public bool IsWindows => Platform.Equals(Platforms.Windows);
     }
 
     public static class Platforms {
@@ -28,7 +28,9 @@ namespace DotNet.Mobile.Shared {
 
     public static class Runtimes {
         public const string MacArm64 = "maccatalyst-arm64";
+        public const string MacX64 = "maccatalyst-x64";
         public const string iOSArm64 = "ios-arm64";
+        public const string iOSimulatorX64 = "iossimulator-x64";
         public const string Unspecified = null;
     }
 

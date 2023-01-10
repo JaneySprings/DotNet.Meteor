@@ -37,6 +37,7 @@ namespace Apple.Sdk {
                     IsMobile = true,
                     IsRunning = extractor.Extract("state", "integer")?.Equals("3") == true,
                     Name = extractor.Extract("name") ?? "Unknown",
+                    RuntimeId = Runtimes.iOSimulatorX64,
                     Details = Details.iOSSimulator,
                     Platform = Platforms.iOS,
                     OSVersion = osVersion,
@@ -49,7 +50,7 @@ namespace Apple.Sdk {
         }
 
         public static DeviceData MacDevice() {
-            var runtime = SystemProfiler.IsArch64() ? Runtimes.MacArm64 : Runtimes.Unspecified;
+            var runtime = SystemProfiler.IsArch64() ? Runtimes.MacArm64 : Runtimes.MacX64;
             var tokens = Environment.OSVersion.VersionString.Split(' ');
             var osVersion = $"MacOS {tokens.Last()}";
 
