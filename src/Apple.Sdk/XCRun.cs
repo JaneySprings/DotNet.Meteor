@@ -32,6 +32,7 @@ namespace Apple.Sdk {
                         Name = deviceMatch.Groups["name"].Value,
                         Details = Details.iOSSimulator,
                         Platform = Platforms.iOS,
+                        RuntimeId = Runtimes.iOSimulatorX64,
                         OSVersion = os,
                         Serial = deviceMatch.Groups["udid"].Value
                     });
@@ -65,6 +66,7 @@ namespace Apple.Sdk {
                         Name = deviceMatch.Groups["name"].Value,
                         Details = Details.iOSDevice,
                         Platform = Platforms.iOS,
+                        RuntimeId = Runtimes.iOSArm64,
                         OSVersion = deviceMatch.Groups["os"].Value,
                         Serial = deviceMatch.Groups["udid"].Value
                     });

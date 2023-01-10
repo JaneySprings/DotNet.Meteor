@@ -1,17 +1,13 @@
 ﻿using System;
 using System.IO;
-using System.Xml;
 using System.Linq;
 using DotNet.Mobile.Shared;
-using System.Collections.Generic;
 
 namespace DotNet.Mobile.Debug.Session;
 
 public class LaunchData {
-    public string AppId { get; }
     public string Framework { get; }
-    public string ExecutableName { get; }
-    public string ExecutablePath { get; }
+    public string OutputAssembly { get; }
     public DeviceData Device { get; }
     public Project Project { get; }
     public bool IsDebug { get; }
@@ -22,72 +18,14 @@ public class LaunchData {
 
         IsDebug = target.Equals("debug", StringComparison.OrdinalIgnoreCase);
         Framework = Project.Frameworks.First(it => it.Contains(Device.Platform, StringComparison.OrdinalIgnoreCase));
-        Project.Load(new Dictionary<string, string> {
-            { "Configuration", target },
-            { "TargetFramework", Framework },
-            { "RuntimeIdentifier", Device.RuntimeId }
-        });
-
-        ExecutableName = Project.EvaluateProperty("AssemblyName") ?? Project.Name;
-        AppId = FindApplicationId();
-
-        if (string.IsNullOrEmpty(AppId))
-            AppId = Project.EvaluateProperty("ApplicationId", null, $"{ExecutableName}.{ExecutableName}");
-
-        ExecutablePath = LocateExecutable();
+        OutputAssembly = Project.GetOutputAssembly(target, Framework, Device);
     }
 
-    // TODO: Remove ._Normalize() after MSBuild Api bug fix
-    private string LocateExecutable() {
-        var rootDirectory = Path.GetDirectoryName(Project.Path);
-        var outputDirectory = Path.Combine(rootDirectory, Project.EvaluateProperty("OutputPath"))._Normalize();
-
-        if (!Directory.Exists(outputDirectory))
-            throw new DirectoryNotFoundException($"Could not find output directory {outputDirectory}");
-
-        if (Device.IsAndroid) {
-            var files = Directory.GetFiles(outputDirectory, $"{AppId}-Signed.apk", SearchOption.TopDirectoryOnly);
-            if (!files.Any())
-                throw new FileNotFoundException($"Could not find \"{AppId}-Signed.apk\" in {outputDirectory}");
-            return files.FirstOrDefault();
-        }
-
-        if (Device.IsWindows) {
-            var files = Directory.GetFiles(outputDirectory, $"{ExecutableName}.exe", SearchOption.AllDirectories);
-            if (!files.Any())
-                throw new FileNotFoundException($"Could not find \"{ExecutableName}.exe\" in {outputDirectory}");
-            return files.FirstOrDefault();
-        }
-
-        if (Device.IsIPhone || Device.IsMacCatalyst) {
-            var bundle = Directory.GetDirectories(outputDirectory, $"{ExecutableName}.app", SearchOption.TopDirectoryOnly);
-            if (!bundle.Any())
-                throw new DirectoryNotFoundException($"Could not find \"{ExecutableName}.app\" in {outputDirectory}");
-            return bundle.FirstOrDefault();
-        }
-
-        return null;
-    }
-
-    private string FindApplicationId() {
+    public string GetApplicationId() {
         if (!Device.IsAndroid)
             return null;
 
-        var rootDirectory = Path.GetDirectoryName(Project.Path);
-        var manifestPaths = Directory.GetFiles(rootDirectory, "AndroidManifest.xml", SearchOption.AllDirectories);
-
-        if (!manifestPaths.Any())
-            return null;
-
-        var xml = new XmlDocument();
-        xml.Load(manifestPaths.FirstOrDefault());
-
-        var manifestNode = xml.SelectSingleNode("/manifest");
-        var packageAttr = manifestNode.Attributes["package"];
-
-        if (packageAttr == null)
-            return null;
-
-        return packageAttr.Value;
+        var assemblyName = Path.GetFileNameWithoutExtension(OutputAssembly);
+        return assemblyName.Replace("-Signed", "");
     }
 }

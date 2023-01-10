@@ -40,11 +40,4 @@ public static class Utilities {
 
         return null;
     }
-
-    // TODO: Remove after MSBuild Api bug fix
-    public static string _Normalize(this string path) {
-        return path
-            .Replace('\\', System.IO.Path.DirectorySeparatorChar)
-            .Replace('/', System.IO.Path.DirectorySeparatorChar);
-    }
 }
