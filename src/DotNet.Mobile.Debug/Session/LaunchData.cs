@@ -9,8 +9,8 @@ namespace DotNet.Mobile.Debug.Session;
 
 public class LaunchData {
     public string AppId { get; }
-    public string AppName { get; }
     public string Framework { get; }
+    public string ExecutableName { get; }
     public string ExecutablePath { get; }
     public DeviceData Device { get; }
     public Project Project { get; }
@@ -28,11 +28,11 @@ public class LaunchData {
             { "RuntimeIdentifier", Device.RuntimeId }
         });
 
-        AppName = Project.EvaluateProperty("ApplicationTitle", "AssemblyName");
+        ExecutableName = Project.EvaluateProperty("AssemblyName") ?? Project.Name;
         AppId = FindApplicationId();
 
         if (string.IsNullOrEmpty(AppId))
-            AppId = Project.EvaluateProperty("ApplicationId", null, $"{AppName}.{AppName}");
+            AppId = Project.EvaluateProperty("ApplicationId", null, $"{ExecutableName}.{ExecutableName}");
 
         ExecutablePath = LocateExecutable();
     }
@@ -48,21 +48,21 @@ public class LaunchData {
         if (Device.IsAndroid) {
             var files = Directory.GetFiles(outputDirectory, $"{AppId}-Signed.apk", SearchOption.TopDirectoryOnly);
             if (!files.Any())
-                throw new FileNotFoundException($"Could not find android package in {outputDirectory}");
+                throw new FileNotFoundException($"Could not find \"{AppId}-Signed.apk\" in {outputDirectory}");
             return files.FirstOrDefault();
         }
 
         if (Device.IsWindows) {
-            var files = Directory.GetFiles(outputDirectory, $"{AppName}.exe", SearchOption.AllDirectories);
+            var files = Directory.GetFiles(outputDirectory, $"{ExecutableName}.exe", SearchOption.AllDirectories);
             if (!files.Any())
-                throw new FileNotFoundException($"Could not find windows program in {outputDirectory}");
+                throw new FileNotFoundException($"Could not find \"{ExecutableName}.exe\" in {outputDirectory}");
             return files.FirstOrDefault();
         }
 
         if (Device.IsIPhone || Device.IsMacCatalyst) {
-            var bundle = Directory.GetDirectories(outputDirectory, $"{AppName}.app", SearchOption.TopDirectoryOnly);
+            var bundle = Directory.GetDirectories(outputDirectory, $"{ExecutableName}.app", SearchOption.TopDirectoryOnly);
             if (!bundle.Any())
-                throw new DirectoryNotFoundException($"Could not find .app bundle in {outputDirectory}");
+                throw new DirectoryNotFoundException($"Could not find \"{ExecutableName}.app\" in {outputDirectory}");
             return bundle.FirstOrDefault();
         }
 
