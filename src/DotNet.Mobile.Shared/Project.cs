@@ -15,7 +15,7 @@ namespace DotNet.Mobile.Shared {
 
         public Project(string path) {
             Name = MSPath.GetFileNameWithoutExtension(path);
-            Path = path;
+            Path = MSPath.GetFullPath(path);
         }
 
         public string EvaluateProperty(string name, string defaultValue = null) {

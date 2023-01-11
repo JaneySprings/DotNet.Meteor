@@ -27,7 +27,7 @@ namespace DotNet.Mobile.Shared {
 
         public static Project AnalyzeProject(string projectFile) {
             var projects = AnalyzeWorkspace(Path.GetDirectoryName(projectFile));
-            return projects.FirstOrDefault(x => x.Path.Equals(projectFile));
+            return projects.FirstOrDefault();
         }
 
         private static List<string> TargetFrameworks(Project project) {

@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<Mobile>net7.0-android;net7.0-ios</Mobile>
+
+        <OutputType>Exe</OutputType>
+		<UseMaui>true</UseMaui>
+		<TargetFrameworks>$(Mobile);net7.0-maccatalyst</TargetFrameworks>
+	</PropertyGroup>
+</Project>
