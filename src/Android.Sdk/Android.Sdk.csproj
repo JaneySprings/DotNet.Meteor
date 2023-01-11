@@ -5,6 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DotNet.Mobile.Shared\DotNet.Mobile.Shared.csproj" />
+    <ProjectReference Include="..\DotNet.Meteor.Shared\DotNet.Meteor.Shared.csproj" />
   </ItemGroup>
 </Project>

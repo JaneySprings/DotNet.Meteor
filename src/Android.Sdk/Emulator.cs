@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading;
-using DotNet.Mobile.Shared;
+using DotNet.Meteor.Shared;
 
 namespace Android.Sdk {
     public static class Emulator {

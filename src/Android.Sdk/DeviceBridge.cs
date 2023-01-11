@@ -3,7 +3,7 @@ using System.Linq;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
-using DotNet.Mobile.Shared;
+using DotNet.Meteor.Shared;
 
 namespace Android.Sdk {
     public static class DeviceBridge {

@@ -22,7 +22,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/src/DotNet.Mobile.Debug/DotNet.Mobile.Debug.csproj",
+                "${workspaceFolder}/src/DotNet.Meteor.Debug/DotNet.Meteor.Debug.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -34,7 +34,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/src/DotNet.Mobile.Debug/DotNet.Mobile.Debug.csproj",
+                "${workspaceFolder}/src/DotNet.Meteor.Debug/DotNet.Meteor.Debug.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -48,7 +48,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/src/DotNet.Mobile.Debug/DotNet.Mobile.Debug.csproj"
+                "${workspaceFolder}/src/DotNet.Meteor.Debug/DotNet.Meteor.Debug.csproj"
             ],
             "problemMatcher": "$msCompile"
         }
