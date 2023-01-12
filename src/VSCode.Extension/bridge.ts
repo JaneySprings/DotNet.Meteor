@@ -8,7 +8,7 @@ import * as res from './resources';
 export class CommandLine {
     private static toolPath: string = path.join(
         extensions.getExtension(`${res.extensionPublisher}.${res.extensionId}`)?.extensionPath ?? "?",
-        "extension", "bin", "dotnet-mobile.dll");
+        "extension", "bin", "DotNet.Meteor.Debug.dll");
 
     public static mobileDevicesAsync(callback: (items: Device[]) => any) {
         ProcessRunner.runAsync<Device[]>(new ProcessArgumentBuilder("dotnet")

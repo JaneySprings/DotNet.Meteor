@@ -6,3 +6,4 @@ node_modules
 artifacts
 /**/.DS_Store
 vsc-extension-quickstart.md
+!src/DotNet.Meteor.Tests/MockData/**/*

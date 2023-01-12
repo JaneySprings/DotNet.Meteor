@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using DotNet.Mobile.Shared;
+using DotNet.Meteor.Shared;
 using System;
 
 namespace Apple.Sdk {

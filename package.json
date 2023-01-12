@@ -62,7 +62,7 @@
         "type": "%debugger.meteor.id%",
         "label": "%debugger.meteor.title%",
         "languages": [ "csharp", "fsharp", "xaml", "xml" ],
-        "program": "./extension/bin/dotnet-mobile.dll",
+        "program": "./extension/bin/DotNet.Meteor.Debug.dll",
         "args": [ "--start-session"],
         "runtime": "dotnet",
         "initialConfigurations": [

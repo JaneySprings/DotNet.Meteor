@@ -17,15 +17,26 @@ Task("build-debugger")
       var regex = @"(<NuGetVersionRoslyn\s+Condition=""\$\(NuGetVersionRoslyn\)\s*==\s*''"")(>.+<)(/NuGetVersionRoslyn>)";
       ReplaceRegexInFiles(file.ToString(), regex, $"$1>{NuGetVersionRoslyn}<$3");
    })
-   .Does(() => DotNetBuild(MobileDebugProjectPath, new DotNetBuildSettings {
+   .Does(() => DotNetBuild(MeteorDebugProjectPath, new DotNetBuildSettings {
       MSBuildSettings = new DotNetMSBuildSettings { AssemblyVersion = version },
       OutputDirectory = ExtensionAssembliesDirectory,
       Configuration = configuration,
    }));
 
+Task("build-tests").Does(() => DotNetTest(MeteorTestsProjectPath, new DotNetTestSettings {  
+   Configuration = configuration,
+   Verbosity = DotNetVerbosity.Quiet,
+   ResultsDirectory = ArtifactsDirectory,
+   Loggers = new[] { "trx" }
+}));
+
 Task("clean-debugger")
    .WithCriteria(configuration.Equals("release"))
    .Does(() => {
+      DeleteFiles(GetFiles(
+         _Path.Combine(ExtensionAssembliesDirectory, 
+         _Path.GetFileNameWithoutExtension(MeteorDebugProjectPath))
+      ));
       DeleteFiles(GetFiles(_Path.Combine(ExtensionAssembliesDirectory, "*.pdb")));
       DeleteFiles(GetFiles(_Path.Combine(ExtensionAssembliesDirectory, "*.deps.json")));
       DeleteFiles(GetFiles(_Path.Combine(ExtensionAssembliesDirectory, "*.xml")));

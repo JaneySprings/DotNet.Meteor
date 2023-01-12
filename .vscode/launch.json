@@ -22,9 +22,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/src/DotNet.Mobile.Debug/bin/Debug/net7.0/dotnet-mobile.dll",
+            "program": "${workspaceFolder}/src/DotNet.Meteor.Debug/bin/Debug/net7.0/DotNet.Meteor.Debug.dll",
             "args": ["--start-session"],
-            "cwd": "${workspaceFolder}/src/DotNet.Mobile.Debug",
+            "cwd": "${workspaceFolder}/src/DotNet.Meteor.Debug",
             "console": "internalConsole",
             "stopAtEntry": false
         },

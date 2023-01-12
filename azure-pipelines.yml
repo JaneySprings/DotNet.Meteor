@@ -3,6 +3,14 @@ trigger:
   tags:
     include:
     - '*'
+  branches:
+    include:
+    - '*'
+
+pr:
+  branches:
+    include:
+    - '*'
 
 stages:
   - stage: Publish
@@ -32,3 +40,64 @@ stages:
             action: 'create'
             tagSource: 'gitTag'
             assets: 'artifacts/*.vsix'
+
+
+
+  - stage: Tests
+    condition: not(startsWith(variables['Build.SourceBranch'], 'refs/tags'))
+    dependsOn: []
+    jobs:
+#//////////////////////////////////////////////////////////////////////
+#// MacOS Tests
+#//////////////////////////////////////////////////////////////////////
+      - job: MacOS
+        pool:
+          vmImage: macos-latest
+        timeoutInMinutes: 5
+        steps:
+        - script: dotnet tool restore
+          displayName: 'Restore .NET tools'
+        - script: dotnet cake --target=build-tests --configuration=release
+          displayName: 'Run tests'
+        - task: PublishTestResults@2
+          continueOnError: true
+          inputs:
+            testResultsFormat: 'VSTest'
+            testResultsFiles: 'artifacts/*.trx'
+            failTaskOnFailedTests: true
+#//////////////////////////////////////////////////////////////////////
+#// Linux Tests
+#//////////////////////////////////////////////////////////////////////
+      # - job: Linux
+      #   pool:
+      #     vmImage: ubuntu-latest
+      #   timeoutInMinutes: 5
+      #   steps:
+      #   - script: dotnet tool restore
+      #     displayName: 'Restore .NET tools'
+      #   - script: dotnet cake --target=build-tests --configuration=release
+      #     displayName: 'Run tests'
+      #   - task: PublishTestResults@2
+      #     continueOnError: true
+      #     inputs:
+      #       testResultsFormat: 'VSTest'
+      #       testResultsFiles: 'artifacts/*.trx'
+      #       failTaskOnFailedTests: true
+#//////////////////////////////////////////////////////////////////////
+#// Windows Tests
+#//////////////////////////////////////////////////////////////////////
+      - job: Windows
+        pool:
+          vmImage: windows-latest
+        timeoutInMinutes: 5
+        steps:
+        - script: dotnet tool restore
+          displayName: 'Restore .NET tools'
+        - script: dotnet cake --target=build-tests --configuration=release
+          displayName: 'Run tests'
+        - task: PublishTestResults@2
+          continueOnError: true
+          inputs:
+            testResultsFormat: 'VSTest'
+            testResultsFiles: 'artifacts/*.trx'
+            failTaskOnFailedTests: true
