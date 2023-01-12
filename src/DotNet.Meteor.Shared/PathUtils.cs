@@ -15,7 +15,7 @@ namespace DotNet.Meteor.Shared {
             else if (RuntimeSystem.IsMacOS)
                 dotnet = Path.Combine("usr", "local", "share", "dotnet");
             else
-                dotnet = Path.Combine("usr", "share", "dotnet");
+                dotnet = Path.Combine("share", "dotnet");
 
             if (Directory.Exists(dotnet))
                 return dotnet;
