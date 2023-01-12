@@ -15,7 +15,7 @@ namespace DotNet.Meteor.Shared {
             else if (RuntimeSystem.IsMacOS)
                 dotnet = Path.Combine("usr", "local", "share", "dotnet");
             else
-                dotnet = Path.Combine("share", "dotnet");
+                dotnet = Path.Combine("usr", "share", "dotnet");
 
             if (Directory.Exists(dotnet))
                 return dotnet;
@@ -25,10 +25,6 @@ namespace DotNet.Meteor.Shared {
 
             if (locations.Any())
                 return locations.First();
-
-            dotnet = Path.Combine(RuntimeSystem.HomeDirectory, ".dotnet");
-            if (Directory.Exists(dotnet))
-                return dotnet;
 
             throw new FileNotFoundException("Could not find dotnet tool");
         }
