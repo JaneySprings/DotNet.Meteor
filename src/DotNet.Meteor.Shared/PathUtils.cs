@@ -5,9 +5,19 @@ using System.Linq;
 namespace DotNet.Meteor.Shared {
     public static class PathUtils {
         public static string DotNetRootLocation() {
-            string dotnet = Environment.GetEnvironmentVariable("DOTNET_SDK_ROOT");
+            string dotnet = Environment.GetEnvironmentVariable("DOTNET_ROOT");
 
-            if (!string.IsNullOrEmpty(dotnet))
+            if (!string.IsNullOrEmpty(dotnet) && Directory.Exists(dotnet))
+                return dotnet;
+
+            if (RuntimeSystem.IsWindows)
+                dotnet = Path.Combine("C:", "Program Files", "dotnet");
+            else if (RuntimeSystem.IsMacOS)
+                dotnet = Path.Combine("usr", "local", "share", "dotnet");
+            else
+                dotnet = Path.Combine("usr", "share", "dotnet");
+
+            if (Directory.Exists(dotnet))
                 return dotnet;
 
             string path = Environment.GetEnvironmentVariable("PATH");
