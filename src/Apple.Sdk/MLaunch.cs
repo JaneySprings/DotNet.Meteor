@@ -1,6 +1,6 @@
 using System.IO;
 using System.Diagnostics;
-using DotNet.Mobile.Shared;
+using DotNet.Meteor.Shared;
 
 namespace Apple.Sdk {
     public static class MLaunch {

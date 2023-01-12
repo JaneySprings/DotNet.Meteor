@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Project>
+	<PropertyGroup>
+        <TargetFrameworks>net7.0-maccatalyst</TargetFrameworks>
+    </PropertyGroup>
+</Project>

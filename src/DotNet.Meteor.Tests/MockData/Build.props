@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Project>
+	<PropertyGroup>
+        <AndroidFramework>net6.0-android</AndroidFramework>
+    </PropertyGroup>
+</Project>

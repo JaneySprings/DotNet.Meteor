@@ -6,6 +6,6 @@
 
   <ItemGroup>
     <PackageReference Include="System.Text.Json" Version="7.0.0" />
-    <ProjectReference Include="..\DotNet.Mobile.Shared\DotNet.Mobile.Shared.csproj" />
+    <ProjectReference Include="..\DotNet.Meteor.Shared\DotNet.Meteor.Shared.csproj" />
   </ItemGroup>
 </Project>
