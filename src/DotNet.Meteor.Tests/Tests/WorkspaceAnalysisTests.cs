@@ -1,8 +1,8 @@
 using Xunit;
 using DotNet.Meteor.Shared;
+using Microsoft.Build.Evaluation;
 
 namespace DotNet.Meteor.Tests;
-
 
 public class WorkspaceAnalysisTests: TestFixture {
 
@@ -16,6 +16,7 @@ public class WorkspaceAnalysisTests: TestFixture {
         Assert.Equal(expected.GetPropertyValue("AssemblyName"), actual.Name);
         Assert.Equal(expected.GetPropertyValue("TargetFramework"), actual.Frameworks.Join());
         Assert.Equal(expected.FullPath, actual.Path);
+        UnloadProject(expected);
     }
 
     [Fact]
@@ -23,11 +24,7 @@ public class WorkspaceAnalysisTests: TestFixture {
         var simpleProjectPath = GetProjectPath(index: 2);
         var actual = WorkspaceAnalyzer.AnalyzeProject(simpleProjectPath);
         var expected = EvaluateProject(simpleProjectPath);
-
-        Assert.NotNull(actual);
-        Assert.Equal(expected.GetPropertyValue("AssemblyName"), actual.Name);
-        Assert.Equal(expected.GetPropertyValue("TargetFrameworks"), actual.Frameworks.Join());
-        Assert.Equal(expected.FullPath, actual.Path);
+        AssertProjects(expected, actual);
     }
 
     [Fact]
@@ -35,11 +32,7 @@ public class WorkspaceAnalysisTests: TestFixture {
         var simpleProjectPath = GetProjectPath(index: 3);
         var actual = WorkspaceAnalyzer.AnalyzeProject(simpleProjectPath);
         var expected = EvaluateProject(simpleProjectPath);
-
-        Assert.NotNull(actual);
-        Assert.Equal(expected.GetPropertyValue("AssemblyName"), actual.Name);
-        Assert.Equal(expected.GetPropertyValue("TargetFrameworks"), actual.Frameworks.Join());
-        Assert.Equal(expected.FullPath, actual.Path);
+        AssertProjects(expected, actual);
     }
 
     [Fact]
@@ -47,10 +40,30 @@ public class WorkspaceAnalysisTests: TestFixture {
         var simpleProjectPath = GetProjectPath(index: 4);
         var actual = WorkspaceAnalyzer.AnalyzeProject(simpleProjectPath);
         var expected = EvaluateProject(simpleProjectPath);
+        AssertProjects(expected, actual);
+    }
 
-        Assert.NotNull(actual);
-        Assert.Equal(expected.GetPropertyValue("AssemblyName"), actual.Name);
-        Assert.Equal(expected.GetPropertyValue("TargetFrameworks"), actual.Frameworks.Join());
-        Assert.Equal(expected.FullPath, actual.Path);
+    [Fact]
+    public void AnalyzeProjectWithDirectoryProps() {
+        var simpleProjectPath = GetProjectPath(index: 5);
+        var actual = WorkspaceAnalyzer.AnalyzeProject(simpleProjectPath);
+        var expected = EvaluateProject(simpleProjectPath);
+        AssertProjects(expected, actual);
+    }
+
+    [Fact]
+    public void AnalyzeProjectWithCustomPropsReferences() {
+        var simpleProjectPath = GetProjectPath(index: 6);
+        var actual = WorkspaceAnalyzer.AnalyzeProject(simpleProjectPath);
+        var expected = EvaluateProject(simpleProjectPath);
+        AssertProjects(expected, actual);
+    }
+
+    [Fact]
+    public void AnalyzeProjectWithDirectoryPropsReferences() {
+        var simpleProjectPath = GetProjectPath(index: 7);
+        var actual = WorkspaceAnalyzer.AnalyzeProject(simpleProjectPath);
+        var expected = EvaluateProject(simpleProjectPath);
+        AssertProjects(expected, actual);
     }
 }

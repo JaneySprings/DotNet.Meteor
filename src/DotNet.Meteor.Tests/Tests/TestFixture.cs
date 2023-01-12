@@ -18,11 +18,25 @@ public abstract class TestFixture {
         Environment.SetEnvironmentVariable("MSBUILD_EXE_PATH", msbuild.FullName);
     }
 
-    protected MSProject EvaluateProject(string projectPath) {
-        return new MSProject(projectPath);
+    protected MSProject EvaluateProject(string projectPath, Dictionary<string, string>? properties = null) {
+        return new MSProject(projectPath, properties, null);
     }
 
     protected string GetProjectPath(int index) {
         return Path.Combine(MockDataDirectory, $"TestApp{index}", $"TestApp{index}.csproj");
+    }
+
+    protected void AssertProjects(MSProject expected, Project actual) {
+        Assert.NotNull(actual);
+        Assert.NotNull(actual.Frameworks);
+        Assert.NotEmpty(actual.Frameworks);
+        Assert.Equal(expected.GetPropertyValue("AssemblyName"), actual.Name);
+        Assert.Equal(expected.GetPropertyValue("TargetFrameworks"), actual.Frameworks.Join());
+        Assert.Equal(expected.FullPath, actual.Path);
+        UnloadProject(expected);
+    }
+
+    protected void UnloadProject(MSProject project) {
+        Microsoft.Build.Evaluation.ProjectCollection.GlobalProjectCollection.UnloadProject(project);
     }
 }

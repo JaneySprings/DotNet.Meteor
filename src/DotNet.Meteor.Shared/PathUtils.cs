@@ -47,7 +47,7 @@ namespace DotNet.Meteor.Shared {
             throw new FileNotFoundException("Could not find dotnet executable");
         }
 
-        public static string NormalizePath(this string path) {
+        public static string ToPlatformPath(this string path) {
             return path
                 .Replace('\\', System.IO.Path.DirectorySeparatorChar)
                 .Replace('/', System.IO.Path.DirectorySeparatorChar);

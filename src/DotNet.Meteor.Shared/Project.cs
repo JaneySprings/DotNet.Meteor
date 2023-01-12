@@ -75,6 +75,7 @@ namespace DotNet.Meteor.Shared {
                 return null;
 
             string content = File.ReadAllText(projectPath);
+            content = Regex.Replace(content, @"<!--.*?-->", string.Empty, RegexOptions.Singleline);
             /* Find in current project */
             var propertyMatch = new Regex($@"<{propertyName}\s?.*>(.*?)<\/{propertyName}>\s*\n").Matches(content);
             if (propertyMatch.Count > 0)
@@ -84,10 +85,10 @@ namespace DotNet.Meteor.Shared {
             foreach(Match importMatch in importRegex.Matches(content)) {
                 var basePath = MSPath.GetDirectoryName(projectPath);
                 var importedProjectName = importMatch.Groups[1].Value;
-                var importedProjectPath = MSPath.Combine(basePath, importedProjectName).NormalizePath();
+                var importedProjectPath = MSPath.Combine(basePath, importedProjectName).ToPlatformPath();
 
                 if (!File.Exists(importedProjectPath))
-                    importedProjectPath = importMatch.Groups[1].Value.NormalizePath();
+                    importedProjectPath = importMatch.Groups[1].Value.ToPlatformPath();
                 if (!File.Exists(importedProjectPath))
                     return null;
 
