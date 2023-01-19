@@ -3,9 +3,9 @@ using System.Linq;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
-using DotNet.Meteor.Shared;
+using DotNet.Meteor.Processes;
 
-namespace Android.Sdk {
+namespace DotNet.Meteor.Android {
     public static class DeviceBridge {
         public static string Shell(string serial, params string[] args) {
             var adb = PathUtils.AdbTool();
@@ -16,7 +16,7 @@ namespace Android.Sdk {
                 .WaitForExit();
 
             if (result.ExitCode != 0)
-                string.Join(Environment.NewLine, result.StandardError);
+                return string.Join(Environment.NewLine, result.StandardError);
 
             return string.Join(Environment.NewLine, result.StandardOutput);
         }

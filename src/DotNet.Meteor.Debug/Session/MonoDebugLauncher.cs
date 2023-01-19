@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
-using DotNet.Meteor.Shared;
-using Android.Sdk;
-using Apple.Sdk;
+using DotNet.Meteor.Processes;
+using DotNet.Meteor.Android;
+using DotNet.Meteor.Apple;
 
 namespace DotNet.Meteor.Debug.Session;
 
@@ -22,17 +22,17 @@ public partial class MonoDebugSession {
 
 
     private void LaunchApple(LaunchData configuration, int port, List<Process> processes) {
-        if (!configuration.Device.IsEmulator) {
-            MLaunch.InstallOnDevice(configuration.OutputAssembly, configuration.Device.Serial, this);
-            processes.Add(MLaunch.TcpTunnel(configuration.Device.Serial, port));
-            processes.Add(MLaunch.LaunchOnDevice(configuration.OutputAssembly, configuration.Device.Serial, port, this));
+        if (configuration.Device.IsEmulator) {
+            processes.Add(MonoLaunch.DebugSim(configuration.Device.Serial, configuration.OutputAssembly, port, this));
         } else {
-            processes.Add(MLaunch.LaunchOnSimulator(configuration.OutputAssembly, configuration.Device.Serial, port, this));
+            //processes.Add(MLaunch.TcpTunnel(configuration.Device.Serial, port));
+            MonoLaunch.InstallDev(configuration.Device.Serial, configuration.OutputAssembly, this);
+            processes.Add(MonoLaunch.DebugDev(configuration.Device.Serial, configuration.OutputAssembly, port, this));
         }
     }
 
     private void LaunchMacCatalyst(LaunchData configuration, int port) {
-        var tool = Apple.Sdk.PathUtils.OpenTool();
+        var tool = DotNet.Meteor.Apple.PathUtils.OpenTool();
         var processRunner = new ProcessRunner(tool, new ProcessArgumentBuilder()
             .AppendQuoted(configuration.OutputAssembly)
         );
@@ -55,13 +55,13 @@ public partial class MonoDebugSession {
         var applicationId = configuration.GetApplicationId();
 
         if (configuration.Device.IsEmulator)
-            configuration.Device.Serial = Emulator.Run(configuration.Device.Name);
+            configuration.Device.Serial = Emulator.Run(configuration.Device.Name).Serial;
 
         DeviceBridge.Uninstall(configuration.Device.Serial, applicationId, this);
         DeviceBridge.Install(configuration.Device.Serial, configuration.OutputAssembly, this);
 
         if (configuration.IsDebug) {
-            var androidSdk = Android.Sdk.PathUtils.SdkLocation();
+            var androidSdk = DotNet.Meteor.Android.PathUtils.SdkLocation();
             var arguments = new ProcessArgumentBuilder()
                 .Append("build").AppendQuoted(configuration.Project.Path)
                 .Append( "-t:_Run")

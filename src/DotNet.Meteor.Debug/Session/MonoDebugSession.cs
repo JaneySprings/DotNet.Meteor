@@ -44,10 +44,10 @@ public partial class MonoDebugSession : DebugSession {
         DebuggerLoggingService.CustomLogger = new MonoLogger();
 
         this.session.ExceptionHandler = ex => {
-            Logger.Log(ex);
+            MonoLogger.Instance.LogError("debugger engine error", ex);
             return true;
         };
-        this.session.LogWriter = (isStdErr, text) => Logger.Log(text);
+        this.session.LogWriter = (isStdErr, text) => MonoLogger.Instance.Log(text);
         this.session.TargetStopped += (sender, e) => {
             Stopped();
             SendEvent(Event.StoppedEvent, new BodyStopped((int)e.Thread.Id, "step"));
@@ -519,7 +519,6 @@ public partial class MonoDebugSession : DebugSession {
     }
 
     private void Terminate(string reason) {
-        Logger.Log("Terminating debugger: " + reason);
         if (!this.terminated) {
             SendEvent(Event.TerminatedEvent, null);
             this.terminated = true;

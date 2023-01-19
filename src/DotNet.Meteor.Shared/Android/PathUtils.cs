@@ -2,24 +2,35 @@ using System;
 using System.IO;
 using DotNet.Meteor.Shared;
 
-namespace Android.Sdk {
+namespace DotNet.Meteor.Android {
     public static class PathUtils {
         public static string SdkLocation() {
             string path = Environment.GetEnvironmentVariable("ANDROID_SDK_ROOT");
 
-            if (string.IsNullOrEmpty(path)) {
-                if (RuntimeSystem.IsWindows)
-                    path = Path.Combine(RuntimeSystem.HomeDirectory, "AppData", "Local", "Android", "Sdk");
-                else if (RuntimeSystem.IsMacOS)
-                    path = Path.Combine(RuntimeSystem.HomeDirectory, "Library", "Android", "Sdk");
-                else
-                    path = Path.Combine(RuntimeSystem.HomeDirectory, "Android", "Sdk");
-            }
+            if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
+                return path;
 
-            if (string.IsNullOrEmpty(path) || !Directory.Exists(path))
-                throw new Exception("Could not find Android SDK path");
+            // Try to find the SDK path in the default AndroidStudio locations
+            if (RuntimeSystem.IsWindows)
+                path = Path.Combine(RuntimeSystem.HomeDirectory, "AppData", "Local", "Android", "Sdk");
+            else if (RuntimeSystem.IsMacOS)
+                path = Path.Combine(RuntimeSystem.HomeDirectory, "Library", "Android", "Sdk");
+            else
+                path = Path.Combine(RuntimeSystem.HomeDirectory, "Android", "Sdk");
 
-            return path;
+            if (Directory.Exists(path))
+                return path;
+
+            // Try to find the SDK path in the default VisualStudio locations
+            if (RuntimeSystem.IsWindows)
+                path = Path.Combine(RuntimeSystem.ProgramX86Directory, "Android", "android-sdk");
+            else if (RuntimeSystem.IsMacOS)
+                path = Path.Combine(RuntimeSystem.HomeDirectory, "Library", "Developer", "Xamarin", "android-sdk-macosx");
+
+            if (Directory.Exists(path))
+                return path;
+
+            throw new Exception("Could not find Android SDK path");
         }
 
         public static string AvdLocation() {

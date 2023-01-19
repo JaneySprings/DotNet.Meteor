@@ -1,7 +1,6 @@
 using System;
 using System.Text;
 using System.Text.Json;
-using DotNet.Meteor.Shared;
 
 namespace DotNet.Meteor.Debug;
 
@@ -47,7 +46,7 @@ public static class Extensions {
                 Uri uri = new Uri(clientPath);
                 return uri.LocalPath;
             }
-            Logger.Log("path not well formed: '{0}'", clientPath);
+            MonoLogger.Instance.LogMessage("path not well formed: '{0}'", clientPath);
             return null;
         } else {
             return clientPath;

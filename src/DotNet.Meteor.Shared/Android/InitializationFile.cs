@@ -1,27 +1,20 @@
 using System.Linq;
 using System.IO;
 
-namespace Android.Sdk {
+namespace DotNet.Meteor.Android {
     public class IniFile {
         private string[] content;
 
-        public static IniFile FromPath(string path) {
-            if (!File.Exists(path))
-                throw new FileNotFoundException("Could not find file", path);
-            return new IniFile(path);
-        }
-        private IniFile(string path) {
+        public IniFile(string path) {
             content = File.ReadAllLines(path);
         }
 
         public string GetField(string name) {
             var record = content.FirstOrDefault(it => it.StartsWith(name));
-
             if (record == null)
                 return null;
 
             var parts = record.Split('=');
-
             if (parts.Length < 2)
                 return null;
 

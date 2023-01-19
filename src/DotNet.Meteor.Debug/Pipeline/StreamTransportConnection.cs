@@ -23,7 +23,7 @@ class IPhoneTransportConnection : Connection {
     }
 
     protected override void TransportSetTimeouts(int send_timeout, int receive_timeout) {
-        Logger.Log("StreamTransportConnection.TransportSetTimeouts ({0}, {1}): Not supported", send_timeout, receive_timeout);
+        MonoLogger.Instance.LogMessage("StreamTransportConnection.TransportSetTimeouts ({0}, {1}): Not supported", send_timeout, receive_timeout);
     }
 
     protected override void TransportClose() {

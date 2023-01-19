@@ -47,10 +47,9 @@ public abstract class DebugSession : Session {
         } catch (Exception e) {
             var message =
                 $"Error occurred while processing {command} request."
-                + Environment.NewLine + e.Message + Environment.NewLine
-                + "For more information see " + Logger.LogFile;
+                + Environment.NewLine + e.Message + Environment.NewLine;
             SendErrorResponse(response, 1104, message);
-            Logger.Log(e);
+            MonoLogger.Instance.LogError("dispatch error", e);
         }
     }
 

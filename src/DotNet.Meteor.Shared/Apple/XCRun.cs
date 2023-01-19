@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
+using DotNet.Meteor.Processes;
 using DotNet.Meteor.Shared;
 
-namespace Apple.Sdk {
+namespace DotNet.Meteor.Apple {
     public static class XCRun {
         public static List<DeviceData> Simulators() {
             FileInfo tool = PathUtils.XCRunTool();
@@ -12,6 +13,9 @@ namespace Apple.Sdk {
                 .Append("simctl")
                 .Append("list"))
                 .WaitForExit();
+
+            if (result.ExitCode != 0)
+                throw new Exception(string.Join(Environment.NewLine, result.StandardError));
 
             var output = string.Join(Environment.NewLine, result.StandardOutput);
             var contentRegex = new Regex(@"^--\s(?<os>iOS\s\d+(.\d+)+)\s--\n(?<content>(\s{4}.+\n)*)", RegexOptions.Multiline);
@@ -50,6 +54,9 @@ namespace Apple.Sdk {
                 .Append("devices"))
                 .WaitForExit();
 
+            if (result.ExitCode != 0)
+                throw new Exception(string.Join(Environment.NewLine, result.StandardError));
+
             var output = string.Join(Environment.NewLine, result.StandardOutput) + Environment.NewLine;
             var contentRegex = new Regex(@"^==\sDevices(\sOffline)*\s==\n(?<content>[^,]+?^\n)", RegexOptions.Multiline);
             var deviceRegex = new Regex(@"^(?<name>.+)\s\((?<os>.+)\)\s\((?<udid>.+)\)", RegexOptions.Multiline);
@@ -74,6 +81,33 @@ namespace Apple.Sdk {
             }
 
             return devices;
+        }
+
+        public static void ShutdownAll(IProcessLogger logger = null) {
+            FileInfo tool = PathUtils.XCRunTool();
+            ProcessResult result = new ProcessRunner(tool, new ProcessArgumentBuilder()
+                .Append("simctl")
+                .Append("shutdown")
+                .Append("all"), logger)
+                .WaitForExit();
+
+            var output = string.Join(Environment.NewLine, result.StandardOutput) + Environment.NewLine;
+
+            if (result.ExitCode != 0)
+                throw new Exception(string.Join(Environment.NewLine, result.StandardError));
+        }
+
+        public static void LaunchSimulator(string serial, IProcessLogger logger = null) {
+            var tool = PathUtils.OpenTool();
+            ProcessResult result = new ProcessRunner(tool, new ProcessArgumentBuilder()
+                .Append("-a", "Simulator")
+                .Append("--args", "-CurrentDeviceUDID", serial), logger)
+                .WaitForExit();
+
+            var output = string.Join(Environment.NewLine, result.StandardOutput) + Environment.NewLine;
+
+            if (result.ExitCode != 0)
+                throw new Exception(string.Join(Environment.NewLine, result.StandardError));
         }
     }
 }
