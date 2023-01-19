@@ -1,4 +1,5 @@
 using Xunit;
+using DotNet.Meteor.Processes;
 using DotNet.Meteor.Shared;
 using DotNet.Meteor.Windows;
 using DotNet.Meteor.Android;
@@ -10,6 +11,17 @@ public class DeviceProvidingTests: TestFixture {
 
     [Fact]
     public void AndroidVirtualDeviceTest() {
+        var avdTool = Android.PathUtils.AvdTool();
+        var avdCreate = new ProcessRunner(avdTool, new ProcessArgumentBuilder()
+            .Append("create", "avd")
+            .Append("-n", "test")
+            .Append("-k", "'system-images;android-31;google_apis;x86'")
+            .Append("--force"))
+            .WaitForExit();
+
+        if (avdCreate.ExitCode != 0)
+            throw new Exception(string.Join(Environment.NewLine, avdCreate.StandardError));
+
         var result = AndroidTool.VirtualDevices();
         Assert.NotNull(result);
     }
@@ -26,6 +38,7 @@ public class DeviceProvidingTests: TestFixture {
             return;
         var result = AppleTool.VirtualDevices();
         Assert.NotNull(result);
+        Assert.NotEmpty(result);
     }
 
     [Fact]
