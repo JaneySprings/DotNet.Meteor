@@ -9,7 +9,7 @@ namespace DotNet.Meteor.Tests;
 
 public class DeviceProvidingTests: TestFixture {
 
-    [Fact]
+    [Fact(Skip = "Requires Android SDK with system-images installed")]
     public void AndroidVirtualDeviceTest() {
         var avdTool = Android.PathUtils.AvdTool();
         var avdCreate = new ProcessRunner(avdTool, new ProcessArgumentBuilder()
