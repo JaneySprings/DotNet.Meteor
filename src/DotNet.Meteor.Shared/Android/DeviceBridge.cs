@@ -3,7 +3,7 @@ using System.Linq;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
-using DotNet.Meteor.Shared;
+using DotNet.Meteor.Processes;
 
 namespace DotNet.Meteor.Android {
     public static class DeviceBridge {

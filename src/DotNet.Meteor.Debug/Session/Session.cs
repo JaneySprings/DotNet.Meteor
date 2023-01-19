@@ -3,7 +3,7 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using DotNet.Meteor.Shared;
+using DotNet.Meteor.Processes;
 using DotNet.Meteor.Debug.Events;
 using DotNet.Meteor.Debug.Protocol;
 using System.Text.Json;
@@ -35,7 +35,6 @@ public abstract class Session: IProcessLogger {
             if (read == 0)
                 break;
         }
-        Logger.Log("Session ended");
     }
 
     public void Stop() {
@@ -61,7 +60,7 @@ public abstract class Session: IProcessLogger {
         if (message.Seq == 0)
             message.Seq = this.sequenceNumber++;
 
-        Logger.Log($"Debugger_Response: {JsonSerializer.Serialize((object)message)}");
+        MonoLogger.Instance.Log($"Debugger_Response: {JsonSerializer.Serialize((object)message)}");
 
         var data = message.ConvertToBytes();
         this.outputStream.Write(data, 0, data.Length);
@@ -71,7 +70,7 @@ public abstract class Session: IProcessLogger {
     private void Dispatch(string req) {
         var request = JsonSerializer.Deserialize<Request>(req)!;
 
-        Logger.Log($"IDE_Request: {req}");
+        MonoLogger.Instance.Log($"IDE_Request: {req}");
 
         var response = new Response(request);
         DispatchRequest(request.Command, request.Arguments, response);

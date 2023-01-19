@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using DotNet.Meteor.Shared;
+using DotNet.Meteor.Processes;
 
 namespace DotNet.Meteor.Apple {
     public static class PathUtils {

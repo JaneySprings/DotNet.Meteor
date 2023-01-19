@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Diagnostics;
-using DotNet.Meteor.Shared;
+using DotNet.Meteor.Processes;
 
 namespace DotNet.Meteor.Android {
     public static class Emulator {

@@ -2,16 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
+using DotNet.Meteor.Processes;
 using DotNet.Meteor.Shared;
 
 namespace DotNet.Meteor.Apple {
     public static class XCRun {
-        public static List<DeviceData> Simulators(IProcessLogger logger = null) {
+        public static List<DeviceData> Simulators() {
             FileInfo tool = PathUtils.XCRunTool();
             ProcessResult result = new ProcessRunner(tool, new ProcessArgumentBuilder()
                 .Append("simctl")
-                .Append("list"), logger)
+                .Append("list"))
                 .WaitForExit();
+
+            if (result.ExitCode != 0)
+                throw new Exception(string.Join(Environment.NewLine, result.StandardError));
 
             var output = string.Join(Environment.NewLine, result.StandardOutput);
             var contentRegex = new Regex(@"^--\s(?<os>iOS\s\d+(.\d+)+)\s--\n(?<content>(\s{4}.+\n)*)", RegexOptions.Multiline);
@@ -42,13 +46,16 @@ namespace DotNet.Meteor.Apple {
             return devices;
         }
 
-        public static List<DeviceData> PhysicalDevices(IProcessLogger logger = null) {
+        public static List<DeviceData> PhysicalDevices() {
             FileInfo tool = PathUtils.XCRunTool();
             ProcessResult result = new ProcessRunner(tool, new ProcessArgumentBuilder()
                 .Append("xctrace")
                 .Append("list")
-                .Append("devices"), logger)
+                .Append("devices"))
                 .WaitForExit();
+
+            if (result.ExitCode != 0)
+                throw new Exception(string.Join(Environment.NewLine, result.StandardError));
 
             var output = string.Join(Environment.NewLine, result.StandardOutput) + Environment.NewLine;
             var contentRegex = new Regex(@"^==\sDevices(\sOffline)*\s==\n(?<content>[^,]+?^\n)", RegexOptions.Multiline);

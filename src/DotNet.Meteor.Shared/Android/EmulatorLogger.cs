@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using DotNet.Meteor.Shared;
+using DotNet.Meteor.Processes;
 
 namespace DotNet.Meteor.Android {
     internal class EmulatorLogger: IProcessLogger {

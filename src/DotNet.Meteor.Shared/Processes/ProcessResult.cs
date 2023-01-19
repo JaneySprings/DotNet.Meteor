@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 
-namespace DotNet.Meteor.Shared {
+namespace DotNet.Meteor.Processes {
     public class ProcessResult {
         public readonly List<string> StandardOutput;
         public readonly List<string> StandardError;

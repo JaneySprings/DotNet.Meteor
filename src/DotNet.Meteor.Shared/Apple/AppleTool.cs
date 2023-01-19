@@ -49,12 +49,12 @@ namespace DotNet.Meteor.Apple {
             return devices;
         }
 
-        public static List<DeviceData> PhysicalDevices(IProcessLogger logger = null) {
-            return SystemProfiler.PhysicalDevices(logger);
+        public static List<DeviceData> PhysicalDevices() {
+            return SystemProfiler.PhysicalDevices();
         }
 
-        public static DeviceData MacintoshDevice(IProcessLogger logger = null) {
-            var runtime = SystemProfiler.IsArch64(logger) ? Runtimes.MacArm64 : Runtimes.MacX64;
+        public static DeviceData MacintoshDevice() {
+            var runtime = SystemProfiler.IsArch64() ? Runtimes.MacArm64 : Runtimes.MacX64;
             var tokens = Environment.OSVersion.VersionString.Split(' ');
             var osVersion = $"MacOS {tokens.Last()}";
 

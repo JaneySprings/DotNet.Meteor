@@ -3,33 +3,43 @@ using System.Text.RegularExpressions;
 
 namespace DotNet.Meteor.Apple {
     public class PropertyExtractor {
-        private string content;
+        private string[] content;
 
         public PropertyExtractor(string plist) {
-            this.content = File.ReadAllText(plist);
+            this.content = File.ReadAllLines(plist);
         }
 
         public string Extract(string key, string valueType = "string") {
-            string pattern = $@"<key>{key}</key>.*<{valueType}>(?<val>.+?)</{valueType}>";
-            var regex = new Regex(pattern);
-            var match = regex.Match(this.content);
+            for (int i = 0; i < content.Length; i++) {
+                if (!content[i].Contains($"<key>{key}</key>"))
+                    continue;
 
-            if (!match.Success)
-                return null;
+                if (i >= content.Length - 1)
+                    return null;
 
-            return match.Groups["val"]?.Value;
+                string value = content[i + 1].Trim();
+                if (!value.Contains($"<{valueType}>"))
+                    return null;
+
+                return value.Replace($"<{valueType}>", "").Replace($"</{valueType}>", "");
+            }
+
+            return null;
         }
 
         public bool ExtractBoolean(string key) {
-            string pattern = $@"<key>{key}</key>.*<(?<val>\S+?)/>";
-            var regex = new Regex(pattern);
-            var match = regex.Match(this.content);
+            for (int i = 0; i < content.Length; i++) {
+                if (!content[i].Contains($"<key>{key}</key>"))
+                    continue;
 
-            if (!match.Success)
-                return false;
+                if (i >= content.Length - 1)
+                    return false;
 
-            string value = match.Groups["val"]?.Value;
-            return value?.Equals("true") ?? false;
+                string value = content[i + 1].Trim();
+                return value.Replace("</", "").Replace(">", "").Equals("true", System.StringComparison.OrdinalIgnoreCase);
+            }
+
+            return false;
         }
 
         public void Free() {

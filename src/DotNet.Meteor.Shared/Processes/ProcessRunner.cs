@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 
-namespace DotNet.Meteor.Shared {
+namespace DotNet.Meteor.Processes {
     public class ProcessRunner {
         readonly List<string> standardOutput;
         readonly List<string> standardError;

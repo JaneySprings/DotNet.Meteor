@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
+using DotNet.Meteor.Processes;
 using DotNet.Meteor.Shared;
 
 namespace DotNet.Meteor.Apple {
