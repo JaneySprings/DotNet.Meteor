@@ -1,10 +1,11 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using DotNet.Meteor.Processes;
 using DotNet.Meteor.Shared;
 using System;
 
-namespace Apple.Sdk {
-    public static class SystemProfiler {
+namespace DotNet.Meteor.Apple {
+    internal static class SystemProfiler {
         public static List<DeviceData> PhysicalDevices() {
             var profiler = PathUtils.SystemProfilerTool();
             var devices = new List<DeviceData>();
@@ -14,11 +15,17 @@ namespace Apple.Sdk {
                 .Append("SPUSBDataType"))
                 .WaitForExit();
 
+            if (result.ExitCode != 0)
+                throw new Exception(string.Join(Environment.NewLine, result.StandardError));
+
             var output = string.Join(Environment.NewLine, result.StandardOutput);
 
             foreach (Match match in regex.Matches(output)) {
                 var version = match.Groups["ver"].Value;
-                var serial = match.Groups["id"].Value.Insert(8, "-");
+                var serial = match.Groups["id"].Value;
+                //For modern iOS devices, the serial number is 24 characters long
+                if (serial.Length == 24)
+                    serial = serial.Insert(8, "-");
 
                 devices.Add(new DeviceData {
                     IsEmulator = false,
@@ -39,6 +46,9 @@ namespace Apple.Sdk {
             ProcessResult result = new ProcessRunner(profiler, new ProcessArgumentBuilder()
                 .Append("SPHardwareDataType"))
                 .WaitForExit();
+
+            if (result.ExitCode != 0)
+                throw new Exception(string.Join(Environment.NewLine, result.StandardError));
 
             var output = string.Join(Environment.NewLine, result.StandardOutput);
             var appleSilicon = new Regex(@"Chip: *(?<name>.+)").Match(output);

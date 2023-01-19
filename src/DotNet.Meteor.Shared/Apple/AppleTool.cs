@@ -4,9 +4,9 @@ using System.Linq;
 using System.Collections.Generic;
 using DotNet.Meteor.Shared;
 
-namespace Apple.Sdk {
+namespace DotNet.Meteor.Apple {
     public static class AppleTool {
-        public static List<DeviceData> SimulatorsFast() {
+        public static List<DeviceData> VirtualDevices() {
             var devices = new List<DeviceData>();
             var path = PathUtils.SimulatorsLocation();
 
@@ -16,7 +16,7 @@ namespace Apple.Sdk {
                 if (!File.Exists(plist))
                     continue;
 
-                var extractor = PropertyExtractor.FromFile(plist);
+                var extractor = new PropertyExtractor(plist);
 
                 if (extractor.ExtractBoolean("isDeleted"))
                     continue;
@@ -49,7 +49,11 @@ namespace Apple.Sdk {
             return devices;
         }
 
-        public static DeviceData MacDevice() {
+        public static List<DeviceData> PhysicalDevices() {
+            return SystemProfiler.PhysicalDevices();
+        }
+
+        public static DeviceData MacintoshDevice() {
             var runtime = SystemProfiler.IsArch64() ? Runtimes.MacArm64 : Runtimes.MacX64;
             var tokens = Environment.OSVersion.VersionString.Split(' ');
             var osVersion = $"MacOS {tokens.Last()}";
@@ -64,22 +68,6 @@ namespace Apple.Sdk {
                 Name = Environment.MachineName,
                 Platform = Platforms.MacCatalyst
             };
-        }
-
-        public static List<DeviceData> AllDevices() {
-            var devices = new List<DeviceData>();
-            devices.AddRange(SystemProfiler.PhysicalDevices().OrderBy(x => x.Name));
-            devices.AddRange(SimulatorsFast().OrderBy(x => x.Name));
-            return devices;
-        }
-
-        public static bool TryGetDevices(List<DeviceData> devices) {
-            try {
-                devices.AddRange(AllDevices());
-                return true;
-            } catch {
-                return false;
-            }
         }
     }
 }

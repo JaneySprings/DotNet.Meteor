@@ -43,7 +43,7 @@ public abstract class StreamCommandConnection : IDisposable {
             }
         }
 
-        Logger.Log("Sending command to sdb: " + command);
+        MonoLogger.Instance.Log("Sending command to sdb: " + command);
 
         if (ar.Stream != null) {
             ExecuteCommand_BeginWriteCommand(ar);
@@ -197,9 +197,7 @@ public abstract class StreamCommandConnection : IDisposable {
                             return;
                         this.heapshotForwarder.BeginAcceptTcpClient(callback, null);
                     }
-                } catch (Exception ex) {
-                    Logger.Log(ex);
-                }
+                } catch (Exception ex) { }
             });
 
             lock (this._lockObject) {
@@ -377,7 +375,7 @@ public abstract class StreamCommandConnection : IDisposable {
             ar.AsyncWaitHandle.WaitOne(100);
             EndExecuteCommand(ar);
         } catch (SocketException ex) {
-            Logger.Log(ex);
+            MonoLogger.Instance.LogError("stop connection error", ex);
         } finally {
             Dispose();  // make sure everything is cleaned up
         }

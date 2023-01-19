@@ -1,8 +1,8 @@
 using System;
 using System.IO;
-using DotNet.Meteor.Shared;
+using DotNet.Meteor.Processes;
 
-namespace Apple.Sdk {
+namespace DotNet.Meteor.Apple {
     public static class PathUtils {
         public static string XCodePath() {
             var selector = new FileInfo(Path.Combine("/usr", "bin", "xcode-select"));
@@ -39,7 +39,7 @@ namespace Apple.Sdk {
         }
 
         public static FileInfo MLaunchTool() {
-            string dotnetPath = Path.Combine("/usr", "local", "share", "dotnet");
+            string dotnetPath = Shared.PathUtils.DotNetRootLocation();
             string sdkPath = Path.Combine(dotnetPath, "packs", "Microsoft.iOS.Sdk");
             FileInfo newestTool = null;
 
@@ -58,6 +58,28 @@ namespace Apple.Sdk {
                 throw new Exception("Could not find mlaunch tool");
 
             return newestTool;
+        }
+
+        public static string IDeviceLocation() {
+            string dotnetPath = Shared.PathUtils.DotNetRootLocation();
+            string sdkPath = Path.Combine(dotnetPath, "packs", "Microsoft.iOS.Windows.Sdk");
+            DirectoryInfo newestTool = null;
+
+            foreach (string directory in Directory.GetDirectories(sdkPath)) {
+                string idevicePath = Path.Combine(directory, "tools", "msbuild", "iOS", "imobiledevice-x64");
+
+                if (Directory.Exists(idevicePath)) {
+                    var tool = new DirectoryInfo(idevicePath);
+
+                    if (newestTool == null || tool.CreationTime > newestTool.CreationTime)
+                        newestTool = tool;
+                }
+            }
+
+            if (newestTool == null || !newestTool.Exists)
+                throw new DirectoryNotFoundException("imobiledevice-x64");
+
+            return newestTool.FullName;
         }
 
         public static FileInfo XCRunTool() {

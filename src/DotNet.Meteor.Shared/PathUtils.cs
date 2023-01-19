@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using DotNet.Meteor.Processes;
 
 namespace DotNet.Meteor.Shared {
     public static class PathUtils {

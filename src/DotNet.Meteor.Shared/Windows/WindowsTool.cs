@@ -1,7 +1,8 @@
 using System;
 using System.Linq;
+using DotNet.Meteor.Shared;
 
-namespace DotNet.Meteor.Shared {
+namespace DotNet.Meteor.Windows {
     public static class WindowsTool {
         public static DeviceData WindowsDevice() {
             string version = Environment.OSVersion.VersionString;

@@ -1,24 +1,27 @@
 using System;
 using System.Linq;
 using System.Threading;
-using DotNet.Meteor.Shared;
+using System.Diagnostics;
+using DotNet.Meteor.Processes;
 
-namespace Android.Sdk {
+namespace DotNet.Meteor.Android {
     public static class Emulator {
         private const int AppearingRetryCount = 120; //seconds
 
-        public static string Run(string name) {
-            var serial = SerialIfRunning(name);
-            if (serial != null)
-                return serial;
+        public static StartResult Run(string name) {
+            var rSerial = SerialIfRunning(name);
+            if (rSerial != null)
+                return new StartResult(rSerial, null);
 
             var emulator = PathUtils.EmulatorTool();
-            var process = new ProcessRunner(emulator, new ProcessArgumentBuilder()
+            var runner = new ProcessRunner(emulator, new ProcessArgumentBuilder()
                 .Append("-avd")
                 .Append(name));
 
-            process.Start();
-            return Emulator.WaitForBoot();
+            var process = runner.Start();
+            var serial = Emulator.WaitForBoot();
+
+            return new StartResult(serial, process);
         }
 
         public static string WaitForBoot() {
@@ -52,6 +55,16 @@ namespace Android.Sdk {
         private static string SerialIfRunning(string avdName) {
             var serials = DeviceBridge.Devices().Where(it => it.StartsWith("emulator-"));
             return serials.FirstOrDefault(it => DeviceBridge.EmuName(it).Equals(avdName));
+        }
+
+        public class StartResult {
+            public string Serial { get; }
+            public Process Process { get; }
+
+            public StartResult(string serial, Process process) {
+                Serial = serial;
+                Process = process;
+            }
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace DotNet.Meteor.Shared {
+namespace DotNet.Meteor.Processes {
     public class ProcessArgumentBuilder {
         public List<string> args = new List<string>();
 

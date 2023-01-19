@@ -1,4 +1,4 @@
-#addin nuget:?package=Cake.FileHelpers&version=5.0.0
+#addin nuget:?package=Cake.FileHelpers&version=6.0.0
 #addin nuget:?package=Cake.VsCode&version=0.11.1
 #load "env.cake"
 
