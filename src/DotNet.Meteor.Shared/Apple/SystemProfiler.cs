@@ -3,22 +3,25 @@ using System.Text.RegularExpressions;
 using DotNet.Meteor.Shared;
 using System;
 
-namespace Apple.Sdk {
-    public static class SystemProfiler {
-        public static List<DeviceData> PhysicalDevices() {
+namespace DotNet.Meteor.Apple {
+    internal static class SystemProfiler {
+        public static List<DeviceData> PhysicalDevices(IProcessLogger logger = null) {
             var profiler = PathUtils.SystemProfilerTool();
             var devices = new List<DeviceData>();
             var regex = new Regex(@"(iPhone:)[^,]*?Version:\s+(?<ver>\d+.\d+)[^,]*?Serial\sNumber:\s+(?<id>\S+)");
 
             ProcessResult result = new ProcessRunner(profiler, new ProcessArgumentBuilder()
-                .Append("SPUSBDataType"))
+                .Append("SPUSBDataType"), logger)
                 .WaitForExit();
 
             var output = string.Join(Environment.NewLine, result.StandardOutput);
 
             foreach (Match match in regex.Matches(output)) {
                 var version = match.Groups["ver"].Value;
-                var serial = match.Groups["id"].Value.Insert(8, "-");
+                var serial = match.Groups["id"].Value;
+                //For modern iOS devices, the serial number is 24 characters long
+                if (serial.Length == 24)
+                    serial = serial.Insert(8, "-");
 
                 devices.Add(new DeviceData {
                     IsEmulator = false,
@@ -34,10 +37,10 @@ namespace Apple.Sdk {
             return devices;
         }
 
-        public static bool IsArch64() {
+        public static bool IsArch64(IProcessLogger logger = null) {
             var profiler = PathUtils.SystemProfilerTool();
             ProcessResult result = new ProcessRunner(profiler, new ProcessArgumentBuilder()
-                .Append("SPHardwareDataType"))
+                .Append("SPHardwareDataType"), logger)
                 .WaitForExit();
 
             var output = string.Join(Environment.NewLine, result.StandardOutput);

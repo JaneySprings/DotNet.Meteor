@@ -8,13 +8,13 @@ namespace DotNet.Meteor.Shared {
         readonly List<string> standardError;
         readonly Process process;
 
-        public ProcessRunner(FileInfo executable, ProcessArgumentBuilder builder, IProcessLogger logger = null) {
+        public ProcessRunner(FileInfo executable, ProcessArgumentBuilder builder = null, IProcessLogger logger = null) {
             this.standardOutput = new List<string>();
             this.standardError = new List<string>();
 
             this.process = new Process();
             this.process.StartInfo.FileName = executable.FullName;
-            this.process.StartInfo.Arguments = builder.ToString();
+            this.process.StartInfo.Arguments = builder != null ? builder.ToString() : string.Empty;
             this.process.StartInfo.CreateNoWindow = true;
             this.process.StartInfo.UseShellExecute = false;
             this.process.StartInfo.RedirectStandardOutput = true;

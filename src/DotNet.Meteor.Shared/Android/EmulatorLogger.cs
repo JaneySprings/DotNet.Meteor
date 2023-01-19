@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using DotNet.Meteor.Shared;
 
-namespace Android.Sdk {
+namespace DotNet.Meteor.Android {
     internal class EmulatorLogger: IProcessLogger {
         private static string LogStagingDirectory => AppDomain.CurrentDomain.BaseDirectory;
         private readonly string LogStandardOutputFile = Path.Combine(LogStagingDirectory, "session_emu_stdout.log");

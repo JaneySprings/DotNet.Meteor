@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text.Json;
 using DotNet.Meteor.Shared;
 using DotNet.Meteor.Debug.Session;
-using Apple.Sdk;
-using Android.Sdk;
+using DotNet.Meteor.Apple;
+using DotNet.Meteor.Android;
 
 namespace DotNet.Meteor.Debug.CLI {
     public static class ConsoleUtils {
@@ -30,22 +30,12 @@ namespace DotNet.Meteor.Debug.CLI {
 
 
         public static void AllDevices(string[] args) {
-            var devices = new List<DeviceData>();
-            AndroidTool.TryGetDevices(devices);
-
-            if (RuntimeSystem.IsWindows) {
-                devices.Add(WindowsTool.WindowsDevice());
-            }
-            if (RuntimeSystem.IsMacOS) {
-                devices.Add(AppleTool.MacDevice());
-                AppleTool.TryGetDevices(devices);
-            }
-
+            var devices = DeviceProvider.GetDevices();
             Console.WriteLine(JsonSerializer.Serialize(devices));
         }
 
         public static void AndroidSdkPath(string[] args) {
-            string path = Android.Sdk.PathUtils.SdkLocation();
+            string path = DotNet.Meteor.Android.PathUtils.SdkLocation();
             Console.WriteLine(JsonSerializer.Serialize(path));
         }
 

@@ -4,13 +4,13 @@ using System.IO;
 using System.Text.RegularExpressions;
 using DotNet.Meteor.Shared;
 
-namespace Apple.Sdk {
+namespace DotNet.Meteor.Apple {
     public static class XCRun {
-        public static List<DeviceData> Simulators() {
+        public static List<DeviceData> Simulators(IProcessLogger logger = null) {
             FileInfo tool = PathUtils.XCRunTool();
             ProcessResult result = new ProcessRunner(tool, new ProcessArgumentBuilder()
                 .Append("simctl")
-                .Append("list"))
+                .Append("list"), logger)
                 .WaitForExit();
 
             var output = string.Join(Environment.NewLine, result.StandardOutput);
@@ -42,12 +42,12 @@ namespace Apple.Sdk {
             return devices;
         }
 
-        public static List<DeviceData> PhysicalDevices() {
+        public static List<DeviceData> PhysicalDevices(IProcessLogger logger = null) {
             FileInfo tool = PathUtils.XCRunTool();
             ProcessResult result = new ProcessRunner(tool, new ProcessArgumentBuilder()
                 .Append("xctrace")
                 .Append("list")
-                .Append("devices"))
+                .Append("devices"), logger)
                 .WaitForExit();
 
             var output = string.Join(Environment.NewLine, result.StandardOutput) + Environment.NewLine;
@@ -74,6 +74,33 @@ namespace Apple.Sdk {
             }
 
             return devices;
+        }
+
+        public static void ShutdownAll(IProcessLogger logger = null) {
+            FileInfo tool = PathUtils.XCRunTool();
+            ProcessResult result = new ProcessRunner(tool, new ProcessArgumentBuilder()
+                .Append("simctl")
+                .Append("shutdown")
+                .Append("all"), logger)
+                .WaitForExit();
+
+            var output = string.Join(Environment.NewLine, result.StandardOutput) + Environment.NewLine;
+
+            if (result.ExitCode != 0)
+                throw new Exception(string.Join(Environment.NewLine, result.StandardError));
+        }
+
+        public static void LaunchSimulator(string serial, IProcessLogger logger = null) {
+            var tool = PathUtils.OpenTool();
+            ProcessResult result = new ProcessRunner(tool, new ProcessArgumentBuilder()
+                .Append("-a", "Simulator")
+                .Append("--args", "-CurrentDeviceUDID", serial), logger)
+                .WaitForExit();
+
+            var output = string.Join(Environment.NewLine, result.StandardOutput) + Environment.NewLine;
+
+            if (result.ExitCode != 0)
+                throw new Exception(string.Join(Environment.NewLine, result.StandardError));
         }
     }
 }

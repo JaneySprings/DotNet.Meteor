@@ -1,24 +1,16 @@
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace Apple.Sdk {
+namespace DotNet.Meteor.Apple {
     public class PropertyExtractor {
         private string content;
 
-        public static PropertyExtractor FromFile(string plist) {
-            if (!File.Exists(plist))
-                throw new FileNotFoundException("Could not find plist file", plist);
-
-            return new PropertyExtractor(plist);
-        }
-
-        private PropertyExtractor(string plist) {
+        public PropertyExtractor(string plist) {
             this.content = File.ReadAllText(plist);
         }
 
-
         public string Extract(string key, string valueType = "string") {
-            string pattern = $@"<key>{key}</key>\n+\t+<{valueType}>(?<val>.+)</{valueType}>";
+            string pattern = $@"<key>{key}</key>.*<{valueType}>(?<val>.+?)</{valueType}>";
             var regex = new Regex(pattern);
             var match = regex.Match(this.content);
 
@@ -29,7 +21,7 @@ namespace Apple.Sdk {
         }
 
         public bool ExtractBoolean(string key) {
-            string pattern = $@"<key>{key}</key>\n+\t+<(?<val>\S+)/>";
+            string pattern = $@"<key>{key}</key>.*<(?<val>\S+?)/>";
             var regex = new Regex(pattern);
             var match = regex.Match(this.content);
 
