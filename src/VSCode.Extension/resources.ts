@@ -24,12 +24,12 @@ export const taskActionPublish = "Publish";
 export const debuggerMeteorId = "dotnet-meteor.debugger";
 export const debuggerMeteorTitle = ".NET Meteor Debugger";
 
-export const messageDebugNotSupported = "Debugging is not supported in release configuration";
-export const messageDebugNotSupportedWin = "Mono Debugger is not supported for Windows";
-export const messageDeviceNotExists = "Selected device does not exists yet";
-export const messageNoFrameworkFound = "No supported framework found";
-export const messageNoProjectFound = "Selected project not found";
-export const messageNoDeviceFound = "Selected device incorrect";
+export const messageDebugNotSupported = "Unable to debug an application when it is run in release configuration. Run the application in release configuration without debugger.";
+export const messageDebugNotSupportedWin = "Mono Debugger cannot be attached to WinUI applications. You can run the application without debugger.";
+export const messageDeviceNotExists = "Selected device does not exist anymore. Make sure that the choosen device is connected to your machine.";
+export const messageNoFrameworkFound = "Supported framework not found. Make sure you have selected a correct device.";
+export const messageNoProjectFound = "Selected project not found. Make sure you have selected a project in the status bar.";
+export const messageNoDeviceFound = "Incorrect selected device. Make sure you have selected a device.";
 
 export const configId = "dotnetMeteor";
 
