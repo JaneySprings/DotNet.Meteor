@@ -11,11 +11,10 @@
 	"command.title.selectActiveDevice": ".NET Meteor: Select device",
 	"command.id.selectActiveDevice": "dotnet-meteor.selectActiveDevice",
 
-	"task.id.build": "dotnet-meteor.build",
-	"task.title.build": "dotnet-meteor: Build",
-
-	"task.id.publish": "dotnet-meteor.publish",
-	"task.title.publish": "dotnet-meteor: Publish",
+	"task.meteor.id": "dotnet-meteor.build",
+	"task.meteor.title": "dotnet-meteor: Build",
+	"task.meteor.description.target": "Set the target. May be build or publish",
+	"task.meteor.description.customArguments": "Set or override additional msbuild properties",
 
 	"debugger.meteor.id": "dotnet-meteor.debugger",
 	"debugger.meteor.title": ".NET Meteor Debugger",

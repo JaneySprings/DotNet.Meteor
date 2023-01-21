@@ -14,7 +14,7 @@ namespace DotNet.Meteor.Shared {
             try { /* Windows Devices */
                 if (RuntimeSystem.IsWindows) {
                     devices.Add(WindowsTool.WindowsDevice());
-                    //devices.AddRange(/*Load apple devices from idevicelist.exe*/);
+                    devices.Add(IDeviceTool.Info());
                 }
             } catch (Exception e) {
                 logger.Log(e);

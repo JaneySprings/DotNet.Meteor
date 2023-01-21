@@ -43,14 +43,23 @@
     ],
     "taskDefinitions": [
       {
-        "type": "%task.id.build%",
+        "type": "%task.meteor.id%",
         "required": [],
-        "properties": {}
-      },
-      {
-        "type": "%task.id.publish%",
-        "required": [],
-        "properties": {}
+        "properties": {
+          "target": {
+            "type": "string",
+            "default": "build",
+            "description": "%task.meteor.description.target%"
+          },
+          "customArguments": {
+            "type": "array",
+            "description": "%task.meteor.description.customArguments%",
+            "default": [],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
       }
     ],
     "breakpoints": [
@@ -70,7 +79,7 @@
             "name": "%debugger.meteor.title%",
             "type": "%debugger.meteor.id%",
             "request": "launch",
-            "preLaunchTask": "%task.title.build%"
+            "preLaunchTask": "%task.meteor.title%"
           }
         ]
       }

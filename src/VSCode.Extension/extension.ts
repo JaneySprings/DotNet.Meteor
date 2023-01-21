@@ -1,6 +1,5 @@
 import { DotNetDebuggerConfiguration } from './tasks/debug';
-import { DotNetPublishTaskProvider } from './tasks/publish';
-import { DotNetBuildTaskProvider } from './tasks/build';
+import { DotNetTaskProvider } from './tasks/build';
 import { Controller } from './controller';
 import { CommandLine } from './bridge';
 import { Target } from './models';
@@ -35,6 +34,5 @@ export function activate(context: vscode.ExtensionContext) {
 	
 	vscode.debug.onDidStartDebugSession(() => vscode.commands.executeCommand(res.commandIdFocusOnDebug));
 	vscode.debug.registerDebugConfigurationProvider(res.debuggerMeteorId, new DotNetDebuggerConfiguration());
-	vscode.tasks.registerTaskProvider(res.taskIdPublish, new DotNetPublishTaskProvider());
-	vscode.tasks.registerTaskProvider(res.taskIdBuild, new DotNetBuildTaskProvider());
+	vscode.tasks.registerTaskProvider(res.taskDefinitionId, new DotNetTaskProvider());
 }

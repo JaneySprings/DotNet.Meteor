@@ -13,13 +13,9 @@ export const commandTitleSelectActiveDevice = ".NET Meteor: Select device";
 
 export const commandIdFocusOnDebug = "workbench.debug.action.focusRepl";
 
-export const taskIdBuild = "dotnet-meteor.build";
-export const taskTitleBuild = "dotnet-meteor: Build";
-export const taskActionBuild = "Build";
+export const taskDefinitionId = "dotnet-meteor.build";
+export const taskDefinitionTitle = "dotnet-meteor: Build";
 
-export const taskIdPublish = "dotnet-meteor.publish";
-export const taskTitlePublish = "dotnet-meteor: Publish";
-export const taskActionPublish = "Publish";
 
 export const debuggerMeteorId = "dotnet-meteor.debugger";
 export const debuggerMeteorTitle = ".NET Meteor Debugger";

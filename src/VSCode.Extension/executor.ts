@@ -39,6 +39,14 @@ export class ProcessArgumentBuilder {
         arg.forEach(a => this.args.push(`"${a}"`));
         return this;
     }
+    public override(arg: string): ProcessArgumentBuilder {
+        const argName = arg.split("=")[0];
+        const index = this.args.findIndex(a => a.startsWith(argName));
+        if (index > -1) 
+            this.args.splice(index, 1);
+        this.args.push(arg);
+        return this;
+    }
     public build(): string {
         return this.args.join(" ");
     }

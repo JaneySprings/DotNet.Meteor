@@ -23,7 +23,7 @@ export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationPro
 		}
 		
 		if (!config.type && !config.request && !config.name) {
-			config.preLaunchTask = res.taskTitleBuild;
+			config.preLaunchTask = res.taskDefinitionTitle;
 			config.name = res.debuggerMeteorTitle;
 			config.type = res.debuggerMeteorId;
 			config.request = 'launch';
