@@ -14,6 +14,7 @@ namespace DotNet.Meteor.Processes {
 
             this.process = new Process();
             this.process.StartInfo.FileName = executable.FullName;
+            this.process.StartInfo.WorkingDirectory = executable.DirectoryName;
             this.process.StartInfo.Arguments = builder != null ? builder.ToString() : string.Empty;
             this.process.StartInfo.CreateNoWindow = true;
             this.process.StartInfo.UseShellExecute = false;

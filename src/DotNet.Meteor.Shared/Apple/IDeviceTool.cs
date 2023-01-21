@@ -1,38 +1,36 @@
 using System;
 using System.IO;
-using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using DotNet.Meteor.Processes;
 using DotNet.Meteor.Shared;
 
 namespace DotNet.Meteor.Apple {
     public static class IDeviceTool {
-        public static List<DeviceData> Info() {
-            var devices = new List<DeviceData>();
+        public static DeviceData Info() {
             var tool = new FileInfo(Path.Combine(PathUtils.IDeviceLocation(), "ideviceinfo.exe"));
             var result = new ProcessRunner(tool).WaitForExit();
 
             if (result.ExitCode != 0)
                 throw new Exception(string.Join(Environment.NewLine, result.StandardError));
 
-            var regex = new Regex(@"^(\w+)\s*:\s*(.*)$");
-            var output = string.Join(Environment.NewLine, result.StandardOutput);
+            return new DeviceData {
+                Name = FindValue(result.StandardOutput, "DeviceName"),
+                Serial = FindValue(result.StandardOutput, "UniqueDeviceID"),
+                OSVersion = "iOS " + FindValue(result.StandardOutput, "ProductVersion"),
+                RuntimeId = Runtimes.iOSArm64,
+                Details = Details.iOSDevice,
+                Platform = Platforms.iOS,
+                IsEmulator = false,
+                IsRunning = true,
+                IsMobile = true
+            };
+        }
 
-            foreach (var match in regex.Matches(output)) {
-                devices.Add(new DeviceData {
-                    IsEmulator = false,
-                    IsRunning = true,
-                    IsMobile = true,
-                    // Name = match.Groups[1].Value,
-                    // Serial = match.Groups[1].Value,
-                    // OSVersion = match.Groups[2].Value,
-                    RuntimeId = Runtimes.iOSArm64,
-                    Details = Details.iOSDevice,
-                    Platform = Platforms.iOS
-                });
-            }
-
-            return devices;
+        private static string FindValue(List<string> records, string key) {
+            return records
+                .Find(x =>x.StartsWith($"{key}:"))?
+                .Replace($"{key}:", "")
+                .Trim();
         }
     }
 }
