@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
+using DotNet.Meteor.Shared;
 using DotNet.Meteor.Processes;
 using DotNet.Meteor.Android;
 using DotNet.Meteor.Apple;
@@ -22,6 +23,12 @@ public partial class MonoDebugSession {
 
 
     private void LaunchApple(LaunchData configuration, int port, List<Process> processes) {
+        if (RuntimeSystem.IsWindows) {
+            IDeviceTool.Installer(configuration.Device.Serial, configuration.OutputAssembly, this);
+            processes.Add(IDeviceTool.Debug(configuration.Device.Serial, configuration.GetApplicationId(), port, this));
+            return;
+        }
+
         if (configuration.Device.IsEmulator) {
             processes.Add(MonoLaunch.DebugSim(configuration.Device.Serial, configuration.OutputAssembly, port, this));
         } else {

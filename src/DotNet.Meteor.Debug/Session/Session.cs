@@ -60,8 +60,6 @@ public abstract class Session: IProcessLogger {
         if (message.Seq == 0)
             message.Seq = this.sequenceNumber++;
 
-        MonoLogger.Instance.Log($"Debugger_Response: {JsonSerializer.Serialize((object)message)}");
-
         var data = message.ConvertToBytes();
         this.outputStream.Write(data, 0, data.Length);
         this.outputStream.Flush();
@@ -69,9 +67,6 @@ public abstract class Session: IProcessLogger {
 
     private void Dispatch(string req) {
         var request = JsonSerializer.Deserialize<Request>(req)!;
-
-        MonoLogger.Instance.Log($"IDE_Request: {req}");
-
         var response = new Response(request);
         DispatchRequest(request.Command, request.Arguments, response);
         SendMessage(response);

@@ -35,7 +35,6 @@ public static class Utilities {
                 }
             }
         } catch (Exception ex) {
-            MonoLogger.Instance.LogError("address reslove error", ex);
         }
 
         return null;
