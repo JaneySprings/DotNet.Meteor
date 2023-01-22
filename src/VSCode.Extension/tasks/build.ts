@@ -19,7 +19,10 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
     }
 
     private getTasks(): vscode.Task[] {
-        const task = this.getTask({ type: res.taskDefinitionId, target: 'build' });
+        const task = this.getTask({ 
+            type: res.taskDefinitionId,
+            target: res.taskDefinitionDefaultTarget,
+        });
         return task ? [ task ] : [];
     }
     private getTask(definition: DotNetTaskDefinition): vscode.Task | undefined {
@@ -29,7 +32,7 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
     
         const framework = Configuration.targetFramework();
         const builder = new ProcessArgumentBuilder('dotnet')
-            .append(definition.target)
+            .append(definition.target.toLowerCase())
             .appendQuoted(Configuration.selectedProject.path)
             .append(`-c:${Configuration.selectedTarget}`)
             .append(`-f:${framework}`);
@@ -59,7 +62,7 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
         return new vscode.Task(
             definition, 
             vscode.TaskScope.Workspace, 
-            definition.target.toLowerCase(), 
+            definition.target, 
             res.extensionId,
             new vscode.ShellExecution(builder.build())
         );

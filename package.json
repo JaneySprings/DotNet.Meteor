@@ -48,7 +48,7 @@
         "properties": {
           "target": {
             "type": "string",
-            "default": "build",
+            "default": "Build",
             "description": "%task.meteor.description.target%"
           },
           "customArguments": {

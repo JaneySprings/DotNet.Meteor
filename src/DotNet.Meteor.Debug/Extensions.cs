@@ -46,7 +46,6 @@ public static class Extensions {
                 Uri uri = new Uri(clientPath);
                 return uri.LocalPath;
             }
-            MonoLogger.Instance.LogMessage("path not well formed: '{0}'", clientPath);
             return null;
         } else {
             return clientPath;

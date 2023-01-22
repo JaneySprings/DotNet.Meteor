@@ -22,6 +22,18 @@ public class LaunchData {
     }
 
     public string GetApplicationId() {
+        if (Device.IsIPhone || Device.IsMacCatalyst) {
+            var workingDirectory = Path.GetDirectoryName(Project.Path);
+            var files = Directory.GetFiles(workingDirectory, "Info.plist", SearchOption.AllDirectories)
+                .Where(it => !it.Contains(Path.GetFileName(OutputAssembly)));
+
+            if (!files.Any())
+                return null;
+
+            var plist = new Apple.PropertyExtractor(files.First());
+            return plist.Extract("CFBundleIdentifier") ?? Project.EvaluateProperty("ApplicationId");
+        }
+
         if (!Device.IsAndroid)
             return null;
 

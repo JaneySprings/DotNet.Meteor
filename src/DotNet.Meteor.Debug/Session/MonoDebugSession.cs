@@ -44,10 +44,12 @@ public partial class MonoDebugSession : DebugSession {
         DebuggerLoggingService.CustomLogger = new MonoLogger();
 
         this.session.ExceptionHandler = ex => {
-            MonoLogger.Instance.LogError("debugger engine error", ex);
+            OnErrorDataReceived(ex.Message);
             return true;
         };
-        this.session.LogWriter = (isStdErr, text) => MonoLogger.Instance.Log(text);
+        this.session.LogWriter = (isStdErr, text) => {
+            if (isStdErr) OnErrorDataReceived(text);
+        };
         this.session.TargetStopped += (sender, e) => {
             Stopped();
             SendEvent(Event.StoppedEvent, new BodyStopped((int)e.Thread.Id, "step"));
