@@ -4,26 +4,34 @@ using System.IO;
 
 namespace DotNet.Meteor.Processes {
     public class ProcessRunner {
-        readonly List<string> standardOutput;
-        readonly List<string> standardError;
-        readonly Process process;
+        private List<string> standardOutput;
+        private List<string> standardError;
+        private readonly Process process;
 
         public ProcessRunner(FileInfo executable, ProcessArgumentBuilder builder = null, IProcessLogger logger = null) {
+            this.process = new Process();
+            this.process.StartInfo.Arguments = builder?.ToString();
+            this.process.StartInfo.FileName = executable.FullName;
+            this.process.StartInfo.WorkingDirectory = executable.DirectoryName;
+
+            SetupProcessLogging(logger);
+        }
+        public ProcessRunner(string command, ProcessArgumentBuilder builder = null) {
+            this.process = new Process();
+            this.process.StartInfo.Arguments = builder?.ToString();
+            this.process.StartInfo.FileName = command;
+
+            SetupProcessLogging(null);
+        }
+
+        private void SetupProcessLogging(IProcessLogger logger = null) {
             this.standardOutput = new List<string>();
             this.standardError = new List<string>();
-
-            this.process = new Process();
             this.process.StartInfo.CreateNoWindow = true;
             this.process.StartInfo.UseShellExecute = false;
             this.process.StartInfo.RedirectStandardOutput = true;
             this.process.StartInfo.RedirectStandardError = true;
             this.process.StartInfo.RedirectStandardInput = true;
-            this.process.StartInfo.Arguments = builder?.ToString();
-            this.process.StartInfo.FileName = executable.Name;
-            this.process.StartInfo.WorkingDirectory = executable.Exists
-                ? executable.DirectoryName
-                : null;
-
             this.process.OutputDataReceived += (s, e) => {
                 if (e.Data != null) {
                     if (logger != null)
