@@ -71,21 +71,21 @@ stages:
 #//////////////////////////////////////////////////////////////////////
 #// Linux Tests
 #//////////////////////////////////////////////////////////////////////
-      # - job: Linux
-      #   pool:
-      #     vmImage: ubuntu-latest
-      #   timeoutInMinutes: 5
-      #   steps:
-      #   - script: dotnet tool restore
-      #     displayName: 'Restore .NET tools'
-      #   - script: dotnet cake --target=build-tests --configuration=release
-      #     displayName: 'Run tests'
-      #   - task: PublishTestResults@2
-      #     continueOnError: true
-      #     inputs:
-      #       testResultsFormat: 'VSTest'
-      #       testResultsFiles: 'artifacts/*.trx'
-      #       failTaskOnFailedTests: true
+      - job: Linux
+        pool:
+          vmImage: ubuntu-latest
+        timeoutInMinutes: 5
+        steps:
+        - script: dotnet tool restore
+          displayName: 'Restore .NET tools'
+        - script: dotnet cake --target=build-tests --configuration=release
+          displayName: 'Run tests'
+        - task: PublishTestResults@2
+          continueOnError: true
+          inputs:
+            testResultsFormat: 'VSTest'
+            testResultsFiles: 'artifacts/*.trx'
+            failTaskOnFailedTests: true
 #//////////////////////////////////////////////////////////////////////
 #// Windows Tests
 #//////////////////////////////////////////////////////////////////////

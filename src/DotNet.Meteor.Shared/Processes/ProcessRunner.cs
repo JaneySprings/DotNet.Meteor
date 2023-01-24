@@ -13,25 +13,29 @@ namespace DotNet.Meteor.Processes {
             this.standardError = new List<string>();
 
             this.process = new Process();
-            this.process.StartInfo.FileName = executable.FullName;
-            this.process.StartInfo.WorkingDirectory = executable.DirectoryName;
-            this.process.StartInfo.Arguments = builder != null ? builder.ToString() : string.Empty;
             this.process.StartInfo.CreateNoWindow = true;
             this.process.StartInfo.UseShellExecute = false;
             this.process.StartInfo.RedirectStandardOutput = true;
             this.process.StartInfo.RedirectStandardError = true;
             this.process.StartInfo.RedirectStandardInput = true;
+            this.process.StartInfo.Arguments = builder?.ToString();
+            this.process.StartInfo.FileName = executable.Name;
+            this.process.StartInfo.WorkingDirectory = executable.Exists
+                ? executable.DirectoryName
+                : null;
 
             this.process.OutputDataReceived += (s, e) => {
                 if (e.Data != null) {
-                    this.standardOutput.Add(e.Data);
-                    logger?.OnOutputDataReceived(e.Data);
+                    if (logger != null)
+                        logger.OnOutputDataReceived(e.Data);
+                    else this.standardOutput.Add(e.Data);
                 }
             };
             this.process.ErrorDataReceived += (s, e) => {
                 if (e.Data != null) {
-                    this.standardError.Add(e.Data);
-                    logger?.OnErrorDataReceived(e.Data);
+                    if (logger != null)
+                        logger.OnErrorDataReceived(e.Data);
+                    else this.standardError.Add(e.Data);
                 }
             };
         }

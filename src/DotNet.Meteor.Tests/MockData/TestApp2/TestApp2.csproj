@@ -2,7 +2,7 @@
 	<PropertyGroup>
         <OutputType>Exe</OutputType>
 		<UseMaui>true</UseMaui>
-		<TargetFrameworks>net7.0-android;net7.0-ios;net7.0-maccatalyst</TargetFrameworks>
+		<TargetFrameworks>net7.0-android;net7.0-ios;net7.0-maccatalyst;</TargetFrameworks>
 		<!-- 
 			<TargetFrameworks>$(TargetFrameworks);net7.0-tizen</TargetFrameworks>  
 		-->
