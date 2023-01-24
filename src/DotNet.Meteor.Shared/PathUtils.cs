@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using DotNet.Meteor.Processes;
 
 namespace DotNet.Meteor.Shared {
@@ -21,13 +22,21 @@ namespace DotNet.Meteor.Shared {
             if (Directory.Exists(dotnet))
                 return dotnet;
 
-            string path = Environment.GetEnvironmentVariable("PATH");
-            var locations = path.Split(Path.PathSeparator).Where(it => it.Contains("dotnet"));
+            var dotnetTool = new FileInfo("dotnet" + RuntimeSystem.ExecExtension);
+            var result = new ProcessRunner(dotnetTool, new ProcessArgumentBuilder()
+                .Append("--list-sdks"))
+                .WaitForExit();
 
-            if (locations.Any())
-                return locations.First();
+            if (result.ExitCode != 0)
+                throw new Exception("Could not find dotnet tool");
 
-            throw new FileNotFoundException("Could not find dotnet tool");
+            var matches = Regex.Matches(result.StandardOutput.Last(), @"\[(.*?)\]");
+            var sdkLocation = matches.FirstOrDefault()?.Groups[1].Value;
+
+            if (string.IsNullOrEmpty(sdkLocation) || !Directory.Exists(sdkLocation))
+                throw new Exception("Could not find dotnet sdk");
+
+            return Directory.GetParent(sdkLocation).FullName;
         }
 
         public static FileInfo MSBuildAssembly() {

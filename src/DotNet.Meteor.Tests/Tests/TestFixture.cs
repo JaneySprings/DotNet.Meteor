@@ -27,11 +27,15 @@ public abstract class TestFixture {
     }
 
     protected void AssertProjects(MSProject expected, Project actual) {
+        foreach (var framework in actual.Frameworks) {
+            Assert.NotNull(framework);
+            Assert.NotEmpty(framework);
+        }
         Assert.NotNull(actual);
         Assert.NotNull(actual.Frameworks);
         Assert.NotEmpty(actual.Frameworks);
         Assert.Equal(expected.GetPropertyValue("AssemblyName"), actual.Name);
-        Assert.Equal(expected.GetPropertyValue("TargetFrameworks"), actual.Frameworks.Join());
+        Assert.Equal(expected.GetPropertyValue("TargetFrameworks").RemoveEmptyEntries(), actual.Frameworks.Join());
         Assert.Equal(expected.FullPath, actual.Path);
         UnloadProject(expected);
     }

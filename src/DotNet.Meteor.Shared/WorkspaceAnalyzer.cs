@@ -42,7 +42,7 @@ namespace DotNet.Meteor.Shared {
             var multipleFrameworks = project.EvaluateProperty("TargetFrameworks");
             if (!string.IsNullOrEmpty(multipleFrameworks)) {
                 foreach (var framework in multipleFrameworks.Split(';')) {
-                    if (frameworks.Contains(framework) || framework.StartsWith("$("))
+                    if (frameworks.Contains(framework) || string.IsNullOrEmpty(framework))
                         continue;
                     frameworks.Add(framework);
                 }
