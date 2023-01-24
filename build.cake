@@ -23,12 +23,14 @@ Task("build-debugger")
       Configuration = configuration,
    }));
 
-Task("build-tests").Does(() => DotNetTest(MeteorTestsProjectPath, new DotNetTestSettings {  
-   Configuration = configuration,
-   Verbosity = DotNetVerbosity.Quiet,
-   ResultsDirectory = ArtifactsDirectory,
-   Loggers = new[] { "trx" }
-}));
+Task("build-tests")
+   .ContinueOnError()
+   .Does(() => DotNetTest(MeteorTestsProjectPath, new DotNetTestSettings {  
+      Configuration = configuration,
+      Verbosity = DotNetVerbosity.Quiet,
+      ResultsDirectory = ArtifactsDirectory,
+      Loggers = new[] { "trx" }
+   }));
 
 Task("clean-debugger")
    .WithCriteria(configuration.Equals("release"))

@@ -22,8 +22,7 @@ namespace DotNet.Meteor.Shared {
             if (Directory.Exists(dotnet))
                 return dotnet;
 
-            var dotnetTool = new FileInfo("dotnet" + RuntimeSystem.ExecExtension);
-            var result = new ProcessRunner(dotnetTool, new ProcessArgumentBuilder()
+            var result = new ProcessRunner("dotnet" + RuntimeSystem.ExecExtension, new ProcessArgumentBuilder()
                 .Append("--list-sdks"))
                 .WaitForExit();
 
