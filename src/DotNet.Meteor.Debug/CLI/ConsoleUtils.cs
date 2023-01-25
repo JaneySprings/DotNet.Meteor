@@ -21,12 +21,6 @@ namespace DotNet.Meteor.Debug.CLI {
                 );
             }
         }
-        public static void Version(string[] args) {
-            Console.WriteLine(Program.Version);
-        }
-        public static void Error(string[] args) {
-            Console.WriteLine($"Unknown parameter: {args[0]}");
-        }
 
 
         public static void AllDevices(string[] args) {

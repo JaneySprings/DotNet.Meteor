@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using System.Collections.Generic;
+using DotNet.Meteor.Logging;
 
 namespace DotNet.Meteor.Debug.CLI;
 
@@ -37,20 +38,11 @@ public class Program {
             "--start-session", new Tuple<string[], Action<string[]>>(new []{
                 "Launch mono debugger session"
             }, ConsoleUtils.StartSession)
-        },
-        {
-            "--version", new Tuple<string[], Action<string[]>>(new []{
-                "Show tool version"
-            }, ConsoleUtils.Version)
-        },
-        {
-            "--help", new Tuple<string[], Action<string[]>>(new []{
-                "Show this help"
-            }, ConsoleUtils.Help)
         }
     };
 
     private static void Main(string[] args) {
+        LogConfig.InitializeLog();
         if (args.Length == 0) {
             ConsoleUtils.Help(args);
             return;
@@ -59,7 +51,7 @@ public class Program {
         if (CommandHandler.TryGetValue(args[0], out var command)) {
             command.Item2.Invoke(args);
         } else {
-            ConsoleUtils.Error(args);
+            ConsoleUtils.Help(args);
         }
     }
 }
