@@ -66,4 +66,16 @@ public class WorkspaceAnalysisTests: TestFixture {
         var expected = EvaluateProject(simpleProjectPath);
         AssertProjects(expected, actual);
     }
+
+    [Fact]
+    public void OnlyExecutableProjectTest() {
+        var callbackInvokeCount = 0;
+        var simpleProjectPath = GetProjectPath(index: 8);
+        var actual = WorkspaceAnalyzer.AnalyzeProject(simpleProjectPath, message => {
+            Assert.Contains("executable", message);
+            callbackInvokeCount++;
+        });
+        Assert.Null(actual);
+        Assert.Equal(1, callbackInvokeCount);
+    }
 }
