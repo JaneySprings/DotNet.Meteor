@@ -4,13 +4,15 @@ using System.Linq;
 using System.Text.Json;
 using DotNet.Meteor.Shared;
 using DotNet.Meteor.Debug.Session;
-using DotNet.Meteor.Apple;
-using DotNet.Meteor.Android;
+using System.Reflection;
+using NLog;
 
 namespace DotNet.Meteor.Debug.CLI {
     public static class ConsoleUtils {
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         public static void Help(string[] args) {
-            Console.WriteLine($"DotNet.Meteor.Debug.CLI version {Program.Version} for Visual Studio Code");
+            Version version = Assembly.GetExecutingAssembly().GetName().Version;
+            Console.WriteLine($"DotNet.Meteor.Debug.CLI version {version?.Major}.{version?.Minor}.{version?.Build} for Visual Studio Code");
             Console.WriteLine("Copyright (C) Nikita Romanov. All rights reserved.");
             Console.WriteLine("\nCommands:");
 
@@ -21,16 +23,10 @@ namespace DotNet.Meteor.Debug.CLI {
                 );
             }
         }
-        public static void Version(string[] args) {
-            Console.WriteLine(Program.Version);
-        }
-        public static void Error(string[] args) {
-            Console.WriteLine($"Unknown parameter: {args[0]}");
-        }
 
 
         public static void AllDevices(string[] args) {
-            var devices = DeviceProvider.GetDevices();
+            var devices = DeviceProvider.GetDevices(logger.Error);
             Console.WriteLine(JsonSerializer.Serialize(devices));
         }
 
@@ -45,7 +41,7 @@ namespace DotNet.Meteor.Debug.CLI {
                 throw new Exception ($"Missing parameter: {Program.CommandHandler[args[0]].Item1[1]}");
 
             for (int i = 1; i < args.Length; i++)
-                projects.AddRange(WorkspaceAnalyzer.AnalyzeWorkspace(args[i]));
+                projects.AddRange(WorkspaceAnalyzer.AnalyzeWorkspace(args[i], logger.Debug));
 
             Console.WriteLine(JsonSerializer.Serialize(projects));
         }
@@ -53,7 +49,7 @@ namespace DotNet.Meteor.Debug.CLI {
         public static void AnalyzeProject(string[] args) {
             if (args.Length < 2)
                 throw new Exception ($"Missing parameter: {Program.CommandHandler[args[0]].Item1[1]}");
-            Project project = WorkspaceAnalyzer.AnalyzeProject(args[1]);
+            Project project = WorkspaceAnalyzer.AnalyzeProject(args[1], logger.Debug);
             Console.WriteLine(JsonSerializer.Serialize(project));
         }
 

@@ -12,5 +12,6 @@
   <ItemGroup>
     <PackageReference Include="Mono.Cecil" Version="0.11.4" />
     <PackageReference Include="Mono.Options" Version="6.12.0.148" />
+    <PackageReference Include="NLog" Version="5.1.1" />
   </ItemGroup>
 </Project>

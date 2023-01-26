@@ -39,16 +39,16 @@ public partial class MonoDebugSession : DebugSession {
         Breakpoints = new BreakpointStore()
     };
 
-
-    public MonoDebugSession() : base() {
+    public MonoDebugSession() {
         DebuggerLoggingService.CustomLogger = new MonoLogger();
 
         this.session.ExceptionHandler = ex => {
-            OnErrorDataReceived(ex.Message);
+            this.sessionLogger.Error(ex);
             return true;
         };
         this.session.LogWriter = (isStdErr, text) => {
-            if (isStdErr) OnErrorDataReceived(text);
+            if (isStdErr) this.sessionLogger.Error($"Mono: {text.Trim()}");
+            else this.sessionLogger.Debug($"Mono: {text.Trim()}");
         };
         this.session.TargetStopped += (sender, e) => {
             Stopped();

@@ -6,28 +6,36 @@ using System;
 namespace DotNet.Meteor.Shared {
 
     public static class WorkspaceAnalyzer {
-        public static IEnumerable<Project> AnalyzeWorkspace(string workspacePath) {
+        public static IEnumerable<Project> AnalyzeWorkspace(string workspacePath, Action<string> callback = null) {
             var projectFiles = Directory.GetFiles(workspacePath, "*.csproj", SearchOption.AllDirectories);
             var projects = new List<Project>();
 
             foreach (var projectFile in projectFiles) {
-                var project = new Project(projectFile);
-                var outputType = project.EvaluateProperty("OutputType");
-
-                if (outputType?.Contains("exe", StringComparison.OrdinalIgnoreCase) == false)
+                var project = AnalyzeProject(projectFile, callback);
+                if (project == null)
                     continue;
-
-                project.Frameworks = TargetFrameworks(project);
-                if (project.Frameworks?.Find(it => it.Contains("net", StringComparison.OrdinalIgnoreCase) && it.Contains('-')) != null)
-                    projects.Add(project);
+                projects.Add(project);
             }
 
             return projects.OrderBy(x => x.Name);
         }
 
-        public static Project AnalyzeProject(string projectFile) {
-            var projects = AnalyzeWorkspace(Path.GetDirectoryName(projectFile));
-            return projects.FirstOrDefault();
+        public static Project AnalyzeProject(string projectFile, Action<string> callback = null) {
+            var project = new Project(projectFile);
+            var outputType = project.EvaluateProperty("OutputType");
+
+            if (outputType?.Contains("exe", StringComparison.OrdinalIgnoreCase) == false) {
+                callback?.Invoke($"Skipping project {project.Name} because it is not an executable.");
+                return null;
+            }
+
+            project.Frameworks = TargetFrameworks(project);
+            if (project.Frameworks?.Find(it => it.Contains("net", StringComparison.OrdinalIgnoreCase) && it.Contains('-')) == null) {
+                callback?.Invoke($"Skipping project {project.Name} because it does not contain a valid target framework.");
+                return null;
+            }
+
+            return project;
         }
 
         private static List<string> TargetFrameworks(Project project) {
