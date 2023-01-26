@@ -7,17 +7,19 @@ using DotNet.Meteor.Processes;
 using DotNet.Meteor.Debug.Events;
 using DotNet.Meteor.Debug.Protocol;
 using System.Text.Json;
+using NLog;
 
 namespace DotNet.Meteor.Debug.Session;
 
 public abstract class Session: IProcessLogger {
+    protected readonly Logger sessionLogger = LogManager.GetCurrentClassLogger();
+    private readonly ByteBuffer rawData = new ByteBuffer();
+    private Stream outputStream = null!;
     private const int InputBufferSize = 4096;
     private int sequenceNumber = 1;
     private int bodyLength = -1;
     private bool stopRequested;
 
-    private Stream outputStream = null!;
-    private readonly ByteBuffer rawData = new();
 
     public async Task Start(Stream inputStream, Stream outputStream) {
         this.outputStream = outputStream;
@@ -35,6 +37,7 @@ public abstract class Session: IProcessLogger {
             if (read == 0)
                 break;
         }
+        this.sessionLogger.Debug("Debugger session terminated.");
     }
 
     public void Stop() {
@@ -61,11 +64,14 @@ public abstract class Session: IProcessLogger {
             message.Seq = this.sequenceNumber++;
 
         var data = message.ConvertToBytes();
+
+        this.sessionLogger.Debug($"DAP Response: {JsonSerializer.Serialize((object)message)}");
         this.outputStream.Write(data, 0, data.Length);
         this.outputStream.Flush();
     }
 
     private void Dispatch(string req) {
+        this.sessionLogger.Debug($"DAP Request: {req}");
         var request = JsonSerializer.Deserialize<Request>(req)!;
         var response = new Response(request);
         DispatchRequest(request.Command, request.Arguments, response);

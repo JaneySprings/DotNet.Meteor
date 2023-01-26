@@ -4,17 +4,6 @@
     <LangVersion>8.0</LangVersion>
   </PropertyGroup>
 
-  <!-- <PropertyGroup>
-        <PackageId>FarmerSwissKnife</PackageId>
-        <Version>1.1.0</Version>
-        <RepositoryType>git</RepositoryType>
-        <RepositoryUrl>https://github.com/DevExpress/native-mobile.git</RepositoryUrl>
-        <Title>Farmer tools</Title>
-        <PackageDescription>Tool for working with farm</PackageDescription>
-        <PackageOutputPath>./nupkg</PackageOutputPath>
-        <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-    </PropertyGroup> -->
-
   <ItemGroup>
     <PackageReference Include="System.Text.Json" Version="7.0.0" />
   </ItemGroup>
