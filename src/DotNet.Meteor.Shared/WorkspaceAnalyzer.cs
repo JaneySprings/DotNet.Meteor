@@ -24,7 +24,7 @@ namespace DotNet.Meteor.Shared {
             var project = new Project(projectFile);
             var outputType = project.EvaluateProperty("OutputType");
 
-            if (outputType?.Contains("exe", StringComparison.OrdinalIgnoreCase) == false) {
+            if (outputType == null || outputType?.Contains("exe", StringComparison.OrdinalIgnoreCase) == false) {
                 callback?.Invoke($"Skipping project {project.Name} because it is not an executable.");
                 return null;
             }
