@@ -1,18 +1,10 @@
 ﻿using System;
-using System.Reflection;
 using System.Collections.Generic;
 using DotNet.Meteor.Logging;
 
 namespace DotNet.Meteor.Debug.CLI;
 
 public class Program {
-    public static string Version {
-        get {
-            Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            return $"{version?.Major}.{version?.Minor}.{version?.Build}";
-        }
-    }
-
     public static readonly Dictionary<string, Tuple<string[], Action<string[]>>> CommandHandler = new() {
         {
             "--all-devices", new Tuple<string[], Action<string[]>>(new []{

@@ -13,7 +13,6 @@ public abstract class DebugSession : Session {
     protected int ConvertDebuggerLineToClient(int line) => this.clientLinesStartAt1 ? line : line - 1;
     protected int ConvertClientLineToDebugger(int line) => this.clientLinesStartAt1 ? line : line + 1;
 
-
     protected DebugSession() {
         requestHandlers = new Dictionary<string, Action<Response, Argument>>() {
             { "initialize", Initialize },
@@ -42,12 +41,11 @@ public abstract class DebugSession : Session {
             if (requestHandlers.TryGetValue(command, out var handler)) {
                 handler.Invoke(response, args);
             } else {
-                SendErrorResponse(response, 1014, $"unrecognized request '{command}'");
+                this.sessionLogger.Error($"unrecognized request '{command}'");
             }
         } catch (Exception e) {
-            var message =
-                $"Error occurred while processing {command} request."
-                + Environment.NewLine + e.Message + Environment.NewLine;
+            var message = $"Error occurred while processing {command} request. " + e.Message;
+            this.sessionLogger.Error(e, message);
             SendErrorResponse(response, 1104, message);
         }
     }
