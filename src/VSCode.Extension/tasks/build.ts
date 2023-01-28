@@ -6,7 +6,7 @@ import * as vscode from 'vscode';
 
 interface DotNetTaskDefinition extends vscode.TaskDefinition {
     target: string;
-    customArguments?: string[];
+    args?: string[];
 }
 
 export class DotNetTaskProvider implements vscode.TaskProvider {
@@ -57,7 +57,7 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
             builder.append('-p:WinUISDKReferences=false');
         }
 
-        definition.customArguments?.forEach(arg => builder.override(arg));
+        definition.args?.forEach(arg => builder.override(arg));
         
         return new vscode.Task(
             definition, 

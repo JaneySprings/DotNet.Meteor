@@ -14,7 +14,7 @@
 	"task.meteor.id": "dotnet-meteor.task",
 	"task.meteor.title": "dotnet-meteor: Build",
 	"task.meteor.description.target": "Set the target. May be build or publish",
-	"task.meteor.description.customArguments": "Set or override additional msbuild properties",
+	"task.meteor.description.args": "Set or override additional msbuild properties",
 
 	"debugger.meteor.id": "dotnet-meteor.debugger",
 	"debugger.meteor.title": ".NET Meteor Debugger",

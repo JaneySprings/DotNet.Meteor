@@ -51,9 +51,9 @@
             "default": "Build",
             "description": "%task.meteor.description.target%"
           },
-          "customArguments": {
+          "args": {
             "type": "array",
-            "description": "%task.meteor.description.customArguments%",
+            "description": "%task.meteor.description.args%",
             "default": [],
             "items": {
               "type": "string"
