@@ -1,17 +1,38 @@
 import { QuickPickItem } from 'vscode';
 
 
+export class Icon {
+    public static readonly project = "$(window)";
+    public static readonly target= "$(window)";
+    public static readonly device = "$(device-mobile)";
+    public static readonly computer = "$(vm)";
+    public static readonly active = "$(vm-running)";
+    public static readonly inactive = "$(device-mobile)";
+}
+
 export enum Target {
     Debug = "Debug",
     Release = "Release"
 }
-
 
 export class Project {
     public name!: string;
     public path!: string;
     public frameworks: string[] | undefined;
 }
+
+export class Device {
+    public name: string | undefined;
+    public details: string | undefined;
+    public serial: string | undefined;
+    public platform: string | undefined;
+    public os_version: string | undefined;
+    public runtime_id: string | undefined;
+    public is_emulator: boolean | undefined;
+    public is_running: boolean | undefined;
+    public is_mobile: boolean | undefined;
+}
+
 
 export class ProjectItem implements QuickPickItem {
     label: string;
@@ -27,19 +48,6 @@ export class ProjectItem implements QuickPickItem {
     }
 }
 
-
-export class Device {
-    public name: string | undefined;
-    public details: string | undefined;
-    public serial: string | undefined;
-    public platform: string | undefined;
-    public os_version: string | undefined;
-    public runtime_id: string | undefined;
-    public is_emulator: boolean | undefined;
-    public is_running: boolean | undefined;
-    public is_mobile: boolean | undefined;
-}
-
 export class DeviceItem implements QuickPickItem {
     label: string;
     detail: string;
@@ -50,14 +58,4 @@ export class DeviceItem implements QuickPickItem {
         this.detail = `${device.details} • ${device.os_version ?? device.platform}`;
         this.item = device;
     }
-}
-
-
-export class Icon {
-    public static readonly project = "$(window)";
-    public static readonly target= "$(window)";
-    public static readonly device = "$(device-mobile)";
-    public static readonly computer = "$(vm)";
-    public static readonly active = "$(vm-running)";
-    public static readonly inactive = "$(device-mobile)";
 }
