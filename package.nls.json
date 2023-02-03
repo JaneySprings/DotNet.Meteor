@@ -13,13 +13,13 @@
 
 	"task.meteor.id": "dotnet-meteor.task",
 	"task.meteor.title": "dotnet-meteor: Build",
-	"task.meteor.description.target": "Set the target. May be build or publish",
-	"task.meteor.description.args": "Set or override additional msbuild properties",
+	"task.meteor.description.target": "Specifies whether the project should be build or published.",
+	"task.meteor.description.args": "Sets or overrides msbuild properties (except for the '-c' and '-f' parameters).",
 
 	"debugger.meteor.id": "dotnet-meteor.debugger",
 	"debugger.meteor.title": ".NET Meteor Debugger",
 
 	"configuration.title": ".NET Meteor configuration",
-	"configuration.description.monoSdbDebuggerPortAndroid": "Default port for Mono SDB debugger for Android platform",
-	"configuration.description.monoSdbDebuggerPortApple": "Default port for Mono SDB debugger for Apple platform"
+	"configuration.description.monoSdbDebuggerPortAndroid": "Android's default port of the Mono SDB debugger.",
+	"configuration.description.monoSdbDebuggerPortApple": "iOS's default port of the Mono SDB debugger."
 }
