@@ -14,8 +14,10 @@ var configuration = Argument("configuration", "debug");
 
 Task("build-debugger")
    .DoesForEach<FilePath>(GetFiles(_Path.Combine(MonoDebuggerDirectory, "**", "*.csproj")), file => {
-      var regex = @"(<NuGetVersionRoslyn\s+Condition=""\$\(NuGetVersionRoslyn\)\s*==\s*''"")(>.+<)(/NuGetVersionRoslyn>)";
-      ReplaceRegexInFiles(file.ToString(), regex, $"$1>{NuGetVersionRoslyn}<$3");
+      var roslynRegex = @"(<NuGetVersionRoslyn\s+Condition=""\$\(NuGetVersionRoslyn\)\s*==\s*''"")(>.+<)(/NuGetVersionRoslyn>)";
+      var targetRefex = @"(<TargetFrameworks>)(.+)(</TargetFrameworks>)";
+      ReplaceRegexInFiles(file.ToString(), roslynRegex, $"$1>{NuGetVersionRoslyn}<$3");
+      ReplaceRegexInFiles(file.ToString(), targetRefex, $"$1{TargetFrameworkVersion}$3");
    })
    .Does(() => DotNetBuild(MeteorDebugProjectPath, new DotNetBuildSettings {
       MSBuildSettings = new DotNetMSBuildSettings { AssemblyVersion = version },
