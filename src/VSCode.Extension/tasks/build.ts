@@ -1,4 +1,4 @@
-import { ProcessArgumentBuilder } from '../executor';
+import { ProcessArgumentBuilder } from '../bridge';
 import { Configuration } from '../configuration';
 import * as res from '../resources';
 import * as vscode from 'vscode';

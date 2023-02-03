@@ -1,7 +1,7 @@
 import { Project, Device, Target } from "./models"
 import { window, workspace } from 'vscode';
 import { UIController } from "./controller";
-import { CommandLine } from "./bridge";
+import { CommandInterface } from "./bridge";
 import * as res from './resources';
 
 
@@ -11,7 +11,7 @@ export class Configuration {
     public static selectedTarget: Target;
 
     public static getAndroidSdkDirectory() {
-        return CommandLine.androidSdk();
+        return CommandInterface.androidSdk();
     }
     public static getDebuggingPort(): number {
         if (Configuration.isAndroid()) 
@@ -43,7 +43,7 @@ export class Configuration {
 
 
     public static updateSelectedProject() {
-        const project = CommandLine.analyzeProject(Configuration.selectedProject!.path);
+        const project = CommandInterface.analyzeProject(Configuration.selectedProject!.path);
         Configuration.selectedProject = project;
     }
     public static workspacesPath(): string[] {

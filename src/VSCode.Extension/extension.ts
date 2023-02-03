@@ -2,8 +2,7 @@ import { DotNetDebuggerConfiguration } from './tasks/debug';
 import { DotNetTaskProvider } from './tasks/build';
 import { Configuration } from './configuration';
 import { UIController } from './controller';
-import { CommandLine } from './bridge';
-import { Target } from './models';
+import { CommandInterface } from './bridge';
 import * as res from './resources';
 import * as vscode from 'vscode';
 
@@ -30,18 +29,28 @@ export function activate(context: vscode.ExtensionContext) {
 
 
 function analyzeWorkspace() {
-	CommandLine.analyzeWorkspaceAsync(items => {
+	CommandInterface.analyzeWorkspaceAsync(items => {
+		if (items.length === 0) {
+			UIController.deactivate();
+			return;
+		}
+
 		UIController.workspaceProjects = items;
 		if (!Configuration.selectedProject) 
-			UIController.performSelectTarget(Target.Debug);
-		if (!Configuration.selectedProject || !items.includes(Configuration.selectedProject)) 
-			UIController.performSelectProject(items[0]);
+			UIController.performSelectTarget();
+		if (!Configuration.selectedProject || !items.some(it => it.path === Configuration.selectedProject.path)) 
+			UIController.performSelectProject();
 	});
 }
 
 function analyzeDevices() {
-	CommandLine.mobileDevicesAsync(items => {
-		UIController.mobileDevices = items
-		UIController.performSelectDevice(items[0]);
+	CommandInterface.mobileDevicesAsync(items => {
+		if (items.length === 0) {
+			UIController.deactivate();
+			return;
+		}
+
+		UIController.mobileDevices = items;
+		UIController.performSelectDevice();
 	});
 }
