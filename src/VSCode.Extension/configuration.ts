@@ -1,6 +1,6 @@
 import { Project, Device, Target } from "./models"
 import { window, workspace } from 'vscode';
-import { Controller } from "./controller";
+import { UIController } from "./controller";
 import { CommandLine } from "./bridge";
 import * as res from './resources';
 
@@ -64,7 +64,7 @@ export class Configuration {
             window.showErrorMessage(res.messageNoDeviceFound);
             return false;
         }
-        if (!Controller.mobileDevices.some(it => it.name === Configuration.selectedDevice!.name)) {
+        if (!UIController.mobileDevices.some(it => it.name === Configuration.selectedDevice!.name)) {
             window.showErrorMessage(res.messageDeviceNotExists);
             return false;
         }
