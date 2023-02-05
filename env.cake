@@ -8,7 +8,7 @@ public string ExtensionAssembliesDirectory => _Path.Combine(ExtensionStagingDire
 
 public string MonoDebuggerDirectory => _Path.Combine(RootDirectory, "src", "Mono.Debugger");
 public string MeteorDebugProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Debug", "DotNet.Meteor.Debug.csproj");
-public string MeteorTestsProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Tests", "Tests", "DotNet.Meteor.Tests.csproj");
+public string MeteorTestsProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Tests", "DotNet.Meteor.Tests.csproj");
 
 public string NuGetVersionRoslyn => "4.3.1";
 public string TargetFrameworkVersion => "net7.0";

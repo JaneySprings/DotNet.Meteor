@@ -1,8 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-	<Import Project=".\Build.props" />
-	<PropertyGroup>
-		<IsWindows>true</IsWindows>
-        <OutputType>Exe</OutputType>
-		<UseMaui>true</UseMaui>
-	</PropertyGroup>
-</Project>
