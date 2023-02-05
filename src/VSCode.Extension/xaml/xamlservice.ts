@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { XamlSchemaPropertiesArray } from './types';
 import XamlLinterProvider from './linterprovider';
-import XamlCompletionItemProvider from './completionitemprovider';
+import XamlCompletionItemProvider from './completionprovider';
 
 
 export const languageId = 'xml';
