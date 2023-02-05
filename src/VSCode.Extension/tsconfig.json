@@ -6,6 +6,10 @@
 		"sourceMap": true,
 		"rootDir": "./",
 		"strict": true,
+		//todo remove after dynamic generation scheme
+		"resolveJsonModule": true,
+		"esModuleInterop": true,
+		//-------------------------------------------
 		"lib": [
 			"ES2020"
 		]

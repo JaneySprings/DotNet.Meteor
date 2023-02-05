@@ -34,3 +34,6 @@ export const configDefaultMonoSdbDebuggerPortAndroid = 10000;
 
 export const configIdMonoSdbDebuggerPortApple = "monoSdbDebuggerPortApple";
 export const configDefaultMonoSdbDebuggerPortApple = 55551;
+
+export const configIdXamlIntelliSense = "enableXamlIntellisense";
+export const configDefaultXamlIntelliSense = true;
