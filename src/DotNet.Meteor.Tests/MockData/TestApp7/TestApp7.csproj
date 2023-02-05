@@ -1,8 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-		<IsWindows>true</IsWindows>
-        <OutputType>Exe</OutputType>
-		<UseMaui>true</UseMaui>
-		<TargetFrameworks>$(AndroidFramework)</TargetFrameworks>
-	</PropertyGroup>
-</Project>

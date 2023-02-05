@@ -1,7 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-        <OutputType>Exe</OutputType>
-		<UseMaui>true</UseMaui>
-		<TargetFramework>net7.0-android</TargetFramework>
-	</PropertyGroup>
-</Project>
