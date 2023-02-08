@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Mono.Debugging.Client;
 using DotNet.Meteor.Debug.Protocol;
 
 namespace DotNet.Meteor.Debug.Session;
@@ -10,11 +11,12 @@ public abstract class DebugSession : Session {
 
     private readonly Dictionary<string, Action<Response, Argument>> requestHandlers;
 
+    protected readonly DebuggerSessionOptions sessionOptions;
     protected int ConvertDebuggerLineToClient(int line) => this.clientLinesStartAt1 ? line : line - 1;
     protected int ConvertClientLineToDebugger(int line) => this.clientLinesStartAt1 ? line : line + 1;
 
     protected DebugSession() {
-        requestHandlers = new Dictionary<string, Action<Response, Argument>>() {
+        this.requestHandlers = new Dictionary<string, Action<Response, Argument>>() {
             { "initialize", Initialize },
             { "launch", Launch },
             { "attach", Attach },
@@ -33,6 +35,27 @@ public abstract class DebugSession : Session {
             { "setExceptionBreakpoints", SetExceptionBreakpoints },
             { "evaluate", Evaluate },
             { "disconnect", Disconnect }
+        };
+
+        var evaluationOptions = new EvaluationOptions() {
+            EvaluationTimeout = 1000,
+            MemberEvaluationTimeout = 5000,
+            UseExternalTypeResolver = true,
+            AllowMethodEvaluation = true,
+            GroupPrivateMembers = true,
+            GroupStaticMembers = true,
+            AllowToStringCalls = true,
+            EllipsizeStrings = false,
+            AllowTargetInvoke = true,
+            FlattenHierarchy = true,
+            ChunkRawStrings = false,
+            IntegerDisplayFormat = IntegerDisplayFormat.Decimal,
+            CurrentExceptionTag = "$exception",
+            StackFrameFormat = new StackFrameFormat ()
+        };
+
+        this.sessionOptions = new DebuggerSessionOptions {
+            EvaluationOptions = evaluationOptions,
         };
     }
 
