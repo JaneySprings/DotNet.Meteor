@@ -31,7 +31,7 @@ namespace DotNet.Meteor.Debug.CLI {
         }
 
         public static void AndroidSdkPath(string[] args) {
-            string path = DotNet.Meteor.Android.PathUtils.SdkLocation();
+            string path = Android.PathUtils.SdkLocation();
             Console.WriteLine(JsonSerializer.Serialize(path));
         }
 
@@ -44,13 +44,6 @@ namespace DotNet.Meteor.Debug.CLI {
                 projects.AddRange(WorkspaceAnalyzer.AnalyzeWorkspace(args[i], logger.Debug));
 
             Console.WriteLine(JsonSerializer.Serialize(projects));
-        }
-
-        public static void AnalyzeProject(string[] args) {
-            if (args.Length < 2)
-                throw new Exception ($"Missing parameter: {Program.CommandHandler[args[0]].Item1[1]}");
-            Project project = WorkspaceAnalyzer.AnalyzeProject(args[1], logger.Debug);
-            Console.WriteLine(JsonSerializer.Serialize(project));
         }
 
         public static void StartSession(string[] args) {

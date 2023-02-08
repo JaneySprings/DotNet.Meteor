@@ -1,6 +1,5 @@
 import path = require('path');
 import { execSync, exec } from 'child_process';
-import { Configuration } from './configuration';
 import { Project, Device } from './models';
 import { extensions } from 'vscode';
 import * as res from './resources';
@@ -11,26 +10,20 @@ export class CommandInterface {
         extensions.getExtension(`${res.extensionPublisher}.${res.extensionId}`)?.extensionPath ?? "?",
         "extension", "bin", "DotNet.Meteor.Debug.dll");
 
-    public static mobileDevicesAsync(callback: (items: Device[]) => any) {
+    public static devicesAsync(callback: (items: Device[]) => any) {
         ProcessRunner.runAsync<Device[]>(new ProcessArgumentBuilder("dotnet")
-            .appendQuoted(this.toolPath)
+            .appendQuoted(CommandInterface.toolPath)
             .append("--all-devices"), callback);
     }
-    public static analyzeWorkspaceAsync(callback: (items: Project[]) => any) {
+    public static analyzeWorkspaceAsync(folders: string[], callback: (items: Project[]) => any) {
         ProcessRunner.runAsync<Project[]>(new ProcessArgumentBuilder("dotnet")
-            .appendQuoted(this.toolPath)
+            .appendQuoted(CommandInterface.toolPath)
             .append("--analyze-workspace")
-            .appendRangeQuoted(Configuration.workspacesPath()), callback);
-    }
-    public static analyzeProject(projectFile: string): Project {
-        return ProcessRunner.run<Project>(new ProcessArgumentBuilder("dotnet")
-            .appendQuoted(this.toolPath)
-            .append("--analyze-project")
-            .appendQuoted(projectFile));
+            .appendRangeQuoted(folders), callback);
     }
     public static androidSdk(): string {
         return ProcessRunner.run<string>(new ProcessArgumentBuilder("dotnet")
-            .appendQuoted(this.toolPath)
+            .appendQuoted(CommandInterface.toolPath)
             .append("--android-sdk-path"));
     }
 }

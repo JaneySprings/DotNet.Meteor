@@ -1,5 +1,6 @@
 import { ProcessArgumentBuilder } from '../bridge';
 import { Configuration } from '../configuration';
+import { CommandInterface } from '../bridge';
 import * as res from '../resources';
 import * as vscode from 'vscode';
 
@@ -10,6 +11,8 @@ interface DotNetTaskDefinition extends vscode.TaskDefinition {
 }
 
 export class DotNetTaskProvider implements vscode.TaskProvider {
+    private androidSdkDirectory: string = CommandInterface.androidSdk();
+
     resolveTask(task: vscode.Task, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Task> { 
         const resolvedTask = this.getTask(task.definition as DotNetTaskDefinition);
         return resolvedTask ? resolvedTask : task;
@@ -26,15 +29,14 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
         return task ? [ task ] : [];
     }
     private getTask(definition: DotNetTaskDefinition): vscode.Task | undefined {
-        Configuration.updateSelectedProject();
         if (!Configuration.validate())
             return undefined;
     
-        const framework = Configuration.targetFramework();
+        const framework = Configuration.project!.frameworks?.find(it => it.includes(Configuration.device!.platform!))
         const builder = new ProcessArgumentBuilder('dotnet')
             .append(definition.target.toLowerCase())
-            .appendQuoted(Configuration.selectedProject.path)
-            .append(`-c:${Configuration.selectedTarget}`)
+            .appendQuoted(Configuration.project!.path)
+            .append(`-c:${Configuration.target}`)
             .append(`-f:${framework}`);
 
         if (definition.target.toLowerCase() === 'build') 
@@ -45,12 +47,12 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
             return undefined;
         }
 
-        if (Configuration.selectedDevice.runtime_id && Configuration.selectedDevice.runtime_id !== 'maccatalyst-x64') {
-            builder.append(`-p:RuntimeIdentifier=${Configuration.selectedDevice.runtime_id}`);
+        if (Configuration.device!.runtime_id && Configuration.device!.runtime_id !== 'maccatalyst-x64') {
+            builder.append(`-p:RuntimeIdentifier=${Configuration.device!.runtime_id}`);
         }
         if (Configuration.isAndroid()) {
             builder.append('-p:EmbedAssembliesIntoApk=true');
-            builder.append(`-p:AndroidSdkDirectory="${Configuration.getAndroidSdkDirectory()}"`);
+            builder.append(`-p:AndroidSdkDirectory="${this.androidSdkDirectory}"`);
         }
         if (Configuration.isWindows()) {
             builder.append('-p:WindowsPackageType=None');

@@ -25,32 +25,37 @@ export function activate(context: vscode.ExtensionContext) {
 	/* Events */
 	context.subscriptions.push(vscode.debug.onDidStartDebugSession(() => vscode.commands.executeCommand(res.commandIdFocusOnDebug)));
 	context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(analyzeWorkspace));
+	context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(ev => {
+		if (ev.fileName.endsWith('.csproj') || ev.fileName.endsWith('.props'))
+			analyzeWorkspace();
+	}));
 }
 
 
 function analyzeWorkspace() {
-	CommandInterface.analyzeWorkspaceAsync(items => {
+	const folders = vscode.workspace.workspaceFolders!.map(it => it.uri.fsPath);
+	CommandInterface.analyzeWorkspaceAsync(folders, items => {
 		if (items.length === 0) {
-			UIController.deactivate();
+			Configuration.project = undefined;
+			UIController.hide();
 			return;
 		}
 
-		UIController.workspaceProjects = items;
-		if (!Configuration.selectedProject) 
-			UIController.performSelectTarget();
-		if (!Configuration.selectedProject || !items.some(it => it.path === Configuration.selectedProject.path)) 
-			UIController.performSelectProject();
+		UIController.projects = items;
+		UIController.show();
+
+		Configuration.project = items.find(it => it.path === Configuration.project?.path);
+		UIController.performSelectProject(Configuration.project);
+		UIController.performSelectTarget(Configuration.target);
 	});
 }
 
 function analyzeDevices() {
-	CommandInterface.mobileDevicesAsync(items => {
-		if (items.length === 0) {
-			UIController.deactivate();
+	CommandInterface.devicesAsync(items => {
+		if (items.length === 0) 
 			return;
-		}
 
-		UIController.mobileDevices = items;
+		UIController.devices = items;
 		UIController.performSelectDevice();
 	});
 }
