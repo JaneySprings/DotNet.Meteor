@@ -32,9 +32,6 @@ public partial class MonoDebugSession : DebugSession {
     private readonly Handles<ObjectValue[]> variableHandles = new Handles<ObjectValue[]>();
     private readonly Dictionary<int, ModelThread> seenThreads = new Dictionary<int, ModelThread>();
     private readonly SortedDictionary<long, BreakEvent> breakpoints = new SortedDictionary<long, BreakEvent>();
-    private readonly DebuggerSessionOptions debuggerSessionOptions = new DebuggerSessionOptions {
-        EvaluationOptions = EvaluationOptions.DefaultOptions
-    };
     private SoftDebuggerSession session = new SoftDebuggerSession {
         Breakpoints = new BreakpointStore()
     };
@@ -187,7 +184,7 @@ public partial class MonoDebugSession : DebugSession {
                 return;
 
             this.debuggerExecuting = true;
-            this.session.Run(new SoftDebuggerStartInfo(arguments), this.debuggerSessionOptions);
+            this.session.Run(new SoftDebuggerStartInfo(arguments), this.sessionOptions);
             OnOutputDataReceived("Debugger is ready and listening...");
         }
     }
@@ -461,7 +458,7 @@ public partial class MonoDebugSession : DebugSession {
             var frame = this.frameHandles.Get(frameId, null);
             if (frame != null) {
                 if (frame.ValidateExpression(expression)) {
-                    var val = frame.GetExpressionValue(expression, this.debuggerSessionOptions.EvaluationOptions);
+                    var val = frame.GetExpressionValue(expression, this.sessionOptions.EvaluationOptions);
                     val.WaitHandle.WaitOne();
 
                     var flags = val.Flags;
