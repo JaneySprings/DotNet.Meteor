@@ -1,5 +1,6 @@
 import { WorkspaceFolder, DebugConfiguration } from 'vscode';
 import { Configuration } from '../configuration';
+import { UIController } from '../controller';
 import { Target } from '../models';
 import * as res from '../resources';
 import * as vscode from 'vscode';
@@ -10,8 +11,13 @@ export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationPro
 									config: DebugConfiguration, 
 									token?: vscode.CancellationToken): Promise<DebugConfiguration | undefined> {
 		
-		if (!Configuration.validate()) return undefined;
-		if (config.noDebug === undefined) {
+		if (config.device !== undefined) 
+			UIController.performSelectDevice(UIController.devices.find(d => d.name === config.device));
+
+		if (!Configuration.validate())
+			return undefined;
+
+		if (!config.noDebug) {
 			if (Configuration.isWindows()) {
 				vscode.window.showErrorMessage(res.messageDebugNotSupportedWin);
 				return undefined;
