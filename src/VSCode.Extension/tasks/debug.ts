@@ -16,7 +16,7 @@ export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationPro
 				vscode.window.showErrorMessage(res.messageDebugNotSupportedWin);
 				return undefined;
 			}
-			if (Configuration.selectedTarget === Target.Release) {
+			if (Configuration.target === Target.Release) {
 				vscode.window.showErrorMessage(res.messageDebugNotSupported);
 				return undefined;
 			}
@@ -29,9 +29,9 @@ export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationPro
 			config.request = 'launch';
 		}
 		
-		config['selected_project'] = Configuration.selectedProject;
-        config['selected_device'] = Configuration.selectedDevice;
-		config['selected_target'] = Configuration.selectedTarget;
+		config['selected_project'] = Configuration.project;
+        config['selected_device'] = Configuration.device;
+		config['selected_target'] = Configuration.target;
 		config['debugging_port'] = Configuration.getDebuggingPort();
 		
         return config;

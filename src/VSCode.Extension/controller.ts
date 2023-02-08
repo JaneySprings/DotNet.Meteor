@@ -6,59 +6,56 @@ import * as vscode from 'vscode';
 
 
 export class UIController {
-    public static projectStatusItem: vscode.StatusBarItem;
-    public static targetStatusItem: vscode.StatusBarItem;
-    public static deviceStatusItem: vscode.StatusBarItem;
-    public static workspaceProjects: models.Project[];
-    public static mobileDevices: models.Device[];
+    private static _projectStatusItem: vscode.StatusBarItem;
+    private static _targetStatusItem: vscode.StatusBarItem;
+    private static _deviceStatusItem: vscode.StatusBarItem;
 
-    private static _isActivated: boolean = true;
+    public static projects: models.Project[];
+    public static devices: models.Device[];
 
     
     public static activate(context: vscode.ExtensionContext) {
-        this.projectStatusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
-        this.targetStatusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 90);
-        this.deviceStatusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 80);
+        UIController._projectStatusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
+        UIController._targetStatusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 90);
+        UIController._deviceStatusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 80);
 
-        this.targetStatusItem.command = res.commandIdSelectActiveConfiguration;
-        this.projectStatusItem.command = res.commandIdSelectActiveProject;
-        this.deviceStatusItem.command = res.commandIdSelectActiveDevice;
+        UIController._targetStatusItem.command = res.commandIdSelectActiveConfiguration;
+        UIController._projectStatusItem.command = res.commandIdSelectActiveProject;
+        UIController._deviceStatusItem.command = res.commandIdSelectActiveDevice;
 
-        context.subscriptions.push(this.projectStatusItem);
-        context.subscriptions.push(this.targetStatusItem);
-        context.subscriptions.push(this.deviceStatusItem);
+        context.subscriptions.push(UIController._projectStatusItem);
+        context.subscriptions.push(UIController._targetStatusItem);
+        context.subscriptions.push(UIController._deviceStatusItem);
     }
-
-    public static deactivate() {
-        this.projectStatusItem.hide();
-        this.targetStatusItem.hide();
-        this.deviceStatusItem.hide();
-        this._isActivated = false;
+    public static show() {
+        UIController._projectStatusItem.show();
+        UIController._targetStatusItem.show();
+        UIController._deviceStatusItem.show();
+    }
+    public static hide() {
+        UIController._projectStatusItem.hide();
+        UIController._targetStatusItem.hide();
+        UIController._deviceStatusItem.hide();
     }
 
     public static performSelectProject(item: models.Project | undefined = undefined) {
-        if (!this._isActivated) return;
-        Configuration.selectedProject = item ?? UIController.workspaceProjects[0];
-        this.projectStatusItem.text = `${models.Icon.project} ${Configuration.selectedProject?.name}`;
-        UIController.workspaceProjects.length === 1 ? this.projectStatusItem.hide() : this.projectStatusItem.show();
+        Configuration.project = item ?? UIController.projects[0];
+        UIController._projectStatusItem.text = `${models.Icon.project} ${Configuration.project?.name}`;
+        UIController.projects.length === 1 ? UIController._projectStatusItem.hide() : UIController._projectStatusItem.show();
     }
-    public static performSelectTarget(target: models.Target | undefined = undefined) {
-        if (!this._isActivated) return;
-        Configuration.selectedTarget = target ?? models.Target.Debug;
-        this.targetStatusItem.text = `${models.Icon.target} ${Configuration.selectedTarget} | Any CPU`;
-        this.targetStatusItem.show();
+    public static performSelectTarget(item: models.Target | undefined = undefined) {
+        Configuration.target = item ?? models.Target.Debug;
+        UIController._targetStatusItem.text = `${models.Icon.target} ${Configuration.target} | Any CPU`;
     }
     public static performSelectDevice(item: models.Device | undefined = undefined) {
-        if (!this._isActivated) return;
-        Configuration.selectedDevice = item ?? UIController.mobileDevices[0];
-        const icon = Configuration.selectedDevice.is_mobile ? models.Icon.device : models.Icon.computer;
-        this.deviceStatusItem.text = `${icon} ${Configuration.selectedDevice?.name}`;
-        this.deviceStatusItem.show();
+        Configuration.device = item ?? UIController.devices[0];
+        const icon = Configuration.device.is_mobile ? models.Icon.device : models.Icon.computer;
+        UIController._deviceStatusItem.text = `${icon} ${Configuration.device?.name}`;
     }
 
 
     public static async showQuickPickProject() {
-        const items = UIController.workspaceProjects.map(project => new models.ProjectItem(project));
+        const items = UIController.projects.map(project => new models.ProjectItem(project));
         const options = { placeHolder: res.commandTitleSelectActiveProject };
         const selectedItem = await vscode.window.showQuickPick(items, options);
 
@@ -87,8 +84,8 @@ export class UIController {
             picker.hide();
         });
 
-        CommandInterface.mobileDevicesAsync(items => {
-            UIController.mobileDevices = items;
+        CommandInterface.devicesAsync(items => {
+            UIController.devices = items;
             picker.items = items.map(device => new models.DeviceItem(device));
             picker.placeholder = res.commandTitleSelectActiveDevice;
             picker.busy = false;

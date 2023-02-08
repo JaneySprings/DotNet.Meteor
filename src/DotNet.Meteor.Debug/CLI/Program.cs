@@ -22,11 +22,6 @@ public class Program {
             }, ConsoleUtils.AnalyzeWorkspace)
         },
         {
-            "--analyze-project", new Tuple<string[], Action<string[]>>(new []{
-                "Get info about specified project", "<project-path>"
-            }, ConsoleUtils.AnalyzeProject)
-        },
-        {
             "--start-session", new Tuple<string[], Action<string[]>>(new []{
                 "Launch mono debugger session"
             }, ConsoleUtils.StartSession)
