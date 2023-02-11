@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using DotNet.Meteor.Shared;
 using DotNet.Meteor.Debug.Session;
+using DotNet.Meteor.Xaml;
 using System.Reflection;
 using NLog;
 
@@ -16,12 +17,8 @@ namespace DotNet.Meteor.Debug.CLI {
             Console.WriteLine("Copyright (C) Nikita Romanov. All rights reserved.");
             Console.WriteLine("\nCommands:");
 
-            foreach (var command in Program.CommandHandler) {
-                Console.WriteLine("  {0,-40} {1,5}",
-                    command.Key + " " + string.Join(" ", command.Value.Item1.Skip(1)),
-                    command.Value.Item1[0]
-                );
-            }
+            foreach (var command in Program.CommandHandler.Keys) 
+                Console.WriteLine($" {command}");
         }
 
 
@@ -37,13 +34,18 @@ namespace DotNet.Meteor.Debug.CLI {
 
         public static void AnalyzeWorkspace(string[] args) {
             var projects = new List<Project>();
-            if (args.Length < 2)
-                throw new Exception ($"Missing parameter: {Program.CommandHandler[args[0]].Item1[1]}");
 
             for (int i = 1; i < args.Length; i++)
                 projects.AddRange(WorkspaceAnalyzer.AnalyzeWorkspace(args[i], logger.Debug));
 
             Console.WriteLine(JsonSerializer.Serialize(projects));
+        }
+
+        public static void XamlGenerate(string[] args) {
+            var rid = args.Length == 5 ? args[4] : null;
+            var schemaGenerator = new JsonSchemaGenerator(args[1], args[2], args[3], rid, logger.Error);
+            var result = schemaGenerator.CreateTypesAlias();
+            Console.WriteLine(JsonSerializer.Serialize(result));
         }
 
         public static void StartSession(string[] args) {

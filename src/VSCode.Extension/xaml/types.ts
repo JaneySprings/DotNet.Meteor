@@ -115,3 +115,13 @@ export class XamlSchemaPropertiesArray extends Array<XamlSchemaProperties> {
             .find(u => u.toString() === e.parentSchemaUri.toString()) !== undefined);
     }
 }
+
+export class XamlSchemaAlias {
+    public namespace: string;
+    public types: any[];
+    
+    public constructor (namespace: string, types: any[]) {
+        this.namespace = namespace;
+        this.types = types;
+    }
+}

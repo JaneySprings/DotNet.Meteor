@@ -6,9 +6,10 @@ import * as res from './resources';
 
 
 export class CommandInterface {
-    private static toolPath: string = path.join(
-        extensions.getExtension(`${res.extensionPublisher}.${res.extensionId}`)?.extensionPath ?? "?",
-        "extension", "bin", "DotNet.Meteor.Debug.dll");
+    private static extensionPath: string = extensions.getExtension(`${res.extensionPublisher}.${res.extensionId}`)?.extensionPath ?? '';
+    private static toolPath: string = path.join(CommandInterface.extensionPath, "extension", "bin", "DotNet.Meteor.Debug.dll");
+    public static generatedPath: string = path.join(CommandInterface.extensionPath, "extension", "generated");
+    
 
     public static devicesAsync(callback: (items: Device[]) => any) {
         ProcessRunner.runAsync<Device[]>(new ProcessArgumentBuilder("dotnet")
@@ -25,6 +26,15 @@ export class CommandInterface {
         return ProcessRunner.run<string>(new ProcessArgumentBuilder("dotnet")
             .appendQuoted(CommandInterface.toolPath)
             .append("--android-sdk-path"));
+    }
+    public static xamlSchema(path: string, framework: string, rid: string, callback: (succeeded: boolean) => any)  {
+        ProcessRunner.runAsync<boolean>(new ProcessArgumentBuilder("dotnet")
+            .appendQuoted(CommandInterface.toolPath)
+            .append("--xaml")
+            .appendQuoted(path)
+            .appendQuoted(CommandInterface.generatedPath)
+            .append(framework)
+            .append(rid), callback);
     }
 }
 

@@ -1,20 +1,22 @@
 /* eslint-disable no-return-assign */
 import * as vscode from 'vscode';
-import { XamlSchemaPropertiesArray, CompletionString } from './types';
+import { CompletionString, XamlSchemaAlias } from './types';
 import { languageId } from './xamlservice';
 import XamlParser from './xamlparser';
-import mauiPlatform from './MAUI.json';
+import { CommandInterface } from '../bridge';
 
-export default class XamlCompletionItemProvider implements vscode.CompletionItemProvider {
-    constructor (protected extensionContext: vscode.ExtensionContext, protected schemaPropertiesArray: XamlSchemaPropertiesArray) {
-    }
+export class XamlCompletionItemProvider implements vscode.CompletionItemProvider {
+    private xamlSchemaAliases: XamlSchemaAlias[] = [];
 
     async provideCompletionItems (textDocument: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, _context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList> {
+        this.loadXamlSchemaAliases();
+
         const documentContent = textDocument.getText();
         const offset = textDocument.offsetAt(position);
         const scope = await XamlParser.getScopeForPosition(documentContent, offset);
         let resultTexts: CompletionString[] = [];
-        const controls: any[] = (mauiPlatform as any[]);
+
+        const controls: any[] = this.xamlSchemaAliases.find(t => t.namespace.startsWith("Microsoft.Maui"))?.types ?? [];
 
         // only for xaml
         if (textDocument.languageId === languageId && textDocument.fileName.includes(".xaml")) {
@@ -37,11 +39,11 @@ export default class XamlCompletionItemProvider implements vscode.CompletionItem
                 const findTag = controls.find(t => t.name === scope.tagName);
 
                 if (findTag !== undefined) {
-                    for (let i = 0; i < findTag.props.length; i++) {
-                        const attr = new CompletionString(findTag.props[i].name);
+                    for (let i = 0; i < findTag.attributes.length; i++) {
+                        const attr = new CompletionString(findTag.attributes[i].name);
 
-                        if (typeof (findTag.props[i].type) === 'string' &&
-                            (findTag.props[i].type as string).includes("Event")
+                        if (typeof (findTag.attributes[i].type) === 'string' &&
+                            (findTag.attributes[i].type as string).includes("Event")
                         ) {
                             attr.type = vscode.CompletionItemKind.Event;
                         } else {
@@ -58,7 +60,7 @@ export default class XamlCompletionItemProvider implements vscode.CompletionItem
 
                 const findTag = controls.find(t => t.name === scope.tagName);
                 if (findTag !== undefined) {
-                    const findProp = findTag.props
+                    const findProp = findTag.attributes
                         .find((t: { name: any; }) => t.name === scope.tagAttribute);
 
                     if (findProp !== undefined) {
@@ -136,5 +138,17 @@ ${body}`;
 
                 return ci;
             });
+    }
+
+    private loadXamlSchemaAliases() {
+        if (this.xamlSchemaAliases.length > 0) 
+            return;
+        
+        const fs = require('fs');
+        fs.readdirSync(CommandInterface.generatedPath).forEach((file: string) => {
+            const dataArray = JSON.parse(fs.readFileSync(file));
+            const xamlSchemaAlias = new XamlSchemaAlias(file, dataArray);
+            this.xamlSchemaAliases.push(xamlSchemaAlias);
+        });
     }
 }
