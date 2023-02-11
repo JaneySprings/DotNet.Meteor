@@ -64,13 +64,15 @@
     ],
     "breakpoints": [
       { "language": "csharp" },
-      { "language": "fsharp" }
+      { "language": "fsharp" },
+      { "language": "razor" },
+      { "language": "aspnetcorerazor" }
     ],
     "debuggers": [
       {
         "type": "%debugger.meteor.id%",
         "label": "%debugger.meteor.title%",
-        "languages": [ "csharp", "fsharp", "xaml", "xml" ],
+        "languages": [ "csharp", "fsharp", "razor", "aspnetcorerazor" ],
         "program": "./extension/bin/DotNet.Meteor.Debug.dll",
         "args": [ "--start-session"],
         "runtime": "dotnet",
@@ -103,7 +105,7 @@
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./src/VSCode.Extension/tsconfig.json",
-    "watch": "tsc -watch -p ./src/VSCode.Extension/tsconfig-dev.json"
+    "watch": "tsc -watch -p ./src/VSCode.Extension/tsconfig.json"
   },
   "devDependencies": {
     "@types/vscode": "^1.73.0",
