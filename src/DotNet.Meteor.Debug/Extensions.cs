@@ -6,7 +6,7 @@ namespace DotNet.Meteor.Debug;
 
 public static class Extensions {
     private readonly static string[] MonoExtensions = new String[] {
-        ".cs", ".csx", ".cake", ".fs", ".fsi", ".ml", ".mli", ".fsx", ".fsscript", ".hx"
+        ".cs", ".csx", ".fs", ".fsi", ".ml", ".mli", ".fsx", ".fsscript", ".hx", ".vb", ".razor"
     };
 
     public static byte[] ConvertToBytes(this object obj) {
