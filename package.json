@@ -104,7 +104,7 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./src/VSCode.Extension/tsconfig.json",
+    "compile": "tsc -p ./src/VSCode.Extension/tsconfig.json --sourceMap false",
     "watch": "tsc -watch -p ./src/VSCode.Extension/tsconfig.json"
   },
   "devDependencies": {
