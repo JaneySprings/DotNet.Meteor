@@ -7,7 +7,7 @@ namespace DotNet.Meteor.Shared {
 
     public static class WorkspaceAnalyzer {
         public static IEnumerable<Project> AnalyzeWorkspace(string workspacePath, Action<string> callback = null) {
-            var projectFiles = Directory.GetFiles(workspacePath, "*.csproj", SearchOption.AllDirectories);
+            var projectFiles = Directory.GetFiles(workspacePath, "*.*proj", SearchOption.AllDirectories);
             var projects = new List<Project>();
 
             foreach (var projectFile in projectFiles) {
