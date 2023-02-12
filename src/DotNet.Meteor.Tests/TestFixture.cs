@@ -42,11 +42,15 @@ public abstract class TestFixture {
 
         return propsPath;
     }
-    protected string CreateOutputAssembly(string target, string framework, string? runtime, string name) {
+    protected string CreateOutputAssembly(string target, string framework, string? runtime, string name, bool includeWinDir) {
         string projectDir = Path.Combine(MockDataDirectory, ProjectName);
         string assemblyDir = runtime == null
             ? Path.Combine(projectDir, "bin", target, framework)
-            : Path.Combine(projectDir, "bin", target, framework, runtime);
+            : Path.Combine(projectDir, "bin", target, framework, runtime);  
+        
+        if (includeWinDir)
+            assemblyDir = Path.Combine(assemblyDir, "win-x64");
+
         string assemblyPath = Path.Combine(assemblyDir, name);
 
         Directory.CreateDirectory(assemblyDir);
