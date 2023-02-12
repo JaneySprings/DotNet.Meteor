@@ -38,15 +38,15 @@ public class WorkspaceBundleLocatorTests: TestFixture {
     [InlineData("Release",  "net7.0-maccatalyst", "release_arm64.app", DeviceService.MacArm64)]
     [InlineData("Release",  "net6.0-maccatalyst", "release_arm64.app", DeviceService.MacArm64)]
 
-    [InlineData("Debug", "net7.0-windows10.0.19041.0", "TestApp.exe", DeviceService.Windows10)]
-    [InlineData("Release", "net7.0-windows10.0.19041.0", "TestApp.exe", DeviceService.Windows10)]
-    public void AndroidPackageLocationTests(string configuration, string framework, string bundleName, string deviceId) {
+    [InlineData("Debug", "net7.0-windows10.0.19041.0", "TestApp.exe", DeviceService.Windows10, true)]
+    [InlineData("Release", "net7.0-windows10.0.19041.0", "TestApp.exe", DeviceService.Windows10, true)]
+    public void AndroidPackageLocationTests(string configuration, string framework, string bundleName, string deviceId, bool includeWinX64Dir = false) {
         var device = DeviceService.GetDevice(deviceId)!;
         var projectPath = CreateMockProject(SimpleProject);
         var project = WorkspaceAnalyzer.AnalyzeProject(projectPath);
         var expectedPath = device.IsIPhone || device.IsMacCatalyst
             ? CreateOutputBundle(configuration, framework, device.RuntimeId, bundleName)
-            : CreateOutputAssembly(configuration, framework, device.RuntimeId, bundleName);
+            : CreateOutputAssembly(configuration, framework, device.RuntimeId, bundleName, includeWinX64Dir);
         var actualPath = project.GetOutputAssembly(configuration, framework, device);
 
         Assert.Equal(expectedPath, actualPath);

@@ -51,7 +51,7 @@ namespace DotNet.Meteor.Shared {
 
             if (device.IsWindows) {
                 var executableName = EvaluateProperty("AssemblyName", Name);
-                var files = Directory.GetFiles(outputDirectory, $"{executableName}.exe", SearchOption.TopDirectoryOnly);
+                var files = Directory.GetFiles(outputDirectory, $"{executableName}.exe", SearchOption.AllDirectories);
                 if (!files.Any())
                     throw new FileNotFoundException($"Could not find \"{executableName}.exe\" in {outputDirectory}");
                 return files.FirstOrDefault();
