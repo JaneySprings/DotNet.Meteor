@@ -1,4 +1,4 @@
-![image](./img/header.jpg)
+<img src="./img/header.jpg" width="1180px"/>
 
 ## .NET Meteor
 This VSCode extension allows you to build, debug .NET 6 / .NET 7 apps and deploy them to devices or emulators. The following table lists supported .NET MAUI target platforms and their capabilities:
