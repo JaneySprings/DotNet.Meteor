@@ -15,6 +15,7 @@
 	"task.meteor.title": "dotnet-meteor: Build",
 	"task.meteor.description.target": "Specifies whether the project should be build or published.",
 	"task.meteor.description.args": "Sets or overrides msbuild properties (except for the '-c' and '-f' parameters).",
+	"task.meteor.problemMatcher": "dotnet-meteor.problemMatcher",
 
 	"debugger.meteor.id": "dotnet-meteor.debugger",
 	"debugger.meteor.title": ".NET Meteor Debugger",

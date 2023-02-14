@@ -15,6 +15,7 @@ export const commandIdFocusOnDebug = "workbench.debug.action.focusRepl";
 
 export const taskDefinitionId = "dotnet-meteor.task";
 export const taskDefinitionDefaultTarget = "Build";
+export const taskProblemMatcherId = "dotnet-meteor.problemMatcher";
 
 export const debuggerMeteorId = "dotnet-meteor.debugger";
 export const debuggerMeteorTitle = ".NET Meteor Debugger";
