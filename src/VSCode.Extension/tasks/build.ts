@@ -66,7 +66,8 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
             vscode.TaskScope.Workspace, 
             definition.target, 
             res.extensionId,
-            new vscode.ShellExecution(builder.build())
+            new vscode.ShellExecution(builder.build()),
+            `$${res.taskProblemMatcherId}`
         );
     }
 }
