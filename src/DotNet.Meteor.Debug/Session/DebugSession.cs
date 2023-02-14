@@ -47,7 +47,7 @@ public abstract class DebugSession : Session {
             AllowToStringCalls = true,
             EllipsizeStrings = false,
             AllowTargetInvoke = true,
-            FlattenHierarchy = true,
+            FlattenHierarchy = false,
             ChunkRawStrings = false,
             IntegerDisplayFormat = IntegerDisplayFormat.Decimal,
             CurrentExceptionTag = "$exception",
