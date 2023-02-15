@@ -31,7 +31,7 @@ namespace DotNet.Meteor.Debug.CLI {
         }
 
         public static void AndroidSdkPath(string[] args) {
-            string path = Android.PathUtils.SdkLocation();
+            string path = Android.PathUtils.SdkLocation(logger.Error);
             Console.WriteLine(JsonSerializer.Serialize(path));
         }
 

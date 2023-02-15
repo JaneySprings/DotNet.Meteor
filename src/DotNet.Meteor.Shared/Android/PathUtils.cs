@@ -4,7 +4,7 @@ using DotNet.Meteor.Shared;
 
 namespace DotNet.Meteor.Android {
     public static class PathUtils {
-        public static string SdkLocation() {
+        public static string SdkLocation(Action<string> errorHandler = null) {
             string path = Environment.GetEnvironmentVariable("ANDROID_SDK_ROOT");
 
             if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
@@ -30,7 +30,8 @@ namespace DotNet.Meteor.Android {
             if (Directory.Exists(path))
                 return path;
 
-            throw new Exception("Could not find Android SDK path");
+            errorHandler?.Invoke("Could not find Android SDK path");
+            return string.Empty;
         }
 
         public static string AvdLocation() {
