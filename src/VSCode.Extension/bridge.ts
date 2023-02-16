@@ -27,14 +27,11 @@ export class CommandInterface {
             .appendQuoted(CommandInterface.toolPath)
             .append("--android-sdk-path"));
     }
-    public static xamlSchema(path: string, framework: string, rid: string, callback: (succeeded: boolean) => any)  {
+    public static xamlSchema(path: string, callback: (succeeded: boolean) => any)  {
         ProcessRunner.runAsync<boolean>(new ProcessArgumentBuilder("dotnet")
             .appendQuoted(CommandInterface.toolPath)
             .append("--xaml")
-            .appendQuoted(path)
-            .appendQuoted(CommandInterface.generatedPath)
-            .append(framework)
-            .append(rid), callback);
+            .appendQuoted(path), callback);
     }
 }
 

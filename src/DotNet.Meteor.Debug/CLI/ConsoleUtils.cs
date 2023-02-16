@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
 using DotNet.Meteor.Shared;
 using DotNet.Meteor.Debug.Session;
@@ -17,7 +16,7 @@ namespace DotNet.Meteor.Debug.CLI {
             Console.WriteLine("Copyright (C) Nikita Romanov. All rights reserved.");
             Console.WriteLine("\nCommands:");
 
-            foreach (var command in Program.CommandHandler.Keys) 
+            foreach (var command in Program.CommandHandler.Keys)
                 Console.WriteLine($" {command}");
         }
 
@@ -42,8 +41,7 @@ namespace DotNet.Meteor.Debug.CLI {
         }
 
         public static void XamlGenerate(string[] args) {
-            var rid = args.Length == 5 ? args[4] : null;
-            var schemaGenerator = new JsonSchemaGenerator(args[1], args[2], args[3], rid, logger.Error);
+            var schemaGenerator = new JsonSchemaGenerator(args[1], logger.Error);
             var result = schemaGenerator.CreateTypesAlias();
             Console.WriteLine(JsonSerializer.Serialize(result));
         }

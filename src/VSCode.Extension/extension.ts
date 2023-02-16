@@ -3,7 +3,7 @@ import { DotNetTaskProvider } from './tasks/build';
 import { Configuration } from './configuration';
 import { UIController } from './controller';
 import { CommandInterface } from './bridge';
-import * as XamlService from './xaml/xamlservice'
+import {XamlService } from './xaml/xamlservice'
 import * as res from './resources';
 import * as vscode from 'vscode';
 

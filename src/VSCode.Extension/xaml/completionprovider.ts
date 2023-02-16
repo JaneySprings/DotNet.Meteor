@@ -1,22 +1,21 @@
 /* eslint-disable no-return-assign */
 import * as vscode from 'vscode';
-import { CompletionString, XamlSchemaAlias } from './types';
+import { CompletionString } from './types';
 import { languageId } from './xamlservice';
+import { SchemaController } from './schemacontroller';
 import XamlParser from './xamlparser';
-import { CommandInterface } from '../bridge';
+
 
 export class XamlCompletionItemProvider implements vscode.CompletionItemProvider {
-    private xamlSchemaAliases: XamlSchemaAlias[] = [];
-
     async provideCompletionItems (textDocument: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, _context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList> {
-        this.loadXamlSchemaAliases();
+        SchemaController.generateXamlSchemaAliases();
 
         const documentContent = textDocument.getText();
         const offset = textDocument.offsetAt(position);
         const scope = await XamlParser.getScopeForPosition(documentContent, offset);
         let resultTexts: CompletionString[] = [];
 
-        const controls: any[] = this.xamlSchemaAliases.find(t => t.namespace.startsWith("Microsoft.Maui"))?.types ?? [];
+        const controls = SchemaController.xamlAliasByName(scope.tagPrefix);
 
         // only for xaml
         if (textDocument.languageId === languageId && textDocument.fileName.includes(".xaml")) {
@@ -91,64 +90,10 @@ export class XamlCompletionItemProvider implements vscode.CompletionItemProvider
                 ci.detail = scope.context;
                 ci.documentation = t.comment;
 
-                if (t.type === vscode.CompletionItemKind.Property ||
-                    t.type === vscode.CompletionItemKind.Event
-                ) {
+                if (t.type === vscode.CompletionItemKind.Property || t.type === vscode.CompletionItemKind.Event)
                     ci.insertText = `${t.name}=`;
-                }
-
-                if (t.type === vscode.CompletionItemKind.Text) {
-                    ci.label = ".";
-                    ci.detail = undefined;
-
-                    const bj = JSON.parse(t.name);
-
-                    // mount markdown
-                    let docStr = "";
-                    const parts = (bj.type as string).split("[");
-                    const title = parts[0];
-                    let body = "";
-
-                    if (parts.length > 1) {
-                        const parts2 = parts[1].split(",");
-
-                        for (let i = 0; i < parts2.length; i++) {
-                            if (i === parts2.length - 1) {
-                                parts2[i] = parts2[i].replace("]", "");
-                            }
-
-                            body += `- ${parts2[i]}\n`;
-                        }
-                    }
-
-                    let link = `https://docs.microsoft.com/en-us/dotnet/api/${(bj.namespace as string)}`;
-
-                    if (bj.type.indexOf("Event") !== -1) {
-                        link += "#events";
-                    }
-
-                    docStr =
-                        `[${(bj.namespace as string)}${bj.type.indexOf("Event") !== -1 ? `.${(bj.name as string)}` : ""}](${link})
-### ${title}
-${body}`;
-
-                    ci.documentation = new vscode.MarkdownString(docStr);
-                    ci.documentation.isTrusted = true;
-                }
 
                 return ci;
             });
-    }
-
-    private loadXamlSchemaAliases() {
-        if (this.xamlSchemaAliases.length > 0) 
-            return;
-        
-        const fs = require('fs');
-        fs.readdirSync(CommandInterface.generatedPath).forEach((file: string) => {
-            const dataArray = JSON.parse(fs.readFileSync(file));
-            const xamlSchemaAlias = new XamlSchemaAlias(file, dataArray);
-            this.xamlSchemaAliases.push(xamlSchemaAlias);
-        });
     }
 }

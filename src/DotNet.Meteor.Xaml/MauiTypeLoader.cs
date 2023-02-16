@@ -6,22 +6,18 @@ namespace DotNet.Meteor.Xaml;
 public class MauiTypeLoader {
     public static Type? VisualElement { get; private set; }
     public static Type? BindableProperty{ get; private set; }
-    public string? AssembliesDirecotry { get; private set; }
+    public string? AssembliesDirectory { get; private set; }
 
     private readonly Action<string>? logger;
     private readonly string projectFilePath;
-    private readonly string targetFramework;
-    private readonly string? runtimeIdentifier;
 
     private const string MAUI_CONTROLS_ASSEMBLY = "Microsoft.Maui.Controls.dll";
     private const string MAUI_VISUAL_ELEMENT = "Microsoft.Maui.Controls.VisualElement";
     private const string MAUI_BINDABLE_PROPERTY = "Microsoft.Maui.Controls.BindableProperty";
 
 
-    public MauiTypeLoader(string path, string framework, string? runtimeId=null, Action<string>? logger = null) {
+    public MauiTypeLoader(string path, Action<string>? logger = null) {
         this.projectFilePath = path;
-        this.targetFramework = framework;
-        this.runtimeIdentifier = runtimeId;
         this.logger = logger;
     }
 
@@ -30,14 +26,26 @@ public class MauiTypeLoader {
         if (VisualElement != null && BindableProperty != null)
             return true;
 
-        AssembliesDirecotry = FindLibraries();
-        if (AssembliesDirecotry == null) {
+        var projectRootDirectory = Path.GetDirectoryName(this.projectFilePath)!;
+        var frameworksDirectory = Path.Combine(projectRootDirectory, "bin", "Debug");
+
+        if (!Directory.Exists(frameworksDirectory)) {
+            this.logger?.Invoke($"Could not find {frameworksDirectory}. Maybe you need to build your project first?");
+            return false;
+        }
+
+        // Get newer directory by creation time
+        AssembliesDirectory = FindAssembliesDirectory(frameworksDirectory);
+        if (AssembliesDirectory == null) {
             this.logger?.Invoke("Could not find assemblies directory");
             return false;
         }
 
+        if (AssembliesDirectory.Contains("-android", StringComparison.OrdinalIgnoreCase))
+            ExtractMissingAndroidAssemblies(AssembliesDirectory);
+
         try {
-            var controlsAssembly = Assembly.LoadFrom(Path.Combine(AssembliesDirecotry, MAUI_CONTROLS_ASSEMBLY));
+            var controlsAssembly = Assembly.LoadFrom(Path.Combine(AssembliesDirectory, MAUI_CONTROLS_ASSEMBLY));
             VisualElement = controlsAssembly.GetType(MAUI_VISUAL_ELEMENT);
             BindableProperty = controlsAssembly.GetType(MAUI_BINDABLE_PROPERTY);
             return VisualElement != null && BindableProperty != null;
@@ -47,25 +55,28 @@ public class MauiTypeLoader {
         }
     }
 
-    private string? FindLibraries() {
-        var projectRootDirectory = Path.GetDirectoryName(this.projectFilePath)!;
-        var assembliesDirectory = Path.Combine(projectRootDirectory, "bin", "Debug", this.targetFramework);
-        if (!string.IsNullOrEmpty(this.runtimeIdentifier))
-            assembliesDirectory = Path.Combine(assembliesDirectory, this.runtimeIdentifier);
+    public string? FindAssembliesDirectory(string basePath) {
+        var assemblies = Directory.GetFiles(basePath, "*.dll", SearchOption.TopDirectoryOnly);
 
-        if (!Directory.Exists(assembliesDirectory)) {
-            this.logger?.Invoke($"Could not find {assembliesDirectory}. Maybe you need to build your project first?");
-            return null;
+        if (assemblies.Any())
+            return basePath;
+
+        var directories = Directory.GetDirectories(basePath)
+            .OrderByDescending(Directory.GetLastWriteTime);
+        foreach (var directory in directories) {
+            var result = FindAssembliesDirectory(directory);
+            if (result != null)
+                return result;
         }
 
-        if (!targetFramework.Contains("android"))
-            return assembliesDirectory;
+        return null;
+    }
 
-        // Android store all assemblies in the apk file
+    private void ExtractMissingAndroidAssemblies(string assembliesDirectory) {
         var apkFile = Directory.GetFiles(assembliesDirectory, "*-Signed.apk", SearchOption.TopDirectoryOnly).FirstOrDefault();
         if (apkFile == null) {
             this.logger?.Invoke($"Could not find *-Signed.apk file in {assembliesDirectory}");
-            return null;
+            return;
         }
 
         var tempDirectory = Path.Combine(assembliesDirectory, "_temp");
@@ -80,7 +91,5 @@ public class MauiTypeLoader {
         }
 
         Directory.Delete(tempDirectory, true);
-
-        return assembliesDirectory;
     }
 }
