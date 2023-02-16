@@ -8,7 +8,7 @@ import XamlParser from './xamlparser';
 
 export class XamlCompletionItemProvider implements vscode.CompletionItemProvider {
     async provideCompletionItems (textDocument: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, _context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList> {
-        SchemaController.generateXamlSchemaAliases();
+        await SchemaController.prepareXamlSchemaAliases();
 
         const documentContent = textDocument.getText();
         const offset = textDocument.offsetAt(position);
