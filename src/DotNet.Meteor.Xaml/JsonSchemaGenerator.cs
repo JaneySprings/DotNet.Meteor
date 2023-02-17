@@ -33,7 +33,7 @@ public class JsonSchemaGenerator {
                     continue;
 
                 var schema = reflector.ParseAssembly(Assembly.LoadFrom(assemblyPath));
-                if (schema.Count == 0)
+                if (schema.Types?.Any() == false)
                     continue;
 
                 Save(schema, Path.Combine(outputDirectory, $"{assemblyName}.json"));

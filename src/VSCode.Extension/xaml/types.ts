@@ -3,12 +3,9 @@ import * as vscode from 'vscode';
 export class CompletionString {
     constructor (
         public name: string,
+        public namespace?: string,
         public comment?: string,
-        public definitionUri?: string,
-        public definitionLine?: number,
-        public definitionColumn?: number,
-        public type: vscode.CompletionItemKind = vscode.CompletionItemKind.Property) {
-    }
+    ) {}
 }
 
 export class XamlTag {
@@ -82,14 +79,6 @@ export class XamlTagCollection extends Array<XamlTag> {
         return result;
     }
 
-    fixNs (xsdString: CompletionString, localXamlMapping: Map<string, string>): CompletionString {
-        const arr = xsdString.name.split(":");
-        if (arr.length === 2 && this.nsMap.has(arr[0]) && localXamlMapping.has(this.nsMap.get(arr[0])!)) {
-            return new CompletionString(`${(localXamlMapping.get(this.nsMap.get(arr[0])!) as string)}:${arr[1]}`, xsdString.comment, xsdString.definitionUri, xsdString.definitionLine, xsdString.definitionColumn);
-        }
-        return xsdString;
-    }
-
     fixNsReverse (XamlString: string, localXamlMapping: Map<string, string>): string[] {
         const arr = XamlString.split(":");
         const XamlStrings = new Array<string>();
@@ -113,15 +102,5 @@ export class XamlSchemaPropertiesArray extends Array<XamlSchemaProperties> {
     filterUris (uris: vscode.Uri[]): XamlSchemaProperties[] {
         return this.filter(e => uris
             .find(u => u.toString() === e.parentSchemaUri.toString()) !== undefined);
-    }
-}
-
-export class XamlSchemaAlias {
-    public namespace: string;
-    public types: any[];
-
-    public constructor (namespace: string, types: any[]) {
-        this.namespace = namespace;
-        this.types = types;
     }
 }

@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Windows.Markup;
 
 namespace DotNet.Meteor.Xaml;
 
@@ -9,8 +10,9 @@ public class Reflector {
         this.logger = logger;
     }
 
-    public List<TypeInfo> ParseAssembly(Assembly assembly) {
+    public SchemaInfo ParseAssembly(Assembly assembly) {
         var elements = new List<TypeInfo>();
+        string xmlNamespace = $"assembly={assembly.GetName().Name}";
 
         foreach (var type in assembly.GetTypes()) {
             if (!type.IsSubclassOf(MauiTypeLoader.VisualElement!) || type.IsAbstract)
@@ -21,7 +23,17 @@ public class Reflector {
                 Attributes = GetAttributes(type)
             });
         }
-        return elements;
+
+        var xmlnsAttribute = assembly.GetCustomAttributes()
+            .FirstOrDefault(it => it.GetType() == MauiTypeLoader.XmlnsDefinitionAttribute!);
+
+        if (xmlnsAttribute != null && MauiTypeLoader.XmlnsDefinitionAttribute!.GetProperty("XmlNamespace")?.GetValue(xmlnsAttribute) is string xmlns)
+            xmlNamespace = xmlns;
+
+        return new SchemaInfo {
+            Xmlns = xmlNamespace,
+            Types = elements
+        };
     }
 
     private List<AttributeInfo> GetAttributes(Type type) {

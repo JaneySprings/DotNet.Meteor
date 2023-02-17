@@ -6,6 +6,7 @@ namespace DotNet.Meteor.Xaml;
 public class MauiTypeLoader {
     public static Type? VisualElement { get; private set; }
     public static Type? BindableProperty{ get; private set; }
+    public static Type? XmlnsDefinitionAttribute { get; private set; }
     public string? AssembliesDirectory { get; private set; }
 
     private readonly Action<string>? logger;
@@ -14,6 +15,7 @@ public class MauiTypeLoader {
     private const string MAUI_CONTROLS_ASSEMBLY = "Microsoft.Maui.Controls.dll";
     private const string MAUI_VISUAL_ELEMENT = "Microsoft.Maui.Controls.VisualElement";
     private const string MAUI_BINDABLE_PROPERTY = "Microsoft.Maui.Controls.BindableProperty";
+    private const string MAUI_XMLNS_DEFINITION = "Microsoft.Maui.Controls.XmlnsDefinitionAttribute";
 
 
     public MauiTypeLoader(string path, Action<string>? logger = null) {
@@ -48,7 +50,8 @@ public class MauiTypeLoader {
             var controlsAssembly = Assembly.LoadFrom(Path.Combine(AssembliesDirectory, MAUI_CONTROLS_ASSEMBLY));
             VisualElement = controlsAssembly.GetType(MAUI_VISUAL_ELEMENT);
             BindableProperty = controlsAssembly.GetType(MAUI_BINDABLE_PROPERTY);
-            return VisualElement != null && BindableProperty != null;
+            XmlnsDefinitionAttribute = controlsAssembly.GetType(MAUI_XMLNS_DEFINITION);
+            return VisualElement != null && BindableProperty != null && XmlnsDefinitionAttribute != null;
         } catch (Exception e) {
             this.logger?.Invoke($"Could not load {MAUI_CONTROLS_ASSEMBLY}: {e.Message}");
             return false;

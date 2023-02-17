@@ -1,8 +1,7 @@
 /* eslint-disable no-return-assign */
 import * as vscode from 'vscode';
-import { CompletionString } from './types';
-import { languageId } from './xamlservice';
 import { SchemaController } from './schemacontroller';
+import { languageId } from './xamlservice';
 import XamlParser from './xamlparser';
 
 
@@ -13,87 +12,59 @@ export class XamlCompletionItemProvider implements vscode.CompletionItemProvider
         const documentContent = textDocument.getText();
         const offset = textDocument.offsetAt(position);
         const scope = await XamlParser.getScopeForPosition(documentContent, offset);
-        let resultTexts: CompletionString[] = [];
+        let completionItems: vscode.CompletionItem[] = [];
 
-        const controls = SchemaController.xamlAliasByName(scope.tagPrefix);
-
-        // only for xaml
         if (textDocument.languageId === languageId && textDocument.fileName.includes(".xaml")) {
-            if (token.isCancellationRequested) {
-                resultTexts = [];
-            } else if (scope.context === "text") {
-                resultTexts = [];
-            } else if (scope.tagName === undefined) {
-                resultTexts = [];
-            } else if (scope.context === "element" && !scope.tagName.includes(".")) {
-                resultTexts = [];
+            if (scope.tagName === undefined)
+                return [];
+            // Element
+            if (scope.context === "element" && !scope.tagName.includes(".")) {
+                const xmlns = await XamlParser.getXmlnsForPrefix(documentContent, scope.tagPrefix);
+                const types = SchemaController.xamlAliasByNamespace(xmlns);
 
-                for (var i = 0; i < controls.length; i++) {
-                    resultTexts.push(new CompletionString(controls[i].name));
+                for (var i = 0; i < types.length; i++) {
+                    const ci = new vscode.CompletionItem(types[i].name, vscode.CompletionItemKind.Class);
+                    ci.detail = types[i].namespace;
+                    completionItems.push(ci);
                 }
-
-                resultTexts.map(t => t.type = vscode.CompletionItemKind.Class);
+            // Attribute
             } else if (scope.context === "attribute") {
-                resultTexts = [];
+                const xmlns = await XamlParser.getXmlnsForPrefix(documentContent, scope.tagPrefix);
+                const controls = SchemaController.xamlAliasByNamespace(xmlns);
                 const findTag = controls.find(t => t.name === scope.tagName);
 
                 if (findTag !== undefined) {
                     for (let i = 0; i < findTag.attributes.length; i++) {
-                        const attr = new CompletionString(findTag.attributes[i].name);
+                        const ci = new vscode.CompletionItem(findTag.attributes[i].name);
+                        ci.detail = findTag.attributes[i].namespace;
+                        ci.kind = (typeof(findTag.attributes[i].type) === 'string' 
+                            && (findTag.attributes[i].type as string).includes("Event")) 
+                                ? vscode.CompletionItemKind.Event : vscode.CompletionItemKind.Property;
 
-                        if (typeof (findTag.attributes[i].type) === 'string' &&
-                            (findTag.attributes[i].type as string).includes("Event")
-                        ) {
-                            attr.type = vscode.CompletionItemKind.Event;
-                        } else {
-                            attr.type = vscode.CompletionItemKind.Property;
-                        }
-
-                        resultTexts.push(attr);
+                        completionItems.push(ci);
                     }
                 }
-
-                // value?
+            // Value
             } else if (scope.context !== undefined) {
-                resultTexts = [];
-
+                const xmlns = await XamlParser.getXmlnsForPrefix(documentContent, scope.tagPrefix);
+                const controls = SchemaController.xamlAliasByNamespace(xmlns);
                 const findTag = controls.find(t => t.name === scope.tagName);
+        
                 if (findTag !== undefined) {
-                    const findProp = findTag.attributes
-                        .find((t: { name: any; }) => t.name === scope.tagAttribute);
-
+                    const findProp = findTag.attributes.find((t: { name: any; }) => t.name === scope.tagAttribute);
+        
                     if (findProp !== undefined) {
                         if (Array.isArray(findProp.type)) {
                             for (let i = 0; i < findProp.type.length; i++) {
-                                var enom = findProp.type[i];
-                                const enomTyped = new CompletionString(enom);
-                                enomTyped.type = vscode.CompletionItemKind.Enum;
-                                resultTexts.push(enomTyped);
+                                const ci = new vscode.CompletionItem(findProp.type[i], vscode.CompletionItemKind.Enum);
+                                completionItems.push(ci);
                             }
-                        } else {
-                            const normalTyped = new CompletionString(JSON.stringify(findProp));
-                            normalTyped.type = vscode.CompletionItemKind.Text;
-                            resultTexts.push(normalTyped);
                         }
                     }
                 }
-            } else {
-                resultTexts = [];
             }
         }
 
-        resultTexts = resultTexts.filter((v, i, a) => a.findIndex(e => e.name === v.name && e.comment === v.comment) === i);
-
-        return resultTexts
-            .map(t => {
-                const ci = new vscode.CompletionItem(t.name, t.type);
-                ci.detail = scope.context;
-                ci.documentation = t.comment;
-
-                if (t.type === vscode.CompletionItemKind.Property || t.type === vscode.CompletionItemKind.Event)
-                    ci.insertText = `${t.name}=`;
-
-                return ci;
-            });
+        return completionItems;
     }
 }

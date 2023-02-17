@@ -13,8 +13,7 @@ export function activate(context: vscode.ExtensionContext) {
 		return;
 	
 	UIController.activate(context);
-	if (Configuration.getSetting(res.configIdXamlIntelliSense, res.configDefaultXamlIntelliSense))
- 		XamlService.activate(context);
+	XamlService.activate(context);
 
 	analyzeWorkspace();
 	analyzeDevices();

@@ -2,6 +2,11 @@ using System.Text.Json.Serialization;
 
 namespace DotNet.Meteor.Xaml;
 
+public class SchemaInfo {
+    [JsonPropertyName("xmlns")] public string? Xmlns { get; set; }
+    [JsonPropertyName("types")] public List<TypeInfo>? Types { get; set; }
+}
+
 public class TypeInfo {
     [JsonPropertyName("name")] public string? Name { get; set; }
     [JsonPropertyName("namespace")] public string? Namespace { get; set; }
