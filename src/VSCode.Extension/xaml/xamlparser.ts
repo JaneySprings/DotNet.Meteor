@@ -174,28 +174,18 @@ export default class XamlParser {
                     resolve(undefined);
                     return;
                 }
-                // Get first tag match
                 const firstTagMatch = xamlContent.match(/<[^>]*>/);
                 if (firstTagMatch === null) {
                     resolve(undefined);
                     return;
                 }
-                // Get xmlns attribute matches
-                const xmlnsMatch = firstTagMatch[0].match(/xmlns:[^=]*="[^"]*"/g);
+                const xmlnsMatch = firstTagMatch[0].match(`xmlns:${xmlPrefix}="([^"]*)"`);
                 if (xmlnsMatch === null) {
                     resolve(undefined);
                     return;
                 }
-                // Find xmlns attribute with prefix xmlPrefix
-                const xmlnsPrefixMatch = xmlnsMatch.find((xmlns: string) => xmlns.startsWith(`xmlns:${xmlPrefix}`));
-                if (xmlnsPrefixMatch === undefined) {
-                    resolve(undefined);
-                    return;
-                }
-                // Get xmlns attribute value
-                const xmlnsPrefixValue = xmlnsPrefixMatch.match(/"([^"]*)"/);
-                if (xmlnsPrefixValue !== null && xmlnsPrefixValue.length > 1) {
-                    resolve(xmlnsPrefixValue[1]);
+                if (xmlnsMatch !== null && xmlnsMatch.length == 2) {
+                    resolve(xmlnsMatch[1]);
                     return;
                 }
             }

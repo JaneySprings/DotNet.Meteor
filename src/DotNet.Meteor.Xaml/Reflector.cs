@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Windows.Markup;
 
 namespace DotNet.Meteor.Xaml;
 
@@ -10,81 +9,55 @@ public class Reflector {
         this.logger = logger;
     }
 
-    public SchemaInfo ParseAssembly(Assembly assembly) {
+    public SchemaInfo CreateAlias(Assembly assembly) {
         var elements = new List<TypeInfo>();
         string xmlNamespace = $"assembly={assembly.GetName().Name}";
 
-        foreach (var type in assembly.GetTypes()) {
-            if (!type.IsSubclassOf(MauiTypeLoader.VisualElement!) || type.IsAbstract)
-                continue;
-            elements.Add(new TypeInfo {
-                Name = type.Name,
-                Namespace = $"{type.Namespace}.{type.Name}",
-                Attributes = GetAttributes(type)
-            });
-        }
+        foreach (var type in assembly.GetTypes())
+            if (type.IsSubclassOf(MauiTypeLoader.VisualElement!) && !type.IsAbstract)
+                elements.Add(new TypeInfo(type.Name, type.Namespace, GetAttributes(type)));
 
-        var xmlnsAttribute = assembly.GetCustomAttributes()
-            .FirstOrDefault(it => it.GetType() == MauiTypeLoader.XmlnsDefinitionAttribute!);
-
+        var xmlnsAttribute = assembly.GetCustomAttributes().FirstOrDefault(it => it.GetType() == MauiTypeLoader.XmlnsDefinitionAttribute!);
         if (xmlnsAttribute != null && MauiTypeLoader.XmlnsDefinitionAttribute!.GetProperty("XmlNamespace")?.GetValue(xmlnsAttribute) is string xmlns)
             xmlNamespace = xmlns;
 
-        return new SchemaInfo {
-            Xmlns = xmlNamespace,
-            Types = elements
-        };
+        return new SchemaInfo(xmlNamespace, elements);
     }
 
     private List<AttributeInfo> GetAttributes(Type type) {
         var properties = new List<AttributeInfo>();
 
-        properties.AddRange(GetEventHandlers(type));
-
-        // Bindable properties
-        foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)) {
+        // Event handlers
+        foreach (var ev in type.GetEvents()) {
+            var declaringType = ev.DeclaringType;
+            var nspace = $"{declaringType?.Namespace}.{declaringType?.Name}";
+            properties.Add(new AttributeInfo(
+                ev.Name, nspace, ev.EventHandlerType?.Name
+            ));
+        }
+        // Properties
+        foreach (var property in type.GetProperties(BindingFlags.Instance|BindingFlags.Public|BindingFlags.FlattenHierarchy)) {
             try {
-                var fieldValue = field.GetValue(null);
-                if (fieldValue?.GetType() != MauiTypeLoader.BindableProperty!)
-                    continue;
+                var propertyType = property.PropertyType;
+                var declaringType = property.DeclaringType;
+                var nspace = $"{declaringType?.Namespace}.{declaringType?.Name}";
+                object fieldType = propertyType.Name;
 
-                var bindablePropertyReturnType = MauiTypeLoader.BindableProperty!.GetProperty("ReturnType")?.GetValue(fieldValue) as Type;
-                var bindablePropertyName = MauiTypeLoader.BindableProperty!.GetProperty("PropertyName")?.GetValue(fieldValue) as string;
-                if (bindablePropertyReturnType == null)
-                    continue;
+                if (propertyType.IsEnum)
+                    fieldType = Enum.GetNames(propertyType);
 
-                object fieldType = $"{bindablePropertyReturnType.Namespace}.{bindablePropertyReturnType.Name}";
-                if (bindablePropertyReturnType.IsEnum) {
-                    fieldType = Enum.GetNames(bindablePropertyReturnType);
-                } else if (bindablePropertyReturnType.IsValueType && !bindablePropertyReturnType.IsPrimitive) {
-                    fieldType = bindablePropertyReturnType
+                if (propertyType.IsValueType && !propertyType.IsPrimitive)
+                    fieldType = propertyType
                         .GetFields()
                         .ToList()
                         .ConvertAll(it => it.Name);
-                }
 
-                properties.Add(new AttributeInfo {
-                    Name = bindablePropertyName,
-                    Type = fieldType,
-                    Namespace = $"{type.Namespace}.{type.Name}.{bindablePropertyName}",
-                });
+                properties.Add(new AttributeInfo(property.Name, nspace, fieldType));
             } catch {
-                this.logger?.Invoke($"Error parsing {field.Name} in {type.Name}");
+                this.logger?.Invoke($"Error parsing {property.Name} in {type.Name}");
             }
         }
 
         return properties;
-    }
-    private static List<AttributeInfo> GetEventHandlers(Type type) {
-        var events = new List<AttributeInfo>();
-
-        foreach (var ev in type.GetEvents()) {
-            events.Add(new AttributeInfo {
-                Name = ev.Name,
-                Type = $"{ev.EventHandlerType?.Namespace}.{ev.EventHandlerType?.Name}",
-                Namespace = $"{type.Namespace}.{type.Name}",
-            });
-        }
-        return events;
     }
 }

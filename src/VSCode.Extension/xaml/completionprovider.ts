@@ -24,7 +24,7 @@ export class XamlCompletionItemProvider implements vscode.CompletionItemProvider
 
                 for (var i = 0; i < types.length; i++) {
                     const ci = new vscode.CompletionItem(types[i].name, vscode.CompletionItemKind.Class);
-                    ci.detail = types[i].namespace;
+                    ci.detail = `${types[i].namespace}.${types[i].name}`;
                     completionItems.push(ci);
                 }
             // Attribute
@@ -36,7 +36,7 @@ export class XamlCompletionItemProvider implements vscode.CompletionItemProvider
                 if (findTag !== undefined) {
                     for (let i = 0; i < findTag.attributes.length; i++) {
                         const ci = new vscode.CompletionItem(findTag.attributes[i].name);
-                        ci.detail = findTag.attributes[i].namespace;
+                        ci.detail = `${findTag.attributes[i].namespace}.${findTag.attributes[i].name}`;
                         ci.kind = (typeof(findTag.attributes[i].type) === 'string' 
                             && (findTag.attributes[i].type as string).includes("Event")) 
                                 ? vscode.CompletionItemKind.Event : vscode.CompletionItemKind.Property;

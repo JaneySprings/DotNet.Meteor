@@ -32,7 +32,7 @@ public class JsonSchemaGenerator {
                 if (assemblyName.StartsWith("System.") || assemblyName.StartsWith("Xamarin.") || assemblyName.StartsWith("Mono."))
                     continue;
 
-                var schema = reflector.ParseAssembly(Assembly.LoadFrom(assemblyPath));
+                var schema = reflector.CreateAlias(Assembly.LoadFrom(assemblyPath));
                 if (schema.Types?.Any() == false)
                     continue;
 
