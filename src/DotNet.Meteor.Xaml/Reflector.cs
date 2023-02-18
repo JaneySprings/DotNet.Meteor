@@ -54,7 +54,7 @@ public class Reflector {
 
                 properties.Add(new AttributeInfo(property.Name, nspace, fieldType));
             } catch {
-                this.logger?.Invoke($"Error parsing {property.Name} in {type.Name}");
+                this.logger?.Invoke($"Error injecting {property.Name} from {type.Name}");
             }
         }
 
