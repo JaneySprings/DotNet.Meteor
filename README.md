@@ -25,7 +25,7 @@ The extension allows you to build and debug `MAUI Blazor` apps. Also you can deb
 The extension allows you to using muliple folders in the workspace and switch the current running project.
 
 - **F# support** </br>
-This extension can build and debug projects, written in the F# language.
+This extension can build and debug projects, written in the `F#` language.
 
 ---
 
