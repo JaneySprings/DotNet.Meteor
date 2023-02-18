@@ -16,14 +16,11 @@ public class Program {
     private static void Main(string[] args) {
         LogConfig.InitializeLog();
         if (args.Length == 0) {
-            ConsoleUtils.Help(args);
+            ConsoleUtils.Help();
             return;
         }
 
-        if (CommandHandler.TryGetValue(args[0], out var command)) {
+        if (CommandHandler.TryGetValue(args[0], out var command))
             command.Invoke(args);
-        } else {
-            ConsoleUtils.Help(args);
-        }
     }
 }

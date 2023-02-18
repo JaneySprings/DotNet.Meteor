@@ -10,7 +10,7 @@ using NLog;
 namespace DotNet.Meteor.Debug.CLI {
     public static class ConsoleUtils {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
-        public static void Help(string[] args) {
+        public static void Help() {
             Version version = Assembly.GetExecutingAssembly().GetName().Version;
             Console.WriteLine($"DotNet.Meteor.Debug.CLI version {version?.Major}.{version?.Minor}.{version?.Build} for Visual Studio Code");
             Console.WriteLine("Copyright (C) Nikita Romanov. All rights reserved.");

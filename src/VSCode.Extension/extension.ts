@@ -1,9 +1,9 @@
 import { DotNetDebuggerConfiguration } from './tasks/debug';
 import { DotNetTaskProvider } from './tasks/build';
+import { XamlService } from './xaml/xamlservice';
 import { Configuration } from './configuration';
 import { UIController } from './controller';
 import { CommandInterface } from './bridge';
-import {XamlService } from './xaml/xamlservice'
 import * as res from './resources';
 import * as vscode from 'vscode';
 
