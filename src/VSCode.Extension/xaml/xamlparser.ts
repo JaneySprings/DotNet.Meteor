@@ -167,28 +167,13 @@ export default class XamlParser {
             }
         );
     }
-    public static async getXmlnsForPrefix(xamlContent: string, xmlPrefix: string | undefined): Promise<string | undefined> {
-        return await new Promise<string | undefined>(
-            (resolve) => {
-                if (xmlPrefix === undefined) {
-                    resolve(undefined);
-                    return;
-                }
-                const firstTagMatch = xamlContent.match(/<[^>]*>/);
-                if (firstTagMatch === null) {
-                    resolve(undefined);
-                    return;
-                }
-                const xmlnsMatch = firstTagMatch[0].match(`xmlns:${xmlPrefix}="([^"]*)"`);
-                if (xmlnsMatch === null) {
-                    resolve(undefined);
-                    return;
-                }
-                if (xmlnsMatch !== null && xmlnsMatch.length == 2) {
-                    resolve(xmlnsMatch[1]);
-                    return;
-                }
-            }
-        );
+    public static getXmlnsForPrefix(xamlContent: string, xmlPrefix: string | undefined): string | undefined {
+        const xmlnsMatch = xmlPrefix !== undefined 
+            ? xamlContent.match(`xmlns:${xmlPrefix}="([^"]*)"`) 
+            : xamlContent.match('xmlns="([^"]*)"');
+        if (xmlnsMatch !== null && xmlnsMatch.length == 2) 
+            return xmlnsMatch[1];
+                
+        return undefined;
     }
 }

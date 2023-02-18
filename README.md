@@ -1,24 +1,35 @@
-<img src="./img/header.jpg" width="1180px"/>
+<h1 align="center">
+    <img src="img/header.jpg" width="1180px" alt=".NET Meteor" />
+</h1>
 
-## .NET Meteor
-This VSCode extension allows you to build, debug .NET 6 / .NET 7 apps and deploy them to devices or emulators. The following table lists supported .NET MAUI target platforms and their capabilities:
+<p align="center">
+<a href="https://github.com/JaneySprings/DotNet.Meteor/wiki">Documentation</a> | <a href="https://marketplace.visualstudio.com/items?itemName=nromanov.dotnet-meteor">Marketplace</a> | <a href="https://github.com/JaneySprings/DotNet.Meteor/releases">Releases</a>
+</p>
 
-| Application Type | Build and Run (including Emulators) | Debugging |
-|-|-|-|
-| WinUI | ✅ | ❌ |
-| Android | ✅ | ✅ |
-| iOS | ✅ | ✅ |
-| MacCatalyst | ✅ | ✅ |
-| MAUI Blazor | ✅ | ✅ |
+## Overview
 
-# Included Features
+The .NET Meteor allows you to build, debug `.NET 6` / `.NET 7` apps and deploy them to devices or emulators.
 
-* Fast and responsive.
-* Do not require to install the OmniSharp VSCode Extension.
-* Shows all projects that exist in the opened workspace.
-* Works on Windows, MacOS, and Linux (tested on Ubuntu).
+## Features
 
-# Run the Application
+- **Cross-Platform** </br>
+You can use this extension in the `Windows`, `MacOS`, and `Linux` operation systems.
+
+- **XAML IntelliSense** </br>
+The extension provides the basic `XAML` syntax highlighting, shows the snippets for the MAUI and third-party controls *(it is required that your project is builded)*.
+
+- **MAUI Blazor support** </br>
+The extension allows you to build and debug `MAUI Blazor` apps. Also you can debug `.razor` files.
+
+- **Multiple folders in workspace support** </br>
+The extension allows you to using muliple folders in the workspace and switch the current running project.
+
+- **F# support** </br>
+This extension can build and debug projects, written in the F# language.
+
+---
+
+## Run the Application
 
 1. Open a project's folder.
 2. Open the Run and Debug VSCode tab and click the `create a launch.json file`.
@@ -30,11 +41,17 @@ This VSCode extension allows you to build, debug .NET 6 / .NET 7 apps and deploy
 
 ![image](./img/demo_dbg.gif)
 
-# Limitations
+---
 
-* The application's Hot Reload is not available. We are working on implementing this feature.
+## Compatibility
 
-# More Topics
+The following table lists supported .NET target platforms and their capabilities:
 
-* [Getting Started for MAUI Development with DotNet.Meteor Extension](https://github.com/JaneySprings/DotNet.Meteor/wiki/Getting-started-for-MAUI-development-with-DotNet.Meteor-extension)
-* [Customize Predefined Tasks](https://github.com/JaneySprings/DotNet.Meteor/wiki/Predefined-task-customization)
+| Application Type | Build and Run | Debugging |
+|-|:-:|:-:|
+| **WinUI** |✅ | ❌ |
+| **Android** | ✅ | ✅ |
+| **iOS** | ✅ | ✅ |
+| **MacCatalyst** | ✅ | ✅ |
+
+*You can debug WinUI apps using the C# VSCode extension with attaching the .NET Core Debugger*

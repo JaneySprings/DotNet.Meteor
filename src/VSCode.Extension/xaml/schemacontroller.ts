@@ -3,14 +3,16 @@ import { Configuration } from "../configuration";
 
 
 export class SchemaController {
-    private static microsoftMauiNamespace: string = "http://schemas.microsoft.com/dotnet/2021/maui";
     private static xamlSchemaAliases: any[] = [];
 
-    public static xamlAliasByNamespace(name: string | undefined): any[] { 
-        const query = name ?? this.microsoftMauiNamespace;
-        const schema = this.xamlSchemaAliases.find(x => query.includes(x.xmlns));
+    public static xamlAliasByNamespace(namespace: string | undefined): any[] { 
+        if (namespace === undefined)
+            return [];
+
+        const schema = this.xamlSchemaAliases.find(x => namespace.includes(x.xmlns));
         if (schema === undefined) 
             return [];
+
         return schema.types;
     }
     public static async prepareXamlSchemaAliases() {

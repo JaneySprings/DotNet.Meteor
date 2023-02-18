@@ -19,7 +19,7 @@ export class XamlCompletionItemProvider implements vscode.CompletionItemProvider
                 return [];
             // Element
             if (scope.context === "element" && !scope.tagName.includes(".")) {
-                const xmlns = await XamlParser.getXmlnsForPrefix(documentContent, scope.tagPrefix);
+                const xmlns = XamlParser.getXmlnsForPrefix(documentContent, scope.tagPrefix);
                 const types = SchemaController.xamlAliasByNamespace(xmlns);
 
                 for (var i = 0; i < types.length; i++) {
@@ -30,9 +30,9 @@ export class XamlCompletionItemProvider implements vscode.CompletionItemProvider
                 }
             // Attribute
             } else if (scope.context === "attribute") {
-                const xmlns = await XamlParser.getXmlnsForPrefix(documentContent, scope.tagPrefix);
-                const controls = SchemaController.xamlAliasByNamespace(xmlns);
-                const findTag = controls.find(t => t.name === scope.tagName);
+                const xmlns = XamlParser.getXmlnsForPrefix(documentContent, scope.tagPrefix);
+                const types = SchemaController.xamlAliasByNamespace(xmlns);
+                const findTag = types.find(t => t.name === scope.tagName);
 
                 if (findTag !== undefined) {
                     for (let i = 0; i < findTag.attributes.length; i++) {
@@ -50,9 +50,9 @@ export class XamlCompletionItemProvider implements vscode.CompletionItemProvider
                 }
             // Value
             } else if (scope.context !== undefined) {
-                const xmlns = await XamlParser.getXmlnsForPrefix(documentContent, scope.tagPrefix);
-                const controls = SchemaController.xamlAliasByNamespace(xmlns);
-                const findTag = controls.find(t => t.name === scope.tagName);
+                const xmlns = XamlParser.getXmlnsForPrefix(documentContent, scope.tagPrefix);
+                const types = SchemaController.xamlAliasByNamespace(xmlns);
+                const findTag = types.find(t => t.name === scope.tagName);
         
                 if (findTag !== undefined) {
                     const findProp = findTag.attributes.find((t: { name: any; }) => t.name === scope.tagAttribute);
