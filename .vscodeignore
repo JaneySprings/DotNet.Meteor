@@ -6,6 +6,7 @@
 # Include
 !img
 !extension
+!node_modules/sax
 !package.json
 !package.nls*.json
 !README.md

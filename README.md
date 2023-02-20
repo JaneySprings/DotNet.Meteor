@@ -1,40 +1,54 @@
-<img src="./img/header.jpg" width="1180px"/>
+<p align="center">
+<img src="img/header.jpg" width="1180px" alt=".NET Meteor" />
+<a href="https://github.com/JaneySprings/DotNet.Meteor/wiki">Documentation</a> | <a href="https://marketplace.visualstudio.com/items?itemName=nromanov.dotnet-meteor">Marketplace</a> | <a href="https://github.com/JaneySprings/DotNet.Meteor/releases">Releases</a>
+</p>
 
-## .NET Meteor
-This VSCode extension allows you to build, debug .NET 6 / .NET 7 apps and deploy them to devices or emulators. The following table lists supported .NET MAUI target platforms and their capabilities:
+---
 
-| Application Type | Build and Run (including Emulators) | Debugging |
-|-|-|-|
-| WinUI | ✅ | ❌ |
-| Android | ✅ | ✅ |
-| iOS | ✅ | ✅ |
-| MacCatalyst | ✅ | ✅ |
-| MAUI Blazor | ✅ | ✅ |
+## Overview
 
-# Included Features
+The .NET Meteor allows you to build, debug `.NET 6` / `.NET 7` apps and deploy them to devices or emulators.
 
-* Fast and responsive.
-* Do not require to install the OmniSharp VSCode Extension.
-* Shows all projects that exist in the opened workspace.
-* Works on Windows, MacOS, and Linux (tested on Ubuntu).
+- **Cross-Platform** </br>
+You can use this extension in the `Windows`, `MacOS`, and `Linux` operation systems.
 
-# Run the Application
+- **XAML IntelliSense** </br>
+The extension provides you with a basic `XAML` syntax highlighting and shows snippets for .NET MAUI / third-party controls (it's necessary to build your project first).
+
+- **MAUI Blazor Support** </br>
+The extension allows you to build and debug `MAUI Blazor` apps (including the `.razor` files).
+
+- **Multiple Folders in a Workspace** </br>
+You can use muliple folders in your workspace and change the current running project.
+
+- **F# support** </br>
+Your can build and debug projects, written in the `F#` language.
+
+---
+
+## Run the Application
 
 1. Open a project's folder.
 2. Open the Run and Debug VSCode tab and click the `create a launch.json file`.
 3. In the opened panel, select the `.NET Meteor Debugger`.
 4. In the status bar, select a project (if your opened folder contains several projects) and a configuration (the debug is the default).
 5. In the status bar, click the device name and select a target device/emulator from the opened panel.
-6. Press F5 to launch the application in the selected configuration (debug, release, etc.). 
+6. Press `F5` to debug the application or `ctrl + F5` to launch the application without debugging.
 7. Enjoy!
 
 ![image](./img/demo_dbg.gif)
 
-# Limitations
+---
 
-* The application's Hot Reload is not available. We are working on implementing this feature.
+## Compatibility
 
-# More Topics
+The following table lists supported .NET target platforms and their capabilities:
 
-* [Getting Started for MAUI Development with DotNet.Meteor Extension](https://github.com/JaneySprings/DotNet.Meteor/wiki/Getting-started-for-MAUI-development-with-DotNet.Meteor-extension)
-* [Customize Predefined Tasks](https://github.com/JaneySprings/DotNet.Meteor/wiki/Predefined-task-customization)
+| Application Type | Build and Run | Debugging |
+|-|:-:|:-:|
+| **WinUI** |✅ | ❌ |
+| **Android** | ✅ | ✅ |
+| **iOS** | ✅ | ✅ |
+| **MacCatalyst** | ✅ | ✅ |
+
+*You can debug WinUI apps using the C# VSCode extension with attaching the .NET Core Debugger*
