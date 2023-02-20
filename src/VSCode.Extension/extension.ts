@@ -1,5 +1,6 @@
 import { DotNetDebuggerConfiguration } from './tasks/debug';
 import { DotNetTaskProvider } from './tasks/build';
+import { XamlService } from './xaml/xamlservice';
 import { Configuration } from './configuration';
 import { UIController } from './controller';
 import { CommandInterface } from './bridge';
@@ -12,6 +13,8 @@ export function activate(context: vscode.ExtensionContext) {
 		return;
 	
 	UIController.activate(context);
+	XamlService.activate(context);
+
 	analyzeWorkspace();
 	analyzeDevices();
 

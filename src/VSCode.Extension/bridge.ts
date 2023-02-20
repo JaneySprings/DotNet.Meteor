@@ -6,38 +6,57 @@ import * as res from './resources';
 
 
 export class CommandInterface {
-    private static toolPath: string = path.join(
-        extensions.getExtension(`${res.extensionPublisher}.${res.extensionId}`)?.extensionPath ?? "?",
-        "extension", "bin", "DotNet.Meteor.Debug.dll");
+    private static extensionPath: string = extensions.getExtension(`${res.extensionPublisher}.${res.extensionId}`)?.extensionPath ?? '';
+    private static toolPath: string = path.join(CommandInterface.extensionPath, "extension", "bin", "DotNet.Meteor.Debug.dll");
+    public static generatedPath: string = path.join(CommandInterface.extensionPath, "extension", "generated");
+    
 
     public static devicesAsync(callback: (items: Device[]) => any) {
-        ProcessRunner.runAsync<Device[]>(new ProcessArgumentBuilder("dotnet")
+        ProcessRunner.run<Device[]>(new ProcessArgumentBuilder("dotnet")
             .appendQuoted(CommandInterface.toolPath)
             .append("--all-devices"), callback);
     }
     public static analyzeWorkspaceAsync(folders: string[], callback: (items: Project[]) => any) {
-        ProcessRunner.runAsync<Project[]>(new ProcessArgumentBuilder("dotnet")
+        ProcessRunner.run<Project[]>(new ProcessArgumentBuilder("dotnet")
             .appendQuoted(CommandInterface.toolPath)
             .append("--analyze-workspace")
             .appendRangeQuoted(folders), callback);
     }
     public static androidSdk(): string {
-        return ProcessRunner.run<string>(new ProcessArgumentBuilder("dotnet")
+        return ProcessRunner.runSync<string>(new ProcessArgumentBuilder("dotnet")
             .appendQuoted(CommandInterface.toolPath)
             .append("--android-sdk-path"));
+    }
+    public static async xamlSchema(path: string): Promise<boolean>  {
+        return await ProcessRunner.runAsync<boolean>(new ProcessArgumentBuilder("dotnet")
+            .appendQuoted(CommandInterface.toolPath)
+            .append("--xaml")
+            .appendQuoted(path));
     }
 }
 
 class ProcessRunner {
-    public static run<TModel>(builder: ProcessArgumentBuilder): TModel {
+    public static runSync<TModel>(builder: ProcessArgumentBuilder): TModel {
         const result = execSync(builder.build()).toString();
         return JSON.parse(result);
     }
-    public static runAsync<TModel>(builder: ProcessArgumentBuilder, callback: (model: TModel) => any) {
+    public static async runAsync<TModel>(builder: ProcessArgumentBuilder): Promise<TModel> {
+        return new Promise<TModel>((resolve, reject) => {
+            exec(builder.build(), (error, stdout, stderr) => {
+                if (error) {
+                    console.error(error);
+                    reject(error);
+                } else {
+                    const item: TModel = JSON.parse(stdout.toString());
+                    resolve(item);
+                }
+            })
+        });
+    }
+    public static run<TModel>(builder: ProcessArgumentBuilder, callback: (model: TModel) => any) {
         exec(builder.build(), (error, stdout, stderr) => {
             if (error) {
                 console.error(error);
-                process.exit(1);
             } else {
                 const item: TModel = JSON.parse(stdout.toString());
                 callback(item);

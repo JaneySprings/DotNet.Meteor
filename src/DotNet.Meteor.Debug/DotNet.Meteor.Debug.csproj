@@ -8,6 +8,7 @@
     <ProjectReference Include="..\Mono.Debugger\Mono.Debugger.Soft\Mono.Debugger.Soft.csproj" />
     <ProjectReference Include="..\Mono.Debugger\Mono.Debugging.Soft\Mono.Debugging.Soft.csproj" />
     <ProjectReference Include="..\DotNet.Meteor.Shared\DotNet.Meteor.Shared.csproj" />
+    <ProjectReference Include="..\DotNet.Meteor.Xaml\DotNet.Meteor.Xaml.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Mono.Cecil" Version="0.11.4" />

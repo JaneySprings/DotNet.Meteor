@@ -18,30 +18,4 @@ namespace DotNet.Meteor.Shared {
         [JsonIgnore] public bool IsMacCatalyst => Platform.Equals(Platforms.MacCatalyst);
         [JsonIgnore] public bool IsWindows => Platform.Equals(Platforms.Windows);
     }
-
-    public static class Platforms {
-        public const string Android = "android";
-        public const string iOS = "ios";
-        public const string MacCatalyst = "maccatalyst";
-        public const string Windows = "windows";
-    }
-
-    public static class Runtimes {
-        public const string MacArm64 = "maccatalyst-arm64";
-        public const string MacX64 = "maccatalyst-x64";
-        public const string iOSArm64 = "ios-arm64";
-        public const string iOSimulatorX64 = "iossimulator-x64";
-        public const string Unspecified = null;
-    }
-
-    public static class Details {
-        public const string AndroidEmulator = "Emulator";
-        public const string AndroidDevice = "Device";
-
-        public const string iOSSimulator = "iPhoneSimulator";
-        public const string iOSDevice = "iPhone";
-
-        public const string MacCatalyst = "Mac";
-        public const string Windows = "Windows";
-    }
 }

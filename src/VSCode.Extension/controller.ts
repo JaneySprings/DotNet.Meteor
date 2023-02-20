@@ -3,6 +3,7 @@ import { CommandInterface } from "./bridge";
 import * as res from './resources';
 import * as models from "./models"
 import * as vscode from 'vscode';
+import { SchemaController } from './xaml/schemacontroller';
 
 
 export class UIController {
@@ -42,6 +43,7 @@ export class UIController {
         Configuration.project = item ?? UIController.projects[0];
         UIController._projectStatusItem.text = `${models.Icon.project} ${Configuration.project?.name}`;
         UIController.projects.length === 1 ? UIController._projectStatusItem.hide() : UIController._projectStatusItem.show();
+        SchemaController.invalidate();
     }
     public static performSelectTarget(item: models.Target | undefined = undefined) {
         Configuration.target = item ?? models.Target.Debug;
