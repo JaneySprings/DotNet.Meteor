@@ -13,16 +13,16 @@ The .NET Meteor allows you to build, debug `.NET 6` / `.NET 7` apps and deploy t
 You can use this extension in the `Windows`, `MacOS`, and `Linux` operation systems.
 
 - **XAML IntelliSense** </br>
-The extension provides basic `XAML` syntax highlighting, shows snippets for .NET MAUI and third-party controls (it's necessary to build your project first).
+The extension provides you with a basic `XAML` syntax highlighting and shows snippets for .NET MAUI / third-party controls (it's necessary to build your project first).
 
-- **MAUI Blazor support** </br>
-The extension allows you to build and debug `MAUI Blazor` apps. Also you can debug `.razor` files.
+- **MAUI Blazor Support** </br>
+The extension allows you to build and debug `MAUI Blazor` apps (including the `.razor` files).
 
-- **Multiple folders in workspace support** </br>
-The extension allows you to using muliple folders in the workspace and switch the current running project.
+- **Multiple Folders in a Workspace** </br>
+You can use muliple folders in your workspace and change the current running project.
 
 - **F# support** </br>
-This extension can build and debug projects, written in the `F#` language.
+Your can build and debug projects, written in the `F#` language.
 
 ---
 
