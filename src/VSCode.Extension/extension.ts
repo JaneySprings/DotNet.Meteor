@@ -1,4 +1,5 @@
 import { DotNetDebuggerConfiguration } from './tasks/debug';
+import { SchemaController } from './xaml/schemacontroller';
 import { DotNetTaskProvider } from './tasks/build';
 import { XamlService } from './xaml/xamlservice';
 import { Configuration } from './configuration';
@@ -27,6 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.tasks.registerTaskProvider(res.taskDefinitionId, new DotNetTaskProvider()));
 	/* Events */
 	context.subscriptions.push(vscode.debug.onDidStartDebugSession(() => vscode.commands.executeCommand(res.commandIdFocusOnDebug)));
+	context.subscriptions.push(vscode.tasks.onDidEndTask(ev => taskEnded(ev.execution.task.definition.type)));
 	context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(ev => workspaceChanged(ev.fileName)));
 	context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(analyzeWorkspace));
 }
@@ -35,6 +37,11 @@ export function activate(context: vscode.ExtensionContext) {
 function workspaceChanged(filter: string) {
 	if (filter.endsWith('.csproj') || filter.endsWith('.props'))
 		analyzeWorkspace();
+}
+
+function taskEnded(filter: string) {
+	if (filter.includes(res.taskDefinitionId))
+		SchemaController.invalidate();
 }
 
 function analyzeWorkspace() {
