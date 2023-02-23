@@ -7,7 +7,7 @@ using DotNet.Meteor.Processes;
 using DotNet.Meteor.Android;
 using DotNet.Meteor.Apple;
 
-namespace DotNet.Meteor.Debug.Session;
+namespace DotNet.Meteor.Debug;
 
 public partial class MonoDebugSession {
     protected void LaunchApplication(LaunchData configuration, int port, List<Process> processes) {

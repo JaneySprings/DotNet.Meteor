@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 using DotNet.Meteor.Processes;
 using DotNet.Meteor.Debug.Events;
 using DotNet.Meteor.Debug.Protocol;
+using DotNet.Meteor.Debug.Utilities;
 using System.Text.Json;
 using NLog;
 
-namespace DotNet.Meteor.Debug.Session;
+namespace DotNet.Meteor.Debug;
 
 public abstract class Session: IProcessLogger {
     protected readonly Logger sessionLogger = LogManager.GetCurrentClassLogger();

@@ -6,12 +6,14 @@ using System.Linq;
 using System.Net;
 using Mono.Debugging.Client;
 using Mono.Debugging.Soft;
+using DotNet.Meteor.Debug.Utilities;
 using DotNet.Meteor.Debug.Events;
 using DotNet.Meteor.Debug.Protocol;
 using DotNet.Meteor.Debug.Pipeline;
 using Process = System.Diagnostics.Process;
+using System.Threading.Tasks;
 
-namespace DotNet.Meteor.Debug.Session;
+namespace DotNet.Meteor.Debug;
 
 public partial class MonoDebugSession : DebugSession {
     private const int MAX_CONNECTION_ATTEMPTS = 20;
@@ -28,6 +30,7 @@ public partial class MonoDebugSession : DebugSession {
     private readonly List<Process> processes = new List<Process>();
     private readonly AutoResetEvent resumeEvent = new AutoResetEvent(false);
     private readonly List<Catchpoint> catchpoints = new List<Catchpoint>();
+    private readonly SourceDownloader sourceDownloader = new SourceDownloader();
     private readonly Handles<StackFrame> frameHandles = new Handles<StackFrame>();
     private readonly Handles<ObjectValue[]> variableHandles = new Handles<ObjectValue[]>();
     private readonly Dictionary<int, ModelThread> seenThreads = new Dictionary<int, ModelThread>();
@@ -143,14 +146,9 @@ public partial class MonoDebugSession : DebugSession {
         SetExceptionOptions(args.ExceptionOptions);
 
         var configuration = new LaunchData(args.Project, args.Device, args.Target);
-        var port = args.DebuggingPort == 0 ? Utilities.FindFreePort() : args.DebuggingPort;
-        var host = args.Address;
+        var port = args.DebuggingPort == 0 ? Extensions.FindFreePort() : args.DebuggingPort;
+        this.sourceDownloader.Configure(configuration.Project.Path);
 
-        IPAddress address = string.IsNullOrWhiteSpace(host) ? IPAddress.Loopback : Utilities.ResolveIPAddress(host);
-        if (address == null) {
-            SendErrorResponse(response, 3013, $"Invalid address '{address}'");
-            return;
-        }
         if (port < 1) {
             SendErrorResponse(response, 3013, $"Invalid port '{port}'");
             return;
@@ -158,9 +156,9 @@ public partial class MonoDebugSession : DebugSession {
 
         SendResponse(response);
         LaunchApplication(configuration, port, this.processes);
-        Connect(configuration, address, port);
+        Connect(configuration, port);
     }
-    private void Connect(LaunchData options, IPAddress address, int port) {
+    private void Connect(LaunchData options, int port) {
         lock (this.locker) {
             this.debuggerKilled = false;
             SoftDebuggerStartArgs arguments = null;
@@ -169,7 +167,7 @@ public partial class MonoDebugSession : DebugSession {
                 return;
 
             if (options.Device.IsAndroid) {
-                arguments = new SoftDebuggerConnectArgs(options.Project.Name, address, port) {
+                arguments = new SoftDebuggerConnectArgs(options.Project.Name, IPAddress.Loopback, port) {
                     MaxConnectionAttempts = MAX_CONNECTION_ATTEMPTS,
                     TimeBetweenConnectionAttempts = CONNECTION_ATTEMPT_INTERVAL
                 };
@@ -347,21 +345,31 @@ public partial class MonoDebugSession : DebugSession {
             totalFrames = bt.FrameCount;
 
             for (var i = 0; i < Math.Min(totalFrames, maxLevels); i++) {
-                var frame = bt.GetFrame(i);
-                string path = frame.SourceLocation.FileName;
-                var hint = "subtle";
-
                 ModelSource source = null;
-                if (!string.IsNullOrEmpty(path)) {
-                    string sourceName = Path.GetFileName(path);
-                    if (!string.IsNullOrEmpty(sourceName)) {
-                        if (File.Exists(path)) {
-                            source = new ModelSource(sourceName, path.ConvertDebuggerPathToClient(this.clientPathsAreURI), 0, "normal");
-                            hint = "normal";
-                        } else {
-                            source = new ModelSource(sourceName, null, 1000, "deemphasize");
-                        }
+                var frame = bt.GetFrame(i);
+                var sourceLocation = frame.SourceLocation;
+                string sourceName = string.Empty;
+                string hint = string.Empty;
+
+                if (!string.IsNullOrEmpty(sourceLocation.FileName)) {
+                    sourceName = Path.GetFileName(sourceLocation.FileName);
+                    if (File.Exists(sourceLocation.FileName)) {
+                        var path =  sourceLocation.FileName.ConvertDebuggerPathToClient(this.clientPathsAreURI);
+                        source = new ModelSource(sourceName, path, 0, "normal");
+                        hint = "normal";
                     }
+                }
+                if (sourceLocation.SourceLink != null && source == null) {
+                    sourceName = Path.GetFileName(sourceLocation.SourceLink.RelativeFilePath);
+                    string path = this.sourceDownloader.DownloadSourceFile(sourceLocation.SourceLink.Uri, sourceLocation.SourceLink.RelativeFilePath);
+                    if (!string.IsNullOrEmpty(path)) {
+                        source = new ModelSource(sourceName, path.ConvertDebuggerPathToClient(this.clientPathsAreURI), 0, "normal");
+                        hint = "normal";
+                    }
+                }
+                if (source == null) {
+                    source = new ModelSource(sourceName, null, 1000, "deemphasize");
+                    hint = "subtle";
                 }
 
                 var frameHandle = this.frameHandles.Create(frame);

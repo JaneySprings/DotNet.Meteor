@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 
-namespace DotNet.Meteor.Debug.Session;
+namespace DotNet.Meteor.Debug.Utilities;
 
 class ByteBuffer {
     private byte[] buffer = new byte[0];

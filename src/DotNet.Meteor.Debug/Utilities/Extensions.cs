@@ -1,8 +1,10 @@
 using System;
 using System.Text;
 using System.Text.Json;
+using System.Net;
+using System.Net.Sockets;
 
-namespace DotNet.Meteor.Debug;
+namespace DotNet.Meteor.Debug.Utilities;
 
 public static class Extensions {
     private readonly static string[] MonoExtensions = new String[] {
@@ -58,5 +60,16 @@ public static class Extensions {
                 return true;
         }
         return false;
+    }
+
+    public static int FindFreePort() {
+        TcpListener listener = null;
+        try {
+            listener = new TcpListener(IPAddress.Loopback, 0);
+            listener.Start();
+            return ((IPEndPoint)listener.LocalEndpoint).Port;
+        } finally {
+            listener.Stop();
+        }
     }
 }

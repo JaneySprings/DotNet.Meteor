@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Mono.Debugging.Client;
 using DotNet.Meteor.Debug.Protocol;
 
-namespace DotNet.Meteor.Debug.Session;
+namespace DotNet.Meteor.Debug;
 
 public abstract class DebugSession : Session {
     protected bool clientLinesStartAt1 = true;
@@ -55,7 +55,7 @@ public abstract class DebugSession : Session {
         };
 
         this.sessionOptions = new DebuggerSessionOptions {
-            EvaluationOptions = evaluationOptions,
+            EvaluationOptions = evaluationOptions
         };
     }
 
