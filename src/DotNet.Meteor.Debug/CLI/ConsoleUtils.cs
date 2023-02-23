@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text.Json;
 using DotNet.Meteor.Shared;
-using DotNet.Meteor.Debug.Session;
 using DotNet.Meteor.Xaml;
 using System.Reflection;
 using NLog;

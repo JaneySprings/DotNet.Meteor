@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using DotNet.Meteor.Shared;
 
-namespace DotNet.Meteor.Debug.Session;
+namespace DotNet.Meteor.Debug;
 
 public class LaunchData {
     public string Framework { get; }

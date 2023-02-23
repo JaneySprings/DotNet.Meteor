@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace DotNet.Meteor.Debug.Session;
+namespace DotNet.Meteor.Debug.Utilities;
 
 public class Handles<T> {
     private const int START_HANDLE = 1000;
