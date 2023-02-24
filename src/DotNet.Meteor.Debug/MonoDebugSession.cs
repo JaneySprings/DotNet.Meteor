@@ -11,7 +11,6 @@ using DotNet.Meteor.Debug.Events;
 using DotNet.Meteor.Debug.Protocol;
 using DotNet.Meteor.Debug.Pipeline;
 using Process = System.Diagnostics.Process;
-using System.Threading.Tasks;
 
 namespace DotNet.Meteor.Debug;
 
@@ -126,15 +125,10 @@ public partial class MonoDebugSession : DebugSession {
         }
 
         SendResponse(response, new BodyCapabilities() {
-            // This debug adapter does not need the configurationDoneRequest.
             SupportsConfigurationDoneRequest = false,
-            // This debug adapter does not support function breakpoints.
             SupportsFunctionBreakpoints = false,
-            // This debug adapter doesn't support conditional breakpoints.
             SupportsConditionalBreakpoints = false,
-            // This debug adapter does not support a side effect free evaluate request for data hovers.
-            SupportsEvaluateForHovers = false,
-            // This debug adapter does not support exception breakpoint filters
+            SupportsEvaluateForHovers = true,
             ExceptionBreakpointFilters = new List<object>()
         });
 
@@ -321,11 +315,6 @@ public partial class MonoDebugSession : DebugSession {
     }
 
     public override void StackTrace(Response response, Argument args) {
-        // HOT RELOAD: Seems that sometimes there's a hang here, look out for this in the future
-        // TODO: Getting a stack trace can hang; we need to fix it but for now just return an empty one
-        //SendResponse(response, new StackTraceResponseBody(new List<StackFrame>(), 0));
-        //return;
-
         int maxLevels = args.Levels;
         int threadReference = args.ThreadId;
 
