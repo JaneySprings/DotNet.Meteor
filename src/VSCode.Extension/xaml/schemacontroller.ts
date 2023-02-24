@@ -22,19 +22,20 @@ export class SchemaController {
         const projectPath = Configuration.project?.path;
         if (projectPath === undefined)
             return;
-        
+
         const result = await CommandInterface.xamlSchema(projectPath);
         if (result === false)
             return;
         
         const fs = require('fs');
         const path = require('path');
-        if (fs.existsSync(CommandInterface.generatedPath) === false)
+        const generatedPath = path.join(path.dirname(projectPath), '.meteor', 'generated');
+        if (fs.existsSync(generatedPath) === false)
             return;
 
-        const files = await fs.promises.readdir(CommandInterface.generatedPath);
+        const files = await fs.promises.readdir(generatedPath);
         for (const file of files) {
-            const filePath = path.join(CommandInterface.generatedPath, file);
+            const filePath = path.join(generatedPath, file);
             const dataArray = JSON.parse(fs.readFileSync(filePath));
             this.xamlSchemaAliases.push(dataArray);
         }

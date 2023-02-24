@@ -14,8 +14,8 @@ public class JsonSchemaGenerator {
 
 
     public bool CreateTypesAlias() {
-        var outputDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "generated");
-        var typeLoader = new MauiTypeLoader(projectPath, this.logger);
+        var outputDirectory = Path.Combine(Path.GetDirectoryName(this.projectPath)!, ".meteor", "generated");
+        var typeLoader = new MauiTypeLoader(this.projectPath, this.logger);
         var reflector = new Reflector(this.logger);
 
         if (!typeLoader.LoadComparedTypes())

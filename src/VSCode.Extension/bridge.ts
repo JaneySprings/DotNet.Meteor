@@ -7,9 +7,7 @@ import * as res from './resources';
 
 export class CommandInterface {
     private static extensionPath: string = extensions.getExtension(`${res.extensionPublisher}.${res.extensionId}`)?.extensionPath ?? '';
-    private static toolPath: string = path.join(CommandInterface.extensionPath, "extension", "bin", "DotNet.Meteor.Debug.dll");
-    public static generatedPath: string = path.join(CommandInterface.extensionPath, "extension", "generated");
-    
+    private static toolPath: string = path.join(CommandInterface.extensionPath, "extension", "bin", "DotNet.Meteor.Debug.dll"); 
 
     public static devicesAsync(callback: (items: Device[]) => any) {
         ProcessRunner.run<Device[]>(new ProcessArgumentBuilder("dotnet")
