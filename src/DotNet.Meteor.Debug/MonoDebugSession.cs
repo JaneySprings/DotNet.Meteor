@@ -315,14 +315,11 @@ public partial class MonoDebugSession : DebugSession {
     }
 
     public override void StackTrace(Response response, Argument args) {
-        int maxLevels = args.Levels;
-        int threadReference = args.ThreadId;
-
         WaitForSuspend();
 
         ThreadInfo thread = DebuggerActiveThread();
-        if (thread.Id != threadReference) {
-            thread = FindThread(threadReference);
+        if (thread.Id != args.ThreadId) {
+            thread = FindThread(args.ThreadId);
             thread?.SetActive();
         }
 
@@ -333,7 +330,7 @@ public partial class MonoDebugSession : DebugSession {
         if (bt?.FrameCount >= 0) {
             totalFrames = bt.FrameCount;
 
-            for (var i = 0; i < Math.Min(totalFrames, maxLevels); i++) {
+            for (var i = args.StartFrame; i < args.Levels; i++) {
                 ModelSource source = null;
                 var frame = bt.GetFrame(i);
                 var sourceLocation = frame.SourceLocation;
