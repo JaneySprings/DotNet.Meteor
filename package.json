@@ -8,111 +8,37 @@
   "license": "MIT",
   "icon": "img/logo.png",
   "preview": false,
-  "bugs": { "url": "https://github.com/JaneySprings/DotNet.Meteor/issues" },
+  "bugs": {
+    "url": "https://github.com/JaneySprings/DotNet.Meteor/issues"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/JaneySprings/DotNet.Meteor.git"
   },
-  "categories": [ "Debuggers" ],
+  "categories": [
+    "Debuggers"
+  ],
   "keywords": [
     "C#",
     ".NET",
     "MAUI",
     "dotnet"
   ],
-  "engines": { "vscode": "^1.73.0" },
+  "engines": {
+    "vscode": "^1.73.0"
+  },
   "activationEvents": [
     "onLanguage:csharp",
     "workspaceContains:**/*.{csproj,sln,slnf,csx}"
   ],
   "main": "./extension/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "%command.id.selectActiveProject%",
-        "title": "%command.title.selectActiveProject%"
-      },
-      {
-        "command": "%command.id.selectActiveConfiguration%",
-        "title": "%command.title.selectActiveConfiguration%"
-      },
-      {
-        "command": "%command.id.selectActiveDevice%",
-        "title": "%command.title.selectActiveDevice%"
-      }
-    ],
-    "taskDefinitions": [
-      {
-        "type": "%task.meteor.id%",
-        "required": [],
-        "properties": {
-          "target": {
-            "type": "string",
-            "default": "Build",
-            "description": "%task.meteor.description.target%"
-          },
-          "args": {
-            "type": "array",
-            "description": "%task.meteor.description.args%",
-            "default": [],
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      }
-    ],
-    "problemMatchers": [{
-      "name": "%task.meteor.problemMatcher%",
-      "fileLocation": ["absolute"],
-      "pattern": {
-        "regexp": "^(.*)\\((\\d+),(\\d+)\\):\\s(error|warning)\\s(.*)\\s\\[.*\\]$",
-        "file": 1,
-        "line": 2,
-        "column": 3,
-        "severity": 4,
-        "message": 5
-      }
-    }],
-    "breakpoints": [
-      { "language": "csharp" },
-      { "language": "fsharp" },
-      { "language": "razor" },
-      { "language": "aspnetcorerazor" }
-    ],
-    "debuggers": [
-      {
-        "type": "%debugger.meteor.id%",
-        "label": "%debugger.meteor.title%",
-        "languages": [ "csharp", "fsharp", "razor", "aspnetcorerazor" ],
-        "program": "./extension/bin/DotNet.Meteor.Debug.dll",
-        "args": [ "--start-session"],
-        "runtime": "dotnet",
-        "initialConfigurations": [
-          {
-            "name": "%debugger.meteor.title%",
-            "type": "%debugger.meteor.id%",
-            "request": "launch",
-            "preLaunchTask": "%task.meteor.title%"
-          }
-        ]
-      }
-    ],
-    "configuration": {
-      "title": "%configuration.title%",
-      "properties": {
-        "dotnetMeteor.monoSdbDebuggerPortAndroid": {
-          "type": "integer",
-          "default": 10000,
-          "description": "%configuration.description.monoSdbDebuggerPortAndroid%"
-        },
-        "dotnetMeteor.monoSdbDebuggerPortApple": {
-          "type": "integer",
-          "default": 55551,
-          "description": "%configuration.description.monoSdbDebuggerPortApple%"
-        }
-      }
-    }
+    "include": "manifest/commands.json",
+    "include": "manifest/tasks.json",
+    "include": "manifest/matchers.json",
+    "include": "manifest/breakpoints.json",
+    "include": "manifest/debuggers.json",
+    "include": "manifest/configuration.json"
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
@@ -120,16 +46,7 @@
     "watch": "tsc -watch -p ./src/VSCode.Extension/tsconfig.json"
   },
   "devDependencies": {
-    "@types/glob": "^8.0.0",
-    "@types/mocha": "^10.0.0",
-    "@types/node": "16.x",
     "@types/vscode": "^1.73.0",
-    "@typescript-eslint/eslint-plugin": "^5.42.0",
-    "@typescript-eslint/parser": "^5.42.0",
-    "@vscode/test-electron": "^2.2.0",
-    "eslint": "^8.26.0",
-    "glob": "^8.0.3",
-    "mocha": "^10.1.0",
     "typescript": "^4.8.4"
   },
   "dependencies": {

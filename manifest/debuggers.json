@@ -1,0 +1,27 @@
+  {
+    "debuggers": [
+      {
+        "type": "%debugger.meteor.id%",
+        "label": "%debugger.meteor.title%",
+        "languages": [
+          "csharp",
+          "fsharp",
+          "razor",
+          "aspnetcorerazor"
+        ],
+        "program": "./extension/bin/DotNet.Meteor.Debug.dll",
+        "args": [
+          "--start-session"
+        ],
+        "runtime": "dotnet",
+        "initialConfigurations": [
+          {
+            "name": "%debugger.meteor.title%",
+            "type": "%debugger.meteor.id%",
+            "request": "launch",
+            "preLaunchTask": "%task.meteor.title%"
+          }
+        ]
+      }
+    ]
+  }

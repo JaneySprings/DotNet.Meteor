@@ -1,0 +1,17 @@
+  {
+    "configuration": {
+      "title": "%configuration.title%",
+      "properties": {
+        "dotnetMeteor.monoSdbDebuggerPortAndroid": {
+          "type": "integer",
+          "default": 10000,
+          "description": "%configuration.description.monoSdbDebuggerPortAndroid%"
+        },
+        "dotnetMeteor.monoSdbDebuggerPortApple": {
+          "type": "integer",
+          "default": 55551,
+          "description": "%configuration.description.monoSdbDebuggerPortApple%"
+        }
+      }
+    }
+  }
