@@ -1,0 +1,16 @@
+  {
+    "commands": [
+      {
+        "command": "%command.id.selectActiveProject%",
+        "title": "%command.title.selectActiveProject%"
+      },
+      {
+        "command": "%command.id.selectActiveConfiguration%",
+        "title": "%command.title.selectActiveConfiguration%"
+      },
+      {
+        "command": "%command.id.selectActiveDevice%",
+        "title": "%command.title.selectActiveDevice%"
+      }
+    ]
+  }

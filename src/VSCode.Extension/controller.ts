@@ -1,9 +1,9 @@
+import { SchemaController } from './xaml/schemacontroller';
 import { Configuration } from './configuration';
 import { CommandInterface } from "./bridge";
 import * as res from './resources';
 import * as models from "./models"
 import * as vscode from 'vscode';
-import { SchemaController } from './xaml/schemacontroller';
 
 
 export class UIController {
@@ -28,16 +28,30 @@ export class UIController {
         context.subscriptions.push(UIController._targetStatusItem);
         context.subscriptions.push(UIController._deviceStatusItem);
     }
-    public static show() {
+    public static async update() {
+        const folders = vscode.workspace.workspaceFolders!.map(it => it.uri.fsPath);
+        UIController.projects = await CommandInterface.getProjects(folders);
+        UIController.devices = await CommandInterface.getDevices();
+
+        if (UIController.projects.length === 0 || UIController.devices.length === 0) {
+            UIController._projectStatusItem.hide();
+            UIController._targetStatusItem.hide();
+            UIController._deviceStatusItem.hide();
+            return;
+        }
+
+        Configuration.project = UIController.projects.find(it => it.name === Configuration.project?.name);
+        Configuration.device = UIController.devices.find(it => it.name === Configuration.device?.name);
+
+        UIController.performSelectProject(Configuration.project);
+        UIController.performSelectTarget(Configuration.target);
+        UIController.performSelectDevice(Configuration.device);
+
         UIController._projectStatusItem.show();
         UIController._targetStatusItem.show();
         UIController._deviceStatusItem.show();
     }
-    public static hide() {
-        UIController._projectStatusItem.hide();
-        UIController._targetStatusItem.hide();
-        UIController._deviceStatusItem.hide();
-    }
+
 
     public static performSelectProject(item: models.Project | undefined = undefined) {
         Configuration.project = item ?? UIController.projects[0];
@@ -74,8 +88,7 @@ export class UIController {
     }
     public static async showQuickPickDevice() {
         const picker = vscode.window.createQuickPick();
-        picker.placeholder = "Fetching devices...";
-        picker.canSelectMany = false;
+        picker.placeholder = res.messageDeviceLoading;
         picker.busy = true;
         picker.show();
         picker.onDidAccept(() => {
@@ -86,11 +99,9 @@ export class UIController {
             picker.hide();
         });
 
-        CommandInterface.devicesAsync(items => {
-            UIController.devices = items;
-            picker.items = items.map(device => new models.DeviceItem(device));
-            picker.placeholder = res.commandTitleSelectActiveDevice;
-            picker.busy = false;
-        });
+        UIController.devices = await CommandInterface.getDevices();
+        picker.items = UIController.devices.map(device => new models.DeviceItem(device));
+        picker.placeholder = res.commandTitleSelectActiveDevice;
+        picker.busy = false;
     }
 }

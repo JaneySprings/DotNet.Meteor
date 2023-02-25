@@ -1,0 +1,23 @@
+  {
+    "taskDefinitions": [
+      {
+        "type": "%task.meteor.id%",
+        "required": [],
+        "properties": {
+          "target": {
+            "type": "string",
+            "default": "Build",
+            "description": "%task.meteor.description.target%"
+          },
+          "args": {
+            "type": "array",
+            "description": "%task.meteor.description.args%",
+            "default": [],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    ]
+  }

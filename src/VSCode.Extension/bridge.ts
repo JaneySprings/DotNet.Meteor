@@ -9,21 +9,21 @@ export class CommandInterface {
     private static extensionPath: string = extensions.getExtension(`${res.extensionPublisher}.${res.extensionId}`)?.extensionPath ?? '';
     private static toolPath: string = path.join(CommandInterface.extensionPath, "extension", "bin", "DotNet.Meteor.Debug.dll"); 
 
-    public static devicesAsync(callback: (items: Device[]) => any) {
-        ProcessRunner.run<Device[]>(new ProcessArgumentBuilder("dotnet")
-            .appendQuoted(CommandInterface.toolPath)
-            .append("--all-devices"), callback);
-    }
-    public static analyzeWorkspaceAsync(folders: string[], callback: (items: Project[]) => any) {
-        ProcessRunner.run<Project[]>(new ProcessArgumentBuilder("dotnet")
-            .appendQuoted(CommandInterface.toolPath)
-            .append("--analyze-workspace")
-            .appendRangeQuoted(folders), callback);
-    }
     public static androidSdk(): string {
         return ProcessRunner.runSync<string>(new ProcessArgumentBuilder("dotnet")
             .appendQuoted(CommandInterface.toolPath)
             .append("--android-sdk-path"));
+    }
+    public static async getDevices(): Promise<Device[]> {
+        return await ProcessRunner.runAsync<Device[]>(new ProcessArgumentBuilder("dotnet")
+            .appendQuoted(CommandInterface.toolPath)
+            .append("--all-devices"));
+    }
+    public static async getProjects(folders: string[]): Promise<Project[]> {
+        return await ProcessRunner.runAsync<Project[]>(new ProcessArgumentBuilder("dotnet")
+            .appendQuoted(CommandInterface.toolPath)
+            .append("--analyze-workspace")
+            .appendRangeQuoted(folders));
     }
     public static async xamlSchema(path: string): Promise<boolean>  {
         return await ProcessRunner.runAsync<boolean>(new ProcessArgumentBuilder("dotnet")
@@ -50,16 +50,6 @@ class ProcessRunner {
                 }
             })
         });
-    }
-    public static run<TModel>(builder: ProcessArgumentBuilder, callback: (model: TModel) => any) {
-        exec(builder.build(), (error, stdout, stderr) => {
-            if (error) {
-                console.error(error);
-            } else {
-                const item: TModel = JSON.parse(stdout.toString());
-                callback(item);
-            }
-        })
     }
 }
 

@@ -26,6 +26,7 @@ export const messageDeviceNotExists = "Selected device does not exist anymore. M
 export const messageNoFrameworkFound = "Supported framework not found. Make sure you have selected a correct device.";
 export const messageNoProjectFound = "Selected project not found. Make sure you have selected a project in the status bar.";
 export const messageNoDeviceFound = "Incorrect selected device. Make sure you have selected a device.";
+export const messageDeviceLoading = "Fetching devices...";
 
 export const configId = "dotnetMeteor";
 

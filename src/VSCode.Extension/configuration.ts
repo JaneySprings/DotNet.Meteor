@@ -7,7 +7,7 @@ import * as res from './resources';
 export class Configuration {
     public static project: Project | undefined;
     public static device: Device | undefined;
-    public static target: Target;
+    public static target: Target | undefined;
 
     public static getSetting<TResult>(id: string, fallback: TResult): TResult {
         return workspace.getConfiguration(res.configId).get(id) ?? fallback;
