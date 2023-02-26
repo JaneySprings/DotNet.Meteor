@@ -112,7 +112,11 @@ public abstract class Session: IProcessLogger {
     }
 
     public void OnOutputDataReceived(string stdout) {
-        SendEvent(Event.OutputEvent, new BodyOutput("stdout", stdout.Trim() + Environment.NewLine));
+        OnOutputDataReceived("stdout", stdout);
+    }
+
+    public void OnOutputDataReceived(string category, string stdout) {
+        SendEvent(Event.OutputEvent, new BodyOutput(category, stdout.Trim() + Environment.NewLine));
     }
 
     public void OnErrorDataReceived(string stderr) {

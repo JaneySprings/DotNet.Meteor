@@ -49,6 +49,9 @@ public partial class MonoDebugSession : DebugSession {
             if (isStdErr) this.sessionLogger.Error($"Mono: {text.Trim()}");
             else this.sessionLogger.Debug($"Mono: {text.Trim()}");
         };
+        this.session.DebugWriter = (int level, string category, string message) => {
+                OnOutputDataReceived("console", message);                
+        };
         this.session.TargetStopped += (sender, e) => {
             Stopped();
             SendEvent(Event.StoppedEvent, new BodyStopped((int)e.Thread.Id, "step"));
