@@ -26,7 +26,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.debug.onDidStartDebugSession(() => vscode.commands.executeCommand(res.commandIdFocusOnDebug)));
 	context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(UIController.update));
 	context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(ev => {
-		if (ev.fileName.endsWith('.csproj') || ev.fileName.endsWith('.props'))
+		if (ev.fileName.endsWith('proj') || ev.fileName.endsWith('.props'))
 			UIController.update();
 	}));
 	context.subscriptions.push(vscode.tasks.onDidEndTask(ev => {
