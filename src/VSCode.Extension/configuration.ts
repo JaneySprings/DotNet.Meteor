@@ -27,6 +27,14 @@ export class Configuration {
         return -1;
     }
 
+    public static getActiveDevice(): string | undefined {
+        const activeDevice = Configuration.getSetting(
+            res.configIdActiveDevice, 
+            res.configDefaultActiveDevice
+        )
+        return activeDevice ?? undefined;
+    }
+
     public static isAndroid() { return Configuration.device?.platform?.includes('android') ?? false; }
     public static isApple() { return Configuration.device?.platform?.includes('ios') ?? false; }
     public static isMacCatalyst() { return Configuration.device?.platform?.includes('maccatalyst') ?? false; }

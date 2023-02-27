@@ -35,3 +35,6 @@ export const configDefaultMonoSdbDebuggerPortAndroid = 10000;
 
 export const configIdMonoSdbDebuggerPortApple = "monoSdbDebuggerPortApple";
 export const configDefaultMonoSdbDebuggerPortApple = 55551;
+
+export const configIdActiveDevice = "activeDevice";
+export const configDefaultActiveDevice = null;

@@ -11,6 +11,11 @@
           "type": "integer",
           "default": 55551,
           "description": "%configuration.description.monoSdbDebuggerPortApple%"
+        },
+        "dotnetMeteor.activeDevice": {
+          "type": "string",
+          "default": null,
+          "description": "%configuration.description.activeDevice%"
         }
       }
     }

@@ -41,7 +41,8 @@ export class UIController {
         }
 
         Configuration.project = UIController.projects.find(it => it.name === Configuration.project?.name);
-        Configuration.device = UIController.devices.find(it => it.name === Configuration.device?.name);
+        const defaultDevice = Configuration.device?.name ?? Configuration.getActiveDevice();
+        Configuration.device = UIController.devices.find(it => it.name === defaultDevice);
 
         UIController.performSelectProject(Configuration.project);
         UIController.performSelectTarget(Configuration.target);
