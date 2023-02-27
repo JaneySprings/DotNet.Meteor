@@ -28,12 +28,16 @@ export class StateManager {
         Configuration.project = UIController.projects.find(it => it.path === project);
         Configuration.target = target;
     }
-    public static save() {
-        if (StateManager.context === undefined)
-            return;
-
-        StateManager.context.workspaceState.update('project', Configuration.project?.path);
-        StateManager.context.workspaceState.update('device', Configuration.device?.name);
-        StateManager.context.workspaceState.update('target', Configuration.target);
+    public static saveProject() {
+        if (StateManager.context !== undefined)
+             StateManager.context.workspaceState.update('project', Configuration.project?.path);
+    }
+    public static saveDevice() {
+        if (StateManager.context !== undefined)
+            StateManager.context.workspaceState.update('device', Configuration.device?.name);
+    }
+    public static saveTarget() {
+        if (StateManager.context !== undefined)
+            StateManager.context.workspaceState.update('target', Configuration.target);
     }
 }

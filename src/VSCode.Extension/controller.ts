@@ -65,18 +65,18 @@ export class UIController {
         Configuration.project = item ?? UIController.projects[0];
         UIController._projectStatusItem.text = `${models.Icon.project} ${Configuration.project?.name}`;
         SchemaController.invalidate();
-        StateManager.save();
+        StateManager.saveProject();
     }
     public static performSelectTarget(item: models.Target | undefined = undefined) {
         Configuration.target = item ?? models.Target.Debug;
         UIController._targetStatusItem.text = `${models.Icon.target} ${Configuration.target} | Any CPU`;
-        StateManager.save();
+        StateManager.saveTarget();
     }
     public static performSelectDevice(item: models.Device | undefined = undefined) {
         Configuration.device = item ?? UIController.devices[0];
         const icon = Configuration.device.is_mobile ? models.Icon.device : models.Icon.computer;
         UIController._deviceStatusItem.text = `${icon} ${Configuration.device?.name}`;
-        StateManager.save();
+        StateManager.saveDevice();
     }
 
     public static async showQuickPickProject() {
