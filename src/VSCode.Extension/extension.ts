@@ -3,6 +3,7 @@ import { SchemaController } from './xaml/schemacontroller';
 import { DotNetTaskProvider } from './tasks/build';
 import { XamlService } from './xaml/xamlservice';
 import { UIController } from './controller';
+import { StateManager } from './cache';
 import * as res from './resources';
 import * as vscode from 'vscode';
 
@@ -13,6 +14,7 @@ export function activate(context: vscode.ExtensionContext) {
 	
 	UIController.activate(context);
 	XamlService.activate(context);
+	StateManager.activate(context);
 	UIController.update();
 
 	/* Commands */
@@ -33,4 +35,8 @@ export function activate(context: vscode.ExtensionContext) {
 		if (ev.execution.task.definition.type.includes(res.taskDefinitionId))
 			SchemaController.invalidate();
 	}));
+}
+
+export function deactivate() {
+	StateManager.deactivate();
 }

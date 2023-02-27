@@ -1,6 +1,7 @@
 import { SchemaController } from './xaml/schemacontroller';
 import { Configuration } from './configuration';
 import { CommandInterface } from "./bridge";
+import { StateManager } from './cache';
 import * as res from './resources';
 import * as models from "./models"
 import * as vscode from 'vscode';
@@ -14,7 +15,8 @@ export class UIController {
     public static projects: models.Project[];
     public static devices: models.Device[];
 
-    
+
+//#region Lifecycle
     public static activate(context: vscode.ExtensionContext) {
         UIController._projectStatusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
         UIController._targetStatusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 90);
@@ -28,6 +30,7 @@ export class UIController {
         context.subscriptions.push(UIController._targetStatusItem);
         context.subscriptions.push(UIController._deviceStatusItem);
     }
+
     public static async update() {
         const folders = vscode.workspace.workspaceFolders!.map(it => it.uri.fsPath);
         UIController.projects = await CommandInterface.getProjects(folders);
@@ -39,6 +42,8 @@ export class UIController {
             UIController._deviceStatusItem.hide();
             return;
         }
+        if (Configuration.project === undefined || Configuration.device === undefined)
+            StateManager.load();
 
         Configuration.project = UIController.projects.find(it => it.name === Configuration.project?.name);
         Configuration.device = UIController.devices.find(it => it.name === Configuration.device?.name);
@@ -47,28 +52,32 @@ export class UIController {
         UIController.performSelectTarget(Configuration.target);
         UIController.performSelectDevice(Configuration.device);
 
-        UIController._projectStatusItem.show();
         UIController._targetStatusItem.show();
         UIController._deviceStatusItem.show();
+        UIController.projects.length === 1 
+            ? UIController._projectStatusItem.hide() 
+            : UIController._projectStatusItem.show();
     }
+//#endregion
 
-
+//#region UI Commands
     public static performSelectProject(item: models.Project | undefined = undefined) {
         Configuration.project = item ?? UIController.projects[0];
         UIController._projectStatusItem.text = `${models.Icon.project} ${Configuration.project?.name}`;
-        UIController.projects.length === 1 ? UIController._projectStatusItem.hide() : UIController._projectStatusItem.show();
         SchemaController.invalidate();
+        StateManager.save();
     }
     public static performSelectTarget(item: models.Target | undefined = undefined) {
         Configuration.target = item ?? models.Target.Debug;
         UIController._targetStatusItem.text = `${models.Icon.target} ${Configuration.target} | Any CPU`;
+        StateManager.save();
     }
     public static performSelectDevice(item: models.Device | undefined = undefined) {
         Configuration.device = item ?? UIController.devices[0];
         const icon = Configuration.device.is_mobile ? models.Icon.device : models.Icon.computer;
         UIController._deviceStatusItem.text = `${icon} ${Configuration.device?.name}`;
+        StateManager.save();
     }
-
 
     public static async showQuickPickProject() {
         const items = UIController.projects.map(project => new models.ProjectItem(project));
@@ -104,4 +113,5 @@ export class UIController {
         picker.placeholder = res.commandTitleSelectActiveDevice;
         picker.busy = false;
     }
+//#endregion
 }
