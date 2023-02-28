@@ -30,13 +30,21 @@ public class Response : ProtocolMessage {
 
     /* Contains request result if success is true and error details if success is
     * false. */
-    [JsonPropertyName("body")] public object Body_ { get; set; }
+    [JsonPropertyName("body")] public object Body { get; set; }
 
     public Response() {}
-    public Response(Request request, bool isSucceeded, object body = null) : base("response") {
-        this.Success = isSucceeded;
+    public Response(Request request) : base("response") {
         this.RequestSeq = request.Seq;
         this.Command = request.Command;
-        this.Body_ = body;
+    }
+
+    public void SetSuccess(object body = null) {
+        this.Body = body;
+        this.Success = true;
+    }
+    public void SetError(string message = null, object body = null) {
+        this.Body = body;
+        this.Success = false;
+        this.Message = message;
     }
 }

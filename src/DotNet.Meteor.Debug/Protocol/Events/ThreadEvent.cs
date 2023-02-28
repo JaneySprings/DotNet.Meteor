@@ -4,6 +4,12 @@ namespace DotNet.Meteor.Debug.Protocol.Events;
 
 public class ThreadEvent: Event {
     public ThreadEvent(Body body) : base("thread", body) { }
+    public ThreadEvent(string reason, int threadId) : base("thread") {
+        this.Body_ = new Body {
+            Reason = reason,
+            ThreadId = threadId
+        };
+    }
 
     public class Body {
         /* The reason for the event.
@@ -12,10 +18,5 @@ public class ThreadEvent: Event {
 
         /* The identifier of the thread. */
         [JsonPropertyName("threadId")] public int ThreadId { get; set; }
-
-        public Body(string reason, int threadId) {
-            this.Reason = reason;
-            this.ThreadId = threadId;
-        }
     }
 }

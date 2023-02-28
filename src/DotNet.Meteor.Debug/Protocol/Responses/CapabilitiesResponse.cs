@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace DotNet.Meteor.Debug.Protocol;
 
-public class BodyCapabilities {
+public class CapabilitiesResponseBody {
     [JsonPropertyName("supportsConfigurationDoneRequest")] public bool SupportsConfigurationDoneRequest { get; set; }
     [JsonPropertyName("supportsFunctionBreakpoints")] public bool SupportsFunctionBreakpoints { get; set; }
     [JsonPropertyName("supportsConditionalBreakpoints")] public bool SupportsConditionalBreakpoints { get; set; }

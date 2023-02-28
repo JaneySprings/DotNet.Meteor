@@ -11,9 +11,6 @@ public class Message {
     * contain user data (PII) and can be safely used for telemetry purposes. */
     [JsonPropertyName("format")] public string Format { get; set; }
 
-    /* An object used as a dictionary for looking up the variables in the format string. */
-    [JsonPropertyName("variables")] public object[] Variables { get; set; }
-
     /* If true send to telemetry. */
     [JsonPropertyName("sendTelemetry")] public bool SendTelemetry { get; set; }
 

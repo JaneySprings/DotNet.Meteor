@@ -1,13 +1,14 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using DotNet.Meteor.Debug.Protocol.Types;
 
 namespace DotNet.Meteor.Debug.Protocol;
 
-public class BodyStackTrace {
-    [JsonPropertyName("stackFrames")] public List<ModelStackFrame> StackFrames { get; set; }
+public class StackTraceResponseBody {
+    [JsonPropertyName("stackFrames")] public List<StackFrame> StackFrames { get; set; }
     [JsonPropertyName("totalFrames")] public int TotalFrames { get; set; }
 
-    public BodyStackTrace(List<ModelStackFrame> frames, int total) {
+    public StackTraceResponseBody(List<StackFrame> frames, int total) {
         this.StackFrames = frames;
         this.TotalFrames = total;
     }

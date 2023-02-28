@@ -4,8 +4,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DotNet.Meteor.Processes;
-using DotNet.Meteor.Debug.Events;
 using DotNet.Meteor.Debug.Protocol;
+using DotNet.Meteor.Debug.Protocol.Events;
 using DotNet.Meteor.Debug.Utilities;
 using System.Text.Json;
 using NLog;
@@ -20,6 +20,9 @@ public abstract class Session: IProcessLogger {
     private int sequenceNumber = 1;
     private int bodyLength = -1;
     private bool stopRequested;
+
+
+    protected abstract void DispatchRequest(string command, Arguments args, Response response);
 
 
     public async Task Start(Stream inputStream, Stream outputStream) {
@@ -41,26 +44,11 @@ public abstract class Session: IProcessLogger {
         this.sessionLogger.Debug("Debugger session terminated.");
     }
 
-    public void Stop() {
+    protected void Stop() {
         this.stopRequested = true;
     }
 
-    protected void SendEvent(string type, object body) {
-        SendMessage(new Event(type, body));
-    }
-
-    protected void SendResponse(Response response, object body = null) {
-        response.SetBody(body);
-        SendMessage(response);
-    }
-
-    protected void SendErrorResponse(Response response, int id, string message) {
-        var model = new ModelMessage(id, message);
-        response.SetBodyError(message, new BodyError(model));
-        SendMessage(response);
-    }
-
-    private void SendMessage(ProtocolBase message) {
+    protected void SendMessage(ProtocolMessage message) {
         if (message.Seq == 0)
             message.Seq = this.sequenceNumber++;
 
@@ -71,6 +59,10 @@ public abstract class Session: IProcessLogger {
         this.outputStream.Flush();
     }
 
+    protected void SendConsoleEvent(string category, string message) {
+        SendMessage(new OutputEvent(category, message.Trim() + Environment.NewLine));
+    }
+
     private void Dispatch(string req) {
         this.sessionLogger.Debug($"DAP Request: {req}");
         var request = JsonSerializer.Deserialize<Request>(req)!;
@@ -78,8 +70,6 @@ public abstract class Session: IProcessLogger {
         DispatchRequest(request.Command, request.Arguments, response);
         SendMessage(response);
     }
-
-    protected abstract void DispatchRequest(string command, Argument args, Response response);
 
     private void ProcessData() {
         while (true) {
@@ -112,14 +102,10 @@ public abstract class Session: IProcessLogger {
     }
 
     public void OnOutputDataReceived(string stdout) {
-        OnOutputDataReceived("stdout", stdout);
-    }
-
-    public void OnOutputDataReceived(string category, string stdout) {
-        SendEvent(Event.OutputEvent, new BodyOutput(category, stdout.Trim() + Environment.NewLine));
+        SendConsoleEvent("stdout", stdout);
     }
 
     public void OnErrorDataReceived(string stderr) {
-        SendEvent(Event.OutputEvent, new BodyOutput("stderr", stderr.Trim() + Environment.NewLine));
+        SendConsoleEvent("stderr", stderr);
     }
 }

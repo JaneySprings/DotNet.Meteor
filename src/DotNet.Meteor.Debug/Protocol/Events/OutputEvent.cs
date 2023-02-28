@@ -1,11 +1,15 @@
 using System.Text.Json.Serialization;
-using DotNet.Meteor.Debug.Protocol.Types;
 
 namespace DotNet.Meteor.Debug.Protocol.Events;
 
 /* The event indicates that the target has produced some output. */
 public class OutputEvent: Event {
-    public OutputEvent(OutputEvent.Body body) : base("output", body) { }
+    public OutputEvent(string category, string output) : base("output") {
+        this.Body_ = new Body {
+            Category = category,
+            Output = output
+        };
+    }
 
     public class Body {
         /* The output category. If not specified or if the category is not
@@ -28,26 +32,5 @@ public class OutputEvent: Event {
 
         /* The output to report. */
         [JsonPropertyName("output")] public string Output { get; set; }
-
-        /* If an attribute `variablesReference` exists and its value is > 0, the
-        * output contains objects which can be retrieved by passing
-        * `variablesReference` to the `variables` request as long as execution
-        * remains suspended. See 'Lifetime of Object References' in the Overview
-        * section for details. */
-        [JsonPropertyName("variablesReference")] public int VariablesReference { get; set; } = -1;
-
-        /* An optional source location where the output was produced. */
-        [JsonPropertyName("source")] public Source Source { get; set; }
-
-        /* An optional source location line where the output was produced. */
-        [JsonPropertyName("line")] public int Line { get; set; }
-
-        /* An optional source location column where the output was produced. */
-        [JsonPropertyName("column")] public int Column { get; set; }
-
-        public Body(string category, string output) {
-            this.Category = category;
-            this.Output = output;
-        }
     }
 }

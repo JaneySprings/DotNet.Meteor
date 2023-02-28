@@ -4,6 +4,13 @@ namespace DotNet.Meteor.Debug.Protocol.Events;
 
 public class StoppedEvent : Event {
     public StoppedEvent(StoppedEvent.Body body) : base("stopped", body) {}
+    public StoppedEvent(int tid, string reason, string text = null): base("stopped") {
+        this.Body_ = new Body {
+            ThreadId = tid,
+            Reason = reason,
+            Text = text
+        };
+    }
 
     public class Body {
         /* The reason for the event.
@@ -28,17 +35,8 @@ public class StoppedEvent : Event {
         * focus. */
         [JsonPropertyName("preserveFocusHint")] public bool PreserveFocusHint { get; set; }
 
-
-        [JsonPropertyName("description")] public string Description { get; set; }
-
         /* Additional information. E.g. if reason is `exception`, text contains the
         * exception name. This string is shown in the UI. */
         [JsonPropertyName("text")] public string Text { get; set; }
-
-        public Body(int tid, string reason, string text) {
-            this.ThreadId = tid;
-            this.Reason = reason;
-            this.Text = text;
-        }
     }
 }
