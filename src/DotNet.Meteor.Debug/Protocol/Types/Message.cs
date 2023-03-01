@@ -20,9 +20,6 @@ public class Message {
     /* A label that is presented to the user as the UI for opening the url. */
     [JsonPropertyName("urlLabel")] public string UrlLabel { get; set; }
 
-    /* If true show user. */
-    [JsonPropertyName("showUser")] public bool ShowUser { get; set; }
-
     public Message(string message, int id = 0) {
         this.Id = id;
         this.Format = message;

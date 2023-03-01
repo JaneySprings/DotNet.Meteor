@@ -8,12 +8,15 @@ using NLog.Targets.Wrappers;
 namespace DotNet.Meteor.Logging;
 
 public static class LogConfig {
+    private static readonly string _logDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
+    public static readonly string ErrorLogFile = Path.Combine(_logDir, "Error.log");
+    public static readonly string DebugLogFile = Path.Combine(_logDir, "Debug.log");
+
     public static void InitializeLog() {
         var conf = new LoggingConfiguration();
-        var logsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
 
         var commonTarget = new FileTarget() {
-            FileName = Path.Combine(logsDir, "Debug.log"),
+            FileName = DebugLogFile,
             Layout = "${time}|${message}",
             DeleteOldFileOnStartup = true,
         };
@@ -24,7 +27,7 @@ public static class LogConfig {
             MaxArchiveFiles = 1,
             ArchiveNumbering = ArchiveNumberingMode.Date,
             ArchiveOldFileOnStartup = true,
-            FileName = Path.Combine(logsDir, "Error.log"),
+            FileName = ErrorLogFile,
             Layout = "${longdate}|${message}|${stacktrace}",
             DeleteOldFileOnStartup = true
         };

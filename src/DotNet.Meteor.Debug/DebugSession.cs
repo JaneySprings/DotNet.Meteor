@@ -55,12 +55,9 @@ public partial class DebugSession : Session {
 
     private readonly Dictionary<string, Action<DebugProtocol.Response, DebugProtocol.Arguments>> requestHandlers;
 
-    private int ConvertDebuggerLineToClient(int line) => this.clientLinesStartAt1 ? line : line - 1;
-    private int ConvertClientLineToDebugger(int line) => this.clientLinesStartAt1 ? line : line + 1;
-
 
 #region Session Setup
-    protected DebugSession() {
+    public DebugSession() {
         MonoClient.DebuggerLoggingService.CustomLogger = new MonoLogger();
         this.requestHandlers = new Dictionary<string, Action<DebugProtocol.Response, DebugProtocol.Arguments>>() {
             { "initialize", Initialize },
@@ -205,11 +202,16 @@ public partial class DebugSession : Session {
 #endregion
 #region Event: Disconnect
     private void Disconnect(DebugProtocol.Response response, DebugProtocol.Arguments args) {
-        PauseDebugger();
+        lock (this.locker) {
+            if (this.session?.IsRunning == true)
+                this.session.Stop();
+        }
+
         DebuggerKill();
         while (!this.debuggerKilled) {
             Thread.Sleep(100);
         }
+
         response.SetSuccess();
         Stop();
     }
@@ -265,7 +267,10 @@ public partial class DebugSession : Session {
 #region Event: Pause
     private void Pause(DebugProtocol.Response response, DebugProtocol.Arguments args) {
         response.SetSuccess();
-        PauseDebugger();
+        lock (this.locker) {
+            if (this.session?.IsRunning == true)
+                this.session.Stop();
+        }
     }
 #endregion
 #region Event: SetExceptionBreakpoints
@@ -297,7 +302,8 @@ public partial class DebugSession : Session {
         var clientLines = args.Lines;
         HashSet<int> lin = new HashSet<int>();
         for (int i = 0; i < clientLines.Count; i++) {
-            lin.Add(ConvertClientLineToDebugger(clientLines[i]));
+            var l = this.clientLinesStartAt1 ? clientLines[i] : clientLines[i] + 1;
+            lin.Add(l);
         }
 
         // find all breakpoints for the given path and remember their id and line number
@@ -321,7 +327,7 @@ public partial class DebugSession : Session {
         }
 
         for (int i = 0; i < clientLines.Count; i++) {
-            var l = ConvertClientLineToDebugger(clientLines[i]);
+            var l = this.clientLinesStartAt1 ? clientLines[i] : clientLines[i] + 1;
             if (!lin2.Contains(l)) {
                 var id = this.nextBreakpointId++;
                 this.breakpoints.Add(id, this.session.Breakpoints.Add(path, l));
@@ -383,8 +389,8 @@ public partial class DebugSession : Session {
 
                 var frameHandle = this.frameHandles.Create(frame);
                 string name = frame.SourceLocation.MethodName;
-                int line = frame.SourceLocation.Line;
-                stackFrames.Add(new DebugProtocol.Types.StackFrame(frameHandle, name, source, ConvertDebuggerLineToClient(line), 0, hint));
+                int line = this.clientLinesStartAt1 ? frame.SourceLocation.Line : frame.SourceLocation.Line - 1;
+                stackFrames.Add(new DebugProtocol.Types.StackFrame(frameHandle, name, source, line, 0, hint));
             }
         }
         response.SetSuccess(new DebugProtocol.StackTraceResponseBody(stackFrames, totalFrames));
@@ -511,11 +517,9 @@ public partial class DebugSession : Session {
 
     protected override void DispatchRequest(string command, DebugProtocol.Arguments args, DebugProtocol.Response response) {
         try {
-            if (requestHandlers.TryGetValue(command, out var handler)) {
+            if (requestHandlers.TryGetValue(command, out var handler))
                 handler.Invoke(response, args);
-            } else {
-                this.sessionLogger.Error($"unrecognized request '{command}'");
-            }
+            else this.sessionLogger.Error($"unrecognized request '{command}'");
         } catch (Exception e) {
             var message = $"Error occurred while processing {command} request. " + e.Message;
             this.sessionLogger.Error(e, message);
@@ -524,13 +528,6 @@ public partial class DebugSession : Session {
     }
 
 #region Helpers
-
-    private void PauseDebugger() {
-        lock (this.locker) {
-            if (this.session?.IsRunning == true)
-                this.session.Stop();
-        }
-    }
     private void DebuggerKill() {
         lock (this.locker) {
             foreach(var process in this.processes)

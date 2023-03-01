@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using DotNet.Meteor.Debug.Protocol.Types;
 
 namespace DotNet.Meteor.Debug.Protocol.Types;
 
