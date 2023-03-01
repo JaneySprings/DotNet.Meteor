@@ -18,7 +18,7 @@ public abstract class ProtocolMessage {
     * Values: 'request', 'response', 'event', etc. */
     [JsonPropertyName("type")] public string Type { get; set; }
 
-    protected ProtocolMessage(string type = null, int seq = 0) {
+    protected ProtocolMessage(string type = null, int seq = 1) {
         this.Type = type;
         this.Seq = seq;
     }

@@ -48,36 +48,13 @@ public partial class DebugSession : Session {
             FlattenHierarchy = false,
             ChunkRawStrings = false,
             IntegerDisplayFormat = MonoClient.IntegerDisplayFormat.Decimal,
-            CurrentExceptionTag = "$exception",
-            StackFrameFormat = new MonoClient.StackFrameFormat()
+            CurrentExceptionTag = "$exception"
         }
     };
-
-    private readonly Dictionary<string, Action<DebugProtocol.Response, DebugProtocol.Arguments>> requestHandlers;
-
 
 #region Session Setup
     public DebugSession() {
         MonoClient.DebuggerLoggingService.CustomLogger = new MonoLogger();
-        this.requestHandlers = new Dictionary<string, Action<DebugProtocol.Response, DebugProtocol.Arguments>>() {
-            { "initialize", Initialize },
-            { "launch", Launch },
-            { "attach", Attach },
-            { "next", Next },
-            { "continue", Continue },
-            { "stepIn", StepIn },
-            { "stepOut", StepOut },
-            { "pause", Pause },
-            { "stackTrace", StackTrace },
-            { "scopes", Scopes },
-            { "variables", Variables },
-            { "source", Source },
-            { "threads", Threads },
-            { "setBreakpoints", SetBreakpoints },
-            { "setExceptionBreakpoints", SetExceptionBreakpoints },
-            { "evaluate", Evaluate },
-            { "disconnect", Disconnect }
-        };
 
         this.session.ExceptionHandler = ex => {
             this.sessionLogger.Error(ex);
@@ -120,9 +97,8 @@ public partial class DebugSession : Session {
         };
         this.session.TargetReady += (sender, e) => this.activeProcess = this.session.GetProcesses().SingleOrDefault();
         this.session.TargetExited += (sender, e) => {
-            DebuggerKill();
+            KillDebugger();
             this.debuggerKilled = true;
-            Terminate();
             this.resumeEvent.Set();
         };
         this.session.TargetInterrupted += (sender, e) => this.resumeEvent.Set();
@@ -148,24 +124,12 @@ public partial class DebugSession : Session {
     }
 #endregion
 
-#region Event: Initialize
-    private void Initialize(DebugProtocol.Response response, DebugProtocol.Arguments args) {
+#region request: Initialize
+    protected override void Initialize(DebugProtocol.Response response, DebugProtocol.Arguments args) {
         this.clientLinesStartAt1 = args.LinesStartAt1;
-        var pathFormat = args.PathFormat;
 
-        if (pathFormat != null) {
-            switch (pathFormat) {
-                case "uri":
-                    this.clientPathsAreURI = true;
-                    break;
-                case "path":
-                    this.clientPathsAreURI = false;
-                    break;
-                default:
-                    response.SetError($"initialize: bad value '{pathFormat}' for pathFormat");
-                    return;
-            }
-        }
+        if (args.PathFormat != null)
+            this.clientPathsAreURI = args.PathFormat.Equals("uri", StringComparison.OrdinalIgnoreCase);
 
         response.SetSuccess(new DebugProtocol.CapabilitiesResponseBody {
             SupportsConfigurationDoneRequest = false,
@@ -178,8 +142,8 @@ public partial class DebugSession : Session {
         SendMessage(new DebugProtocol.Events.InitializedEvent());
     }
 #endregion
-#region Event: Launch
-    private void Launch(DebugProtocol.Response response, DebugProtocol.Arguments args) {
+#region request: Launch
+    protected override void Launch(DebugProtocol.Response response, DebugProtocol.Arguments args) {
         //SetExceptionOptions(args.ExceptionOptions);
         var configuration = new LaunchData(args.Project, args.Device, args.Target);
         var port = args.DebuggingPort == 0 ? Extensions.FindFreePort() : args.DebuggingPort;
@@ -195,29 +159,27 @@ public partial class DebugSession : Session {
         Connect(configuration, port);
     }
 #endregion
-#region Event: Attach
-    private void Attach(DebugProtocol.Response response, DebugProtocol.Arguments args) {
+#region request: Attach
+    protected override void Attach(DebugProtocol.Response response, DebugProtocol.Arguments args) {
         response.SetError("Attach is not supported yet");
     }
 #endregion
-#region Event: Disconnect
-    private void Disconnect(DebugProtocol.Response response, DebugProtocol.Arguments args) {
+#region request: Disconnect
+    protected override void Disconnect(DebugProtocol.Response response, DebugProtocol.Arguments args) {
         lock (this.locker) {
             if (this.session?.IsRunning == true)
                 this.session.Stop();
         }
-
-        DebuggerKill();
+        KillDebugger();
         while (!this.debuggerKilled) {
             Thread.Sleep(100);
         }
-
         response.SetSuccess();
-        Stop();
+        StopGlobalLoop();
     }
 #endregion
-#region Event: Continue
-    private void Continue(DebugProtocol.Response response, DebugProtocol.Arguments args) {
+#region request: Continue
+    protected override void Continue(DebugProtocol.Response response, DebugProtocol.Arguments args) {
         WaitForSuspend();
         response.SetSuccess();
         lock (this.locker) {
@@ -228,8 +190,8 @@ public partial class DebugSession : Session {
         }
     }
 #endregion
-#region Event: Next
-    private void Next(DebugProtocol.Response response, DebugProtocol.Arguments args) {
+#region request: Next
+    protected override void Next(DebugProtocol.Response response, DebugProtocol.Arguments args) {
         WaitForSuspend();
         response.SetSuccess();
         lock (this.locker) {
@@ -240,8 +202,8 @@ public partial class DebugSession : Session {
         }
     }
 #endregion
-#region Event: StepIn
-    private void StepIn(DebugProtocol.Response response, DebugProtocol.Arguments args) {
+#region request: StepIn
+    protected override void StepIn(DebugProtocol.Response response, DebugProtocol.Arguments args) {
         WaitForSuspend();
         response.SetSuccess();
         lock (this.locker) {
@@ -252,8 +214,8 @@ public partial class DebugSession : Session {
         }
     }
 #endregion
-#region Event: StepOut
-    private void StepOut(DebugProtocol.Response response, DebugProtocol.Arguments args) {
+#region request: StepOut
+    protected override void StepOut(DebugProtocol.Response response, DebugProtocol.Arguments args) {
         WaitForSuspend();
         response.SetSuccess();
         lock (this.locker) {
@@ -264,8 +226,8 @@ public partial class DebugSession : Session {
         }
     }
 #endregion
-#region Event: Pause
-    private void Pause(DebugProtocol.Response response, DebugProtocol.Arguments args) {
+#region request: Pause
+    protected override void Pause(DebugProtocol.Response response, DebugProtocol.Arguments args) {
         response.SetSuccess();
         lock (this.locker) {
             if (this.session?.IsRunning == true)
@@ -273,14 +235,14 @@ public partial class DebugSession : Session {
         }
     }
 #endregion
-#region Event: SetExceptionBreakpoints
-    private void SetExceptionBreakpoints(DebugProtocol.Response response, DebugProtocol.Arguments args) {
+#region request: SetExceptionBreakpoints
+    protected override void SetExceptionBreakpoints(DebugProtocol.Response response, DebugProtocol.Arguments args) {
         SetExceptionOptions(args.ExceptionOptions);
         response.SetSuccess();
     }
 #endregion
-#region Event: SetBreakpoints
-    private void SetBreakpoints(DebugProtocol.Response response, DebugProtocol.Arguments args) {
+#region request: SetBreakpoints
+    protected override void SetBreakpoints(DebugProtocol.Response response, DebugProtocol.Arguments args) {
         string path = null;
         if (args.Source != null) {
             string p = args.Source.Path;
@@ -292,7 +254,7 @@ public partial class DebugSession : Session {
             response.SetError("setBreakpoints: property 'source' is empty or misformed");
             return;
         }
-        path = path.ConvertClientPathToDebugger(this.clientPathsAreURI);
+        path = this.clientPathsAreURI ? UriPathConverter.ClientPathToDebugger(path) : path;
 
         if (!path.HasMonoExtension()) {
             response.SetError("file extension is not supported");
@@ -342,8 +304,8 @@ public partial class DebugSession : Session {
         response.SetSuccess(new DebugProtocol.SetBreakpointsResponseBody(breakpoints));
     }
 #endregion
-#region Event: StackTrace
-    private void StackTrace(DebugProtocol.Response response, DebugProtocol.Arguments args) {
+#region request: StackTrace
+    protected override void StackTrace(DebugProtocol.Response response, DebugProtocol.Arguments args) {
         WaitForSuspend();
 
         MonoClient.ThreadInfo thread = DebuggerActiveThread();
@@ -359,7 +321,7 @@ public partial class DebugSession : Session {
         if (bt?.FrameCount >= 0) {
             totalFrames = bt.FrameCount;
 
-            for (var i = args.StartFrame; i < args.Levels; i++) {
+            for (var i = args.StartFrame; i < Math.Min(args.Levels, totalFrames); i++) {
                 DebugProtocol.Types.Source source = null;
                 var frame = bt.GetFrame(i);
                 var sourceLocation = frame.SourceLocation;
@@ -369,7 +331,7 @@ public partial class DebugSession : Session {
                 if (!string.IsNullOrEmpty(sourceLocation.FileName)) {
                     sourceName = Path.GetFileName(sourceLocation.FileName);
                     if (File.Exists(sourceLocation.FileName)) {
-                        var path =  sourceLocation.FileName.ConvertDebuggerPathToClient(this.clientPathsAreURI);
+                        var path = this.clientPathsAreURI ? UriPathConverter.DebuggerPathToClient(sourceLocation.FileName) : sourceLocation.FileName;
                         source = new DebugProtocol.Types.Source(sourceName, path, 0, "normal");
                         hint = "normal";
                     }
@@ -378,7 +340,8 @@ public partial class DebugSession : Session {
                     sourceName = Path.GetFileName(sourceLocation.SourceLink.RelativeFilePath);
                     string path = this.sourceDownloader.DownloadSourceFile(sourceLocation.SourceLink.Uri, sourceLocation.SourceLink.RelativeFilePath);
                     if (!string.IsNullOrEmpty(path)) {
-                        source = new DebugProtocol.Types.Source(sourceName, path.ConvertDebuggerPathToClient(this.clientPathsAreURI), 0, "normal");
+                        path = this.clientPathsAreURI ? UriPathConverter.DebuggerPathToClient(path) : path;
+                        source = new DebugProtocol.Types.Source(sourceName, path, 0, "normal");
                         hint = "normal";
                     }
                 }
@@ -396,8 +359,8 @@ public partial class DebugSession : Session {
         response.SetSuccess(new DebugProtocol.StackTraceResponseBody(stackFrames, totalFrames));
     }
 #endregion
-#region Event: Scopes
-    private void Scopes(DebugProtocol.Response response, DebugProtocol.Arguments args) {
+#region request: Scopes
+    protected override void Scopes(DebugProtocol.Response response, DebugProtocol.Arguments args) {
         int frameId = args.FrameId;
         var frame = this.frameHandles.Get(frameId, null);
 
@@ -421,8 +384,8 @@ public partial class DebugSession : Session {
         response.SetSuccess(new DebugProtocol.ScopesResponseBody(scopes));
     }
 #endregion
-#region Event: Variables
-    private void Variables(DebugProtocol.Response response, DebugProtocol.Arguments args) {
+#region request: Variables
+    protected override void Variables(DebugProtocol.Response response, DebugProtocol.Arguments args) {
         int reference = args.VariablesReference;
         if (reference == -1) {
             response.SetError("variables: property 'variablesReference' is missing");
@@ -449,8 +412,8 @@ public partial class DebugSession : Session {
         response.SetSuccess(new DebugProtocol.VariablesResponseBody(variables));
     }
 #endregion
-#region Event: Threads
-    private void Threads(DebugProtocol.Response response, DebugProtocol.Arguments args) {
+#region request: Threads
+    protected override void Threads(DebugProtocol.Response response, DebugProtocol.Arguments args) {
         var threads = new List<DebugProtocol.Types.Thread>();
         var process = this.activeProcess;
         if (process != null) {
@@ -467,8 +430,8 @@ public partial class DebugSession : Session {
         response.SetSuccess(new DebugProtocol.ThreadsResponseBody(threads));
     }
 #endregion
-#region Event: Evaluate
-    private void Evaluate(DebugProtocol.Response response, DebugProtocol.Arguments args) {
+#region request: Evaluate
+    protected override void Evaluate(DebugProtocol.Response response, DebugProtocol.Arguments args) {
         string error = null;
         var expression = args.Expression;
         if (expression == null) {
@@ -509,26 +472,14 @@ public partial class DebugSession : Session {
         response.SetError($"Evaluate request failed ({error}).");
     }
 #endregion
-#region Event: Source
-    private void Source(DebugProtocol.Response response, DebugProtocol.Arguments arguments) {
+#region request: Source
+    protected override void Source(DebugProtocol.Response response, DebugProtocol.Arguments arguments) {
         response.SetError("No source available");
     }
 #endregion
 
-    protected override void DispatchRequest(string command, DebugProtocol.Arguments args, DebugProtocol.Response response) {
-        try {
-            if (requestHandlers.TryGetValue(command, out var handler))
-                handler.Invoke(response, args);
-            else this.sessionLogger.Error($"unrecognized request '{command}'");
-        } catch (Exception e) {
-            var message = $"Error occurred while processing {command} request. " + e.Message;
-            this.sessionLogger.Error(e, message);
-            response.SetError(message, new DebugProtocol.ErrorResponseBody(e));
-        }
-    }
-
 #region Helpers
-    private void DebuggerKill() {
+    private void KillDebugger() {
         lock (this.locker) {
             foreach(var process in this.processes)
                 process.Kill();
@@ -543,6 +494,11 @@ public partial class DebugSession : Session {
 
                 this.session.Dispose();
                 this.session = null;
+            }
+
+            if (!this.terminated) {
+                SendMessage(new DebugProtocol.Events.TerminatedEvent());
+                this.terminated = true;
             }
         }
     }
@@ -572,16 +528,11 @@ public partial class DebugSession : Session {
             }
         }
     }
+
     private void WaitForSuspend() {
         if (this.debuggerExecuting) {
             this.resumeEvent.WaitOne();
             this.debuggerExecuting = false;
-        }
-    }
-    private void Terminate() {
-        if (!this.terminated) {
-            SendMessage(new DebugProtocol.Events.TerminatedEvent());
-            this.terminated = true;
         }
     }
 
@@ -622,15 +573,14 @@ public partial class DebugSession : Session {
             return this.session.ActiveThread;
         }
     }
-
     private MonoClient.Backtrace DebuggerActiveBacktrace() {
         var thr = DebuggerActiveThread();
         return thr?.Backtrace;
     }
-
     private MonoClient.ExceptionInfo DebuggerActiveException() {
         var bt = DebuggerActiveBacktrace();
         return bt?.GetFrame(0).GetException();
     }
+
 #endregion
 }
