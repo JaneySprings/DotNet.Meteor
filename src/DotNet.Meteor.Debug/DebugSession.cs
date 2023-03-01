@@ -48,7 +48,8 @@ public partial class DebugSession : Session {
             FlattenHierarchy = false,
             ChunkRawStrings = false,
             IntegerDisplayFormat = MonoClient.IntegerDisplayFormat.Decimal,
-            CurrentExceptionTag = "$exception"
+            CurrentExceptionTag = "$exception",
+            StackFrameFormat = new MonoClient.StackFrameFormat()
         }
     };
 
