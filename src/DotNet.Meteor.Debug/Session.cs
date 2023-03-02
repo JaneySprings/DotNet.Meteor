@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DotNet.Meteor.Processes;
 using DotNet.Meteor.Debug.Protocol;
@@ -13,7 +14,6 @@ namespace DotNet.Meteor.Debug;
 
 public abstract class Session: IProcessLogger {
     protected readonly Logger sessionLogger = LogManager.GetCurrentClassLogger();
-    private const int MESSAGE_BUFFER_SIZE = 4096;
     private bool stopGlobalLoop;
     private Stream outputStream;
 
@@ -21,29 +21,38 @@ public abstract class Session: IProcessLogger {
 #region Event pump
     public async Task Start(Stream inputStream, Stream outputStream) {
         this.outputStream = outputStream;
-        var buffer = new byte[MESSAGE_BUFFER_SIZE];
+        var stringBuilder = new StringBuilder();
 
         while (!this.stopGlobalLoop) {
-            var rawMessage = await inputStream.ReadAsync(buffer);
-            if (rawMessage == 0)
+            const int bufferSize = 1024;
+            int readedCount;
+            do {
+                var buffer = new byte[bufferSize];
+                readedCount = await inputStream.ReadAsync(buffer);
+                stringBuilder.Append(Encoding.UTF8.GetString(buffer, 0, readedCount));
+            } while (readedCount == bufferSize);
+
+            if (readedCount == 0)
                 break;
 
-            string messageString = Encoding.UTF8.GetString(buffer, 0, rawMessage);
-            string requestString = messageString[(messageString.IndexOf("\r\n\r\n") + 4)..];
+            var readed = stringBuilder.ToString();
+            stringBuilder.Clear();
 
-            this.sessionLogger.Debug($"DAP Request: {requestString}");
-            var request = JsonSerializer.Deserialize<Request>(requestString)!;
-            var response = new Response(request);
+            foreach(Match match in Regex.Matches(readed, @"{(.*)}", RegexOptions.Multiline)) {
+                var request = JsonSerializer.Deserialize<Request>(match.Value)!;
+                var response = new Response(request);
+                this.sessionLogger.Debug($"DAP Request: {match.Value}");
 
-            try {
-                DispatchRequest(request.Command, request.Arguments, response);
-            } catch (Exception e) {
-                var message = $"Error occurred while processing {request.Command} request. " + e.Message;
-                response.SetError(message, new ErrorResponseBody(e));
-                this.sessionLogger.Error(e, message);
+                 try {
+                    DispatchRequest(request.Command, request.Arguments, response);
+                } catch (Exception e) {
+                    var message = $"Error occurred while processing {request.Command} request. " + e.Message;
+                    response.SetError(message, new ErrorResponseBody(e));
+                    this.sessionLogger.Error(e, message);
+                }
+
+                SendMessage(response);
             }
-
-            SendMessage(response);
         }
         this.sessionLogger.Debug("Debugger session terminated.");
     }
