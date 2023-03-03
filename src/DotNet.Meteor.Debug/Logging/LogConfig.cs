@@ -28,7 +28,7 @@ public static class LogConfig {
             ArchiveNumbering = ArchiveNumberingMode.Date,
             ArchiveOldFileOnStartup = true,
             FileName = ErrorLogFile,
-            Layout = "${longdate}|${message}|${stacktrace}",
+            Layout = "${longdate}|${message}|${callsite}|${stacktrace:format=Raw}",
             DeleteOldFileOnStartup = true
         };
         var errorAsyncTarget = new AsyncTargetWrapper(errorTarget, 500, AsyncTargetWrapperOverflowAction.Discard);

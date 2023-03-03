@@ -13,12 +13,10 @@ namespace DotNet.Meteor.Debug;
 
 public partial class DebugSession : Session {
     private bool clientLinesStartAt1 = true;
-    private bool clientPathsAreURI = true;
+    private bool clientPathsAreUri = true;
 
     private bool terminated;
-    private long nextBreakpointId;
     private bool debuggerExecuting;
-    private volatile bool debuggerKilled = true;
     private readonly object locker = new object();
 
     private MonoClient.ObjectValue exception;
@@ -43,94 +41,40 @@ public partial class DebugSession : Session {
             GroupPrivateMembers = true,
             GroupStaticMembers = true,
             AllowToStringCalls = true,
-            EllipsizeStrings = false,
             AllowTargetInvoke = true,
-            FlattenHierarchy = false,
             ChunkRawStrings = false,
-            IntegerDisplayFormat = MonoClient.IntegerDisplayFormat.Decimal,
             CurrentExceptionTag = "$exception",
+            IntegerDisplayFormat = MonoClient.IntegerDisplayFormat.Decimal,
             StackFrameFormat = new MonoClient.StackFrameFormat()
         }
     };
 
-#region Session Setup
     public DebugSession() {
         MonoClient.DebuggerLoggingService.CustomLogger = new MonoLogger();
 
-        this.session.ExceptionHandler = ex => {
-            this.sessionLogger.Error(ex);
-            return true;
-        };
-        this.session.LogWriter = (isStdErr, text) => {
-            if (isStdErr) this.sessionLogger.Error($"Mono: {text.Trim()}");
-            else this.sessionLogger.Debug($"Mono: {text.Trim()}");
-        };
-        this.session.DebugWriter = (int _, string _, string message) => SendConsoleEvent("console", message);
+        this.session.LogWriter = OnSessionLog;
+        this.session.DebugWriter = OnDebugLog;
+        this.session.OutputWriter = OnLog;
 
+        this.session.ExceptionHandler = OnExceptionHandled;
 
-        this.session.TargetStopped += (sender, e) => {
-            Stopped();
-            SendMessage(new DebugProtocol.Events.StoppedEvent((int)e.Thread.Id, "step"));
-            this.resumeEvent.Set();
-        };
-        this.session.TargetHitBreakpoint += (sender, e) => {
-            Stopped();
-            SendMessage(new DebugProtocol.Events.StoppedEvent((int)e.Thread.Id, "breakpoint"));
-            this.resumeEvent.Set();
-        };
-        this.session.TargetExceptionThrown += (sender, e) => {
-            Stopped();
-            var ex = DebuggerActiveException();
-            if (ex != null) {
-                this.exception = ex.Instance;
-                SendMessage(new DebugProtocol.Events.StoppedEvent((int)e.Thread.Id, "exception", ex.Message));
-            }
-            this.resumeEvent.Set();
-        };
-        this.session.TargetUnhandledException += (sender, e) => {
-            Stopped();
-            var ex = DebuggerActiveException();
-            if (ex != null) {
-                this.exception = ex.Instance;
-                SendMessage(new DebugProtocol.Events.StoppedEvent((int)e.Thread.Id, "exception", ex.Message));
-            }
-            this.resumeEvent.Set();
-        };
-        this.session.TargetReady += (sender, e) => this.activeProcess = this.session.GetProcesses().SingleOrDefault();
-        this.session.TargetExited += (sender, e) => {
-            KillDebugger();
-            this.debuggerKilled = true;
-            this.resumeEvent.Set();
-        };
-        this.session.TargetInterrupted += (sender, e) => this.resumeEvent.Set();
-        this.session.TargetEvent += (sender, e) => {};
-        this.session.TargetThreadStarted += (sender, e) => {
-            int tid = (int)e.Thread.Id;
-            lock (this.seenThreads) {
-                this.seenThreads[tid] = new DebugProtocol.Types.Thread(tid, e.Thread.Name);
-            }
-            SendMessage(new DebugProtocol.Events.ThreadEvent("started", tid));
-        };
-        this.session.TargetThreadStopped += (sender, e) => {
-            int tid = (int)e.Thread.Id;
-            lock (this.seenThreads) {
-                this.seenThreads.Remove(tid);
-            }
-            SendMessage(new DebugProtocol.Events.ThreadEvent("exited", tid));
-        };
-        this.session.OutputWriter = (isStdErr, text) => {
-            if (isStdErr) OnErrorDataReceived(text);
-            else OnOutputDataReceived(text);
-        };
+        this.session.TargetStopped += TargetStopped;
+        this.session.TargetHitBreakpoint += TargetHitBreakpoint;
+        this.session.TargetExceptionThrown += TargetExceptionThrown;
+        this.session.TargetUnhandledException += TargetExceptionThrown;
+        this.session.TargetReady += TargetReady;
+        this.session.TargetExited += TargetExited;
+        this.session.TargetInterrupted += TargetInterrupted;
+        this.session.TargetThreadStarted += TargetThreadStarted;
+        this.session.TargetThreadStopped += TargetThreadStopped;
     }
-#endregion
 
 #region request: Initialize
     protected override void Initialize(DebugProtocol.Response response, DebugProtocol.Arguments args) {
         this.clientLinesStartAt1 = args.LinesStartAt1;
 
         if (args.PathFormat != null)
-            this.clientPathsAreURI = args.PathFormat.Equals("uri", StringComparison.OrdinalIgnoreCase);
+            this.clientPathsAreUri = args.PathFormat.Equals("uri", StringComparison.OrdinalIgnoreCase);
 
         response.SetSuccess(new DebugProtocol.CapabilitiesResponseBody {
             SupportsConfigurationDoneRequest = false,
@@ -172,9 +116,6 @@ public partial class DebugSession : Session {
                 this.session.Stop();
         }
         KillDebugger();
-        while (!this.debuggerKilled) {
-            Thread.Sleep(100);
-        }
         response.SetSuccess();
         StopGlobalLoop();
     }
@@ -244,21 +185,10 @@ public partial class DebugSession : Session {
 #endregion
 #region request: SetBreakpoints
     protected override void SetBreakpoints(DebugProtocol.Response response, DebugProtocol.Arguments args) {
-        string path = null;
-        if (args.Source != null) {
-            string p = args.Source.Path;
-            if (p != null && p.Trim().Length > 0) {
-                path = p;
-            }
-        }
-        if (path == null) {
-            response.SetError("setBreakpoints: property 'source' is empty or misformed");
-            return;
-        }
-        path = this.clientPathsAreURI ? UriPathConverter.ClientPathToDebugger(path) : path;
+        string path = this.clientPathsAreUri ? UriPathConverter.ClientPathToDebugger(args.Source?.Path): args.Source?.Path;
 
         if (!path.HasMonoExtension()) {
-            response.SetError("file extension is not supported");
+            response.SetError("setBreakpoints: incorrect file path");
             return;
         }
 
@@ -291,10 +221,8 @@ public partial class DebugSession : Session {
 
         for (int i = 0; i < clientLines.Count; i++) {
             var l = this.clientLinesStartAt1 ? clientLines[i] : clientLines[i] + 1;
-            if (!lin2.Contains(l)) {
-                var id = this.nextBreakpointId++;
-                this.breakpoints.Add(id, this.session.Breakpoints.Add(path, l));
-            }
+            if (!lin2.Contains(l)) 
+                this.breakpoints.Add(path.GetHashCode(), this.session.Breakpoints.Add(path, l));
         }
 
         var breakpoints = new List<DebugProtocol.Types.Breakpoint>();
@@ -332,7 +260,7 @@ public partial class DebugSession : Session {
                 if (!string.IsNullOrEmpty(sourceLocation.FileName)) {
                     sourceName = Path.GetFileName(sourceLocation.FileName);
                     if (File.Exists(sourceLocation.FileName)) {
-                        var path = this.clientPathsAreURI ? UriPathConverter.DebuggerPathToClient(sourceLocation.FileName) : sourceLocation.FileName;
+                        var path = this.clientPathsAreUri ? UriPathConverter.DebuggerPathToClient(sourceLocation.FileName) : sourceLocation.FileName;
                         source = new DebugProtocol.Types.Source(sourceName, path, 0, "normal");
                         hint = "normal";
                     }
@@ -341,7 +269,7 @@ public partial class DebugSession : Session {
                     sourceName = Path.GetFileName(sourceLocation.SourceLink.RelativeFilePath);
                     string path = this.sourceDownloader.DownloadSourceFile(sourceLocation.SourceLink.Uri, sourceLocation.SourceLink.RelativeFilePath);
                     if (!string.IsNullOrEmpty(path)) {
-                        path = this.clientPathsAreURI ? UriPathConverter.DebuggerPathToClient(path) : path;
+                        path = this.clientPathsAreUri ? UriPathConverter.DebuggerPathToClient(path) : path;
                         source = new DebugProtocol.Types.Source(sourceName, path, 0, "normal");
                         hint = "normal";
                     }
@@ -477,6 +405,70 @@ public partial class DebugSession : Session {
     protected override void Source(DebugProtocol.Response response, DebugProtocol.Arguments arguments) {
         response.SetError("No source available");
     }
+#endregion
+
+#region Event handlers 
+
+    private void TargetStopped(object sender, MonoClient.TargetEventArgs e) {
+        Stopped();
+        SendMessage(new DebugProtocol.Events.StoppedEvent((int)e.Thread.Id, "step"));
+        this.resumeEvent.Set();
+    }
+    private void TargetHitBreakpoint(object sender, MonoClient.TargetEventArgs e) {
+        Stopped();
+        SendMessage(new DebugProtocol.Events.StoppedEvent((int)e.Thread.Id, "breakpoint"));
+        this.resumeEvent.Set();
+    }
+    private void TargetExceptionThrown(object sender, MonoClient.TargetEventArgs e) {
+        Stopped();
+        var ex = DebuggerActiveException();
+        if (ex != null) {
+            this.exception = ex.Instance;
+            SendMessage(new DebugProtocol.Events.StoppedEvent((int)e.Thread.Id, "exception", ex.Message));
+        }
+        this.resumeEvent.Set();
+    }
+    private void TargetReady(object sender, MonoClient.TargetEventArgs e) {
+        this.activeProcess = this.session.GetProcesses().SingleOrDefault();
+    }
+    private void TargetExited(object sender, MonoClient.TargetEventArgs e) {
+        KillDebugger();
+        this.resumeEvent.Set();
+    }
+    private void TargetInterrupted(object sender, MonoClient.TargetEventArgs e) {
+        this.resumeEvent.Set();
+    }
+    private void TargetThreadStarted(object sender, MonoClient.TargetEventArgs e) {
+        int tid = (int)e.Thread.Id;
+        lock (this.seenThreads) {
+            this.seenThreads[tid] = new DebugProtocol.Types.Thread(tid, e.Thread.Name);
+        }
+        SendMessage(new DebugProtocol.Events.ThreadEvent("started", tid));
+    }
+    private void TargetThreadStopped(object sender, MonoClient.TargetEventArgs e) {
+        int tid = (int)e.Thread.Id;
+        lock (this.seenThreads) {
+            this.seenThreads.Remove(tid);
+        }
+        SendMessage(new DebugProtocol.Events.ThreadEvent("exited", tid));
+    }
+
+    private bool OnExceptionHandled(Exception ex) {
+        this.sessionLogger.Error(ex);
+        return true;
+    }
+    private void OnSessionLog(bool isError, string message) {
+        if (isError) this.sessionLogger.Error($"Mono: {message.Trim()}");
+        else this.sessionLogger.Debug($"Mono: {message.Trim()}");
+    }
+    private void OnLog(bool isError, string message) {
+        if (isError) OnErrorDataReceived(message);
+        else OnOutputDataReceived(message);
+    }
+    private void OnDebugLog(int level, string category, string message) {
+        SendConsoleEvent("console", message);
+    }
+
 #endregion
 
 #region Helpers

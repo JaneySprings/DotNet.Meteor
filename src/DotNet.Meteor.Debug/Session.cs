@@ -19,20 +19,19 @@ public abstract class Session: IProcessLogger {
 
 
 #region Event pump
-    public async Task Start(Stream inputStream, Stream outputStream) {
+    public async Task Start(Stream inputStream, Stream outputStream, int messageBufferSize = 1024) {
         this.outputStream = outputStream;
         var stringBuilder = new StringBuilder();
 
         while (!this.stopGlobalLoop) {
-            const int bufferSize = 1024;
-            int readedCount;
+            int readedBytes;
             do {
-                var buffer = new byte[bufferSize];
-                readedCount = await inputStream.ReadAsync(buffer);
-                stringBuilder.Append(Encoding.UTF8.GetString(buffer, 0, readedCount));
-            } while (readedCount == bufferSize);
+                var buffer = new byte[messageBufferSize];
+                readedBytes = await inputStream.ReadAsync(buffer);
+                stringBuilder.Append(Encoding.UTF8.GetString(buffer));
+            } while (readedBytes == messageBufferSize);
 
-            if (readedCount == 0)
+            if (stringBuilder.Length == 0)
                 break;
 
             var readed = stringBuilder.ToString();
@@ -43,7 +42,7 @@ public abstract class Session: IProcessLogger {
                 var response = new Response(request);
                 this.sessionLogger.Debug($"DAP Request: {match.Value}");
 
-                 try {
+                try {
                     DispatchRequest(request.Command, request.Arguments, response);
                 } catch (Exception e) {
                     var message = $"Error occurred while processing {request.Command} request. " + e.Message;

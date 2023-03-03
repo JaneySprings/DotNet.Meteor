@@ -1,12 +1,35 @@
-#addin nuget:?package=Cake.FileHelpers&version=6.0.0
+#addin nuget:?package=Cake.FileHelpers&version=6.1.2
 #addin nuget:?package=Cake.VsCode&version=0.11.1
 #load "env.cake"
 
 using _Path = System.IO.Path;
 
 var target = Argument("target", "vsix");
-var version = Argument("release-version", "1.0");
+var version = Argument("release-version", "");
 var configuration = Argument("configuration", "debug");
+
+///////////////////////////////////////////////////////////////////////////////
+// COMMON
+///////////////////////////////////////////////////////////////////////////////
+
+Setup(context => {
+   if (string.IsNullOrEmpty(version)) 
+      version = DateTime.Now.ToString($"yy.{DateTime.Now.DayOfYear}");
+   Information("Building DotNet.Meteor {0} ({1})", version, configuration);
+});
+
+Task("prepare")
+   .Does(() => {
+      CleanDirectory(ArtifactsDirectory);
+      CleanDirectory(ExtensionStagingDirectory);
+      CleanDirectories(_Path.Combine(RootDirectory, "**", "bin"));
+      CleanDirectories(_Path.Combine(RootDirectory, "**", "obj"));
+   })
+   .DoesForEach<FilePath>(GetFiles(_Path.Combine(RootDirectory, "*.json")), file => {
+      var regex = @"^\s\s(""version"":\s+)("".+"")(,)";
+      var options = System.Text.RegularExpressions.RegexOptions.Multiline;
+      ReplaceRegexInFiles(file.ToString(), regex, $"  $1\"{version}.0\"$3", options);
+   });
 
 ///////////////////////////////////////////////////////////////////////////////
 // DOTNET
@@ -49,19 +72,6 @@ Task("clean-debugger")
 ///////////////////////////////////////////////////////////////////////////////
 // TYPESCRIPT
 ///////////////////////////////////////////////////////////////////////////////
-
-Task("prepare")
-   .Does(() => {
-      CleanDirectory(ArtifactsDirectory);
-      CleanDirectory(ExtensionStagingDirectory);
-      CleanDirectories(_Path.Combine(RootDirectory, "**", "bin"));
-      CleanDirectories(_Path.Combine(RootDirectory, "**", "obj"));
-   })
-   .DoesForEach<FilePath>(GetFiles(_Path.Combine(RootDirectory, "*.json")), file => {
-      var regex = @"^\s\s(""version"":\s+)("".+"")(,)";
-      var options = System.Text.RegularExpressions.RegexOptions.Multiline;
-      ReplaceRegexInFiles(file.ToString(), regex, $"  $1\"{version}.0\"$3", options);
-   });
 
 Task("manifest").Does(() => {
    var options = System.Text.RegularExpressions.RegexOptions.Multiline;

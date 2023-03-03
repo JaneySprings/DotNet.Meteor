@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using System.Collections.Generic;
 using DotNet.Meteor.Shared;
+using DotNet.Meteor.Debug.Protocol.Types;
 
 namespace DotNet.Meteor.Debug.Protocol;
 
@@ -15,18 +16,13 @@ public class Arguments {
     [JsonPropertyName("startFrame")] public int StartFrame { get; set; }
     [JsonPropertyName("lines")] public List<int> Lines { get; set; }
     [JsonPropertyName("__exceptionOptions")] public List<ExceptionOption> ExceptionOptions { get; set; }
-    [JsonPropertyName("source")] public BreakPointSource Source { get; set; }
+    [JsonPropertyName("source")] public Source Source { get; set; }
 
     // LaunchConfig arguments
     [JsonPropertyName("debugging_port")] public int DebuggingPort { get; set; }
     [JsonPropertyName("selected_device")] public DeviceData Device { get; set; }
     [JsonPropertyName("selected_project")] public Project Project { get; set; }
     [JsonPropertyName("selected_target")] public string Target { get; set; }
-
-
-    public class BreakPointSource {
-        [JsonPropertyName("path")] public string Path { get; set; }
-    }
 
     public class ExceptionOption {
         [JsonPropertyName("breakMode")] public string BreakMode { get; set; }

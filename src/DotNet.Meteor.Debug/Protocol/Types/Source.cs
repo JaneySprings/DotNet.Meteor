@@ -32,6 +32,7 @@ public class Source {
     * from source map', etc. */
     [JsonPropertyName("origin")] public string Origin { get; set; }
 
+    public Source() { }
     public Source(string name, string path, int sourceReference, string hint) {
         this.Name = name;
         this.Path = path;

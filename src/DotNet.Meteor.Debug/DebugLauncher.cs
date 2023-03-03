@@ -19,7 +19,6 @@ public partial class DebugSession  {
 
     private void Connect(LaunchData options, int port) {
         lock (this.locker) {
-            this.debuggerKilled = false;
             SoftDebuggerStartArgs arguments = null;
 
             if (!options.IsDebug)

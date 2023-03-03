@@ -27,6 +27,8 @@ public static class Extensions {
     }
 
     public static bool HasMonoExtension(this string path) {
+        if (string.IsNullOrEmpty(path))
+            return false;
         foreach (var ext in MonoExtensions) {
             if (path.EndsWith(ext, StringComparison.OrdinalIgnoreCase))
                 return true;
@@ -57,6 +59,8 @@ public static class UriPathConverter {
     }
 
     public static string ClientPathToDebugger(string path) {
+        if (string.IsNullOrEmpty(path))
+            return null;
         if (Uri.IsWellFormedUriString(path, UriKind.Absolute))
             return new Uri(path).LocalPath;
         return null;
