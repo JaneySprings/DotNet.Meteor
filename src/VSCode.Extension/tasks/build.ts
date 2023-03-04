@@ -47,7 +47,7 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
             return undefined;
         }
 
-        if (Configuration.device!.runtime_id && Configuration.device!.runtime_id !== 'maccatalyst-x64') {
+        if (Configuration.device!.runtime_id) {
             builder.append(`-p:RuntimeIdentifier=${Configuration.device!.runtime_id}`);
         }
         if (Configuration.isAndroid()) {
