@@ -5,6 +5,7 @@ using DotNet.Meteor.Debug.Protocol.Types;
 namespace DotNet.Meteor.Debug.Protocol;
 
 public class ThreadsResponseBody {
+    /* All threads. */
     [JsonPropertyName("threads")] public List<Thread> Threads { get; set; }
 
     public ThreadsResponseBody(List<Thread> threads) {

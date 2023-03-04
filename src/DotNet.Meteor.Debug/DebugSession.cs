@@ -76,7 +76,7 @@ public partial class DebugSession : Session {
         if (args.PathFormat != null)
             this.clientPathsAreUri = args.PathFormat.Equals("uri", StringComparison.OrdinalIgnoreCase);
 
-        response.SetSuccess(new DebugProtocol.CapabilitiesResponseBody {
+        response.SetSuccess(new DebugProtocol.Capabilities {
             SupportsConfigurationDoneRequest = false,
             SupportsFunctionBreakpoints = false,
             SupportsConditionalBreakpoints = false,

@@ -20,21 +20,16 @@ public class Variable {
     * Typically shown in the UI when hovering over the value. */
     [JsonPropertyName("type")] public string Type { get; set; }
 
-    /* Properties of a variable that can be used to determine how to render the
-    * variable in the UI. */
-    [JsonPropertyName("presentationHint")] public VariablePresentationHint PresentationHint { get; set; }
-
     /* If `variablesReference` is > 0, the variable is structured and its children
     * can be retrieved by passing `variablesReference` to the `variables` request
     * as long as execution remains suspended. See 'Lifetime of Object References'
     * in the Overview section for details. */
     [JsonPropertyName("variablesReference")] public int VariablesReference { get; set; }
 
-    public Variable(string name, string value, string type, int variablesReference = 0, VariablePresentationHint presentationHint = null) {
+    public Variable(string name, string value, string type, int variablesReference = 0) {
         this.Name = name;
         this.Value = value;
         this.Type = type;
         this.VariablesReference = variablesReference;
-        this.PresentationHint = presentationHint;
     }
 }
