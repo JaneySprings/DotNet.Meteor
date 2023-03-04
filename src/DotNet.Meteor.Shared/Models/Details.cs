@@ -7,5 +7,8 @@ namespace DotNet.Meteor.Shared {
         public const string iOSDevice = "iPhone";
         public const string MacCatalyst = "Mac";
         public const string Windows = "Windows";
+
+        public const string MacArm = "Apple Silicon";
+        public const string MacX64 = "Intel";
     }
 }

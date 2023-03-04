@@ -24,7 +24,7 @@ namespace DotNet.Meteor.Shared {
 
             try { /* Apple Devices */
                 if (RuntimeSystem.IsMacOS) {
-                    devices.Add(AppleTool.MacintoshDevice());
+                    devices.AddRange(AppleTool.MacintoshDevices());
                     devices.AddRange(AppleTool.PhysicalDevices().OrderBy(x => x.Name));
                     devices.AddRange(AppleTool.VirtualDevices().OrderBy(x => x.Name));
                 }

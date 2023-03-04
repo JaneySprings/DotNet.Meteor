@@ -53,8 +53,10 @@ public class DeviceProvidingTests: TestFixture {
     public void AppleMacDeviceTest() {
         if (!RuntimeSystem.IsMacOS)
             return;
-        var result = AppleTool.MacintoshDevice();
-        Assert.NotNull(result);
+        var result = AppleTool.MacintoshDevices();
+
+        if (SystemProfiler.IsArch64()) Assert.Equal(2, result.Count);
+        else Assert.Single(result);
     }
 
     [Fact]

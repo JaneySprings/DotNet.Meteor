@@ -53,21 +53,36 @@ namespace DotNet.Meteor.Apple {
             return SystemProfiler.PhysicalDevices();
         }
 
-        public static DeviceData MacintoshDevice() {
-            var runtime = SystemProfiler.IsArch64() ? Runtimes.MacArm64 : Runtimes.MacX64;
+        public static List<DeviceData> MacintoshDevices() {
+            var devices = new List<DeviceData>();
             var tokens = Environment.OSVersion.VersionString.Split(' ');
             var osVersion = $"MacOS {tokens.Last()}";
 
-            return new DeviceData {
+            if (SystemProfiler.IsArch64()) {
+                devices.Add(new DeviceData {
+                    IsEmulator = false,
+                    IsRunning = true,
+                    IsMobile = false,
+                    RuntimeId = Runtimes.MacArm64,
+                    OSVersion = osVersion,
+                    Details = Details.MacCatalyst,
+                    Platform = Platforms.MacCatalyst,
+                    Name = $"{Environment.MachineName} ({Details.MacArm})"
+                });
+            }
+
+            devices.Add(new DeviceData {
                 IsEmulator = false,
                 IsRunning = true,
                 IsMobile = false,
-                RuntimeId = runtime,
+                RuntimeId = Runtimes.MacX64,
                 OSVersion = osVersion,
                 Details = Details.MacCatalyst,
-                Name = Environment.MachineName,
-                Platform = Platforms.MacCatalyst
-            };
+                Platform = Platforms.MacCatalyst,
+                Name = $"{Environment.MachineName} ({Details.MacX64})"
+            });
+
+            return devices;
         }
     }
 }
