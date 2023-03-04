@@ -1,10 +1,11 @@
 using System.Text.Json.Serialization;
 using System.Collections.Generic;
 using DotNet.Meteor.Shared;
+using DotNet.Meteor.Debug.Protocol.Types;
 
 namespace DotNet.Meteor.Debug.Protocol;
 
-public class Argument {
+public class Arguments {
     [JsonPropertyName("linesStartAt1")] public bool LinesStartAt1 { get; set; }
     [JsonPropertyName("pathFormat")] public string PathFormat { get; set; }
     [JsonPropertyName("expression")] public string Expression { get; set; }
@@ -22,4 +23,13 @@ public class Argument {
     [JsonPropertyName("selected_device")] public DeviceData Device { get; set; }
     [JsonPropertyName("selected_project")] public Project Project { get; set; }
     [JsonPropertyName("selected_target")] public string Target { get; set; }
+
+    public class ExceptionOption {
+        [JsonPropertyName("breakMode")] public string BreakMode { get; set; }
+        [JsonPropertyName("path")] public List<ExceptionPath> Path { get; set; }
+    }
+
+    public class ExceptionPath {
+        [JsonPropertyName("names")] public List<string> Names { get; set; }
+    }
 }
