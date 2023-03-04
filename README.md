@@ -1,13 +1,12 @@
 <p align="center">
 <img src="img/header.jpg" width="1180px" alt=".NET Meteor" />
-<a href="https://github.com/JaneySprings/DotNet.Meteor/wiki">Documentation</a> | <a href="https://marketplace.visualstudio.com/items?itemName=nromanov.dotnet-meteor">Marketplace</a> | <a href="https://github.com/JaneySprings/DotNet.Meteor/releases">Releases</a>
-</p>
+<a href="https://github.com/JaneySprings/DotNet.Meteor/wiki">Documentation</a> | <a href="https://github.com/JaneySprings/DotNet.Meteor/issues">Support</a> | <a href="https://github.com/JaneySprings/DotNet.Meteor/releases">Releases</a>
 
 ---
 
 ## Overview
 
-The .NET Meteor allows you to build, debug `.NET 6` / `.NET 7` apps and deploy them to devices or emulators.
+&emsp;The .NET Meteor allows you to build, debug `.NET 6` / `.NET 7` apps and deploy them to devices or emulators.
 
 - **Cross-Platform** </br>
 You can use this extension in the `Windows`, `MacOS`, and `Linux` operation systems.
@@ -42,7 +41,7 @@ Your can build and debug projects, written in the `F#` language.
 
 ## Compatibility
 
-The following table lists supported .NET target platforms and their capabilities:
+&emsp;The following table lists supported .NET target platforms and their capabilities:
 
 | Application Type | Build and Run | Debugging |
 |-|:-:|:-:|
@@ -51,4 +50,10 @@ The following table lists supported .NET target platforms and their capabilities
 | **iOS** | ✅ | ✅ |
 | **MacCatalyst** | ✅ | ✅ |
 
-*You can debug WinUI apps using the C# VSCode extension with attaching the .NET Core Debugger*
+&emsp;*You can debug WinUI apps using the C# VSCode extension with attaching the .NET Core Debugger.*
+
+---
+
+## About the Author
+
+&emsp;I'm Nikita Romanov, a passionate programming enthusiast with a focus on .NET MAUI. I work with an amazing team at `DevExpress` to make the lives of developers around us easier. Our team is dedicated to creating a comprehensive [mobile component suite](https://www.devexpress.com/maui) for .NET MAUI which is currently available `free-of-charge`. In my free time, I work on my hobby project, `DotNet.Meteor`, which is always open to feedback and contributions. Feel free to share your thoughts with me, and **let's make the .NET MAUI community even better together!**

@@ -26,35 +26,9 @@ public static class Extensions {
         return data;
     }
 
-    public static string ConvertDebuggerPathToClient(this string path, bool clientPathsAreURI) {
-        if (clientPathsAreURI) {
-            try {
-                var uri = new Uri(path);
-                return uri.AbsoluteUri;
-            } catch {
-                return null;
-            }
-        } else {
-            return path;
-        }
-    }
-
-    public static string ConvertClientPathToDebugger(this string clientPath, bool clientPathsAreURI) {
-        if (clientPath == null)
-            return null;
-
-        if (clientPathsAreURI) {
-            if (Uri.IsWellFormedUriString(clientPath, UriKind.Absolute)) {
-                Uri uri = new Uri(clientPath);
-                return uri.LocalPath;
-            }
-            return null;
-        } else {
-            return clientPath;
-        }
-    }
-
     public static bool HasMonoExtension(this string path) {
+        if (string.IsNullOrEmpty(path))
+            return false;
         foreach (var ext in MonoExtensions) {
             if (path.EndsWith(ext, StringComparison.OrdinalIgnoreCase))
                 return true;
@@ -71,5 +45,24 @@ public static class Extensions {
         } finally {
             listener.Stop();
         }
+    }
+}
+
+public static class UriPathConverter {
+    public static string DebuggerPathToClient(string path) {
+        try {
+            var uri = new Uri(path);
+            return uri.AbsoluteUri;
+        } catch {
+            return null;
+        }
+    }
+
+    public static string ClientPathToDebugger(string path) {
+        if (string.IsNullOrEmpty(path))
+            return null;
+        if (Uri.IsWellFormedUriString(path, UriKind.Absolute))
+            return new Uri(path).LocalPath;
+        return null;
     }
 }

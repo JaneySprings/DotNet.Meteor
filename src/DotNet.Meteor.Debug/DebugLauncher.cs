@@ -1,16 +1,51 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Diagnostics;
 using DotNet.Meteor.Shared;
 using DotNet.Meteor.Processes;
 using DotNet.Meteor.Android;
 using DotNet.Meteor.Apple;
+using System.Net;
+using Mono.Debugging.Soft;
+using DotNet.Meteor.Debug.Pipeline;
+using Process = System.Diagnostics.Process;
 
 namespace DotNet.Meteor.Debug;
 
-public partial class MonoDebugSession {
-    protected void LaunchApplication(LaunchData configuration, int port, List<Process> processes) {
+public partial class DebugSession  {
+    private const int MAX_CONNECTION_ATTEMPTS = 20;
+    private const int CONNECTION_ATTEMPT_INTERVAL = 500;
+
+
+    private void Connect(LaunchData options, int port) {
+        lock (this.locker) {
+            SoftDebuggerStartArgs arguments = null;
+
+            if (!options.IsDebug)
+                return;
+
+            if (options.Device.IsAndroid) {
+                arguments = new SoftDebuggerConnectArgs(options.Project.Name, IPAddress.Loopback, port) {
+                    MaxConnectionAttempts = MAX_CONNECTION_ATTEMPTS,
+                    TimeBetweenConnectionAttempts = CONNECTION_ATTEMPT_INTERVAL
+                };
+            }
+            if (options.Device.IsIPhone || options.Device.IsMacCatalyst) {
+                arguments = new StreamCommandConnectionDebuggerArgs(options.Project.Name, IPAddress.Loopback, port) {
+                    MaxConnectionAttempts = MAX_CONNECTION_ATTEMPTS
+                };
+            }
+
+            if (arguments == null)
+                return;
+
+            this.debuggerExecuting = true;
+            this.session.Run(new SoftDebuggerStartInfo(arguments), this.sessionOptions);
+            OnOutputDataReceived("Debugger is ready and listening...");
+        }
+    }
+
+    private void LaunchApplication(LaunchData configuration, int port, List<Process> processes) {
         if (configuration.Device.IsAndroid)
             LaunchAndroid(configuration, port, processes);
         if (configuration.Device.IsIPhone)
@@ -20,7 +55,6 @@ public partial class MonoDebugSession {
         if (configuration.Device.IsWindows)
             LaunchWindows(configuration, processes);
     }
-
 
     private void LaunchApple(LaunchData configuration, int port, List<Process> processes) {
         if (RuntimeSystem.IsWindows) {
