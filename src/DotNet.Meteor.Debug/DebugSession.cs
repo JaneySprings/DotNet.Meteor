@@ -80,8 +80,6 @@ public partial class DebugSession : Session {
             SupportsEvaluateForHovers = true,
             SupportsExceptionInfoRequest = true
         });
-
-        SendMessage(new DebugProtocol.Events.InitializedEvent());
     }
 #endregion
 #region request: Launch
@@ -436,6 +434,7 @@ public partial class DebugSession : Session {
     }
     private void TargetReady(object sender, MonoClient.TargetEventArgs e) {
         this.activeProcess = this.session.GetProcesses().SingleOrDefault();
+        SendMessage(new DebugProtocol.Events.InitializedEvent());
     }
     private void TargetExited(object sender, MonoClient.TargetEventArgs e) {
         KillDebugger();

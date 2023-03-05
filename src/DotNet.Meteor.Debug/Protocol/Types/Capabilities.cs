@@ -23,12 +23,6 @@ public class Capabilities {
     /* The debug adapter supports stepping back via the 'stepBack' and 'reverseContinue' requests. */
     [JsonPropertyName("supportsStepBack")] public bool SupportsStepBack { get; set; }
 
-    /* The debug adapter supports the 'gotoTargets' request. */
-    [JsonPropertyName("supportsGotoTargetsRequest")] public bool SupportsGotoTargetsRequest { get; set; }
-
-    /* The debug adapter supports the 'stepInTargets' request. */
-    [JsonPropertyName("supportsStepInTargetsRequest")] public bool SupportsStepInTargetsRequest { get; set; }
-
     /* The debug adapter supports 'exceptionOptions' on the setExceptionBreakpoints request. */
     [JsonPropertyName("supportsExceptionOptions")] public bool SupportsExceptionOptions { get; set; }
 

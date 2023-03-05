@@ -53,6 +53,7 @@ public abstract class Session: IProcessLogger {
                 SendMessage(response);
             }
         }
+        SendMessage(new ExitedEvent(0));
         this.sessionLogger.Debug("Debugger session terminated.");
     }
 
