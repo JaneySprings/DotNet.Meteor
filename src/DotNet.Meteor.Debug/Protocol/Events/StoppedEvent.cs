@@ -8,7 +8,8 @@ public class StoppedEvent : Event {
         this.Body_ = new Body {
             ThreadId = tid,
             Reason = reason,
-            Text = text
+            Text = text,
+            AllThreadsStopped = true
         };
     }
 
@@ -30,10 +31,6 @@ public class StoppedEvent : Event {
         * - If the attribute is missing or false, only the thread with the given
         * `threadId` can be expanded. */
         [JsonPropertyName("allThreadsStopped")] public bool AllThreadsStopped { get; set; }
-
-        /* A value of true hints to the client that this event should not change the
-        * focus. */
-        [JsonPropertyName("preserveFocusHint")] public bool PreserveFocusHint { get; set; }
 
         /* Additional information. E.g. if reason is `exception`, text contains the
         * exception name. This string is shown in the UI. */

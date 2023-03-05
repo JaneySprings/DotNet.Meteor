@@ -1,6 +1,7 @@
 namespace DotNet.Meteor.Debug.Protocol.Events;
 
-/* This event indicates that the debuggee has exited. */
+/* The event indicates that debugging of the debuggee has terminated. 
+* This does not mean that the debuggee itself has exited. */
 public class TerminatedEvent : Event {
     public TerminatedEvent() : base("terminated") {}
 }
