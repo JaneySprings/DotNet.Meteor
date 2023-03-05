@@ -77,11 +77,8 @@ public partial class DebugSession : Session {
             this.clientPathsAreUri = args.PathFormat.Equals("uri", StringComparison.OrdinalIgnoreCase);
 
         response.SetSuccess(new DebugProtocol.Capabilities {
-            SupportsConfigurationDoneRequest = false,
-            SupportsFunctionBreakpoints = false,
-            SupportsConditionalBreakpoints = false,
             SupportsEvaluateForHovers = true,
-            ExceptionBreakpointFilters = new List<object>()
+            SupportsExceptionInfoRequest = true
         });
 
         SendMessage(new DebugProtocol.Events.InitializedEvent());
@@ -301,7 +298,7 @@ public partial class DebugSession : Session {
             return;
         }
 
-        if (frame.Index == 0 && this.exception != null) {
+        if (this.exception != null) {
             scopes.Add(new DebugProtocol.Types.Scope("Exception", this.variableHandles.Create(new MonoClient.ObjectValue[] { this.exception })));
         }
 
@@ -406,6 +403,17 @@ public partial class DebugSession : Session {
         response.SetError("No source available");
     }
 #endregion
+#region request: ExceptionInfo
+    protected override void ExceptionInfo(DebugProtocol.Response response, DebugProtocol.Arguments arguments) {
+        var ex = DebuggerActiveException(arguments.ThreadId);
+        if (ex == null) {
+            response.SetError("No exception available");
+            return;
+        }
+
+        response.SetSuccess(new DebugProtocol.ExceptionInfoResponseBody(ex));
+    }
+#endregion
 
 #region Event handlers 
 
@@ -421,11 +429,9 @@ public partial class DebugSession : Session {
     }
     private void TargetExceptionThrown(object sender, MonoClient.TargetEventArgs e) {
         Stopped();
-        var ex = DebuggerActiveException();
-        if (ex != null) {
-            this.exception = ex.Instance;
+        var ex = DebuggerActiveException((int)e.Thread.Id);
+        if (ex != null)
             SendMessage(new DebugProtocol.Events.StoppedEvent((int)e.Thread.Id, "exception", ex.Message));
-        }
         this.resumeEvent.Set();
     }
     private void TargetReady(object sender, MonoClient.TargetEventArgs e) {
@@ -566,13 +572,20 @@ public partial class DebugSession : Session {
             return this.session.ActiveThread;
         }
     }
-    private MonoClient.Backtrace DebuggerActiveBacktrace() {
-        var thr = DebuggerActiveThread();
-        return thr?.Backtrace;
-    }
-    private MonoClient.ExceptionInfo DebuggerActiveException() {
-        var bt = DebuggerActiveBacktrace();
-        return bt?.GetFrame(0).GetException();
+
+    private MonoClient.ExceptionInfo DebuggerActiveException(int threadId) {
+        var thread = FindThread(threadId);
+        if (thread == null)
+            return null;
+
+        for (int i = 0; i < thread.Backtrace.FrameCount; i++) {
+            var ex = thread.Backtrace.GetFrame(i).GetException();
+            if (ex != null) {
+                this.exception = ex.Instance;
+                return ex;
+            }
+        }
+        return null;
     }
 
 #endregion

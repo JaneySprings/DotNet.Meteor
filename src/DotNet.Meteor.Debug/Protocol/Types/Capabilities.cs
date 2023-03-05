@@ -5,9 +5,6 @@ namespace DotNet.Meteor.Debug.Protocol;
 
 /* Information about the capabilities of a debug adapter. */
 public class Capabilities {
-    /* The debug adapter supports the 'configurationDone' request. */
-    [JsonPropertyName("supportsConfigurationDoneRequest")] public bool SupportsConfigurationDoneRequest { get; set; }
-
     /* The debug adapter supports function breakpoints. */
     [JsonPropertyName("supportsFunctionBreakpoints")] public bool SupportsFunctionBreakpoints { get; set; }
 
@@ -40,7 +37,4 @@ public class Capabilities {
 
     /* The debug adapter supports logpoints by interpreting the 'logMessage' attribute of the SourceBreakpoint. */
     [JsonPropertyName("supportsLogPoints")] public bool SupportsLogPoints { get; set; }
-
-    /* The debug adapter supports data breakpoints. */
-    [JsonPropertyName("supportsDataBreakpoints")] public bool SupportsDataBreakpoints { get; set; }
 }
