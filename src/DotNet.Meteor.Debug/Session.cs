@@ -88,6 +88,7 @@ public abstract class Session: IProcessLogger {
             case "threads": Threads(response, args); break;
             case "setBreakpoints": SetBreakpoints(response, args); break;
             case "setExceptionBreakpoints": SetExceptionBreakpoints(response, args); break;
+            case "exceptionInfo": ExceptionInfo(response, args); break;
             case "evaluate": Evaluate(response, args); break;
             case "disconnect": Disconnect(response, args); break;
             default: this.sessionLogger.Error($"unrecognized request '{command}'"); break;
@@ -112,6 +113,7 @@ public abstract class Session: IProcessLogger {
     protected abstract void Variables(Response response, Arguments arguments);
     protected abstract void Source(Response response, Arguments arguments);
     protected abstract void Threads(Response response, Arguments arguments);
+    protected abstract void ExceptionInfo(Response response, Arguments arguments);
     protected abstract void Evaluate(Response response, Arguments arguments);
 
     public void OnOutputDataReceived(string stdout) {
