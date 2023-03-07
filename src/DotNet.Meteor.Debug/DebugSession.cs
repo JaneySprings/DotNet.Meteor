@@ -12,9 +12,6 @@ using Process = System.Diagnostics.Process;
 namespace DotNet.Meteor.Debug;
 
 public partial class DebugSession : Session {
-    private bool clientLinesStartAt1 = true;
-    private bool clientPathsAreUri = true;
-
     private bool terminated;
     private bool debuggerExecuting;
     private readonly object locker = new object();
@@ -28,7 +25,6 @@ public partial class DebugSession : Session {
     private readonly Handles<MonoClient.StackFrame> frameHandles = new Handles<MonoClient.StackFrame>();
     private readonly Handles<MonoClient.ObjectValue[]> variableHandles = new Handles<MonoClient.ObjectValue[]>();
     private readonly Dictionary<int, DebugProtocol.Types.Thread> seenThreads = new Dictionary<int, DebugProtocol.Types.Thread>();
-    private readonly SortedDictionary<long, MonoClient.BreakEvent> breakpoints = new SortedDictionary<long, MonoClient.BreakEvent>();
     private SoftDebuggerSession session = new SoftDebuggerSession {
         Breakpoints = new MonoClient.BreakpointStore()
     };
@@ -71,14 +67,10 @@ public partial class DebugSession : Session {
 
 #region request: Initialize
     protected override void Initialize(DebugProtocol.Response response, DebugProtocol.Arguments args) {
-        this.clientLinesStartAt1 = args.LinesStartAt1;
-
-        if (args.PathFormat != null)
-            this.clientPathsAreUri = args.PathFormat.Equals("uri", StringComparison.OrdinalIgnoreCase);
-
         response.SetSuccess(new DebugProtocol.Capabilities {
             SupportsEvaluateForHovers = true,
-            SupportsExceptionInfoRequest = true
+            SupportsExceptionInfoRequest = true,
+            SupportsConditionalBreakpoints = true
         });
     }
 #endregion
@@ -174,55 +166,39 @@ public partial class DebugSession : Session {
 #endregion
 #region request: SetExceptionBreakpoints
     protected override void SetExceptionBreakpoints(DebugProtocol.Response response, DebugProtocol.Arguments args) {
-        SetExceptionOptions(args.ExceptionOptions);
+        //SetExceptionOptions(args.ExceptionOptions);
         response.SetSuccess();
     }
 #endregion
 #region request: SetBreakpoints
     protected override void SetBreakpoints(DebugProtocol.Response response, DebugProtocol.Arguments args) {
-        string path = this.clientPathsAreUri ? UriPathConverter.ClientPathToDebugger(args.Source?.Path): args.Source?.Path;
+        var breakpoints = new List<DebugProtocol.Types.Breakpoint>();
+        var breakpointsInfos = args.Breakpoints;
+        var sourcePath = args.Source?.Path;
 
-        if (!path.HasMonoExtension()) {
+        if (!sourcePath.HasMonoExtension()) {
             response.SetError("setBreakpoints: incorrect file path");
             return;
         }
-
-        var clientLines = args.Lines;
-        HashSet<int> lin = new HashSet<int>();
-        for (int i = 0; i < clientLines.Count; i++) {
-            var l = this.clientLinesStartAt1 ? clientLines[i] : clientLines[i] + 1;
-            lin.Add(l);
-        }
-
-        // find all breakpoints for the given path and remember their id and line number
-        var bpts = new List<Tuple<int, int>>();
-        foreach (var be in this.breakpoints) {
-            if (be.Value is MonoClient.Breakpoint bp && bp.FileName == path) {
-                bpts.Add(new Tuple<int, int>((int)be.Key, (int)bp.Line));
+        // Remove unexisting breakpoints
+        var fileBreakpoints = this.session.Breakpoints.GetBreakpointsAtFile(sourcePath);
+        foreach(var fileBreakpoint in fileBreakpoints) {
+            var breakpointInfo = breakpointsInfos.Find(b => b.Line == fileBreakpoint.Line);
+            if (breakpointInfo == null) {
+                this.session.Breakpoints.Remove(fileBreakpoint);
+                breakpointsInfos.Remove(breakpointInfo);
             }
         }
-
-        HashSet<int> lin2 = new HashSet<int>();
-        foreach (var bpt in bpts) {
-            if (lin.Contains(bpt.Item2)) {
-                lin2.Add(bpt.Item2);
-            } else {
-                if (this.breakpoints.TryGetValue(bpt.Item1, out MonoClient.BreakEvent b)) {
-                    this.breakpoints.Remove(bpt.Item1);
-                    this.session.Breakpoints.Remove(b);
-                }
-            }
-        }
-
-        for (int i = 0; i < clientLines.Count; i++) {
-            var l = this.clientLinesStartAt1 ? clientLines[i] : clientLines[i] + 1;
-            if (!lin2.Contains(l)) 
-                this.breakpoints.Add(path.GetHashCode(), this.session.Breakpoints.Add(path, l));
-        }
-
-        var breakpoints = new List<DebugProtocol.Types.Breakpoint>();
-        foreach (var l in clientLines) {
-            breakpoints.Add(new DebugProtocol.Types.Breakpoint(true, l));
+        // Add new breakpoints
+        foreach(var breakpointInfo in breakpointsInfos) {
+            MonoClient.Breakpoint breakpoint = this.session.Breakpoints.Add(sourcePath, breakpointInfo.Line, breakpointInfo.Column ?? 1);
+            if (breakpoint != null && breakpointInfo.Condition != null)
+                breakpoint.ConditionExpression = breakpointInfo.Condition;
+            breakpoints.Add(new DebugProtocol.Types.Breakpoint(
+                breakpoint != null,
+                breakpoint?.Line ?? breakpointInfo.Line,
+                breakpoint?.Column ?? breakpointInfo.Column
+            ));
         }
 
         response.SetSuccess(new DebugProtocol.SetBreakpointsResponseBody(breakpoints));
@@ -255,7 +231,7 @@ public partial class DebugSession : Session {
                 if (!string.IsNullOrEmpty(sourceLocation.FileName)) {
                     sourceName = Path.GetFileName(sourceLocation.FileName);
                     if (File.Exists(sourceLocation.FileName)) {
-                        var path = this.clientPathsAreUri ? UriPathConverter.DebuggerPathToClient(sourceLocation.FileName) : sourceLocation.FileName;
+                        var path = sourceLocation.FileName;
                         source = new DebugProtocol.Types.Source(sourceName, path, 0, "normal");
                         hint = "normal";
                     }
@@ -264,7 +240,6 @@ public partial class DebugSession : Session {
                     sourceName = Path.GetFileName(sourceLocation.SourceLink.RelativeFilePath);
                     string path = this.sourceDownloader.DownloadSourceFile(sourceLocation.SourceLink.Uri, sourceLocation.SourceLink.RelativeFilePath);
                     if (!string.IsNullOrEmpty(path)) {
-                        path = this.clientPathsAreUri ? UriPathConverter.DebuggerPathToClient(path) : path;
                         source = new DebugProtocol.Types.Source(sourceName, path, 0, "normal");
                         hint = "normal";
                     }
@@ -274,10 +249,14 @@ public partial class DebugSession : Session {
                     hint = "subtle";
                 }
 
-                var frameHandle = this.frameHandles.Create(frame);
-                string name = frame.SourceLocation.MethodName;
-                int line = this.clientLinesStartAt1 ? frame.SourceLocation.Line : frame.SourceLocation.Line - 1;
-                stackFrames.Add(new DebugProtocol.Types.StackFrame(frameHandle, name, source, line, 0, hint));
+                stackFrames.Add(new DebugProtocol.Types.StackFrame(
+                    this.frameHandles.Create(frame),
+                    frame.SourceLocation.MethodName,
+                    source,
+                    frame.SourceLocation.Line,
+                    frame.SourceLocation.Column,
+                    hint
+                ));
             }
         }
         response.SetSuccess(new DebugProtocol.StackTraceResponseBody(stackFrames, totalFrames));
@@ -475,7 +454,6 @@ public partial class DebugSession : Session {
     }
 
 #endregion
-
 #region Helpers
     private void KillDebugger() {
         lock (this.locker) {
@@ -497,32 +475,6 @@ public partial class DebugSession : Session {
             if (!this.terminated) {
                 SendMessage(new DebugProtocol.Events.TerminatedEvent());
                 this.terminated = true;
-            }
-        }
-    }
-
-    private void SetExceptionOptions(List<DebugProtocol.Arguments.ExceptionOption> exceptionOptions) {
-        if (exceptionOptions != null) {
-            // clear all existig catchpoints
-            foreach (var cp in this.catchpoints) {
-                this.session.Breakpoints.Remove(cp);
-            }
-            this.catchpoints.Clear();
-
-            foreach (var exception in exceptionOptions) {
-                string exName = null;
-                string exBreakMode = exception.BreakMode;
-
-                if (exception.Path != null) {
-                    var path = exception.Path[0];
-                    if (path.Names?.Count > 0) {
-                        exName = path.Names[0];
-                    }
-                }
-
-                if (exName != null && exBreakMode == "always") {
-                    this.catchpoints.Add(this.session.Breakpoints.AddCatchpoint(exName));
-                }
             }
         }
     }
