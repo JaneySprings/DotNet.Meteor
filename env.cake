@@ -11,4 +11,3 @@ public string MeteorDebugProjectPath => _Path.Combine(RootDirectory, "src", "Dot
 public string MeteorTestsProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Tests", "DotNet.Meteor.Tests.csproj");
 
 public string NuGetVersionRoslyn => "4.3.1";
-public string TargetFrameworkVersion => "net7.0";

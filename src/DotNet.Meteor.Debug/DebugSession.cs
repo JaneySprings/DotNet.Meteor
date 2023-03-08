@@ -20,7 +20,6 @@ public partial class DebugSession : Session {
     private MonoClient.ProcessInfo activeProcess;
     private readonly List<Process> processes = new List<Process>();
     private readonly AutoResetEvent resumeEvent = new AutoResetEvent(false);
-    private readonly List<MonoClient.Catchpoint> catchpoints = new List<MonoClient.Catchpoint>();
     private readonly SourceDownloader sourceDownloader = new SourceDownloader();
     private readonly Handles<MonoClient.StackFrame> frameHandles = new Handles<MonoClient.StackFrame>();
     private readonly Handles<MonoClient.ObjectValue[]> variableHandles = new Handles<MonoClient.ObjectValue[]>();
@@ -53,6 +52,7 @@ public partial class DebugSession : Session {
         this.session.OutputWriter = OnLog;
 
         this.session.ExceptionHandler = OnExceptionHandled;
+        this.session.CustomBreakEventHitHandler = OnLogPointEventHandled;
 
         this.session.TargetStopped += TargetStopped;
         this.session.TargetHitBreakpoint += TargetHitBreakpoint;
@@ -70,7 +70,9 @@ public partial class DebugSession : Session {
         response.SetSuccess(new DebugProtocol.Capabilities {
             SupportsEvaluateForHovers = true,
             SupportsExceptionInfoRequest = true,
-            SupportsConditionalBreakpoints = true
+            SupportsConditionalBreakpoints = true,
+            SupportsHitConditionalBreakpoints = true,
+            SupportsLogPoints = true
         });
     }
 #endregion
@@ -192,8 +194,20 @@ public partial class DebugSession : Session {
         // Add new breakpoints
         foreach(var breakpointInfo in breakpointsInfos) {
             MonoClient.Breakpoint breakpoint = this.session.Breakpoints.Add(sourcePath, breakpointInfo.Line, breakpointInfo.Column ?? 1);
+            // Conditional breakpoint
             if (breakpoint != null && breakpointInfo.Condition != null)
                 breakpoint.ConditionExpression = breakpointInfo.Condition;
+            // Hit count breakpoint
+            if (breakpoint != null && !string.IsNullOrEmpty(breakpointInfo.HitCondition)) {
+                breakpoint.HitCountMode = MonoClient.HitCountMode.EqualTo;
+                breakpoint.HitCount = int.TryParse(breakpointInfo.HitCondition, out int hitCount) ? hitCount : 1;
+            }
+            // Logpoint
+            if (breakpoint != null && breakpointInfo.LogMessage != null) {
+                breakpoint.HitAction = MonoClient.HitAction.CustomAction;
+                breakpoint.CustomActionId = $"LogPoint: {breakpointInfo.LogMessage}";
+            }
+
             breakpoints.Add(new DebugProtocol.Types.Breakpoint(
                 breakpoint != null,
                 breakpoint?.Line ?? breakpointInfo.Line,
@@ -441,6 +455,11 @@ public partial class DebugSession : Session {
         this.sessionLogger.Error(ex);
         return true;
     }
+    private bool OnLogPointEventHandled(string id, MonoClient.BreakEvent be) {
+        OnDebugLog(0, string.Empty, id);
+        return true;
+    }
+
     private void OnSessionLog(bool isError, string message) {
         if (isError) this.sessionLogger.Error($"Mono: {message.Trim()}");
         else this.sessionLogger.Debug($"Mono: {message.Trim()}");
