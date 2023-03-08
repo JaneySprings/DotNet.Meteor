@@ -18,6 +18,13 @@ public class Breakpoint {
     /* An optional expression for conditional breakpoints. */
     [JsonPropertyName("condition")] public string Condition { get; set; }
 
+    /* An optional expression that controls how many hits of the breakpoint are ignored.
+    * The backend is expected to interpret the expression as needed. */
+    [JsonPropertyName("hitCondition")] public string HitCondition { get; set; }
+
+    /* Print message and continue. */
+    [JsonPropertyName("logMessage")] public string LogMessage { get; set; }
+
     public Breakpoint() { }
     public Breakpoint(bool verified, int line, int? column = null) {
         this.Verified = verified;

@@ -7,6 +7,7 @@ using _Path = System.IO.Path;
 var target = Argument("target", "vsix");
 var version = Argument("release-version", "");
 var configuration = Argument("configuration", "debug");
+var framework = Argument("framework", "net7.0");
 
 ///////////////////////////////////////////////////////////////////////////////
 // COMMON
@@ -15,7 +16,7 @@ var configuration = Argument("configuration", "debug");
 Setup(context => {
    if (string.IsNullOrEmpty(version)) 
       version = DateTime.Now.ToString($"yy.{DateTime.Now.DayOfYear}");
-   Information("Building DotNet.Meteor {0} ({1})", version, configuration);
+   Information("Building DotNet.Meteor {0} {1}-{2}", version, framework, configuration);
 });
 
 Task("prepare")
@@ -40,7 +41,7 @@ Task("build-debugger")
       var roslynRegex = @"(<NuGetVersionRoslyn\s+Condition=""\$\(NuGetVersionRoslyn\)\s*==\s*''"")(>.+<)(/NuGetVersionRoslyn>)";
       var targetRegex = @"(<TargetFrameworks>)(.+)(</TargetFrameworks>)";
       ReplaceRegexInFiles(file.ToString(), roslynRegex, $"$1>{NuGetVersionRoslyn}<$3");
-      ReplaceRegexInFiles(file.ToString(), targetRegex, $"$1{TargetFrameworkVersion}$3");
+      ReplaceRegexInFiles(file.ToString(), targetRegex, $"$1{framework}$3");
    })
    .Does(() => DotNetBuild(MeteorDebugProjectPath, new DotNetBuildSettings {
       MSBuildSettings = new DotNetMSBuildSettings { AssemblyVersion = version },
