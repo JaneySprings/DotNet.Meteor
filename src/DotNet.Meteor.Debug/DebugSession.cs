@@ -8,6 +8,7 @@ using DotNet.Meteor.Debug.Utilities;
 using DebugProtocol = DotNet.Meteor.Debug.Protocol;
 using MonoClient = Mono.Debugging.Client;
 using Process = System.Diagnostics.Process;
+using System.Text.RegularExpressions;
 
 namespace DotNet.Meteor.Debug;
 
@@ -52,7 +53,6 @@ public partial class DebugSession : Session {
         this.session.OutputWriter = OnLog;
 
         this.session.ExceptionHandler = OnExceptionHandled;
-        this.session.CustomBreakEventHitHandler = OnLogPointEventHandled;
 
         this.session.TargetStopped += TargetStopped;
         this.session.TargetHitBreakpoint += TargetHitBreakpoint;
@@ -204,8 +204,8 @@ public partial class DebugSession : Session {
             }
             // Logpoint
             if (breakpoint != null && breakpointInfo.LogMessage != null) {
-                breakpoint.HitAction = MonoClient.HitAction.CustomAction;
-                breakpoint.CustomActionId = $"LogPoint: {breakpointInfo.LogMessage}";
+                breakpoint.HitAction = MonoClient.HitAction.PrintExpression;
+                breakpoint.TraceExpression = $"LogPoint: {breakpointInfo.LogMessage}";
             }
 
             breakpoints.Add(new DebugProtocol.Types.Breakpoint(
@@ -453,10 +453,6 @@ public partial class DebugSession : Session {
 
     private bool OnExceptionHandled(Exception ex) {
         this.sessionLogger.Error(ex);
-        return true;
-    }
-    private bool OnLogPointEventHandled(string id, MonoClient.BreakEvent be) {
-        OnDebugLog(0, string.Empty, id);
         return true;
     }
 
