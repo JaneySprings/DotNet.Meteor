@@ -33,8 +33,7 @@ public class ExceptionBreakpointsFilter {
         Filter = "all",
         Label = "All Exceptions",
         Description = "Break when an exception is thrown.",
-        Default = true,
+        ConditionDescription = "Specifies a exception name to break on. Example: System.Exception.",
         SupportsCondition = true,
-        ConditionDescription = "Specifies a exception name to break on. Example: System.Exception."
     };
 }
