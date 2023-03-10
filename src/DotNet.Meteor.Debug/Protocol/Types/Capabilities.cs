@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using DotNet.Meteor.Debug.Protocol.Types;
 
 namespace DotNet.Meteor.Debug.Protocol;
 
@@ -18,13 +19,17 @@ public class Capabilities {
     [JsonPropertyName("supportsEvaluateForHovers")] public bool SupportsEvaluateForHovers { get; set; }
 
     /* Available filters or options for the setExceptionBreakpoints request. */
-    [JsonPropertyName("exceptionBreakpointFilters")] public List<object> ExceptionBreakpointFilters { get; set; }
+    [JsonPropertyName("exceptionBreakpointFilters")] public List<ExceptionBreakpointsFilter> ExceptionBreakpointFilters { get; set; }
 
     /* The debug adapter supports stepping back via the 'stepBack' and 'reverseContinue' requests. */
     [JsonPropertyName("supportsStepBack")] public bool SupportsStepBack { get; set; }
 
     /* The debug adapter supports 'exceptionOptions' on the setExceptionBreakpoints request. */
     [JsonPropertyName("supportsExceptionOptions")] public bool SupportsExceptionOptions { get; set; }
+
+    /* The debug adapter supports `filterOptions` as an argument on the
+    * setExceptionBreakpoints` request. */
+    [JsonPropertyName("supportsExceptionFilterOptions")] public bool SupportsExceptionFilterOptions { get; set; }
 
     /* The debug adapter supports the 'exceptionInfo' request. */
     [JsonPropertyName("supportsExceptionInfoRequest")] public bool SupportsExceptionInfoRequest { get; set; }

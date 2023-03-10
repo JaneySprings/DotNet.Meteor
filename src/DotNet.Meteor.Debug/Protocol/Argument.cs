@@ -14,6 +14,7 @@ public class Arguments {
     [JsonPropertyName("startFrame")] public int StartFrame { get; set; }
     [JsonPropertyName("source")] public Source Source { get; set; }
     [JsonPropertyName("breakpoints")] public List<Breakpoint> Breakpoints { get; set; }
+    [JsonPropertyName("filterOptions")] public List<ExceptionFilterOptions> FilterOptions { get; set; }
 
     // LaunchConfig arguments
     [JsonPropertyName("debugging_port")] public int DebuggingPort { get; set; }

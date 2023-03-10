@@ -72,7 +72,12 @@ public partial class DebugSession : Session {
             SupportsExceptionInfoRequest = true,
             SupportsConditionalBreakpoints = true,
             SupportsHitConditionalBreakpoints = true,
-            SupportsLogPoints = true
+            SupportsLogPoints = true,
+            SupportsExceptionOptions = true,
+            SupportsExceptionFilterOptions = true,
+            ExceptionBreakpointFilters = new List<DebugProtocol.Types.ExceptionBreakpointsFilter> {
+                DebugProtocol.Types.ExceptionBreakpointsFilter.AllExceptions,
+            }
         });
     }
 #endregion
@@ -168,7 +173,24 @@ public partial class DebugSession : Session {
 #endregion
 #region request: SetExceptionBreakpoints
     protected override void SetExceptionBreakpoints(DebugProtocol.Response response, DebugProtocol.Arguments args) {
-        //SetExceptionOptions(args.ExceptionOptions);
+        if (args.FilterOptions == null || args.FilterOptions.Count == 0) {
+            this.session.Breakpoints.ClearCatchpoints();
+            response.SetSuccess();
+            return;
+        }
+
+        foreach (var option in args.FilterOptions) {
+            if (option.FilterId == DebugProtocol.Types.ExceptionBreakpointsFilter.AllExceptions.Filter) {
+                var exceptionFilter = typeof(Exception).ToString();
+
+                if (!string.IsNullOrEmpty(option.Condition))
+                    exceptionFilter = option.Condition;
+
+                this.session.Breakpoints.ClearCatchpoints();
+                this.session.Breakpoints.AddCatchpoint(exceptionFilter);
+            }
+        }
+
         response.SetSuccess();
     }
 #endregion
@@ -410,7 +432,7 @@ public partial class DebugSession : Session {
 
     private void TargetStopped(object sender, MonoClient.TargetEventArgs e) {
         Stopped();
-        SendMessage(new DebugProtocol.Events.StoppedEvent((int)e.Thread.Id, "step"));
+        SendMessage(new DebugProtocol.Events.StoppedEvent((int)e.Thread.Id, "pause"));
         this.resumeEvent.Set();
     }
     private void TargetHitBreakpoint(object sender, MonoClient.TargetEventArgs e) {
