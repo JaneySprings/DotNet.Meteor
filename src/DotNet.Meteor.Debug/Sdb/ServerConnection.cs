@@ -26,9 +26,9 @@ public class ServerConnection : Connection {
 
     protected override void TransportClose() {
         this.listener.Stop();
-        this.stream?.Close();
+        this.stream.Close();
     }
     protected override void TransportShutdown() {
-        this.stream?.Dispose();
+        this.stream.Dispose();
     }
 }

@@ -29,10 +29,10 @@ public class ClientConnection : Connection {
 
     protected override void TransportClose() {
         this.client.Close();
-        this.stream?.Close();
+        this.stream.Close();
     }
     protected override void TransportShutdown() {
         this.client.Dispose();
-        this.stream?.Dispose();
+        this.stream.Dispose();
     }
 }
