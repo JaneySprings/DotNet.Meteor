@@ -8,7 +8,6 @@ using DotNet.Meteor.Debug.Utilities;
 using DebugProtocol = DotNet.Meteor.Debug.Protocol;
 using MonoClient = Mono.Debugging.Client;
 using Process = System.Diagnostics.Process;
-using System.Text.RegularExpressions;
 
 namespace DotNet.Meteor.Debug;
 
@@ -83,7 +82,6 @@ public partial class DebugSession : Session {
 #endregion
 #region request: Launch
     protected override void Launch(DebugProtocol.Response response, DebugProtocol.Arguments args) {
-        //SetExceptionOptions(args.ExceptionOptions);
         var configuration = new LaunchData(args.Project, args.Device, args.Target);
         var port = args.DebuggingPort == 0 ? Extensions.FindFreePort() : args.DebuggingPort;
         this.sourceDownloader.Configure(configuration.Project.Path);
@@ -200,10 +198,6 @@ public partial class DebugSession : Session {
         var breakpointsInfos = args.Breakpoints;
         var sourcePath = args.Source?.Path;
 
-        if (!sourcePath.HasMonoExtension()) {
-            response.SetError("setBreakpoints: incorrect file path");
-            return;
-        }
         // Remove unexisting breakpoints
         var fileBreakpoints = this.session.Breakpoints.GetBreakpointsAtFile(sourcePath);
         foreach(var fileBreakpoint in fileBreakpoints) {
@@ -475,6 +469,12 @@ public partial class DebugSession : Session {
 
     private bool OnExceptionHandled(Exception ex) {
         this.sessionLogger.Error(ex);
+        var innerException = ex.InnerException;
+
+        while (innerException != null) {
+            this.sessionLogger.Error(innerException);
+            innerException = innerException.InnerException;
+        }
         return true;
     }
 

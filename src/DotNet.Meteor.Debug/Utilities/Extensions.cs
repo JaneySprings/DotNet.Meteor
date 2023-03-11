@@ -7,10 +7,6 @@ using System.Net.Sockets;
 namespace DotNet.Meteor.Debug.Utilities;
 
 public static class Extensions {
-    private readonly static string[] MonoExtensions = new String[] {
-        ".cs", ".csx", ".fs", ".fsi", ".ml", ".mli", ".fsx", ".fsscript", ".hx", ".vb", ".razor"
-    };
-
     public static byte[] ConvertToBytes(this object obj) {
         var encoding = Encoding.UTF8;
         var asJson = JsonSerializer.Serialize(obj);
@@ -26,16 +22,6 @@ public static class Extensions {
         return data;
     }
 
-    public static bool HasMonoExtension(this string path) {
-        if (string.IsNullOrEmpty(path))
-            return false;
-        foreach (var ext in MonoExtensions) {
-            if (path.EndsWith(ext, StringComparison.OrdinalIgnoreCase))
-                return true;
-        }
-        return false;
-    }
-
     public static int FindFreePort() {
         TcpListener listener = null;
         try {
@@ -45,24 +31,5 @@ public static class Extensions {
         } finally {
             listener.Stop();
         }
-    }
-}
-
-public static class UriPathConverter {
-    public static string DebuggerPathToClient(string path) {
-        try {
-            var uri = new Uri(path);
-            return uri.AbsoluteUri;
-        } catch {
-            return null;
-        }
-    }
-
-    public static string ClientPathToDebugger(string path) {
-        if (string.IsNullOrEmpty(path))
-            return null;
-        if (Uri.IsWellFormedUriString(path, UriKind.Absolute))
-            return new Uri(path).LocalPath;
-        return null;
     }
 }

@@ -1,15 +1,15 @@
-﻿using System.IO;
+using System.IO;
+using System.Net.Sockets;
 using Mono.Debugger.Soft;
-using DotNet.Meteor.Shared;
 
-namespace DotNet.Meteor.Debug.Pipeline;
+namespace DotNet.Meteor.Debug.Sdb;
 
-class IPhoneTransportConnection : Connection {
-    readonly StreamCommandConnection connection;
+public class ClientConnection : Connection {
+    readonly TcpClient client;
     readonly Stream stream;
 
-    internal IPhoneTransportConnection(StreamCommandConnection connection, Stream stream) {
-        this.connection = connection;
+    internal ClientConnection(TcpClient client, Stream stream) {
+        this.client = client;
         this.stream = stream;
     }
 
@@ -23,14 +23,16 @@ class IPhoneTransportConnection : Connection {
     }
 
     protected override void TransportSetTimeouts(int send_timeout, int receive_timeout) {
+        this.client.SendTimeout = send_timeout;
+        this.client.ReceiveTimeout = receive_timeout;
     }
 
     protected override void TransportClose() {
-        this.connection.Dispose();
+        this.client.Close();
         this.stream.Close();
     }
     protected override void TransportShutdown() {
-        this.connection.Dispose();
-        this.stream.Close();
+        this.client.Dispose();
+        this.stream.Dispose();
     }
 }

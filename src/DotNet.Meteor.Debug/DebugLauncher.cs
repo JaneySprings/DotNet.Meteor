@@ -7,36 +7,26 @@ using DotNet.Meteor.Android;
 using DotNet.Meteor.Apple;
 using System.Net;
 using Mono.Debugging.Soft;
-using DotNet.Meteor.Debug.Pipeline;
+using DotNet.Meteor.Debug.Sdb;
 using Process = System.Diagnostics.Process;
 
 namespace DotNet.Meteor.Debug;
 
-public partial class DebugSession  {
-    private const int MAX_CONNECTION_ATTEMPTS = 20;
-    private const int CONNECTION_ATTEMPT_INTERVAL = 500;
-
-
+public partial class DebugSession {
     private void Connect(LaunchData options, int port) {
         lock (this.locker) {
             SoftDebuggerStartArgs arguments = null;
 
-            if (!options.IsDebug)
-                return;
-
-            if (options.Device.IsAndroid) {
-                arguments = new SoftDebuggerConnectArgs(options.Project.Name, IPAddress.Loopback, port) {
-                    MaxConnectionAttempts = MAX_CONNECTION_ATTEMPTS,
-                    TimeBetweenConnectionAttempts = CONNECTION_ATTEMPT_INTERVAL
+            if (options.Device.IsAndroid || (options.Device.IsIPhone && !options.Device.IsEmulator)) {
+                arguments = new ClientConnectionProvider(IPAddress.Loopback, port, options.Project.Name) {
+                    MaxConnectionAttempts = 100,
+                    TimeBetweenConnectionAttempts = 500
                 };
-            }
-            if (options.Device.IsIPhone || options.Device.IsMacCatalyst) {
-                arguments = new StreamCommandConnectionDebuggerArgs(options.Project.Name, IPAddress.Loopback, port) {
-                    MaxConnectionAttempts = MAX_CONNECTION_ATTEMPTS
-                };
+            } else if (options.Device.IsIPhone || options.Device.IsMacCatalyst) {
+                arguments = new ServerConnectionProvider(IPAddress.Loopback, port, options.Project.Name);
             }
 
-            if (arguments == null)
+            if (arguments == null || !options.IsDebug)
                 return;
 
             this.debuggerExecuting = true;
@@ -66,7 +56,7 @@ public partial class DebugSession  {
         if (configuration.Device.IsEmulator) {
             processes.Add(MonoLaunch.DebugSim(configuration.Device.Serial, configuration.OutputAssembly, port, this));
         } else {
-            //processes.Add(MLaunch.TcpTunnel(configuration.Device.Serial, port));
+            processes.Add(MonoLaunch.TcpTunnel(configuration.Device.Serial, port, this));
             MonoLaunch.InstallDev(configuration.Device.Serial, configuration.OutputAssembly, this);
             processes.Add(MonoLaunch.DebugDev(configuration.Device.Serial, configuration.OutputAssembly, port, this));
         }
@@ -98,29 +88,12 @@ public partial class DebugSession  {
         if (configuration.Device.IsEmulator)
             configuration.Device.Serial = Emulator.Run(configuration.Device.Name).Serial;
 
+        DeviceBridge.Shell(configuration.Device.Serial, "forward", "--remove-all");
+        DeviceBridge.Forward(configuration.Device.Serial, port, port);
         DeviceBridge.Uninstall(configuration.Device.Serial, applicationId, this);
         DeviceBridge.Install(configuration.Device.Serial, configuration.OutputAssembly, this);
-
-        if (configuration.IsDebug) {
-            var androidSdk = DotNet.Meteor.Android.PathUtils.SdkLocation();
-            var arguments = new ProcessArgumentBuilder()
-                .Append("build").AppendQuoted(configuration.Project.Path)
-                .Append( "-t:_Run")
-                .Append($"-f:{configuration.Framework}")
-                .Append($"-p:AndroidSdkDirectory=\"{androidSdk}\"")
-                .Append($"-p:AdbTarget=-s%20{configuration.Device.Serial}")
-                .Append( "-p:AndroidAttachDebugger=true")
-                .Append($"-p:AndroidSdbTargetPort={port}")
-                .Append($"-p:AndroidSdbHostPort={port}");
-
-            var result = new ProcessRunner(Shared.PathUtils.DotNetTool(), arguments, this)
-                .WaitForExit();
-
-            if (result.ExitCode != 0)
-                throw new Exception(string.Join(Environment.NewLine, result.StandardError));
-        } else {
-            DeviceBridge.Launch(configuration.Device.Serial, applicationId, this);
-        }
+        DeviceBridge.Shell(configuration.Device.Serial, "setprop", "debug.mono.connect", "port=10000,timeout=2000000000");
+        DeviceBridge.Launch(configuration.Device.Serial, applicationId, this);
 
         var logger = DeviceBridge.Logcat(configuration.Device.Serial, this);
         processes.Add(logger);
