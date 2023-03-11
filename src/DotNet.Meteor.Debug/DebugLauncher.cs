@@ -9,20 +9,18 @@ using System.Net;
 using Mono.Debugging.Soft;
 using DotNet.Meteor.Debug.Pipeline;
 using Process = System.Diagnostics.Process;
+using DotNet.Meteor.Debug.Sdb;
 
 namespace DotNet.Meteor.Debug;
 
 public partial class DebugSession  {
-    private const int MAX_CONNECTION_ATTEMPTS = 20;
+    private const int MAX_CONNECTION_ATTEMPTS = 100;
     private const int CONNECTION_ATTEMPT_INTERVAL = 500;
 
 
     private void Connect(LaunchData options, int port) {
         lock (this.locker) {
             SoftDebuggerStartArgs arguments = null;
-
-            if (!options.IsDebug)
-                return;
 
             if (options.Device.IsAndroid) {
                 arguments = new SoftDebuggerConnectArgs(options.Project.Name, IPAddress.Loopback, port) {
@@ -31,9 +29,14 @@ public partial class DebugSession  {
                 };
             }
             if (options.Device.IsIPhone || options.Device.IsMacCatalyst) {
-                arguments = new StreamCommandConnectionDebuggerArgs(options.Project.Name, IPAddress.Loopback, port) {
-                    MaxConnectionAttempts = MAX_CONNECTION_ATTEMPTS
-                };
+                if (options.Device.IsIPhone && !options.Device.IsEmulator) {
+                    arguments = new ClientConnectionProvider(IPAddress.Loopback, port, options.Project.Name) {
+                        MaxConnectionAttempts = MAX_CONNECTION_ATTEMPTS,
+                        TimeBetweenConnectionAttempts = CONNECTION_ATTEMPT_INTERVAL
+                    };
+                } else {
+                    arguments = new ServerConnectionProvider(IPAddress.Loopback, port, options.Project.Name);
+                }
             }
 
             if (arguments == null)
@@ -66,7 +69,7 @@ public partial class DebugSession  {
         if (configuration.Device.IsEmulator) {
             processes.Add(MonoLaunch.DebugSim(configuration.Device.Serial, configuration.OutputAssembly, port, this));
         } else {
-            //processes.Add(MLaunch.TcpTunnel(configuration.Device.Serial, port));
+            processes.Add(MonoLaunch.TcpTunnel(configuration.Device.Serial, port, this));
             MonoLaunch.InstallDev(configuration.Device.Serial, configuration.OutputAssembly, this);
             processes.Add(MonoLaunch.DebugDev(configuration.Device.Serial, configuration.OutputAssembly, port, this));
         }

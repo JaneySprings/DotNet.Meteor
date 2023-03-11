@@ -475,6 +475,12 @@ public partial class DebugSession : Session {
 
     private bool OnExceptionHandled(Exception ex) {
         this.sessionLogger.Error(ex);
+        var innerException = ex.InnerException;
+
+        while (innerException != null) {
+            this.sessionLogger.Error(innerException);
+            innerException = innerException.InnerException;
+        }
         return true;
     }
 
