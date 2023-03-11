@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Net.Http;
-using System.Threading.Tasks;
 using NLog;
 
 namespace DotNet.Meteor.Debug.Utilities;
@@ -21,11 +20,11 @@ public class SourceDownloader {
         if (File.Exists(outputFilePath))
             return outputFilePath;
 
-        DowndloadFileAsync(url, outputFilePath);
+        DownloadFileAsync(url, outputFilePath);
         return outputFilePath;
     }
 
-    private async void DowndloadFileAsync(string url, string outputFilePath) {
+    private async void DownloadFileAsync(string url, string outputFilePath) {
         try {
             using var client = new HttpClient();
             using var response = await client.GetAsync(url);
