@@ -92,7 +92,7 @@ public partial class DebugSession {
         DeviceBridge.Forward(configuration.Device.Serial, port, port);
         DeviceBridge.Uninstall(configuration.Device.Serial, applicationId, this);
         DeviceBridge.Install(configuration.Device.Serial, configuration.OutputAssembly, this);
-        DeviceBridge.Shell(configuration.Device.Serial, "setprop", "debug.mono.connect", "port=10000,timeout=2000000000");
+        DeviceBridge.Shell(configuration.Device.Serial, "setprop", "debug.mono.connect", $"port={port}");
         DeviceBridge.Launch(configuration.Device.Serial, applicationId, this);
 
         var logger = DeviceBridge.Logcat(configuration.Device.Serial, this);
