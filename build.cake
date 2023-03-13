@@ -7,7 +7,6 @@ using _Path = System.IO.Path;
 var target = Argument("target", "vsix");
 var version = Argument("release-version", "");
 var configuration = Argument("configuration", "debug");
-var framework = Argument("framework", "net7.0");
 
 ///////////////////////////////////////////////////////////////////////////////
 // COMMON
@@ -16,31 +15,22 @@ var framework = Argument("framework", "net7.0");
 Setup(context => {
    if (string.IsNullOrEmpty(version)) 
       version = DateTime.Now.ToString($"yy.{DateTime.Now.DayOfYear}");
-   Information("Building DotNet.Meteor {0} {1}-{2}", version, framework, configuration);
+   Information("Building DotNet.Meteor {0}-{1}", version, configuration);
 });
 
-Task("prepare")
-   .Does(() => {
-      CleanDirectory(ArtifactsDirectory);
-      CleanDirectory(ExtensionStagingDirectory);
-      CleanDirectories(_Path.Combine(RootDirectory, "**", "bin"));
-      CleanDirectories(_Path.Combine(RootDirectory, "**", "obj"));
-   })
-   .DoesForEach<FilePath>(GetFiles(_Path.Combine(RootDirectory, "*.json")), file => {
-      var regex = @"^\s\s(""version"":\s+)("".+"")(,)";
-      var options = System.Text.RegularExpressions.RegexOptions.Multiline;
-      ReplaceRegexInFiles(file.ToString(), regex, $"  $1\"{version}.0\"$3", options);
-   });
+Task("clean").Does(() => {
+   CleanDirectory(ArtifactsDirectory);
+   CleanDirectory(ExtensionStagingDirectory);
+   CleanDirectories(_Path.Combine(RootDirectory, "**", "bin"));
+   CleanDirectories(_Path.Combine(RootDirectory, "**", "obj"));
+});
 
 ///////////////////////////////////////////////////////////////////////////////
 // DOTNET
 ///////////////////////////////////////////////////////////////////////////////
 
 Task("build-debugger")
-   .DoesForEach<FilePath>(GetFiles(_Path.Combine(MonoDebuggerDirectory, "**", "*.csproj")), file => {
-      var targetRegex = @"(<TargetFrameworks>)(.+)(</TargetFrameworks>)";
-      ReplaceRegexInFiles(file.ToString(), targetRegex, $"$1{framework}$3");
-   })
+   .Does(() => InjectSourceCode())
    .Does(() => DotNetBuild(MeteorDebugProjectPath, new DotNetBuildSettings {
       MSBuildSettings = new DotNetMSBuildSettings { AssemblyVersion = version },
       OutputDirectory = ExtensionAssembliesDirectory,
@@ -86,10 +76,15 @@ Task("manifest").Does(() => {
 });
 
 Task("vsix")
-   .IsDependentOn("prepare")
+   .IsDependentOn("clean")
    .IsDependentOn("build-debugger")
    .IsDependentOn("clean-debugger")
    .IsDependentOn("manifest")
+   .DoesForEach<FilePath>(GetFiles(_Path.Combine(RootDirectory, "*.json")), file => {
+      var regex = @"^\s\s(""version"":\s+)("".+"")(,)";
+      var options = System.Text.RegularExpressions.RegexOptions.Multiline;
+      ReplaceRegexInFiles(file.ToString(), regex, $"  $1\"{version}.0\"$3", options);
+   })
    .Does(() => VscePackage(new VscePackageSettings {
       OutputFilePath = _Path.Combine(ArtifactsDirectory, $"DotNet.Meteor.{version}.0.vsix"),
       WorkingDirectory = RootDirectory

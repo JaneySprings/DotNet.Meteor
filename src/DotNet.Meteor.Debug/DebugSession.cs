@@ -251,7 +251,7 @@ public partial class DebugSession : Session {
         if (bt?.FrameCount >= 0) {
             totalFrames = bt.FrameCount;
 
-            for (var i = args.StartFrame; i < Math.Min(args.Levels, totalFrames); i++) {
+            for (var i = args.StartFrame; i < Math.Min(args.StartFrame + args.Levels, totalFrames); i++) {
                 DebugProtocol.Types.Source source = null;
                 var frame = bt.GetFrame(i);
                 var sourceLocation = frame.SourceLocation;
