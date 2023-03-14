@@ -7,7 +7,9 @@
           "csharp",
           "fsharp",
           "razor",
-          "aspnetcorerazor"
+          "aspnetcorerazor",
+          "xaml",
+          "xml"
         ],
         "program": "./extension/bin/DotNet.Meteor.Debug.dll",
         "args": [
