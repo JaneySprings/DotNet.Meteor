@@ -9,7 +9,7 @@ namespace DotNet.Meteor.Shared {
 
         public static string ExecExtension => IsWindows ? ".exe" : "";
         public static string HomeDirectory => IsWindows
-            ? Environment.GetEnvironmentVariable("HOMEPATH")
+            ? Environment.GetEnvironmentVariable("USERPROFILE")
             : Environment.GetEnvironmentVariable("HOME");
         public static string ProgramX86Directory => IsWindows
             ? Environment.GetEnvironmentVariable("ProgramFiles(x86)")
