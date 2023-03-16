@@ -103,17 +103,22 @@ namespace DotNet.Meteor.Android {
             return Shell(serial, "getprop", "ro.product.model");
         }
 
-        public static Process Logcat(string serial, IProcessLogger logger) {
+        public static void Flush(string serial) {
             var adb = PathUtils.AdbTool();
             new ProcessRunner(adb, new ProcessArgumentBuilder()
                 .Append("-s", serial)
                 .Append("logcat")
                 .Append("-c"))
                 .WaitForExit();
+        }
 
+        public static Process Logcat(string serial, string buffer, string filter, IProcessLogger logger) {
+            var adb = PathUtils.AdbTool();
             var arguments = new ProcessArgumentBuilder()
                 .Append("-s", serial)
                 .Append("logcat")
+                .Append("-s", filter)
+                .Append("-b", buffer)
                 .Append("-v", "tag");
             return new ProcessRunner(adb, arguments, logger).Start();
         }

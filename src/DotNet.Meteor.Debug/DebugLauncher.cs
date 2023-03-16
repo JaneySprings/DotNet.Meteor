@@ -94,8 +94,9 @@ public partial class DebugSession {
         DeviceBridge.Install(configuration.Device.Serial, configuration.OutputAssembly, this);
         DeviceBridge.Shell(configuration.Device.Serial, "setprop", "debug.mono.connect", $"port={port}");
         DeviceBridge.Launch(configuration.Device.Serial, applicationId, this);
+        DeviceBridge.Flush(configuration.Device.Serial);
 
-        var logger = DeviceBridge.Logcat(configuration.Device.Serial, this);
-        processes.Add(logger);
+        processes.Add(DeviceBridge.Logcat(configuration.Device.Serial, "system,crash", "*:I", this));
+        processes.Add(DeviceBridge.Logcat(configuration.Device.Serial, "main", "DOTNET:I", this));
     }
 }
