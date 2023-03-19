@@ -3,15 +3,18 @@ import { SchemaController } from './xaml/schemacontroller';
 import { DotNetTaskProvider } from './tasks/build';
 import { XamlService } from './xaml/xamlservice';
 import { UIController } from './controller';
+import { PublicExports } from './exports';
 import { StateManager } from './cache';
 import * as res from './resources';
 import * as vscode from 'vscode';
 
 
-export function activate(context: vscode.ExtensionContext) {
+export function activate(context: vscode.ExtensionContext): PublicExports | undefined {
 	if (vscode.workspace.workspaceFolders === undefined) 
-		return;
-	
+		return undefined;
+
+	const exports = new PublicExports();
+
 	UIController.activate(context);
 	XamlService.activate(context);
 	StateManager.activate(context);
@@ -35,6 +38,8 @@ export function activate(context: vscode.ExtensionContext) {
 		if (ev.execution.task.definition.type.includes(res.taskDefinitionId))
 			SchemaController.invalidate();
 	}));
+
+	return exports;
 }
 
 export function deactivate() {

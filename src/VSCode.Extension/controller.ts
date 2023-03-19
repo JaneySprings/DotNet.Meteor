@@ -1,6 +1,7 @@
 import { SchemaController } from './xaml/schemacontroller';
 import { Configuration } from './configuration';
 import { CommandInterface } from "./bridge";
+import { PublicExports } from './exports';
 import { StateManager } from './cache';
 import * as res from './resources';
 import * as models from "./models"
@@ -64,18 +65,21 @@ export class UIController {
     public static performSelectProject(item: models.Project | undefined = undefined) {
         Configuration.project = item ?? UIController.projects[0];
         UIController._projectStatusItem.text = `${models.Icon.project} ${Configuration.project?.name}`;
+        PublicExports.instance.projectChangedEventHandler.invoke(Configuration.project);
         SchemaController.invalidate();
         StateManager.saveProject();
     }
     public static performSelectTarget(item: models.Target | undefined = undefined) {
         Configuration.target = item ?? models.Target.Debug;
         UIController._targetStatusItem.text = `${models.Icon.target} ${Configuration.target} | Any CPU`;
+        PublicExports.instance.targetChangedEventHandler.invoke(Configuration.target);
         StateManager.saveTarget();
     }
     public static performSelectDevice(item: models.Device | undefined = undefined) {
         Configuration.device = item ?? UIController.devices[0];
         const icon = Configuration.device.is_mobile ? models.Icon.device : models.Icon.computer;
         UIController._deviceStatusItem.text = `${icon} ${Configuration.device?.name}`;
+        PublicExports.instance.deviceChangedEventHandler.invoke(Configuration.device);
         StateManager.saveDevice();
     }
 
