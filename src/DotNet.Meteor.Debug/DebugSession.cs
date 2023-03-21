@@ -29,7 +29,7 @@ public partial class DebugSession : Session {
     };
     private readonly MonoClient.DebuggerSessionOptions sessionOptions = new MonoClient.DebuggerSessionOptions {
         EvaluationOptions = new MonoClient.EvaluationOptions {
-            EvaluationTimeout = 1000,
+            EvaluationTimeout = 5000,
             MemberEvaluationTimeout = 5000,
             UseExternalTypeResolver = true,
             AllowMethodEvaluation = true,
@@ -130,7 +130,7 @@ public partial class DebugSession : Session {
         response.SetSuccess();
         lock (this.locker) {
             if (this.session?.IsRunning == false && !this.session.HasExited) {
-                this.session.NextLine();
+                this.session.NextInstruction();
                 this.debuggerExecuting = true;
             }
         }
@@ -142,7 +142,7 @@ public partial class DebugSession : Session {
         response.SetSuccess();
         lock (this.locker) {
             if (this.session?.IsRunning == false && !this.session.HasExited) {
-                this.session.StepLine();
+                this.session.StepInstruction();
                 this.debuggerExecuting = true;
             }
         }
@@ -280,12 +280,12 @@ public partial class DebugSession : Session {
                 }
 
                 stackFrames.Add(new DebugProtocol.Types.StackFrame(
-                    this.frameHandles.Create(frame),
+                    this.frameHandles.Create(frame), source, hint,
                     frame.SourceLocation.MethodName,
-                    source,
                     frame.SourceLocation.Line,
                     frame.SourceLocation.Column,
-                    hint
+                    frame.SourceLocation.EndLine,
+                    frame.SourceLocation.EndColumn
                 ));
             }
         }
@@ -365,44 +365,36 @@ public partial class DebugSession : Session {
 #endregion
 #region request: Evaluate
     protected override void Evaluate(DebugProtocol.Response response, DebugProtocol.Arguments args) {
-        string error = null;
-        var expression = args.Expression;
-        if (expression == null) {
-            error = "expression missing";
-        } else {
-            int frameId = args.FrameId;
-            var frame = this.frameHandles.Get(frameId, null);
-            if (frame != null) {
-                if (frame.ValidateExpression(expression)) {
-                    var val = frame.GetExpressionValue(expression, this.sessionOptions.EvaluationOptions);
-                    val.WaitHandle.WaitOne();
-
-                    var flags = val.Flags;
-                    if (flags.HasFlag(MonoClient.ObjectValueFlags.Error) || flags.HasFlag(MonoClient.ObjectValueFlags.NotSupported)) {
-                        error = val.DisplayValue;
-                        if (error.IndexOf("reference not available in the current evaluation context") > 0) {
-                            error = "not available";
-                        }
-                    } else if (flags.HasFlag(MonoClient.ObjectValueFlags.Unknown)) {
-                        error = "invalid expression";
-                    } else if (flags.HasFlag(MonoClient.ObjectValueFlags.Object) && flags.HasFlag(MonoClient.ObjectValueFlags.Namespace)) {
-                        error = "not available";
-                    } else {
-                        int handle = 0;
-                        if (val.HasChildren) {
-                            handle = this.variableHandles.Create(val.GetAllChildren());
-                        }
-                        response.SetSuccess(new DebugProtocol.EvaluateResponseBody(val.DisplayValue, handle));
-                        return;
-                    }
-                } else {
-                    error = "invalid expression";
-                }
-            } else {
-                error = "no active stackframe";
-            }
+        if (string.IsNullOrEmpty(args.Expression)) {
+            response.SetError("expression missing");
+            return;
         }
-        response.SetError($"Evaluate request failed ({error}).");
+        var frame = this.frameHandles.Get(args.FrameId, null);
+        if (frame == null) {
+            response.SetError("no active stackframe");
+            return;
+        }
+        if (!frame.ValidateExpression(args.Expression)) {
+            response.SetError("invalid expression");
+            return;
+        }
+
+        var val = frame.GetExpressionValue(args.Expression, this.sessionOptions.EvaluationOptions);
+        val.WaitHandle.WaitOne();
+
+        if (val.Flags.HasFlag(MonoClient.ObjectValueFlags.Error) || val.Flags.HasFlag(MonoClient.ObjectValueFlags.NotSupported)) {
+            response.SetError(val.DisplayValue);
+        } else if (val.Flags.HasFlag(MonoClient.ObjectValueFlags.Unknown)) {
+            response.SetError("invalid expression");
+        } else if (val.Flags.HasFlag(MonoClient.ObjectValueFlags.Object) && val.Flags.HasFlag(MonoClient.ObjectValueFlags.Namespace)) {
+            response.SetError("not available");
+        } else {
+            int handle = 0;
+            if (val.HasChildren) {
+                handle = this.variableHandles.Create(val.GetAllChildren());
+            }
+            response.SetSuccess(new DebugProtocol.EvaluateResponseBody(val.DisplayValue, handle));
+        }
     }
 #endregion
 #region request: Source
