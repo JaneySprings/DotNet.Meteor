@@ -63,7 +63,6 @@ stages:
         - script: dotnet cake --target=build-tests --configuration=release
           displayName: 'Run tests'
         - task: PublishTestResults@2
-          continueOnError: true
           inputs:
             testResultsFormat: 'VSTest'
             testResultsFiles: 'artifacts/*.trx'
@@ -83,7 +82,6 @@ stages:
         - script: dotnet cake --target=build-tests --configuration=release
           displayName: 'Run tests'
         - task: PublishTestResults@2
-          continueOnError: true
           inputs:
             testResultsFormat: 'VSTest'
             testResultsFiles: 'artifacts/*.trx'
@@ -101,7 +99,6 @@ stages:
         - script: dotnet cake --target=build-tests --configuration=release
           displayName: 'Run tests'
         - task: PublishTestResults@2
-          continueOnError: true
           inputs:
             testResultsFormat: 'VSTest'
             testResultsFiles: 'artifacts/*.trx'
