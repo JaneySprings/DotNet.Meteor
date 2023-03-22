@@ -30,7 +30,6 @@ Task("clean").Does(() => {
 ///////////////////////////////////////////////////////////////////////////////
 
 Task("build-debugger")
-   .Does(() => InjectSourceCode())
    .Does(() => DotNetBuild(MeteorDebugProjectPath, new DotNetBuildSettings {
       MSBuildSettings = new DotNetMSBuildSettings { AssemblyVersion = version },
       OutputDirectory = ExtensionAssembliesDirectory,

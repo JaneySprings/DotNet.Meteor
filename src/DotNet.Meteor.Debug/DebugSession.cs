@@ -82,10 +82,10 @@ public partial class DebugSession : Session {
 #region request: Launch
     protected override void Launch(DebugProtocol.Response response, DebugProtocol.Arguments args) {
         var configuration = new LaunchData(args.Project, args.Device, args.Target);
+        var sourceLocation = Path.Combine(Path.GetDirectoryName(configuration.Project.Path), ".meteor", "sources");
         var port = args.DebuggingPort == 0 ? Extensions.FindFreePort() : args.DebuggingPort;
-        MonoClient.DebuggerSession.DownloadedSourceLocation = Path.Combine(Path.GetDirectoryName(configuration.Project.Path), ".meteor", "sources");
-        if (!Directory.Exists(MonoClient.DebuggerSession.DownloadedSourceLocation))
-            Directory.CreateDirectory(MonoClient.DebuggerSession.DownloadedSourceLocation);
+
+        this.session.SetSourceLocation(sourceLocation);
 
         if (port < 1) {
             response.SetError($"Invalid port '{port}'");
