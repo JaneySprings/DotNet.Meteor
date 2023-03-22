@@ -130,7 +130,7 @@ public partial class DebugSession : Session {
         response.SetSuccess();
         lock (this.locker) {
             if (this.session?.IsRunning == false && !this.session.HasExited) {
-                this.session.NextInstruction();
+                this.session.NextLine();
                 this.debuggerExecuting = true;
             }
         }
@@ -142,7 +142,7 @@ public partial class DebugSession : Session {
         response.SetSuccess();
         lock (this.locker) {
             if (this.session?.IsRunning == false && !this.session.HasExited) {
-                this.session.StepInstruction();
+                this.session.StepLine();
                 this.debuggerExecuting = true;
             }
         }
