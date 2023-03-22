@@ -21,8 +21,10 @@ public class OtherTests: TestFixture {
         var homeDirectory = RuntimeSystem.HomeDirectory;
         if (RuntimeSystem.IsWindows)
             Assert.StartsWith("C:\\Users", homeDirectory);
-        else
+        else if (RuntimeSystem.IsMacOS)
             Assert.StartsWith("/Users", homeDirectory);
+        else
+            Assert.StartsWith("/home", homeDirectory);
     }
 
     [Fact]
