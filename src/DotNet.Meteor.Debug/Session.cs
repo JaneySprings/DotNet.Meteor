@@ -76,7 +76,6 @@ public abstract class Session: IProcessLogger {
         switch(command) {
             case "initialize": Initialize(response, args); break;
             case "launch": Launch(response, args); break;
-            case "attach": Attach(response, args); break;
             case "next": Next(response, args); break;
             case "continue": Continue(response, args); break;
             case "stepIn": StepIn(response, args); break;
@@ -100,7 +99,6 @@ public abstract class Session: IProcessLogger {
 
     protected abstract void Initialize(Response response, Arguments args);
     protected abstract void Launch(Response response, Arguments arguments);
-    protected abstract void Attach(Response response, Arguments arguments);
     protected abstract void Disconnect(Response response, Arguments arguments);
     protected abstract void SetExceptionBreakpoints(Response response, Arguments arguments);
     protected abstract void SetBreakpoints(Response response, Arguments arguments);

@@ -6,7 +6,10 @@ namespace DotNet.Meteor.Android {
     public static class PathUtils {
         public static string SdkLocation(Action<string> errorHandler = null) {
             string path = Environment.GetEnvironmentVariable("ANDROID_SDK_ROOT");
+            if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
+                return path;
 
+            path = Environment.GetEnvironmentVariable("ANDROID_HOME");
             if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
                 return path;
 
@@ -35,6 +38,10 @@ namespace DotNet.Meteor.Android {
         }
 
         public static string AvdLocation() {
+            string path = Environment.GetEnvironmentVariable("ANDROID_USER_HOME");
+            if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
+                return Path.Combine(path, "avd");
+
             return Path.Combine(RuntimeSystem.HomeDirectory, ".android", "avd");
         }
 
