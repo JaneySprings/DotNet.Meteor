@@ -38,9 +38,9 @@ namespace DotNet.Meteor.Android {
         }
 
         public static string AvdLocation() {
-            string path = Environment.GetEnvironmentVariable("ANDROID_USER_HOME");
+            string path = Environment.GetEnvironmentVariable("ANDROID_AVD_HOME");
             if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
-                return Path.Combine(path, "avd");
+                return path;
 
             return Path.Combine(RuntimeSystem.HomeDirectory, ".android", "avd");
         }
