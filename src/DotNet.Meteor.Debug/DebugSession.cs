@@ -97,11 +97,6 @@ public partial class DebugSession : Session {
         Connect(configuration, port);
     }
 #endregion
-#region request: Attach
-    protected override void Attach(DebugProtocol.Response response, DebugProtocol.Arguments args) {
-        response.SetError("Attach is not supported yet");
-    }
-#endregion
 #region request: Disconnect
     protected override void Disconnect(DebugProtocol.Response response, DebugProtocol.Arguments args) {
         lock (this.locker) {
@@ -244,41 +239,42 @@ public partial class DebugSession : Session {
         }
 
         var stackFrames = new List<DebugProtocol.Types.StackFrame>();
-        int totalFrames = 0;
         var bt = thread.Backtrace;
 
-        if (bt?.FrameCount >= 0) {
-            totalFrames = bt.FrameCount;
+        if (bt?.FrameCount < 0) {
+            response.SetError("No stack trace available");
+            return;
+        }
 
-            for (var i = args.StartFrame; i < Math.Min(args.StartFrame + args.Levels, totalFrames); i++) {
-                DebugProtocol.Types.Source source = null;
-                var frame = bt.GetFrame(i);
-                var sourceLocation = frame.SourceLocation;
-                string sourceName = string.Empty;
-                string hint = string.Empty;
+        int totalFrames = bt.FrameCount;
+        for (var i = args.StartFrame; i < Math.Min(args.StartFrame + args.Levels, totalFrames); i++) {
+            DebugProtocol.Types.Source source = null;
+            var frame = bt.GetFrame(i);
+            var sourceLocation = frame.SourceLocation;
+            string sourceName = string.Empty;
+            string hint = string.Empty;
 
-                if (!string.IsNullOrEmpty(sourceLocation.FileName)) {
-                    sourceName = Path.GetFileName(sourceLocation.FileName);
-                    if (File.Exists(sourceLocation.FileName)) {
-                        var path = sourceLocation.FileName;
-                        source = new DebugProtocol.Types.Source(sourceName, path, 0, "normal");
-                        hint = "normal";
-                    }
+            if (!string.IsNullOrEmpty(sourceLocation.FileName)) {
+                sourceName = Path.GetFileName(sourceLocation.FileName);
+                if (File.Exists(sourceLocation.FileName)) {
+                    var path = sourceLocation.FileName;
+                    source = new DebugProtocol.Types.Source(sourceName, path, 0, "normal");
+                    hint = "normal";
                 }
-                if (source == null) {
-                    source = new DebugProtocol.Types.Source(sourceName, null, 1000, "deemphasize");
-                    hint = "subtle";
-                }
-
-                stackFrames.Add(new DebugProtocol.Types.StackFrame(
-                    this.frameHandles.Create(frame), source, hint,
-                    frame.SourceLocation.MethodName,
-                    frame.SourceLocation.Line,
-                    frame.SourceLocation.Column,
-                    frame.SourceLocation.EndLine,
-                    frame.SourceLocation.EndColumn
-                ));
             }
+            if (source == null) {
+                source = new DebugProtocol.Types.Source(sourceName, null, 1000, "deemphasize");
+                hint = "subtle";
+            }
+
+            stackFrames.Add(new DebugProtocol.Types.StackFrame(
+                this.frameHandles.Create(frame), source, hint,
+                frame.SourceLocation.MethodName,
+                frame.SourceLocation.Line,
+                frame.SourceLocation.Column,
+                frame.SourceLocation.EndLine,
+                frame.SourceLocation.EndColumn
+            ));
         }
         response.SetSuccess(new DebugProtocol.StackTraceResponseBody(stackFrames, totalFrames));
     }
@@ -287,24 +283,17 @@ public partial class DebugSession : Session {
     protected override void Scopes(DebugProtocol.Response response, DebugProtocol.Arguments args) {
         int frameId = args.FrameId;
         var frame = this.frameHandles.Get(frameId, null);
-
         var scopes = new List<DebugProtocol.Types.Scope>();
 
-        // TODO: I'm not sure if this is the best response in this scenario but it at least avoids an NRE
         if (frame == null) {
-            response.SetSuccess(new DebugProtocol.ScopesResponseBody(scopes));
+            response.SetError("frame not found");
             return;
         }
 
-        if (this.exception != null) {
+        if (this.exception != null)
             scopes.Add(new DebugProtocol.Types.Scope("Exception", this.variableHandles.Create(new MonoClient.ObjectValue[] { this.exception })));
-        }
 
-        var locals = new[] { frame.GetThisReference() }.Concat(frame.GetParameters()).Concat(frame.GetLocalVariables()).Where(x => x != null).ToArray();
-        if (locals.Length > 0) {
-            scopes.Add(new DebugProtocol.Types.Scope("Local", this.variableHandles.Create(locals)));
-        }
-
+        scopes.Add(new DebugProtocol.Types.Scope("Local", this.variableHandles.Create(frame.GetAllLocals())));
         response.SetSuccess(new DebugProtocol.ScopesResponseBody(scopes));
     }
 #endregion
