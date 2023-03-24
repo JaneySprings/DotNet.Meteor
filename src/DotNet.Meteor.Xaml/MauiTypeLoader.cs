@@ -4,7 +4,7 @@ using System.Reflection;
 namespace DotNet.Meteor.Xaml;
 
 public class MauiTypeLoader {
-    public static Type? VisualElement { get; private set; }
+    public static Type? BindableObject { get; private set; }
     public static Type? XmlnsDefinitionAttribute { get; private set; }
     public string? AssembliesDirectory { get; private set; }
 
@@ -12,7 +12,7 @@ public class MauiTypeLoader {
     private readonly string projectFilePath;
 
     private const string MAUI_CONTROLS_ASSEMBLY = "Microsoft.Maui.Controls.dll";
-    private const string MAUI_VISUAL_ELEMENT = "Microsoft.Maui.Controls.VisualElement";
+    private const string MAUI_BINDABLE_OBJECT = "Microsoft.Maui.Controls.BindableObject";
     private const string MAUI_XMLNS_DEFINITION = "Microsoft.Maui.Controls.XmlnsDefinitionAttribute";
 
 
@@ -23,7 +23,7 @@ public class MauiTypeLoader {
 
 
     public bool LoadComparedTypes() {
-        if (VisualElement != null && XmlnsDefinitionAttribute != null)
+        if (BindableObject != null && XmlnsDefinitionAttribute != null)
             return true;
 
         var projectRootDirectory = Path.GetDirectoryName(this.projectFilePath)!;
@@ -46,9 +46,9 @@ public class MauiTypeLoader {
 
         try {
             var controlsAssembly = Assembly.LoadFrom(Path.Combine(AssembliesDirectory, MAUI_CONTROLS_ASSEMBLY));
-            VisualElement = controlsAssembly.GetType(MAUI_VISUAL_ELEMENT);
+            BindableObject = controlsAssembly.GetType(MAUI_BINDABLE_OBJECT);
             XmlnsDefinitionAttribute = controlsAssembly.GetType(MAUI_XMLNS_DEFINITION);
-            return VisualElement != null && XmlnsDefinitionAttribute != null;
+            return BindableObject != null && XmlnsDefinitionAttribute != null;
         } catch (Exception e) {
             this.logger?.Invoke($"Could not load {MAUI_CONTROLS_ASSEMBLY}: {e.Message}");
             return false;

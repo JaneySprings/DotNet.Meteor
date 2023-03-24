@@ -14,7 +14,7 @@ public class Reflector {
         string xmlNamespace = $"assembly={assembly.GetName().Name}";
 
         foreach (var type in assembly.GetTypes())
-            if (type.IsSubclassOf(MauiTypeLoader.VisualElement!) && !type.IsAbstract)
+            if (type.IsSubclassOf(MauiTypeLoader.BindableObject!) && !type.IsAbstract)
                 elements.Add(new TypeInfo(type.Name, type.Namespace, GetAttributes(type)));
 
         var xmlnsAttribute = assembly.GetCustomAttributes().FirstOrDefault(it => it.GetType() == MauiTypeLoader.XmlnsDefinitionAttribute!);
