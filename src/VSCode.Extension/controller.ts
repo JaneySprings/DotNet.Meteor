@@ -1,4 +1,4 @@
-import { SchemaController } from './xaml/schemacontroller';
+import { XamlService } from './xaml/service';
 import { Configuration } from './configuration';
 import { CommandInterface } from "./bridge";
 import { PublicExports } from './exports';
@@ -66,7 +66,7 @@ export class UIController {
         Configuration.project = item ?? UIController.projects[0];
         UIController._projectStatusItem.text = `${models.Icon.project} ${Configuration.project?.name}`;
         PublicExports.instance.projectChangedEventHandler.invoke(Configuration.project);
-        SchemaController.invalidate();
+        XamlService.invalidate();
         StateManager.saveProject();
     }
     public static performSelectTarget(item: models.Target | undefined = undefined) {

@@ -32,7 +32,7 @@ public class Reflector {
             var declaringType = ev.DeclaringType;
             var nspace = $"{declaringType?.Namespace}.{declaringType?.Name}";
             properties.Add(new AttributeInfo(
-                ev.Name, nspace, ev.EventHandlerType?.Name
+                ev.Name, nspace, ev.EventHandlerType?.Name, isEvent: true
             ));
         }
         // Properties
@@ -55,6 +55,30 @@ public class Reflector {
                 properties.Add(new AttributeInfo(property.Name, nspace, fieldType));
             } catch {
                 this.logger?.Invoke($"Error injecting {property.Name} from {type.Name}");
+            }
+        }
+        // Attached properties
+        foreach (var method in type.GetMethods(BindingFlags.Static|BindingFlags.Public|BindingFlags.FlattenHierarchy).Where(it => it.Name.StartsWith("Get", StringComparison.Ordinal))) {
+            try {
+                if (method.Name.Contains("InheritedBindingContext"))
+                    continue; /* Ignore this */
+                var propertyType = method.ReturnType;
+                var declaringType = method.DeclaringType;
+                var nspace = $"{declaringType?.Namespace}.{declaringType?.Name}";
+                object fieldType = propertyType.Name;
+
+                if (propertyType.IsEnum)
+                    fieldType = Enum.GetNames(propertyType);
+
+                if (propertyType.IsValueType && !propertyType.IsPrimitive)
+                    fieldType = propertyType
+                        .GetFields()
+                        .ToList()
+                        .ConvertAll(it => it.Name);
+
+                properties.Add(new AttributeInfo(method.Name[3..], nspace, fieldType, isAttached: true));
+            } catch {
+                this.logger?.Invoke($"Error injecting {method.Name} from {type.Name}");
             }
         }
 
