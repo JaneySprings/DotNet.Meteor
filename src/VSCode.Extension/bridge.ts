@@ -1,8 +1,8 @@
-import path = require('path');
 import { execSync, exec } from 'child_process';
 import { Project, Device } from './models';
 import { extensions } from 'vscode';
 import * as res from './resources';
+import * as path from 'path';
 
 
 export class CommandInterface {

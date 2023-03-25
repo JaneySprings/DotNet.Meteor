@@ -1,7 +1,6 @@
 import { DotNetDebuggerConfiguration } from './tasks/debug';
-import { SchemaController } from './xaml/schemacontroller';
 import { DotNetTaskProvider } from './tasks/build';
-import { XamlService } from './xaml/xamlservice';
+import { XamlService } from './xaml/service';
 import { UIController } from './controller';
 import { PublicExports } from './exports';
 import { StateManager } from './cache';
@@ -36,7 +35,7 @@ export function activate(context: vscode.ExtensionContext): PublicExports | unde
 	}));
 	context.subscriptions.push(vscode.tasks.onDidEndTask(ev => {
 		if (ev.execution.task.definition.type.includes(res.taskDefinitionId))
-			SchemaController.invalidate();
+			XamlService.invalidate();
 	}));
 
 	return exports;

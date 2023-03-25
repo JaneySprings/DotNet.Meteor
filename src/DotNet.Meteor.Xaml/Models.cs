@@ -28,12 +28,25 @@ public class TypeInfo {
 public class AttributeInfo {
     [JsonPropertyName("name")] public string? Name { get; set; }
     [JsonPropertyName("namespace")] public string? Namespace { get; set; }
-    [JsonPropertyName("doc")] public string? Documentation { get; set; }
     [JsonPropertyName("type")] public object? Type { get; set; }
 
-    public AttributeInfo(string name, string? nspace, object? type) {
+    [JsonPropertyName("doc")] 
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Documentation { get; set; }
+
+    [JsonPropertyName("isEvent")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+     public bool IsEvent { get; set; }
+
+    [JsonPropertyName("isAttached")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool IsAttached { get; set; }
+
+    public AttributeInfo(string name, string? nspace, object? type, bool isEvent = false, bool isAttached = false) {
         Name = name;
         Namespace = nspace;
         Type = type;
+        IsEvent = isEvent;
+        IsAttached = isAttached;
     }
 }
