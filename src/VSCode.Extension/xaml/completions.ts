@@ -90,7 +90,6 @@ class CompletionCreator {
         const ci = new vscode.CompletionItem(type.name, vscode.CompletionItemKind.Class);
         ci.detail = `Class ${type.namespace}.${type.name}`;
         ci.documentation = type.doc;
-        ci.insertText = new vscode.SnippetString(`${type.name} $1>`);
         return ci;
     }
 
