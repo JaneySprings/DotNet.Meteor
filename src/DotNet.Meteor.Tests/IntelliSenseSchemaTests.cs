@@ -16,7 +16,9 @@ public class IntelliSenseSchemaTests: TestFixture {
         </Project>
         ");
         CreateOutputAssembly("Debug", "net7.0-droid", null, "Microsoft.Maui.Controls.dll", false);
+        Thread.Sleep(1000);
         CreateOutputAssembly("Debug", "net7.0-ios", DeviceService.AppleArm64, "Microsoft.Maui.Controls.dll", false);
+        Thread.Sleep(1000);
         var expectedPath = CreateOutputAssembly("Debug", "net7.0-ios", DeviceService.AppleSimulatorX64, "Microsoft.Maui.Controls.dll", false);
         var typeLoader = new MauiTypeLoader(projectPath, s => {
             if (!s.Contains("Bad IL format"))
