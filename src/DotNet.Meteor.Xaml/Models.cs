@@ -5,6 +5,8 @@ namespace DotNet.Meteor.Xaml;
 public class SchemaInfo {
     [JsonPropertyName("xmlns")] public string? Xmlns { get; set; }
     [JsonPropertyName("types")] public List<TypeInfo>? Types { get; set; }
+    [JsonPropertyName("timestamp")] public string? TimeStamp { get; set; }
+    [JsonPropertyName("target")] public string? Target { get; set; }
 
     public SchemaInfo(string xmlns, List<TypeInfo> types) {
         Xmlns = xmlns;

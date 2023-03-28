@@ -9,7 +9,8 @@ public class Reflector {
         this.logger = logger;
     }
 
-    public SchemaInfo CreateAlias(Assembly assembly) {
+    public SchemaInfo CreateAlias(string path) {
+        var assembly = Assembly.LoadFrom(path);
         var elements = new List<TypeInfo>();
         string xmlNamespace = $"assembly={assembly.GetName().Name}";
 
@@ -25,13 +26,13 @@ public class Reflector {
     }
 
     private List<AttributeInfo> GetAttributes(Type type) {
-        var properties = new List<AttributeInfo>();
+        var attributes = new List<AttributeInfo>();
 
         // Event handlers
         foreach (var ev in type.GetEvents()) {
             var declaringType = ev.DeclaringType;
             var nspace = $"{declaringType?.Namespace}.{declaringType?.Name}";
-            properties.Add(new AttributeInfo(
+            attributes.Add(new AttributeInfo(
                 ev.Name, nspace, ev.EventHandlerType?.Name, isEvent: true
             ));
         }
@@ -52,7 +53,7 @@ public class Reflector {
                         .ToList()
                         .ConvertAll(it => it.Name);
 
-                properties.Add(new AttributeInfo(property.Name, nspace, fieldType));
+                attributes.Add(new AttributeInfo(property.Name, nspace, fieldType));
             } catch {
                 this.logger?.Invoke($"Error injecting {property.Name} from {type.Name}");
             }
@@ -76,12 +77,12 @@ public class Reflector {
                         .ToList()
                         .ConvertAll(it => it.Name);
 
-                properties.Add(new AttributeInfo(method.Name[3..], nspace, fieldType, isAttached: true));
+                attributes.Add(new AttributeInfo(method.Name[3..], nspace, fieldType, isAttached: true));
             } catch {
                 this.logger?.Invoke($"Error injecting {method.Name} from {type.Name}");
             }
         }
 
-        return properties;
+        return attributes;
     }
 }

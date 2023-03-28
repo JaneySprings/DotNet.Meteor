@@ -19,5 +19,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DotNet.Meteor.Shared\DotNet.Meteor.Shared.csproj" />
+    <ProjectReference Include="..\DotNet.Meteor.Xaml\DotNet.Meteor.Xaml.csproj" />
   </ItemGroup>
 </Project>
