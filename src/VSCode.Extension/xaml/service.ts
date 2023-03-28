@@ -52,9 +52,9 @@ export class XamlService {
         const projectPath = Configuration.project?.path;
         if (projectPath === undefined)
             return;
-        const result = await CommandInterface.xamlSchema(projectPath);
-        if (result === false)
-            return;
+
+        await CommandInterface.xamlSchema(projectPath);
+
         const generatedPath = path.join(path.dirname(projectPath), '.meteor', 'generated');
         if (fs.existsSync(generatedPath) === false)
             return;
