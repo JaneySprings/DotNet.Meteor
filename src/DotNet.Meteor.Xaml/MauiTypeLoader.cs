@@ -1,4 +1,3 @@
-using System.IO.Compression;
 using System.Reflection;
 
 namespace DotNet.Meteor.Xaml;
@@ -35,14 +34,11 @@ public class MauiTypeLoader {
         }
 
         // Get newer directory by creation time
-        AssembliesDirectory = FindAssembliesDirectory(frameworksDirectory);
+        AssembliesDirectory = FindActualAssembliesDirectory(frameworksDirectory);
         if (AssembliesDirectory == null) {
             this.logger?.Invoke("Could not find assemblies directory");
             return false;
         }
-
-        if (AssembliesDirectory.Contains("-android", StringComparison.OrdinalIgnoreCase))
-            ExtractMissingAndroidAssemblies(AssembliesDirectory);
 
         try {
             var controlsAssembly = Assembly.LoadFrom(Path.Combine(AssembliesDirectory, MAUI_CONTROLS_ASSEMBLY));
@@ -55,41 +51,23 @@ public class MauiTypeLoader {
         }
     }
 
-    public string? FindAssembliesDirectory(string basePath) {
-        var assemblies = Directory.GetFiles(basePath, "*.dll", SearchOption.TopDirectoryOnly);
+    private string? FindActualAssembliesDirectory(string basePath) {
+        var assembliesDirectories = new List<string>();
+        FindAssembliesDirectory(basePath, assembliesDirectories);
 
-        if (assemblies.Any())
-            return basePath;
-
-        var directories = Directory.GetDirectories(basePath)
-            .OrderByDescending(Directory.GetLastWriteTime);
-        foreach (var directory in directories) {
-            var result = FindAssembliesDirectory(directory);
-            if (result != null)
-                return result;
-        }
-
-        return null;
+        return assembliesDirectories.OrderByDescending(Directory.GetLastWriteTime).FirstOrDefault();
     }
 
-    private void ExtractMissingAndroidAssemblies(string assembliesDirectory) {
-        var apkFile = Directory.GetFiles(assembliesDirectory, "*-Signed.apk", SearchOption.TopDirectoryOnly).FirstOrDefault();
-        if (apkFile == null) {
-            this.logger?.Invoke($"Could not find *-Signed.apk file in {assembliesDirectory}");
-            return;
-        }
+    private void FindAssembliesDirectory(string basePath, List<string> assembliesDirectories) {
+        if (basePath.Contains("-android", StringComparison.OrdinalIgnoreCase))
+            ApkTool.ExtractMissingAndroidAssemblies(basePath, this.logger);
 
-        var tempDirectory = Path.Combine(assembliesDirectory, "_temp");
-        Directory.CreateDirectory(tempDirectory);
-        ZipFile.ExtractToDirectory(apkFile, tempDirectory);
+        var assemblies = Directory.GetFiles(basePath, "*.dll", SearchOption.TopDirectoryOnly);
 
-        var apkAssembliesDirectory = Path.Combine(tempDirectory, "assemblies");
-        foreach (var file in Directory.GetFiles(apkAssembliesDirectory, "*.dll", SearchOption.TopDirectoryOnly)) {
-            var fileName = Path.GetFileName(file);
-            var targetFile = Path.Combine(assembliesDirectory, fileName);
-            File.Copy(file, targetFile, true);
-        }
+        if (assemblies.Any() && assemblies.Any(x => x.Contains(MAUI_CONTROLS_ASSEMBLY, StringComparison.OrdinalIgnoreCase)))
+            assembliesDirectories.Add(basePath);
 
-        Directory.Delete(tempDirectory, true);
+        foreach (var directory in Directory.GetDirectories(basePath))
+            FindAssembliesDirectory(directory, assembliesDirectories);
     }
 }
