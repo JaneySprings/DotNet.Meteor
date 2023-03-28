@@ -46,8 +46,8 @@ public abstract class TestFixture {
         string projectDir = Path.Combine(MockDataDirectory, ProjectName);
         string assemblyDir = runtime == null
             ? Path.Combine(projectDir, "bin", target, framework)
-            : Path.Combine(projectDir, "bin", target, framework, runtime);  
-        
+            : Path.Combine(projectDir, "bin", target, framework, runtime);
+
         if (includeWinDir)
             assemblyDir = Path.Combine(assemblyDir, "win-x64");
 
