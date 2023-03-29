@@ -72,6 +72,14 @@ public abstract class TestFixture {
 
         return assemblyDir;
     }
+
+    protected string CreateOutputAssemblyFile(string path, string name) {
+        string assemblyPath = Path.Combine(path, name);
+        using var writer = File.CreateText(assemblyPath);
+        writer.WriteLine("bin-data...");
+
+        return assemblyPath;
+    }
     protected void DeleteMockData() {
         Directory.Delete(MockDataDirectory, true);
     }
