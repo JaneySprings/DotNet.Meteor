@@ -41,6 +41,7 @@ export class UIController {
             UIController._projectStatusItem.hide();
             UIController._targetStatusItem.hide();
             UIController._deviceStatusItem.hide();
+            PublicExports.instance.invokeAll();
             return;
         }
         if (Configuration.project === undefined || Configuration.device === undefined)
