@@ -11,6 +11,12 @@ export class PublicExports {
         this.targetChangedEventHandler = new EventHandler();
         this.deviceChangedEventHandler = new EventHandler();
     }
+
+    public invokeAll() {
+        this.projectChangedEventHandler.invoke(undefined);
+        this.targetChangedEventHandler.invoke(undefined);
+        this.deviceChangedEventHandler.invoke(undefined);
+    }
 }
 
 
