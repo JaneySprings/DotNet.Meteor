@@ -13,8 +13,12 @@ var configuration = Argument("configuration", "debug");
 ///////////////////////////////////////////////////////////////////////////////
 
 Setup(context => {
-   if (string.IsNullOrEmpty(version)) 
-      version = DateTime.Now.ToString($"yy.{DateTime.Now.DayOfYear}");
+   if (string.IsNullOrEmpty(version)) {
+      var major = DateTime.Now.ToString("yy");
+      var minor = DateTime.Now.Month < 7 ? "1" : "2";
+      var build = DateTime.Now.DayOfYear;
+      version = $"{major}.{minor}.{major}{build:000}";
+   }
    Information("Building DotNet.Meteor {0}-{1}", version, configuration);
 });
 
@@ -82,10 +86,10 @@ Task("vsix")
    .DoesForEach<FilePath>(GetFiles(_Path.Combine(RootDirectory, "*.json")), file => {
       var regex = @"^\s\s(""version"":\s+)("".+"")(,)";
       var options = System.Text.RegularExpressions.RegexOptions.Multiline;
-      ReplaceRegexInFiles(file.ToString(), regex, $"  $1\"{version}.0\"$3", options);
+      ReplaceRegexInFiles(file.ToString(), regex, $"  $1\"{version}\"$3", options);
    })
    .Does(() => VscePackage(new VscePackageSettings {
-      OutputFilePath = _Path.Combine(ArtifactsDirectory, $"DotNet.Meteor.{version}.0.vsix"),
+      OutputFilePath = _Path.Combine(ArtifactsDirectory, $"DotNet.Meteor.{version}.vsix"),
       WorkingDirectory = RootDirectory
    }));
 

@@ -37,6 +37,8 @@ public partial class DebugSession : Session {
             AllowToStringCalls = true,
             AllowTargetInvoke = true,
             ChunkRawStrings = false,
+            EllipsizeStrings = true,
+            EllipsizedLength = byte.MaxValue,
             CurrentExceptionTag = "$exception",
             IntegerDisplayFormat = MonoClient.IntegerDisplayFormat.Decimal,
             StackFrameFormat = new MonoClient.StackFrameFormat()
