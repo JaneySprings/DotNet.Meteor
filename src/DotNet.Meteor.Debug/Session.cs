@@ -7,13 +7,12 @@ using DotNet.Meteor.Processes;
 using DotNet.Meteor.Debug.Protocol;
 using DotNet.Meteor.Debug.Protocol.Events;
 using DotNet.Meteor.Debug.Utilities;
+using Mono.Debugging.Client;
 using System.Text.Json;
-using NLog;
 
 namespace DotNet.Meteor.Debug;
 
 public abstract class Session: IProcessLogger {
-    protected readonly Logger sessionLogger = LogManager.GetCurrentClassLogger();
     private bool stopGlobalLoop;
     private Stream outputStream;
 
@@ -40,21 +39,21 @@ public abstract class Session: IProcessLogger {
             foreach(Match match in Regex.Matches(readed, @"{(.*)}", RegexOptions.Multiline)) {
                 var request = JsonSerializer.Deserialize<Request>(match.Value)!;
                 var response = new Response(request);
-                this.sessionLogger.Debug($"DAP Request: {match.Value}");
+                GetLogger().LogMessage($"DAP Request: {match.Value}");
 
                 try {
                     DispatchRequest(request.Command, request.Arguments, response);
                 } catch (Exception e) {
                     var message = $"Error occurred while processing {request.Command} request. " + e.Message;
                     response.SetError(message, new ErrorResponseBody(e));
-                    this.sessionLogger.Error(e, message);
+                    GetLogger().LogError(message, e);
                 }
 
                 SendMessage(response);
             }
         }
         SendMessage(new ExitedEvent(0));
-        this.sessionLogger.Debug("Debugger session terminated.");
+        GetLogger().LogMessage("Debugger session terminated.");
     }
 
     protected void StopGlobalLoop() {
@@ -62,8 +61,10 @@ public abstract class Session: IProcessLogger {
     }
 
     protected void SendMessage(ProtocolMessage message) {
+        if (message is not Event ev || ev.EventType != "output")
+            GetLogger().LogMessage($"DAP Response: {JsonSerializer.Serialize((object)message)}");
+
         var data = message.ConvertToBytes();
-        this.sessionLogger.Debug($"DAP Response: {JsonSerializer.Serialize((object)message)}");
         this.outputStream.Write(data, 0, data.Length);
         this.outputStream.Flush();
     }
@@ -91,7 +92,7 @@ public abstract class Session: IProcessLogger {
             case "exceptionInfo": ExceptionInfo(response, args); break;
             case "evaluate": Evaluate(response, args); break;
             case "disconnect": Disconnect(response, args); break;
-            default: this.sessionLogger.Error($"unrecognized request '{command}'"); break;
+            default: GetLogger().LogError($"unrecognized request '{command}'", null); break;
         }
     }
 
@@ -114,6 +115,8 @@ public abstract class Session: IProcessLogger {
     protected abstract void Threads(Response response, Arguments arguments);
     protected abstract void ExceptionInfo(Response response, Arguments arguments);
     protected abstract void Evaluate(Response response, Arguments arguments);
+
+    protected abstract ICustomLogger GetLogger();
 
     public void OnOutputDataReceived(string stdout) {
         SendConsoleEvent("stdout", stdout);

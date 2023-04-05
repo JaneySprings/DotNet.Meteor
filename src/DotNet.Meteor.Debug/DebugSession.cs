@@ -65,6 +65,8 @@ public partial class DebugSession : Session {
         this.session.TargetThreadStopped += TargetThreadStopped;
     }
 
+    protected override MonoClient.ICustomLogger GetLogger() => MonoClient.DebuggerLoggingService.CustomLogger;
+
 #region request: Initialize
     protected override void Initialize(DebugProtocol.Response response, DebugProtocol.Arguments args) {
         response.SetSuccess(new DebugProtocol.Capabilities {
@@ -442,19 +444,13 @@ public partial class DebugSession : Session {
     }
 
     private bool OnExceptionHandled(Exception ex) {
-        this.sessionLogger.Error(ex);
-        var innerException = ex.InnerException;
-
-        while (innerException != null) {
-            this.sessionLogger.Error(innerException);
-            innerException = innerException.InnerException;
-        }
+        GetLogger().LogError(ex.Message, ex);
         return true;
     }
 
     private void OnSessionLog(bool isError, string message) {
-        if (isError) this.sessionLogger.Error($"Mono: {message.Trim()}");
-        else this.sessionLogger.Debug($"Mono: {message.Trim()}");
+        if (isError) GetLogger().LogError($"Mono: {message.Trim()}", null);
+        else GetLogger().LogMessage($"Mono: {message.Trim()}");
     }
     private void OnLog(bool isError, string message) {
         if (isError) OnErrorDataReceived(message);
