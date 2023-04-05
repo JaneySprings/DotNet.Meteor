@@ -46,7 +46,6 @@ namespace DotNet.Meteor.Debug.CLI {
         }
 
         public static void StartSession(string[] args) {
-            Console.WriteLine("Starting Mono debugger session...");
             var debugSession = new DebugSession();
             debugSession.Start(Console.OpenStandardInput(), Console.OpenStandardOutput()).Wait();
         }

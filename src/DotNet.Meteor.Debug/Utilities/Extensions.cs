@@ -3,13 +3,14 @@ using System.Text;
 using System.Text.Json;
 using System.Net;
 using System.Net.Sockets;
+using DotNet.Meteor.Debug.Protocol;
 
 namespace DotNet.Meteor.Debug.Utilities;
 
 public static class Extensions {
-    public static byte[] ConvertToBytes(this object obj) {
+    public static byte[] ConvertToBytes(this ProtocolMessage obj) {
         var encoding = Encoding.UTF8;
-        var asJson = JsonSerializer.Serialize(obj);
+        var asJson = JsonSerializer.Serialize((object)obj);
         byte[] jsonBytes = encoding.GetBytes(asJson);
 
         string header = string.Format("Content-Length: {0}{1}", jsonBytes.Length, "\r\n\r\n");

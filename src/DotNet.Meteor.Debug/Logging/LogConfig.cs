@@ -13,7 +13,7 @@ public static class LogConfig {
     public static readonly string DebugLogFile = Path.Combine(_logDir, "Debug.log");
 
     public static void InitializeLog() {
-        var conf = new LoggingConfiguration();
+        var configuration = new LoggingConfiguration();
 
         var commonTarget = new FileTarget() {
             FileName = DebugLogFile,
@@ -21,24 +21,24 @@ public static class LogConfig {
             DeleteOldFileOnStartup = true,
         };
         var commonAsyncTarget = new AsyncTargetWrapper(commonTarget, 500, AsyncTargetWrapperOverflowAction.Discard);
-        conf.AddTarget("log", commonAsyncTarget);
+        configuration.AddTarget("log", commonAsyncTarget);
 
         var errorTarget = new FileTarget() {
             MaxArchiveFiles = 1,
             ArchiveNumbering = ArchiveNumberingMode.Date,
             ArchiveOldFileOnStartup = true,
             FileName = ErrorLogFile,
-            Layout = "${longdate}|${message}|${callsite}|${stacktrace:format=Raw}",
+            Layout = "${longdate}|${message}${newline}at ${stacktrace:format=Flat:separator= at :reverse=true}${newline}${callsite-filename}[${callsite-linenumber}]",
             DeleteOldFileOnStartup = true
         };
         var errorAsyncTarget = new AsyncTargetWrapper(errorTarget, 500, AsyncTargetWrapperOverflowAction.Discard);
-        conf.AddTarget("errorLog", errorAsyncTarget);
+        configuration.AddTarget("errorLog", errorAsyncTarget);
 
-        conf.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, commonAsyncTarget));
-        conf.LoggingRules.Add(new LoggingRule("*", LogLevel.Error, errorAsyncTarget));
+        configuration.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, commonAsyncTarget));
+        configuration.LoggingRules.Add(new LoggingRule("*", LogLevel.Error, errorAsyncTarget));
 
         LogManager.ThrowExceptions = false;
-        LogManager.Configuration = conf;
+        LogManager.Configuration = configuration;
         LogManager.ReconfigExistingLoggers();
     }
 }

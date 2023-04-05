@@ -56,7 +56,6 @@ Task("clean-debugger")
          _Path.Combine(ExtensionAssembliesDirectory, 
          _Path.GetFileNameWithoutExtension(MeteorDebugProjectPath))
       ));
-      DeleteFiles(GetFiles(_Path.Combine(ExtensionAssembliesDirectory, "*.pdb")));
       DeleteFiles(GetFiles(_Path.Combine(ExtensionAssembliesDirectory, "*.deps.json")));
       DeleteFiles(GetFiles(_Path.Combine(ExtensionAssembliesDirectory, "*.xml")));
    });
@@ -89,7 +88,7 @@ Task("vsix")
       ReplaceRegexInFiles(file.ToString(), regex, $"  $1\"{version}\"$3", options);
    })
    .Does(() => VscePackage(new VscePackageSettings {
-      OutputFilePath = _Path.Combine(ArtifactsDirectory, $"DotNet.Meteor.{version}.vsix"),
+      OutputFilePath = _Path.Combine(ArtifactsDirectory, $"DotNet.Meteor.{version}-{configuration}.vsix"),
       WorkingDirectory = RootDirectory
    }));
 
