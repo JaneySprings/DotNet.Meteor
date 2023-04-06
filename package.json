@@ -28,7 +28,8 @@
     "vscode": "^1.73.0"
   },
   "activationEvents": [
-    "onLanguage:{csharp,fsharp}",
+    "onLanguage:csharp",
+    "onLanguage:fsharp",
     "workspaceContains:**/*.{csproj,fsproj,sln,slnf,csx}"
   ],
   "main": "./extension/extension.js",
