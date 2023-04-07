@@ -20,6 +20,7 @@ public partial class DebugSession : Session {
     private MonoClient.ProcessInfo activeProcess;
     private readonly List<Process> processes = new List<Process>();
     private readonly AutoResetEvent resumeEvent = new AutoResetEvent(false);
+    private readonly SourceDownloader sourceDownloader = new SourceDownloader();
     private readonly Handles<MonoClient.StackFrame> frameHandles = new Handles<MonoClient.StackFrame>();
     private readonly Handles<MonoClient.ObjectValue[]> variableHandles = new Handles<MonoClient.ObjectValue[]>();
     private readonly Dictionary<int, DebugProtocol.Types.Thread> seenThreads = new Dictionary<int, DebugProtocol.Types.Thread>();
@@ -86,10 +87,8 @@ public partial class DebugSession : Session {
 #region request: Launch
     protected override void Launch(DebugProtocol.Response response, DebugProtocol.Arguments args) {
         var configuration = new LaunchData(args.Project, args.Device, args.Target);
-        var sourceLocation = Path.Combine(Path.GetDirectoryName(configuration.Project.Path), ".meteor", "sources");
         var port = args.DebuggingPort == 0 ? Extensions.FindFreePort() : args.DebuggingPort;
-
-        this.session.SetSourceLocation(sourceLocation);
+        this.sourceDownloader.Configure(configuration.Project.Path, s => GetLogger().LogMessage(s));
 
         if (port < 1) {
             response.SetError($"Invalid port '{port}'");
@@ -251,7 +250,7 @@ public partial class DebugSession : Session {
         }
 
         int totalFrames = bt.FrameCount;
-        for (var i = args.StartFrame; i < Math.Min(args.StartFrame + args.Levels, totalFrames); i++) {
+        for (int i = args.StartFrame; i < Math.Min(args.StartFrame + args.Levels, totalFrames); i++) {
             DebugProtocol.Types.Source source = null;
             var frame = bt.GetFrame(i);
             var sourceLocation = frame.SourceLocation;
@@ -262,6 +261,14 @@ public partial class DebugSession : Session {
                 sourceName = Path.GetFileName(sourceLocation.FileName);
                 if (File.Exists(sourceLocation.FileName)) {
                     var path = sourceLocation.FileName;
+                    source = new DebugProtocol.Types.Source(sourceName, path, 0, "normal");
+                    hint = "normal";
+                }
+            }
+            if (sourceLocation.SourceLink != null && source == null) {
+                sourceName = Path.GetFileName(sourceLocation.SourceLink.RelativeFilePath);
+                string path = this.sourceDownloader.DownloadSourceFile(sourceLocation.SourceLink.Uri, sourceLocation.SourceLink.RelativeFilePath);
+                if (!string.IsNullOrEmpty(path)) {
                     source = new DebugProtocol.Types.Source(sourceName, path, 0, "normal");
                     hint = "normal";
                 }
