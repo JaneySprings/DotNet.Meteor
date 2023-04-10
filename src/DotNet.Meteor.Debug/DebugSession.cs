@@ -99,6 +99,7 @@ public partial class DebugSession : Session {
             arguments.ConfigurationProperties["selected_device"].ToObject<DeviceData>()!,
             arguments.ConfigurationProperties["selected_target"].ToObject<string>()!
         );
+        configuration.TryLoad(ex => throw new ProtocolException($"Failed to load launch configuration. {ex.Message}"));
         this.sourceDownloader.Configure(configuration.Project.Path, s => GetLogger().LogMessage(s));
         var port = arguments.ConfigurationProperties["debugging_port"].ToObject<int>()!;
         
@@ -206,14 +207,12 @@ public partial class DebugSession : Session {
         var breakpointsInfos = arguments.Breakpoints;
         var sourcePath = arguments.Source?.Path;
 
-        // Remove unexisting breakpoints
+        // Remove all file breakpoints
         var fileBreakpoints = this.session.Breakpoints.GetBreakpointsAtFile(sourcePath);
         foreach(var fileBreakpoint in fileBreakpoints) {
-            if (breakpointsInfos.Find(b => b.Line == fileBreakpoint.Line) == null) {
-                this.session.Breakpoints.Remove(fileBreakpoint);
-            }
+            this.session.Breakpoints.Remove(fileBreakpoint);
         }
-        // Add new breakpoints
+        // Add all new breakpoints
         foreach(var breakpointInfo in breakpointsInfos) {
             MonoClient.Breakpoint breakpoint = this.session.Breakpoints.Add(sourcePath, breakpointInfo.Line, breakpointInfo.Column ?? 1);
             // Conditional breakpoint
@@ -484,13 +483,13 @@ public partial class DebugSession : Session {
     }
 
     private bool OnExceptionHandled(Exception ex) {
-        GetLogger().LogError(ex.Message, ex);
+        GetLogger().LogError($"[Handled] {ex.Message}", ex);
         return true;
     }
 
     private void OnSessionLog(bool isError, string message) {
-        if (isError) GetLogger().LogError($"Mono: {message.Trim()}", null);
-        else GetLogger().LogMessage($"Mono: {message.Trim()}");
+        if (isError) GetLogger().LogError($"[Error] {message.Trim()}", null);
+        else GetLogger().LogMessage($"[Info] {message.Trim()}");
     }
     private void OnLog(bool isError, string message) {
         if (isError) OnErrorDataReceived(message);

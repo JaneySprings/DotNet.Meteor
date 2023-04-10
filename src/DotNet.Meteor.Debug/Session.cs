@@ -17,10 +17,12 @@ public abstract class Session: DebugAdapterBase, IProcessLogger {
 
     public void Start() {
         Protocol.LogMessage += LogMessage;
+        Protocol.DispatcherError += LogError;
         Protocol.Run();
     }
     protected void Stop() {
         Protocol.LogMessage -= LogMessage;
+        Protocol.DispatcherError -= LogError;
         Protocol.Stop();
         GetLogger().LogMessage("Debugger session terminated.");
     }
@@ -30,6 +32,7 @@ public abstract class Session: DebugAdapterBase, IProcessLogger {
             Category = category
         });
     }
+
     public void OnOutputDataReceived(string stdout) {
         SendConsoleEvent(OutputEvent.CategoryValue.Stdout, stdout);
     }
@@ -39,5 +42,9 @@ public abstract class Session: DebugAdapterBase, IProcessLogger {
 
     private void LogMessage(object sender, LogEventArgs args) {
         GetLogger().LogMessage(args.Message);
+    }
+    private void LogError(object sender, DispatcherErrorEventArgs args) {
+        GetLogger().LogError($"[Fatal] {args.Exception.Message}", args.Exception);
+        OnErrorDataReceived($"{args.Exception}: {args.Exception.Message}");
     }
 }
