@@ -8,6 +8,7 @@ using DotNet.Meteor.Apple;
 using System.Net;
 using Mono.Debugging.Soft;
 using DotNet.Meteor.Debug.Sdb;
+using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Process = System.Diagnostics.Process;
 
 namespace DotNet.Meteor.Debug;
@@ -72,7 +73,7 @@ public partial class DebugSession {
         var result = processRunner.WaitForExit();
 
         if (result.ExitCode != 0)
-            throw new Exception(string.Join(Environment.NewLine, result.StandardError));
+            throw new ProtocolException(string.Join(Environment.NewLine, result.StandardError));
     }
 
     private void LaunchWindows(LaunchData configuration, List<Process> processes) {

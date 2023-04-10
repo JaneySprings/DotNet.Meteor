@@ -4,9 +4,12 @@ using System.IO;
 using System.Threading;
 using System.Linq;
 using Mono.Debugging.Soft;
+using DotNet.Meteor.Shared;
 using DotNet.Meteor.Debug.Utilities;
-using DebugProtocol = DotNet.Meteor.Debug.Protocol;
+using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
+using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 using MonoClient = Mono.Debugging.Client;
+using DebugProtocol = Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 using Process = System.Diagnostics.Process;
 
 namespace DotNet.Meteor.Debug;
@@ -23,7 +26,7 @@ public partial class DebugSession : Session {
     private readonly SourceDownloader sourceDownloader = new SourceDownloader();
     private readonly Handles<MonoClient.StackFrame> frameHandles = new Handles<MonoClient.StackFrame>();
     private readonly Handles<MonoClient.ObjectValue[]> variableHandles = new Handles<MonoClient.ObjectValue[]>();
-    private readonly Dictionary<int, DebugProtocol.Types.Thread> seenThreads = new Dictionary<int, DebugProtocol.Types.Thread>();
+    private readonly Dictionary<int, DebugProtocol.Thread> seenThreads = new Dictionary<int, DebugProtocol.Thread>();
     private SoftDebuggerSession session = new SoftDebuggerSession {
         Breakpoints = new MonoClient.BreakpointStore()
     };
@@ -31,22 +34,21 @@ public partial class DebugSession : Session {
         EvaluationOptions = new MonoClient.EvaluationOptions {
             EvaluationTimeout = 5000,
             MemberEvaluationTimeout = 5000,
-            UseExternalTypeResolver = true,
+            UseExternalTypeResolver = false,
             AllowMethodEvaluation = true,
             GroupPrivateMembers = true,
             GroupStaticMembers = true,
             AllowToStringCalls = true,
             AllowTargetInvoke = true,
             ChunkRawStrings = false,
-            EllipsizeStrings = true,
-            EllipsizedLength = byte.MaxValue,
+            EllipsizeStrings = false,
             CurrentExceptionTag = "$exception",
             IntegerDisplayFormat = MonoClient.IntegerDisplayFormat.Decimal,
             StackFrameFormat = new MonoClient.StackFrameFormat()
         }
     };
 
-    public DebugSession() {
+    public DebugSession(Stream input, Stream output): base(input, output) {
         MonoClient.DebuggerLoggingService.CustomLogger = new MonoLogger();
 
         this.session.LogWriter = OnSessionLog;
@@ -69,8 +71,8 @@ public partial class DebugSession : Session {
     protected override MonoClient.ICustomLogger GetLogger() => MonoClient.DebuggerLoggingService.CustomLogger;
 
 #region request: Initialize
-    protected override void Initialize(DebugProtocol.Response response, DebugProtocol.Arguments args) {
-        response.SetSuccess(new DebugProtocol.Capabilities {
+    protected override InitializeResponse HandleInitializeRequest(InitializeArguments arguments) {
+        return new InitializeResponse() {
             SupportsEvaluateForHovers = true,
             SupportsExceptionInfoRequest = true,
             SupportsConditionalBreakpoints = true,
@@ -78,106 +80,114 @@ public partial class DebugSession : Session {
             SupportsLogPoints = true,
             SupportsExceptionOptions = true,
             SupportsExceptionFilterOptions = true,
-            ExceptionBreakpointFilters = new List<DebugProtocol.Types.ExceptionBreakpointsFilter> {
-                DebugProtocol.Types.ExceptionBreakpointsFilter.AllExceptions,
+            ExceptionBreakpointFilters = new List<ExceptionBreakpointsFilter> {
+                new ExceptionBreakpointsFilter {
+                    Filter = "all",
+                    Label = "All Exceptions",
+                    Description = "Break when an exception is thrown.",
+                    ConditionDescription = "Specifies an exception name to break on. Example: System.Exception.",
+                    SupportsCondition = true,
+                },
             }
-        });
+        };
     }
 #endregion
 #region request: Launch
-    protected override void Launch(DebugProtocol.Response response, DebugProtocol.Arguments args) {
-        var configuration = new LaunchData(args.Project, args.Device, args.Target);
-        var port = args.DebuggingPort == 0 ? Extensions.FindFreePort() : args.DebuggingPort;
+    protected override LaunchResponse HandleLaunchRequest(LaunchArguments arguments) {
+        var configuration = new LaunchData(
+            arguments.ConfigurationProperties["selected_project"].ToObject<Project>()!,
+            arguments.ConfigurationProperties["selected_device"].ToObject<DeviceData>()!,
+            arguments.ConfigurationProperties["selected_target"].ToObject<string>()!
+        );
         this.sourceDownloader.Configure(configuration.Project.Path, s => GetLogger().LogMessage(s));
+        var port = arguments.ConfigurationProperties["debugging_port"].ToObject<int>()!;
+        
+        if (port == 0) 
+            port = Extensions.FindFreePort();
+        if (port < 1) 
+            throw new ProtocolException($"Invalid port '{port}'");
 
-        if (port < 1) {
-            response.SetError($"Invalid port '{port}'");
-            return;
-        }
-
-        response.SetSuccess();
         LaunchApplication(configuration, port, this.processes);
         Connect(configuration, port);
+        return new LaunchResponse();
     }
 #endregion
 #region request: Disconnect
-    protected override void Disconnect(DebugProtocol.Response response, DebugProtocol.Arguments args) {
+    protected override DisconnectResponse HandleDisconnectRequest(DisconnectArguments arguments) {
         lock (this.locker) {
             if (this.session?.IsRunning == true)
                 this.session.Stop();
         }
         KillDebugger();
-        response.SetSuccess();
-        StopGlobalLoop();
+        return new DisconnectResponse();
     }
 #endregion
 #region request: Continue
-    protected override void Continue(DebugProtocol.Response response, DebugProtocol.Arguments args) {
+    protected override ContinueResponse HandleContinueRequest(ContinueArguments arguments) {
         WaitForSuspend();
-        response.SetSuccess();
         lock (this.locker) {
             if (this.session?.IsRunning == false && !this.session.HasExited) {
                 this.session.Continue();
                 this.debuggerExecuting = true;
             }
         }
+        return new ContinueResponse();
     }
 #endregion
 #region request: Next
-    protected override void Next(DebugProtocol.Response response, DebugProtocol.Arguments args) {
+    protected override NextResponse HandleNextRequest(NextArguments arguments) {
         WaitForSuspend();
-        response.SetSuccess();
         lock (this.locker) {
             if (this.session?.IsRunning == false && !this.session.HasExited) {
                 this.session.NextLine();
                 this.debuggerExecuting = true;
             }
         }
+        return new NextResponse();
     }
 #endregion
 #region request: StepIn
-    protected override void StepIn(DebugProtocol.Response response, DebugProtocol.Arguments args) {
+    protected override StepInResponse HandleStepInRequest(StepInArguments arguments) {
         WaitForSuspend();
-        response.SetSuccess();
         lock (this.locker) {
             if (this.session?.IsRunning == false && !this.session.HasExited) {
                 this.session.StepLine();
                 this.debuggerExecuting = true;
             }
         }
+        return new StepInResponse();
     }
 #endregion
 #region request: StepOut
-    protected override void StepOut(DebugProtocol.Response response, DebugProtocol.Arguments args) {
+    protected override StepOutResponse HandleStepOutRequest(StepOutArguments arguments) {
         WaitForSuspend();
-        response.SetSuccess();
         lock (this.locker) {
             if (this.session?.IsRunning == false && !this.session.HasExited) {
                 this.session.Finish();
                 this.debuggerExecuting = true;
             }
         }
+        return new StepOutResponse();
     }
 #endregion
 #region request: Pause
-    protected override void Pause(DebugProtocol.Response response, DebugProtocol.Arguments args) {
-        response.SetSuccess();
+    protected override PauseResponse HandlePauseRequest(PauseArguments arguments) {
         lock (this.locker) {
             if (this.session?.IsRunning == true)
                 this.session.Stop();
         }
+        return new PauseResponse();
     }
 #endregion
 #region request: SetExceptionBreakpoints
-    protected override void SetExceptionBreakpoints(DebugProtocol.Response response, DebugProtocol.Arguments args) {
-        if (args.FilterOptions == null || args.FilterOptions.Count == 0) {
+    protected override SetExceptionBreakpointsResponse HandleSetExceptionBreakpointsRequest(SetExceptionBreakpointsArguments arguments) {
+        if (arguments.FilterOptions == null || arguments.FilterOptions.Count == 0) {
             this.session.Breakpoints.ClearCatchpoints();
-            response.SetSuccess();
-            return;
+            return new SetExceptionBreakpointsResponse();
         }
 
-        foreach (var option in args.FilterOptions) {
-            if (option.FilterId == DebugProtocol.Types.ExceptionBreakpointsFilter.AllExceptions.Filter) {
+        foreach (var option in arguments.FilterOptions) {
+            if (option.FilterId == "all") {
                 var exceptionFilter = typeof(Exception).ToString();
 
                 if (!string.IsNullOrEmpty(option.Condition))
@@ -187,15 +197,14 @@ public partial class DebugSession : Session {
                 this.session.Breakpoints.AddCatchpoint(exceptionFilter);
             }
         }
-
-        response.SetSuccess();
+        return new SetExceptionBreakpointsResponse();
     }
 #endregion
 #region request: SetBreakpoints
-    protected override void SetBreakpoints(DebugProtocol.Response response, DebugProtocol.Arguments args) {
-        var breakpoints = new List<DebugProtocol.Types.Breakpoint>();
-        var breakpointsInfos = args.Breakpoints;
-        var sourcePath = args.Source?.Path;
+    protected override SetBreakpointsResponse HandleSetBreakpointsRequest(SetBreakpointsArguments arguments) {
+        var breakpoints = new List<DebugProtocol.Breakpoint>();
+        var breakpointsInfos = arguments.Breakpoints;
+        var sourcePath = arguments.Source?.Path;
 
         // Remove unexisting breakpoints
         var fileBreakpoints = this.session.Breakpoints.GetBreakpointsAtFile(sourcePath);
@@ -221,103 +230,122 @@ public partial class DebugSession : Session {
                 breakpoint.TraceExpression = $"LogPoint: {breakpointInfo.LogMessage}";
             }
 
-            breakpoints.Add(new DebugProtocol.Types.Breakpoint(
-                breakpoint != null,
-                breakpoint?.Line ?? breakpointInfo.Line,
-                breakpoint?.Column ?? breakpointInfo.Column
-            ));
+            breakpoints.Add(new DebugProtocol.Breakpoint() {
+                Verified = breakpoint != null,
+                Line =  breakpoint?.Line ?? breakpointInfo.Line,
+                Column = breakpoint?.Column ?? breakpointInfo.Column
+            });
         }
 
-        response.SetSuccess(new DebugProtocol.SetBreakpointsResponseBody(breakpoints));
+        return new SetBreakpointsResponse(breakpoints);
     }
 #endregion
 #region request: StackTrace
-    protected override void StackTrace(DebugProtocol.Response response, DebugProtocol.Arguments args) {
+    protected override StackTraceResponse HandleStackTraceRequest(StackTraceArguments arguments) {
         WaitForSuspend();
 
         MonoClient.ThreadInfo thread = DebuggerActiveThread();
-        if (thread.Id != args.ThreadId) {
-            thread = FindThread(args.ThreadId);
+        if (thread.Id != arguments.ThreadId) {
+            thread = FindThread(arguments.ThreadId);
             thread?.SetActive();
         }
 
-        var stackFrames = new List<DebugProtocol.Types.StackFrame>();
+        var stackFrames = new List<DebugProtocol.StackFrame>();
         var bt = thread.Backtrace;
 
-        if (bt?.FrameCount < 0) {
-            response.SetError("No stack trace available");
-            return;
-        }
-
+        if (bt?.FrameCount < 0)
+            throw new ProtocolException("No stack trace available");
+        
         int totalFrames = bt.FrameCount;
-        for (int i = args.StartFrame; i < Math.Min(args.StartFrame + args.Levels, totalFrames); i++) {
-            DebugProtocol.Types.Source source = null;
+        int startFrame = arguments.StartFrame ?? 0;
+        int levels = arguments.Levels ?? totalFrames;
+        for (int i = startFrame; i < Math.Min(startFrame + levels, totalFrames); i++) {
+            DebugProtocol.Source source = null;
+            var hint = DebugProtocol.StackFrame.PresentationHintValue.Unknown;
             var frame = bt.GetFrame(i);
             var sourceLocation = frame.SourceLocation;
             string sourceName = string.Empty;
-            string hint = string.Empty;
-
+            
             if (!string.IsNullOrEmpty(sourceLocation.FileName)) {
                 sourceName = Path.GetFileName(sourceLocation.FileName);
                 if (File.Exists(sourceLocation.FileName)) {
                     var path = sourceLocation.FileName;
-                    source = new DebugProtocol.Types.Source(sourceName, path, 0, "normal");
-                    hint = "normal";
+                    hint = DebugProtocol.StackFrame.PresentationHintValue.Normal;
+                    source = new DebugProtocol.Source() {
+                        PresentationHint = DebugProtocol.Source.PresentationHintValue.Normal,
+                        SourceReference = 0,
+                        Name = sourceName,
+                        Path = path
+                    };
                 }
             }
             if (sourceLocation.SourceLink != null && source == null) {
                 sourceName = Path.GetFileName(sourceLocation.SourceLink.RelativeFilePath);
                 string path = this.sourceDownloader.DownloadSourceFile(sourceLocation.SourceLink.Uri, sourceLocation.SourceLink.RelativeFilePath);
                 if (!string.IsNullOrEmpty(path)) {
-                    source = new DebugProtocol.Types.Source(sourceName, path, 0, "normal");
-                    hint = "normal";
+                    hint = DebugProtocol.StackFrame.PresentationHintValue.Normal;
+                    source = new DebugProtocol.Source() {
+                        PresentationHint = DebugProtocol.Source.PresentationHintValue.Normal,
+                        SourceReference = 0,
+                        Name = sourceName,
+                        Path = path
+                    };
                 }
             }
             if (source == null) {
-                source = new DebugProtocol.Types.Source(sourceName, null, 1000, "deemphasize");
-                hint = "subtle";
+                hint = DebugProtocol.StackFrame.PresentationHintValue.Subtle;
+                source = new DebugProtocol.Source() {
+                    PresentationHint = DebugProtocol.Source.PresentationHintValue.Deemphasize,
+                    SourceReference = 1000,
+                    Name = sourceName,
+                };
             }
 
-            stackFrames.Add(new DebugProtocol.Types.StackFrame(
-                this.frameHandles.Create(frame), source, hint,
-                frame.SourceLocation.MethodName,
-                frame.SourceLocation.Line,
-                frame.SourceLocation.Column,
-                frame.SourceLocation.EndLine,
-                frame.SourceLocation.EndColumn
-            ));
+            stackFrames.Add(new DebugProtocol.StackFrame() {
+                Id = this.frameHandles.Create(frame),
+                Source = source,
+                PresentationHint = hint,
+                Name = frame.SourceLocation.MethodName,
+                Line = frame.SourceLocation.Line,
+                Column = frame.SourceLocation.Column,
+                EndLine = frame.SourceLocation.EndLine,
+                EndColumn = frame.SourceLocation.EndColumn
+            });
         }
-        response.SetSuccess(new DebugProtocol.StackTraceResponseBody(stackFrames, totalFrames));
+
+        return new StackTraceResponse(stackFrames);
     }
 #endregion
 #region request: Scopes
-    protected override void Scopes(DebugProtocol.Response response, DebugProtocol.Arguments args) {
-        int frameId = args.FrameId;
+    protected override ScopesResponse HandleScopesRequest(ScopesArguments arguments) {
+        int frameId = arguments.FrameId;
         var frame = this.frameHandles.Get(frameId, null);
-        var scopes = new List<DebugProtocol.Types.Scope>();
+        var scopes = new List<DebugProtocol.Scope>();
 
-        if (frame == null) {
-            response.SetError("frame not found");
-            return;
-        }
+        if (frame == null) 
+            throw new ProtocolException("frame not found");
 
-        if (this.exception != null)
-            scopes.Add(new DebugProtocol.Types.Scope("Exception", this.variableHandles.Create(new MonoClient.ObjectValue[] { this.exception })));
+        if (this.exception != null) scopes.Add(new DebugProtocol.Scope() {
+            Name = "Exception",
+            VariablesReference = this.variableHandles.Create(new MonoClient.ObjectValue[] { this.exception })
+        });
 
-        scopes.Add(new DebugProtocol.Types.Scope("Local", this.variableHandles.Create(frame.GetAllLocals())));
-        response.SetSuccess(new DebugProtocol.ScopesResponseBody(scopes));
+        scopes.Add(new DebugProtocol.Scope() {
+            Name = "Local",
+            VariablesReference = this.variableHandles.Create(frame.GetAllLocals())
+        });
+
+        return new ScopesResponse(scopes);
     }
 #endregion
 #region request: Variables
-    protected override void Variables(DebugProtocol.Response response, DebugProtocol.Arguments args) {
-        int reference = args.VariablesReference;
-        if (reference == -1) {
-            response.SetError("variables: property 'variablesReference' is missing");
-            return;
-        }
+    protected override VariablesResponse HandleVariablesRequest(VariablesArguments arguments) {
+        int reference = arguments.VariablesReference;
+        if (reference == -1) 
+            throw new ProtocolException("variables: property 'variablesReference' is missing");
 
         WaitForSuspend();
-        var variables = new List<DebugProtocol.Types.Variable>();
+        var variables = new List<DebugProtocol.Variable>();
 
         if (this.variableHandles.TryGet(reference, out MonoClient.ObjectValue[] children) && children?.Length > 0) {
             if (children.Length < 20) {
@@ -333,75 +361,71 @@ public partial class DebugSession : Session {
                 }
             }
         }
-        response.SetSuccess(new DebugProtocol.VariablesResponseBody(variables));
+
+        return new VariablesResponse(variables);
     }
 #endregion
 #region request: Threads
-    protected override void Threads(DebugProtocol.Response response, DebugProtocol.Arguments args) {
-        var threads = new List<DebugProtocol.Types.Thread>();
+    protected override ThreadsResponse HandleThreadsRequest(ThreadsArguments arguments) {
+        var threads = new List<DebugProtocol.Thread>();
         var process = this.activeProcess;
         if (process != null) {
-            Dictionary<int, DebugProtocol.Types.Thread> d;
+            Dictionary<int, DebugProtocol.Thread> d;
             lock (this.seenThreads) {
-                d = new Dictionary<int, DebugProtocol.Types.Thread>(this.seenThreads);
+                d = new Dictionary<int, DebugProtocol.Thread>(this.seenThreads);
             }
             foreach (var t in process.GetThreads()) {
                 int tid = (int)t.Id;
-                d[tid] = new DebugProtocol.Types.Thread(tid, t.Name);
+                d[tid] = new DebugProtocol.Thread(tid, t.Name.ToThreadName(tid));
             }
             threads = d.Values.ToList();
         }
-        response.SetSuccess(new DebugProtocol.ThreadsResponseBody(threads));
+        return new ThreadsResponse(threads);
     }
 #endregion
 #region request: Evaluate
-    protected override void Evaluate(DebugProtocol.Response response, DebugProtocol.Arguments args) {
-        if (string.IsNullOrEmpty(args.Expression)) {
-            response.SetError("expression missing");
-            return;
-        }
-        var frame = this.frameHandles.Get(args.FrameId, null);
-        if (frame == null) {
-            response.SetError("no active stackframe");
-            return;
-        }
-        if (!frame.ValidateExpression(args.Expression)) {
-            response.SetError("invalid expression");
-            return;
-        }
+    protected override EvaluateResponse HandleEvaluateRequest(EvaluateArguments arguments) {
+        if (string.IsNullOrEmpty(arguments.Expression)) 
+            throw new ProtocolException("expression missing");
 
-        var val = frame.GetExpressionValue(args.Expression, this.sessionOptions.EvaluationOptions);
+        var frame = this.frameHandles.Get(arguments.FrameId ?? 0, null);
+        if (frame == null)
+            throw new ProtocolException("no active stackframe");
+    
+        if (!frame.ValidateExpression(arguments.Expression))
+            throw new ProtocolException("invalid expression");
+
+        var val = frame.GetExpressionValue(arguments.Expression, this.sessionOptions.EvaluationOptions);
         val.WaitHandle.WaitOne();
 
-        if (val.Flags.HasFlag(MonoClient.ObjectValueFlags.Error) || val.Flags.HasFlag(MonoClient.ObjectValueFlags.NotSupported)) {
-            response.SetError(val.DisplayValue);
-        } else if (val.Flags.HasFlag(MonoClient.ObjectValueFlags.Unknown)) {
-            response.SetError("invalid expression");
-        } else if (val.Flags.HasFlag(MonoClient.ObjectValueFlags.Object) && val.Flags.HasFlag(MonoClient.ObjectValueFlags.Namespace)) {
-            response.SetError("not available");
-        } else {
-            int handle = 0;
-            if (val.HasChildren) {
-                handle = this.variableHandles.Create(val.GetAllChildren());
-            }
-            response.SetSuccess(new DebugProtocol.EvaluateResponseBody(val.DisplayValue, handle));
-        }
+        if (val.Flags.HasFlag(MonoClient.ObjectValueFlags.Error) || val.Flags.HasFlag(MonoClient.ObjectValueFlags.NotSupported)) 
+            throw new ProtocolException(val.DisplayValue);
+        if (val.Flags.HasFlag(MonoClient.ObjectValueFlags.Unknown)) 
+            throw new ProtocolException("invalid expression");
+        if (val.Flags.HasFlag(MonoClient.ObjectValueFlags.Object) && val.Flags.HasFlag(MonoClient.ObjectValueFlags.Namespace))
+            throw new ProtocolException("not available");
+     
+        int handle = 0;
+        if (val.HasChildren) 
+            handle = this.variableHandles.Create(val.GetAllChildren());
+    
+        return new EvaluateResponse(val.DisplayValue, handle);
     }
 #endregion
 #region request: Source
-    protected override void Source(DebugProtocol.Response response, DebugProtocol.Arguments arguments) {
-        response.SetError("No source available");
+    protected override SourceResponse HandleSourceRequest(SourceArguments arguments) {
+        throw new ProtocolException("No source available");
     }
-#endregion
+    #endregion
 #region request: ExceptionInfo
-    protected override void ExceptionInfo(DebugProtocol.Response response, DebugProtocol.Arguments arguments) {
+    protected override ExceptionInfoResponse HandleExceptionInfoRequest(ExceptionInfoArguments arguments) {
         var ex = DebuggerActiveException(arguments.ThreadId);
-        if (ex == null) {
-            response.SetError("No exception available");
-            return;
-        }
+        if (ex == null)
+            throw new ProtocolException("No exception available");
 
-        response.SetSuccess(new DebugProtocol.ExceptionInfoResponseBody(ex));
+        return new ExceptionInfoResponse(ex.Type, DebugProtocol.ExceptionBreakMode.Always) {
+            Description = ex.Message
+        };
     }
 #endregion
 
@@ -409,24 +433,33 @@ public partial class DebugSession : Session {
 
     private void TargetStopped(object sender, MonoClient.TargetEventArgs e) {
         Stopped();
-        SendMessage(new DebugProtocol.Events.StoppedEvent((int)e.Thread.Id, "pause"));
+        Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Pause) {
+            ThreadId = (int)e.Thread.Id,
+            AllThreadsStopped = true,
+        });
         this.resumeEvent.Set();
     }
     private void TargetHitBreakpoint(object sender, MonoClient.TargetEventArgs e) {
         Stopped();
-        SendMessage(new DebugProtocol.Events.StoppedEvent((int)e.Thread.Id, "breakpoint"));
+        Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Breakpoint) {
+            ThreadId = (int)e.Thread.Id,
+            AllThreadsStopped = true,
+        });
         this.resumeEvent.Set();
     }
     private void TargetExceptionThrown(object sender, MonoClient.TargetEventArgs e) {
         Stopped();
         var ex = DebuggerActiveException((int)e.Thread.Id);
-        if (ex != null)
-            SendMessage(new DebugProtocol.Events.StoppedEvent((int)e.Thread.Id, "exception", ex.Message));
+        if (ex != null) Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Exception) {
+            ThreadId = (int)e.Thread.Id,
+            AllThreadsStopped = true,
+            Text = ex.Message
+        });
         this.resumeEvent.Set();
     }
     private void TargetReady(object sender, MonoClient.TargetEventArgs e) {
         this.activeProcess = this.session.GetProcesses().SingleOrDefault();
-        SendMessage(new DebugProtocol.Events.InitializedEvent());
+        Protocol.SendEvent(new InitializedEvent());
     }
     private void TargetExited(object sender, MonoClient.TargetEventArgs e) {
         KillDebugger();
@@ -438,16 +471,16 @@ public partial class DebugSession : Session {
     private void TargetThreadStarted(object sender, MonoClient.TargetEventArgs e) {
         int tid = (int)e.Thread.Id;
         lock (this.seenThreads) {
-            this.seenThreads[tid] = new DebugProtocol.Types.Thread(tid, e.Thread.Name);
+            this.seenThreads[tid] = new DebugProtocol.Thread(tid, e.Thread.Name.ToThreadName(tid));
         }
-        SendMessage(new DebugProtocol.Events.ThreadEvent("started", tid));
+        Protocol.SendEvent(new ThreadEvent(ThreadEvent.ReasonValue.Started, tid));
     }
     private void TargetThreadStopped(object sender, MonoClient.TargetEventArgs e) {
         int tid = (int)e.Thread.Id;
         lock (this.seenThreads) {
             this.seenThreads.Remove(tid);
         }
-        SendMessage(new DebugProtocol.Events.ThreadEvent("exited", tid));
+        Protocol.SendEvent(new ThreadEvent(ThreadEvent.ReasonValue.Exited, tid));
     }
 
     private bool OnExceptionHandled(Exception ex) {
@@ -464,7 +497,7 @@ public partial class DebugSession : Session {
         else OnOutputDataReceived(message);
     }
     private void OnDebugLog(int level, string category, string message) {
-        SendConsoleEvent("console", message);
+        SendConsoleEvent(OutputEvent.CategoryValue.Console, message);
     }
 
 #endregion
@@ -487,7 +520,7 @@ public partial class DebugSession : Session {
             }
 
             if (!this.terminated) {
-                SendMessage(new DebugProtocol.Events.TerminatedEvent());
+                Protocol.SendEvent(new TerminatedEvent());
                 this.terminated = true;
             }
         }
@@ -517,7 +550,7 @@ public partial class DebugSession : Session {
         this.frameHandles.Reset();
     }
 
-    private DebugProtocol.Types.Variable CreateVariable(MonoClient.ObjectValue v) {
+    private DebugProtocol.Variable CreateVariable(MonoClient.ObjectValue v) {
         var dv = v.DisplayValue ?? "<error getting value>";
         int childrenReference = 0;
 
@@ -529,7 +562,9 @@ public partial class DebugSession : Session {
             childrenReference = this.variableHandles.Create(objectValues);
         }
 
-        return new DebugProtocol.Types.Variable(v.Name, dv, v.TypeName, childrenReference);
+        return new DebugProtocol.Variable(v.Name, dv, childrenReference) {
+            VariablesReference = childrenReference
+        };
     }
 
     private MonoClient.ThreadInfo DebuggerActiveThread() {
