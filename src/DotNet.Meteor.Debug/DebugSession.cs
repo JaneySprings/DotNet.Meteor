@@ -355,7 +355,7 @@ public partial class DebugSession : Session {
                 }
             } else {
                 foreach (var v in children) {
-                    v.WaitHandle.WaitOne();
+                    v.WaitHandle.WaitOne(this.session.EvaluationOptions.EvaluationTimeout);
                     variables.Add(CreateVariable(v));
                 }
             }
@@ -395,8 +395,10 @@ public partial class DebugSession : Session {
             throw new ProtocolException("invalid expression");
 
         var val = frame.GetExpressionValue(arguments.Expression, this.sessionOptions.EvaluationOptions);
-        val.WaitHandle.WaitOne();
+        val.WaitHandle.WaitOne(this.sessionOptions.EvaluationOptions.EvaluationTimeout);
 
+        if (val.IsEvaluating)
+            throw new ProtocolException("evaluation timeout expected");
         if (val.Flags.HasFlag(MonoClient.ObjectValueFlags.Error) || val.Flags.HasFlag(MonoClient.ObjectValueFlags.NotSupported)) 
             throw new ProtocolException(val.DisplayValue);
         if (val.Flags.HasFlag(MonoClient.ObjectValueFlags.Unknown)) 
@@ -526,8 +528,9 @@ public partial class DebugSession : Session {
     }
 
     private void WaitForSuspend() {
-        if (this.debuggerExecuting) {
-            this.resumeEvent.WaitOne();
+        if (this.debuggerExecuting && !this.session.IsRunning) {
+            var timeout = this.session.EvaluationOptions.EvaluationTimeout;
+            this.resumeEvent.WaitOne(timeout);
             this.debuggerExecuting = false;
         }
     }
