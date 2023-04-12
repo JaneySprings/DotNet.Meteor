@@ -20,12 +20,6 @@ public abstract class Session: DebugAdapterBase, IProcessLogger {
         Protocol.DispatcherError += LogError;
         Protocol.Run();
     }
-    protected void Stop() {
-        Protocol.LogMessage -= LogMessage;
-        Protocol.DispatcherError -= LogError;
-        Protocol.Stop();
-        GetLogger().LogMessage("Debugger session terminated.");
-    }
 
     protected void SendConsoleEvent(OutputEvent.CategoryValue category, string message) {
         Protocol.SendEvent(new OutputEvent(message.Trim() + Environment.NewLine) {

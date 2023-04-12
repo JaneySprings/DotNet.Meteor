@@ -15,14 +15,9 @@ using Process = System.Diagnostics.Process;
 namespace DotNet.Meteor.Debug;
 
 public partial class DebugSession : Session {
-    private bool terminated;
-    private bool debuggerExecuting;
-    private readonly object locker = new object();
-
     private MonoClient.ObjectValue exception;
     private MonoClient.ProcessInfo activeProcess;
     private readonly List<Process> processes = new List<Process>();
-    private readonly AutoResetEvent resumeEvent = new AutoResetEvent(false);
     private readonly SourceDownloader sourceDownloader = new SourceDownloader();
     private readonly Handles<MonoClient.StackFrame> frameHandles = new Handles<MonoClient.StackFrame>();
     private readonly Handles<MonoClient.ObjectValue[]> variableHandles = new Handles<MonoClient.ObjectValue[]>();
@@ -115,68 +110,61 @@ public partial class DebugSession : Session {
 #endregion
 #region request: Disconnect
     protected override DisconnectResponse HandleDisconnectRequest(DisconnectArguments arguments) {
-        lock (this.locker) {
-            if (this.session?.IsRunning == true)
-                this.session.Stop();
+        if (this.session?.IsRunning == true)
+            this.session.Stop();
+
+        foreach(var process in this.processes)
+            process.Kill();
+
+        this.processes.Clear();
+        if (this.session != null) {
+            if (!this.session.HasExited)
+                this.session.Exit();
+
+            this.session.Dispose();
+            this.session = null;
         }
-        KillDebugger();
+
         return new DisconnectResponse();
     }
 #endregion
 #region request: Continue
     protected override ContinueResponse HandleContinueRequest(ContinueArguments arguments) {
-        WaitForSuspend();
-        lock (this.locker) {
-            if (this.session?.IsRunning == false && !this.session.HasExited) {
-                this.session.Continue();
-                this.debuggerExecuting = true;
-            }
-        }
+        if (this.session?.IsRunning == false && !this.session.HasExited) 
+            this.session.Continue();
+
         return new ContinueResponse();
     }
 #endregion
 #region request: Next
     protected override NextResponse HandleNextRequest(NextArguments arguments) {
-        WaitForSuspend();
-        lock (this.locker) {
-            if (this.session?.IsRunning == false && !this.session.HasExited) {
-                this.session.NextLine();
-                this.debuggerExecuting = true;
-            }
-        }
+        if (this.session?.IsRunning == false && !this.session.HasExited) 
+            this.session.NextLine();
+
         return new NextResponse();
     }
 #endregion
 #region request: StepIn
     protected override StepInResponse HandleStepInRequest(StepInArguments arguments) {
-        WaitForSuspend();
-        lock (this.locker) {
-            if (this.session?.IsRunning == false && !this.session.HasExited) {
-                this.session.StepLine();
-                this.debuggerExecuting = true;
-            }
-        }
+        if (this.session?.IsRunning == false && !this.session.HasExited) 
+            this.session.StepLine();
+                
         return new StepInResponse();
     }
 #endregion
 #region request: StepOut
     protected override StepOutResponse HandleStepOutRequest(StepOutArguments arguments) {
-        WaitForSuspend();
-        lock (this.locker) {
-            if (this.session?.IsRunning == false && !this.session.HasExited) {
-                this.session.Finish();
-                this.debuggerExecuting = true;
-            }
-        }
+        if (this.session?.IsRunning == false && !this.session.HasExited) 
+            this.session.Finish();
+
         return new StepOutResponse();
     }
 #endregion
 #region request: Pause
     protected override PauseResponse HandlePauseRequest(PauseArguments arguments) {
-        lock (this.locker) {
-            if (this.session?.IsRunning == true)
-                this.session.Stop();
-        }
+        if (this.session?.IsRunning == true)
+            this.session.Stop();
+
         return new PauseResponse();
     }
 #endregion
@@ -241,9 +229,7 @@ public partial class DebugSession : Session {
 #endregion
 #region request: StackTrace
     protected override StackTraceResponse HandleStackTraceRequest(StackTraceArguments arguments) {
-        WaitForSuspend();
-
-        MonoClient.ThreadInfo thread = DebuggerActiveThread();
+        MonoClient.ThreadInfo thread = this.session.ActiveThread;
         if (thread.Id != arguments.ThreadId) {
             thread = FindThread(arguments.ThreadId);
             thread?.SetActive();
@@ -343,7 +329,6 @@ public partial class DebugSession : Session {
         if (reference == -1) 
             throw new ProtocolException("variables: property 'variablesReference' is missing");
 
-        WaitForSuspend();
         var variables = new List<DebugProtocol.Variable>();
 
         if (this.variableHandles.TryGet(reference, out MonoClient.ObjectValue[] children) && children?.Length > 0) {
@@ -420,7 +405,7 @@ public partial class DebugSession : Session {
     #endregion
 #region request: ExceptionInfo
     protected override ExceptionInfoResponse HandleExceptionInfoRequest(ExceptionInfoArguments arguments) {
-        var ex = DebuggerActiveException(arguments.ThreadId);
+        var ex = GetActiveException(arguments.ThreadId);
         if (ex == null)
             throw new ProtocolException("No exception available");
 
@@ -433,41 +418,36 @@ public partial class DebugSession : Session {
 #region Event handlers 
 
     private void TargetStopped(object sender, MonoClient.TargetEventArgs e) {
-        Stopped();
+        Reset();
         Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Pause) {
             ThreadId = (int)e.Thread.Id,
             AllThreadsStopped = true,
         });
-        this.resumeEvent.Set();
     }
     private void TargetHitBreakpoint(object sender, MonoClient.TargetEventArgs e) {
-        Stopped();
+        Reset();
         Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Breakpoint) {
             ThreadId = (int)e.Thread.Id,
             AllThreadsStopped = true,
         });
-        this.resumeEvent.Set();
     }
     private void TargetExceptionThrown(object sender, MonoClient.TargetEventArgs e) {
-        Stopped();
-        var ex = DebuggerActiveException((int)e.Thread.Id);
+        Reset();
+        var ex = GetActiveException((int)e.Thread.Id);
         if (ex != null) Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Exception) {
             ThreadId = (int)e.Thread.Id,
             AllThreadsStopped = true,
             Text = ex.Message
         });
-        this.resumeEvent.Set();
     }
     private void TargetReady(object sender, MonoClient.TargetEventArgs e) {
         this.activeProcess = this.session.GetProcesses().SingleOrDefault();
         Protocol.SendEvent(new InitializedEvent());
     }
     private void TargetExited(object sender, MonoClient.TargetEventArgs e) {
-        KillDebugger();
-        this.resumeEvent.Set();
+        Protocol.SendEvent(new TerminatedEvent());
     }
     private void TargetInterrupted(object sender, MonoClient.TargetEventArgs e) {
-        this.resumeEvent.Set();
     }
     private void TargetThreadStarted(object sender, MonoClient.TargetEventArgs e) {
         int tid = (int)e.Thread.Id;
@@ -503,55 +483,20 @@ public partial class DebugSession : Session {
 
 #endregion
 #region Helpers
-    private void KillDebugger() {
-        lock (this.locker) {
-            foreach(var process in this.processes)
-                process.Kill();
-
-            this.processes.Clear();
-
-            if (this.session != null) {
-                this.debuggerExecuting = true;
-
-                if (!this.session.HasExited)
-                    this.session.Exit();
-
-                this.session.Dispose();
-                this.session = null;
-            }
-
-            if (!this.terminated) {
-                Protocol.SendEvent(new TerminatedEvent());
-                this.terminated = true;
-            }
-        }
-    }
-
-    private void WaitForSuspend() {
-        if (this.debuggerExecuting && !this.session.IsRunning) {
-            var timeout = this.session.EvaluationOptions.EvaluationTimeout;
-            this.resumeEvent.WaitOne(timeout);
-            this.debuggerExecuting = false;
-        }
-    }
-
-    private MonoClient.ThreadInfo FindThread(int threadReference) {
-        if (this.activeProcess != null) {
-            foreach (var t in this.activeProcess.GetThreads()) {
-                if (t.Id == threadReference) {
-                    return t;
-                }
-            }
-        }
-        return null;
-    }
-
-    private void Stopped() {
+    private void Reset() {
         this.exception = null;
         this.variableHandles.Reset();
         this.frameHandles.Reset();
     }
 
+    private MonoClient.ThreadInfo FindThread(int threadReference) {
+        if (this.activeProcess != null)
+            foreach (var t in this.activeProcess.GetThreads()) 
+                if (t.Id == threadReference) 
+                    return t;
+
+        return null;
+    }
     private DebugProtocol.Variable CreateVariable(MonoClient.ObjectValue v) {
         var dv = v.DisplayValue ?? "<error getting value>";
         int childrenReference = 0;
@@ -569,13 +514,7 @@ public partial class DebugSession : Session {
         };
     }
 
-    private MonoClient.ThreadInfo DebuggerActiveThread() {
-        lock (this.locker) {
-            return this.session.ActiveThread;
-        }
-    }
-
-    private MonoClient.ExceptionInfo DebuggerActiveException(int threadId) {
+    private MonoClient.ExceptionInfo GetActiveException(int threadId) {
         var thread = FindThread(threadId);
         if (thread == null)
             return null;
@@ -589,6 +528,5 @@ public partial class DebugSession : Session {
         }
         return null;
     }
-
 #endregion
 }
