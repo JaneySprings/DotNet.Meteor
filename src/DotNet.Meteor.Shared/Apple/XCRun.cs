@@ -21,6 +21,9 @@ namespace DotNet.Meteor.Apple {
             var contentRegex = new Regex(@"^--\s(?<os>iOS\s\d+(.\d+)+)\s--\n(?<content>(\s{4}.+\n)*)", RegexOptions.Multiline);
             var deviceRegex = new Regex(@"^\s{4}(?<name>.+)\s\((?<udid>.+)\)\s\((?<state>.+)\)", RegexOptions.Multiline);
             var devices = new List<DeviceData>();
+            var runtimeId = SystemProfiler.IsArch64() 
+                ? Runtimes.iOSSimulatorArm64 
+                : Runtimes.iOSSimulatorX64;
 
             foreach (Match match in contentRegex.Matches(output)) {
                 var os = match.Groups["os"].Value;
@@ -36,7 +39,7 @@ namespace DotNet.Meteor.Apple {
                         Name = deviceMatch.Groups["name"].Value,
                         Details = Details.iOSSimulator,
                         Platform = Platforms.iOS,
-                        RuntimeId = Runtimes.iOSimulatorX64,
+                        RuntimeId = runtimeId,
                         OSVersion = os,
                         Serial = deviceMatch.Groups["udid"].Value
                     });
