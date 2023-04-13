@@ -41,7 +41,6 @@ Task("build-debugger")
    }));
 
 Task("build-tests")
-   .ContinueOnError()
    .Does(() => DotNetTest(MeteorTestsProjectPath, new DotNetTestSettings {  
       Configuration = configuration,
       Verbosity = DotNetVerbosity.Quiet,
