@@ -5,7 +5,7 @@ using DotNet.Meteor.Shared;
 using System;
 
 namespace DotNet.Meteor.Apple {
-    internal static class SystemProfiler {
+    public static class SystemProfiler {
         public static List<DeviceData> PhysicalDevices() {
             var profiler = PathUtils.SystemProfilerTool();
             var devices = new List<DeviceData>();
