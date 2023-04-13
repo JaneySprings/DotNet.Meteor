@@ -8,31 +8,29 @@ using DotNet.Meteor.Apple;
 using System.Net;
 using Mono.Debugging.Soft;
 using DotNet.Meteor.Debug.Sdb;
+using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Process = System.Diagnostics.Process;
 
 namespace DotNet.Meteor.Debug;
 
 public partial class DebugSession {
     private void Connect(LaunchData options, int port) {
-        lock (this.locker) {
-            SoftDebuggerStartArgs arguments = null;
+        SoftDebuggerStartArgs arguments = null;
 
-            if (options.Device.IsAndroid || (options.Device.IsIPhone && !options.Device.IsEmulator)) {
-                arguments = new ClientConnectionProvider(IPAddress.Loopback, port, options.Project.Name) {
-                    MaxConnectionAttempts = 100,
-                    TimeBetweenConnectionAttempts = 500
-                };
-            } else if (options.Device.IsIPhone || options.Device.IsMacCatalyst) {
-                arguments = new ServerConnectionProvider(IPAddress.Loopback, port, options.Project.Name);
-            }
-
-            if (arguments == null || !options.IsDebug)
-                return;
-
-            this.debuggerExecuting = true;
-            this.session.Run(new SoftDebuggerStartInfo(arguments), this.sessionOptions);
-            OnOutputDataReceived("Debugger is ready and listening...");
+        if (options.Device.IsAndroid || (options.Device.IsIPhone && !options.Device.IsEmulator)) {
+            arguments = new ClientConnectionProvider(IPAddress.Loopback, port, options.Project.Name) {
+                MaxConnectionAttempts = 100,
+                TimeBetweenConnectionAttempts = 500
+            };
+        } else if (options.Device.IsIPhone || options.Device.IsMacCatalyst) {
+            arguments = new ServerConnectionProvider(IPAddress.Loopback, port, options.Project.Name);
         }
+
+        if (arguments == null || !options.IsDebug)
+            return;
+
+        this.session.Run(new SoftDebuggerStartInfo(arguments), this.sessionOptions);
+        OnOutputDataReceived("Debugger is ready and listening...");
     }
 
     private void LaunchApplication(LaunchData configuration, int port, List<Process> processes) {
@@ -72,7 +70,7 @@ public partial class DebugSession {
         var result = processRunner.WaitForExit();
 
         if (result.ExitCode != 0)
-            throw new Exception(string.Join(Environment.NewLine, result.StandardError));
+            throw new ProtocolException(string.Join(Environment.NewLine, result.StandardError));
     }
 
     private void LaunchWindows(LaunchData configuration, List<Process> processes) {
