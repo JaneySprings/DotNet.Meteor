@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.Json;
 using DotNet.Meteor.Shared;
 using DotNet.Meteor.Xaml;
 using System.Reflection;
+using Newtonsoft.Json;
 using NLog;
 
 namespace DotNet.Meteor.Debug.CLI {
@@ -22,12 +22,12 @@ namespace DotNet.Meteor.Debug.CLI {
 
         public static void AllDevices(string[] args) {
             var devices = DeviceProvider.GetDevices(logger.Error);
-            Console.WriteLine(JsonSerializer.Serialize(devices));
+            Console.WriteLine(JsonConvert.SerializeObject(devices));
         }
 
         public static void AndroidSdkPath(string[] args) {
             string path = Android.PathUtils.SdkLocation(logger.Error);
-            Console.WriteLine(JsonSerializer.Serialize(path));
+            Console.WriteLine(JsonConvert.SerializeObject(path));
         }
 
         public static void AnalyzeWorkspace(string[] args) {
@@ -36,18 +36,18 @@ namespace DotNet.Meteor.Debug.CLI {
             for (int i = 1; i < args.Length; i++)
                 projects.AddRange(WorkspaceAnalyzer.AnalyzeWorkspace(args[i], logger.Debug));
 
-            Console.WriteLine(JsonSerializer.Serialize(projects));
+            Console.WriteLine(JsonConvert.SerializeObject(projects));
         }
 
         public static void XamlGenerate(string[] args) {
             var schemaGenerator = new JsonSchemaGenerator(args[1], logger.Error);
             var result = schemaGenerator.CreateTypesAlias();
-            Console.WriteLine(JsonSerializer.Serialize(result));
+            Console.WriteLine(JsonConvert.SerializeObject(result));
         }
 
         public static void StartSession(string[] args) {
-            var debugSession = new DebugSession();
-            debugSession.Start(Console.OpenStandardInput(), Console.OpenStandardOutput()).Wait();
+            var debugSession = new DebugSession(Console.OpenStandardInput(), Console.OpenStandardOutput());
+            debugSession.Start();
         }
     }
 }

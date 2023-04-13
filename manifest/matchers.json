@@ -3,7 +3,7 @@
       {
         "name": "%task.meteor.problemMatcher%",
         "pattern": {
-          "regexp": "^(.*)\\((\\d+),(\\d+)\\):.*?(error|warning)\\s.*?:\\s(.*)$",
+          "regexp": "^(.*.xaml)\\((\\d+),(\\d+)\\):.*?(error|warning)\\s.*?:\\s(.*)$",
           "file": 1,
           "line": 2,
           "column": 3,

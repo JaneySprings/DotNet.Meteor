@@ -6,20 +6,28 @@ using DotNet.Meteor.Shared;
 namespace DotNet.Meteor.Debug;
 
 public class LaunchData {
-    public string Framework { get; }
-    public string OutputAssembly { get; }
+    public string Framework { get; private set; }
+    public string OutputAssembly { get; private set; }
     public DeviceData Device { get; }
     public Project Project { get; }
-    public bool IsDebug { get; }
+    public string Target { get; }
+
+    public bool IsDebug => Target.Equals("debug", StringComparison.OrdinalIgnoreCase);
 
     public LaunchData(Project project, DeviceData device, string target) {
         Project = project;
         Device = device;
-
-        IsDebug = target.Equals("debug", StringComparison.OrdinalIgnoreCase);
-        Framework = Project.Frameworks.First(it => it.Contains(Device.Platform, StringComparison.OrdinalIgnoreCase));
-        OutputAssembly = Project.GetOutputAssembly(target, Framework, Device);
+        Target = target;
     }
+
+    public void TryLoad(Action<Exception> callback) {
+        try {
+            Framework = Project.Frameworks.First(it => it.Contains(Device.Platform, StringComparison.OrdinalIgnoreCase));
+            OutputAssembly = Project.GetOutputAssembly(Target, Framework, Device);
+        } catch (Exception ex) {
+            callback(ex);
+        }
+    } 
 
     public string GetApplicationId() {
         if (Device.IsIPhone || Device.IsMacCatalyst) {

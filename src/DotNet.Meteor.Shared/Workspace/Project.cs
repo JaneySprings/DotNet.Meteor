@@ -3,15 +3,15 @@ using System.Text;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Text.Json.Serialization;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using MSPath = System.IO.Path;
 
 namespace DotNet.Meteor.Shared {
     public class Project {
-        [JsonPropertyName("name")] public string Name { get; set; }
-        [JsonPropertyName("path")] public string Path { get; set; }
-        [JsonPropertyName("frameworks")] public List<string> Frameworks { get; set; }
+        [JsonProperty("name")] public string Name { get; set; }
+        [JsonProperty("path")] public string Path { get; set; }
+        [JsonProperty("frameworks")] public List<string> Frameworks { get; set; }
 
         public Project(string path) {
             Name = MSPath.GetFileNameWithoutExtension(path);
