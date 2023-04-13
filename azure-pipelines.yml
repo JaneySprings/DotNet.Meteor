@@ -56,7 +56,7 @@ stages:
       - job: MacOS
         pool:
           vmImage: macos-latest
-        timeoutInMinutes: 5
+        timeoutInMinutes: 10
         steps:
         - script: dotnet tool restore
           displayName: 'Restore .NET tools'
