@@ -17,12 +17,16 @@ namespace DotNet.Meteor.Debug;
 public partial class DebugSession : Session {
     private MonoClient.ObjectValue exception;
     private MonoClient.ProcessInfo activeProcess;
+    private bool runningSuspended;
+
+    private readonly object syncronization = new object();
     private readonly List<Process> processes = new List<Process>();
+    private readonly AutoResetEvent suspendEvent = new AutoResetEvent(false);
     private readonly SourceDownloader sourceDownloader = new SourceDownloader();
     private readonly Handles<MonoClient.StackFrame> frameHandles = new Handles<MonoClient.StackFrame>();
     private readonly Handles<MonoClient.ObjectValue[]> variableHandles = new Handles<MonoClient.ObjectValue[]>();
     private readonly Dictionary<int, DebugProtocol.Thread> seenThreads = new Dictionary<int, DebugProtocol.Thread>();
-    private SoftDebuggerSession session = new SoftDebuggerSession {
+    private readonly SoftDebuggerSession session = new SoftDebuggerSession {
         Breakpoints = new MonoClient.BreakpointStore()
     };
     private readonly MonoClient.DebuggerSessionOptions sessionOptions = new MonoClient.DebuggerSessionOptions {
@@ -122,7 +126,6 @@ public partial class DebugSession : Session {
                 this.session.Exit();
 
             this.session.Dispose();
-            this.session = null;
         }
 
         return new DisconnectResponse();
@@ -130,33 +133,49 @@ public partial class DebugSession : Session {
 #endregion
 #region request: Continue
     protected override ContinueResponse HandleContinueRequest(ContinueArguments arguments) {
-        if (this.session?.IsRunning == false && !this.session.HasExited) 
-            this.session.Continue();
-
+        WaitForSuspend();
+        lock (this.syncronization) {
+            if (this.session?.IsRunning == false && !this.session.HasExited) {
+                this.session.Continue();
+                this.runningSuspended = false;
+            }
+        }
         return new ContinueResponse();
     }
 #endregion
 #region request: Next
     protected override NextResponse HandleNextRequest(NextArguments arguments) {
-        if (this.session?.IsRunning == false && !this.session.HasExited) 
-            this.session.NextLine();
-
+        WaitForSuspend();
+        lock (this.syncronization) {
+            if (this.session?.IsRunning == false && !this.session.HasExited) {
+                this.session.NextLine();
+                this.runningSuspended = false;
+            }
+        }
         return new NextResponse();
     }
 #endregion
 #region request: StepIn
     protected override StepInResponse HandleStepInRequest(StepInArguments arguments) {
-        if (this.session?.IsRunning == false && !this.session.HasExited) 
-            this.session.StepLine();
-                
+        WaitForSuspend();
+        lock (this.syncronization) {
+            if (this.session?.IsRunning == false && !this.session.HasExited) {
+                this.session.StepLine();
+                this.runningSuspended = false;
+            }
+        }   
         return new StepInResponse();
     }
 #endregion
 #region request: StepOut
     protected override StepOutResponse HandleStepOutRequest(StepOutArguments arguments) {
-        if (this.session?.IsRunning == false && !this.session.HasExited) 
-            this.session.Finish();
-
+        WaitForSuspend();
+        lock (this.syncronization) {
+            if (this.session?.IsRunning == false && !this.session.HasExited) {
+                this.session.Finish();
+                this.runningSuspended = false;
+            }
+        }
         return new StepOutResponse();
     }
 #endregion
@@ -229,7 +248,7 @@ public partial class DebugSession : Session {
 #endregion
 #region request: StackTrace
     protected override StackTraceResponse HandleStackTraceRequest(StackTraceArguments arguments) {
-        MonoClient.ThreadInfo thread = this.session.ActiveThread;
+        MonoClient.ThreadInfo thread = this.session.GetActiveThread(syncronization);
         if (thread.Id != arguments.ThreadId) {
             thread = FindThread(arguments.ThreadId);
             thread?.SetActive();
@@ -419,6 +438,7 @@ public partial class DebugSession : Session {
 
     private void TargetStopped(object sender, MonoClient.TargetEventArgs e) {
         Reset();
+        this.suspendEvent.Set();
         Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Pause) {
             ThreadId = (int)e.Thread.Id,
             AllThreadsStopped = true,
@@ -426,6 +446,7 @@ public partial class DebugSession : Session {
     }
     private void TargetHitBreakpoint(object sender, MonoClient.TargetEventArgs e) {
         Reset();
+        this.suspendEvent.Set();
         Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Breakpoint) {
             ThreadId = (int)e.Thread.Id,
             AllThreadsStopped = true,
@@ -433,6 +454,7 @@ public partial class DebugSession : Session {
     }
     private void TargetExceptionThrown(object sender, MonoClient.TargetEventArgs e) {
         Reset();
+        this.suspendEvent.Set();
         var ex = GetActiveException((int)e.Thread.Id);
         if (ex != null) Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Exception) {
             ThreadId = (int)e.Thread.Id,
@@ -448,6 +470,7 @@ public partial class DebugSession : Session {
         Protocol.SendEvent(new TerminatedEvent());
     }
     private void TargetInterrupted(object sender, MonoClient.TargetEventArgs e) {
+        this.suspendEvent.Set();
     }
     private void TargetThreadStarted(object sender, MonoClient.TargetEventArgs e) {
         int tid = (int)e.Thread.Id;
@@ -487,6 +510,12 @@ public partial class DebugSession : Session {
         this.exception = null;
         this.variableHandles.Reset();
         this.frameHandles.Reset();
+    }
+    private void WaitForSuspend() {
+        if (!this.runningSuspended) {
+            this.suspendEvent.WaitOne(this.session.Options.EvaluationOptions.EvaluationTimeout);
+            this.runningSuspended = true;
+        }
     }
 
     private MonoClient.ThreadInfo FindThread(int threadReference) {
