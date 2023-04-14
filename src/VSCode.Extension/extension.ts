@@ -35,7 +35,7 @@ export function activate(context: vscode.ExtensionContext): PublicExports | unde
 	}));
 	context.subscriptions.push(vscode.tasks.onDidEndTask(ev => {
 		if (ev.execution.task.definition.type.includes(res.taskDefinitionId))
-			XamlService.invalidate();
+			XamlService.regenerate();
 	}));
 
 	return exports;

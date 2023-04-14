@@ -2,6 +2,8 @@ using System.Net;
 using System.Net.Sockets;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Mono.Debugging.Client;
+using Mono.Debugging.Soft;
 
 namespace DotNet.Meteor.Debug.Utilities;
 
@@ -21,5 +23,11 @@ public static class Extensions {
         if (!string.IsNullOrEmpty(threadName))
             return threadName;
         return $"Thread #{threadId}";
+    }
+
+    public static ThreadInfo GetActiveThread(this SoftDebuggerSession session, object sync) {
+        lock(sync) {
+            return session.ActiveThread;
+        }
     }
 }

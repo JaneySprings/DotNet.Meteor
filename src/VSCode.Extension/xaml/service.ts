@@ -66,7 +66,8 @@ export class XamlService {
             this.xamlSchemaAliases.push(dataArray);
         }
     }
-    public static invalidate() {
+    public static regenerate() {
         this.xamlSchemaAliases = [];
+        XamlService.generate();
     }
 }

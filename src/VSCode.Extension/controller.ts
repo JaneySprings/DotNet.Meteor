@@ -67,7 +67,7 @@ export class UIController {
         Configuration.project = item ?? UIController.projects[0];
         UIController._projectStatusItem.text = `${models.Icon.project} ${Configuration.project?.name}`;
         PublicExports.instance.projectChangedEventHandler.invoke(Configuration.project);
-        XamlService.invalidate();
+        XamlService.regenerate();
         StateManager.saveProject();
     }
     public static performSelectTarget(item: models.Target | undefined = undefined) {
