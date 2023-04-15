@@ -1,4 +1,4 @@
-import { QuickPickItem } from 'vscode';
+import { QuickPickItem, QuickPickItemKind } from 'vscode';
 
 
 export class Icon {
@@ -23,7 +23,7 @@ export class Project {
 
 export class Device {
     public name: string | undefined;
-    public details: string | undefined;
+    public detail: string | undefined;
     public serial: string | undefined;
     public platform: string | undefined;
     public os_version: string | undefined;
@@ -55,7 +55,16 @@ export class DeviceItem implements QuickPickItem {
 
     constructor(device: Device) {
         this.label = `${device.is_running ? Icon.active : Icon.inactive} ${device.name}`;
-        this.detail = `${device.details} • ${device.os_version ?? device.platform}`;
+        this.detail = `${device.detail} • ${device.os_version ?? device.platform}`;
         this.item = device;
+    }
+}
+
+export class SeparatorItem implements QuickPickItem {
+    kind: QuickPickItemKind = QuickPickItemKind.Separator;
+    label: string;
+
+    constructor(label: string | undefined) {
+        this.label = label ?? '';
     }
 }

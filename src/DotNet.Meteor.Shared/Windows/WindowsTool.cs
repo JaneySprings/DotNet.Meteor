@@ -13,7 +13,7 @@ namespace DotNet.Meteor.Windows {
                 IsMobile = false,
                 Name = Environment.MachineName,
                 OSVersion = osVersion,
-                Details = Details.Windows,
+                Detail = Details.Windows,
                 Platform = Platforms.Windows
             };
         }

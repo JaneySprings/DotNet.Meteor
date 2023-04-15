@@ -103,6 +103,7 @@ export class UIController {
     public static async showQuickPickDevice() {
         const picker = vscode.window.createQuickPick();
         picker.placeholder = res.messageDeviceLoading;
+        picker.matchOnDetail = true;
         picker.busy = true;
         picker.show();
         picker.onDidAccept(() => {
@@ -114,7 +115,16 @@ export class UIController {
         });
 
         UIController.devices = await CommandInterface.getDevices();
-        picker.items = UIController.devices.map(device => new models.DeviceItem(device));
+
+        const items: vscode.QuickPickItem[] = [];
+        for (let i of UIController.devices.keys()) {
+            if (i == 0 || UIController.devices[i].detail !== UIController.devices[i-1].detail) 
+                items.push(new models.SeparatorItem(UIController.devices[i].detail));
+
+            items.push(new models.DeviceItem(UIController.devices[i]));    
+        }
+        
+        picker.items = items;
         picker.placeholder = res.commandTitleSelectActiveDevice;
         picker.busy = false;
     }
