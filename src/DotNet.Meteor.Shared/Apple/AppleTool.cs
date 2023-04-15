@@ -38,7 +38,7 @@ namespace DotNet.Meteor.Apple {
                     IsRunning = extractor.Extract("state", "integer")?.Equals("3") == true,
                     Name = extractor.Extract("name") ?? "Unknown",
                     RuntimeId = runtimeId,
-                    Details = Details.iOSSimulator,
+                    Detail = Details.iOSSimulator,
                     Platform = Platforms.iOS,
                     OSVersion = osVersion,
                     Serial = extractor.Extract("UDID")
@@ -65,7 +65,7 @@ namespace DotNet.Meteor.Apple {
                     IsMobile = false,
                     RuntimeId = Runtimes.MacArm64,
                     OSVersion = osVersion,
-                    Details = Details.MacCatalyst,
+                    Detail = Details.MacCatalyst,
                     Platform = Platforms.MacCatalyst,
                     Name = $"{Environment.MachineName} ({Details.MacArm})"
                 });
@@ -77,7 +77,7 @@ namespace DotNet.Meteor.Apple {
                 IsMobile = false,
                 RuntimeId = Runtimes.MacX64,
                 OSVersion = osVersion,
-                Details = Details.MacCatalyst,
+                Detail = Details.MacCatalyst,
                 Platform = Platforms.MacCatalyst,
                 Name = $"{Environment.MachineName} ({Details.MacX64})"
             });

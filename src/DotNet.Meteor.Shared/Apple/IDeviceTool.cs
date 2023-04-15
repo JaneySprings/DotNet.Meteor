@@ -19,7 +19,7 @@ namespace DotNet.Meteor.Apple {
                 Serial = FindValue(result.StandardOutput, "UniqueDeviceID"),
                 OSVersion = "iOS " + FindValue(result.StandardOutput, "ProductVersion"),
                 RuntimeId = Runtimes.iOSArm64,
-                Details = Details.iOSDevice,
+                Detail = Details.iOSDevice,
                 Platform = Platforms.iOS,
                 IsEmulator = false,
                 IsRunning = true,

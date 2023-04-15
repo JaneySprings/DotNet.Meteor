@@ -21,7 +21,7 @@ namespace DotNet.Meteor.Android {
                 avds.Add(new DeviceData {
                     Name = name,
                     Serial = runningAvds.ContainsKey(name) ? runningAvds[name] : null,
-                    Details = Details.AndroidEmulator,
+                    Detail = Details.AndroidEmulator,
                     Platform = Platforms.Android,
                     OSVersion = ini.GetField("target") ?? "Unknown",
                     IsRunning = runningAvds.ContainsKey(name),
@@ -46,7 +46,7 @@ namespace DotNet.Meteor.Android {
                     Name = DeviceBridge.Shell(serial, "getprop", "ro.product.model"),
                     OSVersion = $"android-{DeviceBridge.Shell(serial, "getprop", "ro.build.version.sdk")}",
                     Platform = Platforms.Android,
-                    Details = Details.AndroidDevice,
+                    Detail = Details.AndroidDevice,
                     IsEmulator = false,
                     IsRunning = true,
                     IsMobile = true,

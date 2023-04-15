@@ -23,7 +23,33 @@
             "request": "launch",
             "preLaunchTask": "%task.meteor.title%"
           }
-        ]
+        ],
+        "configurationSnippets": [
+          {
+            "label": "%debugger.meteor.title%",
+            "description": "%debugger.meteor.description%",
+            "body": {
+              "name": "%debugger.meteor.title%",
+              "type": "%debugger.meteor.id%",
+              "request": "launch",
+              "preLaunchTask": "%task.meteor.title%"
+            }
+          }
+        ],
+        "configurationAttributes": {
+          "launch": {
+            "properties": {
+              "device": {
+                "type": "string",
+                "description": "%debugger.meteor.device.description%"
+              },
+              "runtime": {
+                "type": "string",
+                "description": "%debugger.meteor.runtime.description%"
+              }
+            }
+          }
+        }
       }
     ]
   }

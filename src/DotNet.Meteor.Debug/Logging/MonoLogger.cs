@@ -15,7 +15,7 @@ public class MonoLogger : ICustomLogger {
             logger.Error(message);
             return;
         }
-        logger.Error(ex, message);
+        logger.Error(ex, message + Environment.NewLine + ex.StackTrace);
         var innerException = ex.InnerException;
 
         while (innerException != null) {

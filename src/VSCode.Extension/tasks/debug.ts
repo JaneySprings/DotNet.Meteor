@@ -11,11 +11,13 @@ export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationPro
 									config: DebugConfiguration, 
 									token?: vscode.CancellationToken): Promise<DebugConfiguration | undefined> {
 		
-		if (config.device !== undefined) 
-			UIController.performSelectDevice(UIController.devices.find(d => d.name === config.device));
-
 		if (!Configuration.validate())
 			return undefined;
+
+		if (config.device !== undefined) 
+			UIController.performSelectDevice(UIController.devices.find(d => d.name === config.device));
+		if (config.runtime !== undefined)
+			Configuration.device!.runtime_id = config.runtime;
 
 		if (!config.noDebug) {
 			if (Configuration.isWindows()) {

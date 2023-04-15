@@ -33,7 +33,7 @@ namespace DotNet.Meteor.Apple {
                     IsMobile = true,
                     RuntimeId = Runtimes.iOSArm64,
                     Name = $"iPhone {version}",
-                    Details = Details.iOSDevice,
+                    Detail = Details.iOSDevice,
                     Platform = Platforms.iOS,
                     Serial = serial
                 });
