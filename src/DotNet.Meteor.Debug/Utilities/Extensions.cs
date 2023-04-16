@@ -24,10 +24,4 @@ public static class Extensions {
             return threadName;
         return $"Thread #{threadId}";
     }
-
-    public static ThreadInfo GetActiveThread(this SoftDebuggerSession session, object sync) {
-        lock(sync) {
-            return session.ActiveThread;
-        }
-    }
 }
