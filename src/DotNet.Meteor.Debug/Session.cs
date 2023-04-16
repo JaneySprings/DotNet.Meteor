@@ -4,6 +4,7 @@ using DotNet.Meteor.Processes;
 using Mono.Debugging.Client;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
+using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Protocol;
 
 namespace DotNet.Meteor.Debug;
 
@@ -26,6 +27,16 @@ public abstract class Session: DebugAdapterBase, IProcessLogger {
             Category = category
         });
     }
+    protected T DoSafe<T>(Func<T> func) {
+        try {
+            return func.Invoke();
+        } catch (Exception ex) {
+            if (ex is ProtocolException)
+                throw;
+            GetLogger().LogError($"[Handled] {ex.Message}", ex);
+            throw new ProtocolException(ex.Message);
+        }
+    }
 
     public void OnOutputDataReceived(string stdout) {
         SendConsoleEvent(OutputEvent.CategoryValue.Stdout, stdout);
@@ -39,6 +50,5 @@ public abstract class Session: DebugAdapterBase, IProcessLogger {
     }
     private void LogError(object sender, DispatcherErrorEventArgs args) {
         GetLogger().LogError($"[Fatal] {args.Exception.Message}", args.Exception);
-        OnErrorDataReceived($"{args.Exception}: {args.Exception.Message}");
     }
 }
