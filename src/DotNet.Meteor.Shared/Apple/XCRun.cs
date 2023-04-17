@@ -77,7 +77,7 @@ namespace DotNet.Meteor.Apple {
                         Detail = Details.iOSDevice,
                         Platform = Platforms.iOS,
                         RuntimeId = Runtimes.iOSArm64,
-                        OSVersion = deviceMatch.Groups["os"].Value,
+                        OSVersion = $"iOS {deviceMatch.Groups["os"].Value}",
                         Serial = deviceMatch.Groups["udid"].Value
                     });
                 }

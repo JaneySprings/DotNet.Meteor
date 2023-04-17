@@ -6,7 +6,7 @@ export class Icon {
     public static readonly target= "$(window)";
     public static readonly device = "$(device-mobile)";
     public static readonly computer = "$(vm)";
-    public static readonly active = "$(vm-running)";
+    public static readonly active = "$(debug-disconnect)";
     public static readonly inactive = "$(device-mobile)";
 }
 
@@ -50,12 +50,12 @@ export class ProjectItem implements QuickPickItem {
 
 export class DeviceItem implements QuickPickItem {
     label: string;
-    detail: string;
+    description: string;
     item: Device;
 
     constructor(device: Device) {
         this.label = `${device.is_running ? Icon.active : Icon.inactive} ${device.name}`;
-        this.detail = `${device.detail} • ${device.os_version ?? device.platform}`;
+        this.description = device.os_version ?? '';
         this.item = device;
     }
 }
