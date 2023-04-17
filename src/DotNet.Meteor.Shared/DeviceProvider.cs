@@ -19,14 +19,14 @@ namespace DotNet.Meteor.Shared {
 
             try { /* Android Devices */
                 devices.AddRange(AndroidTool.PhysicalDevices().OrderBy(x => x.Name));
-                devices.AddRange(AndroidTool.VirtualDevices().OrderBy(x => x.Name));
+                devices.AddRange(AndroidTool.VirtualDevices().OrderBy(x => !x.IsRunning).ThenBy(x => x.Name));
             } catch (Exception e) { errorHandler?.Invoke(e); }
 
             try { /* Apple Devices */
                 if (RuntimeSystem.IsMacOS) {
                     devices.AddRange(AppleTool.MacintoshDevices());
                     devices.AddRange(AppleTool.PhysicalDevices().OrderBy(x => x.Name));
-                    devices.AddRange(AppleTool.VirtualDevices().OrderBy(x => x.Name));
+                    devices.AddRange(AppleTool.VirtualDevices().OrderBy(x => !x.IsRunning).ThenBy(x => x.Name));
                 }
             } catch (Exception e) { errorHandler?.Invoke(e); }
 
