@@ -14,22 +14,23 @@ export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationPro
 		if (!Configuration.validate())
 			return undefined;
 
+		const targetDevice = { ...Configuration.device };
+		const targetProject = { ...Configuration.project };
+		
+		if (!config.noDebug && Configuration.isWindows()) {
+			vscode.window.showErrorMessage(res.messageDebugNotSupportedWin);
+			return undefined;
+		}
+		if (!config.noDebug && Configuration.target === Target.Release) {
+			vscode.window.showErrorMessage(res.messageDebugNotSupported);
+			return undefined;
+		}
+
 		if (config.device !== undefined) 
 			UIController.performSelectDevice(UIController.devices.find(d => d.name === config.device));
 		if (config.runtime !== undefined)
-			Configuration.device!.runtime_id = config.runtime;
+			targetDevice!.runtime_id = config.runtime;
 
-		if (!config.noDebug) {
-			if (Configuration.isWindows()) {
-				vscode.window.showErrorMessage(res.messageDebugNotSupportedWin);
-				return undefined;
-			}
-			if (Configuration.target === Target.Release) {
-				vscode.window.showErrorMessage(res.messageDebugNotSupported);
-				return undefined;
-			}
-		}
-		
 		if (!config.type && !config.request && !config.name) {
 			config.preLaunchTask = `${res.extensionId}: ${res.taskDefinitionDefaultTarget}`
 			config.name = res.debuggerMeteorTitle;
@@ -37,8 +38,8 @@ export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationPro
 			config.request = 'launch';
 		}
 		
-		config['selected_project'] = Configuration.project;
-        config['selected_device'] = Configuration.device;
+        config['selected_device'] = targetDevice;
+		config['selected_project'] = targetProject;
 		config['selected_target'] = Configuration.target;
 		config['debugging_port'] = Configuration.getDebuggingPort();
 		
