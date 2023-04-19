@@ -20,8 +20,8 @@
 	"debugger.meteor.id": "dotnet-meteor.debugger",
 	"debugger.meteor.title": ".NET Meteor Debugger",
 	"debugger.meteor.description": "A new configuration for launching .NET apps.",
-	"debugger.meteor.device.description": "Perform select a specified device name before launching.",
-	"debugger.meteor.runtime.description": "Overrides a device specified runtime identifier to the custom.",
+	"debugger.meteor.device.description": "Overrides a target device with the specified device.",
+	"debugger.meteor.runtime.description": "Overrides a device's runtime identifier with the specified identifier.",
 
 	"configuration.title": ".NET Meteor configuration",
 	"configuration.description.monoSdbDebuggerPortAndroid": "Android's default port of the Mono SDB debugger.",
