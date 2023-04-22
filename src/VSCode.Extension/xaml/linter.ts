@@ -56,8 +56,8 @@ export class XamlLinterProvider implements vscode.Disposable {
                         new vscode.Range(
                             position, 
                             new vscode.Position(parser.line, parser.column)
-                        ), 
-                        parser.error.message, 
+                        ),
+                        parser.error.message.replace(/\n/g, ' '),
                         vscode.DiagnosticSeverity.Error
                     );
                     result.push(diag);
