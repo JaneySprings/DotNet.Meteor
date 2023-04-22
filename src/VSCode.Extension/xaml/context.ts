@@ -6,11 +6,11 @@ export class ContextService {
         const context = new XamlContext();
         const documentPart = content.substring(0, offset);
         const contextTagStartIndex = documentPart.lastIndexOf('<');
-        if (!contextTagStartIndex || contextTagStartIndex < 0 || contextTagStartIndex > offset)
+        if (contextTagStartIndex < 0 || contextTagStartIndex > offset)
             return undefined;
         // If the tag is closed, we don't need to provide any context
         const documentSpan = documentPart.substring(contextTagStartIndex, offset);
-        if (documentSpan.includes('>') || documentSpan.includes('/'))
+        if (documentSpan.includes('>') || documentSpan.includes('</'))
             return undefined;
         // Extract all xmlns definitions from the document
         const xmlnsMatches = content.matchAll(/xmlns:([^=]*)="([^"]*)"/g);
