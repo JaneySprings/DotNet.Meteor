@@ -1,6 +1,6 @@
 <p align="center">
 <img src="img/header.jpg" width="1180px" alt=".NET Meteor" />
-<a href="https://github.com/JaneySprings/DotNet.Meteor/wiki">Documentation</a> | <a href="https://github.com/JaneySprings/DotNet.Meteor/issues">Support</a> | <a href="https://github.com/JaneySprings/DotNet.Meteor/releases">Releases</a>
+<a href="https://dev.to/nromanov/boost-net-maui-development-productivity-6-powerful-features-of-net-meteor-for-vs-code-in-windows-mac-linux-d0b">Features</a> | <a href="https://github.com/JaneySprings/DotNet.Meteor/wiki">Documentation</a> | <a href="https://github.com/JaneySprings/DotNet.Meteor/issues">Support</a>
 
 ---
 
