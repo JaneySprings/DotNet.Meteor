@@ -1,28 +1,21 @@
 export class XamlContext {
-    public tagContext: BaseContext | undefined;
-    public attributeContext: BaseContext | undefined;
-    public context: string | undefined;
+    public tagContext: Context | undefined;
+    public attributeContext: Context | undefined;
+    public imports: { [prefix: string]: string } = {};
+    public scope: XamlScope | undefined;
 }
 
-export class BaseContext {
-    public name: string;
-    public class: string | undefined;
+export class Context {
+    public name: string | undefined;
+    public prefix: string | undefined;
+    public parent: Context | undefined;
     public namespace: string | undefined;
-    public specific: boolean | undefined;
+}
 
-    public constructor (name: string) {
-        this.name = name;
-
-        const nameTokens = name.split(":");
-        if (nameTokens.length === 2) {
-            this.namespace = nameTokens[0];
-            this.name = nameTokens[1];
-        }
-
-        const classTokens = this.name.split(".");
-        if (classTokens.length === 2) {
-            this.class = classTokens[0];
-            this.name = classTokens[1];
-        }
-    }
+export enum XamlScope {
+    Tag = 0,
+    Attribute = 1,
+    Multiline = 2,
+    Static = 3,
+    Value = 4
 }

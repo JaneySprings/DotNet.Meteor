@@ -1,63 +1,89 @@
-import * as sax from 'sax';
-import { BaseContext, XamlContext } from './types';
+import { XamlContext, XamlScope, Context } from './types';
 
 
 export class ContextService {
-    public static async getContext(content: string, offset: number): Promise<XamlContext> {
-        const parser = sax.parser(true);
-        return await new Promise<XamlContext>(
-            (resolve) => {
-                const result = new XamlContext();
-                parser.onerror = () => parser.resume();
-                parser.onopentagstart = () => {
-                    if (parser.position < offset)
-                        return;
-
-                    if (parser.tag.name.includes('.')) {
-                        const parts = parser.tag.name.split('.');
-                        result.tagContext = new BaseContext(parts[0]);
-                        result.attributeContext = new BaseContext(parts[1]);
-                        result.attributeContext.specific = true;
-                        result.context = 'attribute';
-                    } else {
-                        result.tagContext = new BaseContext(parser.tag.name);
-                        result.context = 'element';
-                    }
-
-                    parser.end();
-                };
-                parser.onattribute = () => {
-                    if (parser.position < offset)
-                        return;
-                    
-                    let lastAttr = undefined;
-                    for (let key in parser.tag.attributes)
-                        lastAttr = key;
-                    
-                    result.tagContext = new BaseContext(parser.tag.name);
-                    result.attributeContext = new BaseContext(lastAttr ?? '');
-                    result.context = 'attribute';
-
-                    const substring = content.substring(offset, parser.position);
-                    const quoteCount = substring.match(/"/g)?.length ?? 0;
-                    if (quoteCount % 2 !== 0)
-                        result.context = 'value';
-
-                    parser.end();
-                };
-                parser.onend = () => resolve(result);
-                parser.write(content).close();
+    public static getContext(content: string, offset: number): XamlContext | undefined {
+        const context = new XamlContext();
+        const documentPart = content.substring(0, offset);
+        const contextTagStartIndex = documentPart.lastIndexOf('<');
+        if (!contextTagStartIndex || contextTagStartIndex < 0 || contextTagStartIndex > offset)
+            return undefined;
+        // If the tag is closed, we don't need to provide any context
+        const documentSpan = documentPart.substring(contextTagStartIndex, offset);
+        if (documentSpan.includes('>') || documentSpan.includes('/'))
+            return undefined;
+        // Extract all xmlns definitions from the document
+        const xmlnsMatches = content.matchAll(/xmlns:([^=]*)="([^"]*)"/g);
+        const xmlnsMatch = content.match(/xmlns="([^"]*)"/);
+        if (xmlnsMatch !== null && xmlnsMatch.length == 2)
+            context.imports[''] = xmlnsMatch[1];
+        for (const match of xmlnsMatches) 
+            context.imports[match[1]] = match[2];
+        // Simple tag definition
+        if (!documentSpan.includes(' ')) {
+            const tagRawValue = documentSpan.substring(1);
+            context.tagContext = ContextService.getTagContext(tagRawValue, content, context);
+            context.scope = XamlScope.Tag;
+            if (context.tagContext.name?.includes('.')) {
+                const tokens = context.tagContext.name.split('.');
+                context.tagContext.name = tokens[0];
+                context.attributeContext = ContextService.getAttributeContext(tokens[1], content, context);
+                context.attributeContext.parent = context.tagContext;
+                context.scope = XamlScope.Multiline;
             }
-        );
+        }
+        // Tag with attributes
+        if (documentSpan.includes(' ')) {
+            const tagRawValue = documentSpan.substring(1, documentSpan.indexOf(' '));
+            const attributeSpan = documentSpan.substring(documentSpan.lastIndexOf(' ') + 1);
+            const equalIndex = attributeSpan.lastIndexOf('=');
+            const attributeEndIndex = equalIndex === -1 ? undefined : equalIndex;
+            const attributeRawValue = attributeSpan.substring(0, attributeEndIndex);
+            context.tagContext = ContextService.getTagContext(tagRawValue, content, context);
+            context.attributeContext = ContextService.getAttributeContext(attributeRawValue, content, context);
+            context.scope = XamlScope.Attribute;
+            if (context.attributeContext.parent === undefined)
+                context.attributeContext.parent = context.tagContext;
+
+            if (context.attributeContext.parent !== context.tagContext)
+                context.scope = XamlScope.Static;
+        }
+        
+        if ((documentSpan.match(/"/g)?.length ?? 0) % 2 !== 0)
+            context.scope = XamlScope.Value;
+
+        return context;
     }
 
-    public static getXmlns(content: string, prefix: string | undefined): string | undefined {
-        const xmlnsMatch = prefix !== undefined 
-            ? content.match(`xmlns:${prefix}="([^"]*)"`) 
-            : content.match('xmlns="([^"]*)"');
-        if (xmlnsMatch !== null && xmlnsMatch.length == 2) 
-            return xmlnsMatch[1];
-                
-        return undefined;
+    private static getTagContext(rawValue: string, content: string, xamlContext: XamlContext): Context {
+        const context = new Context();
+        context.name = rawValue;
+        if (rawValue.includes(':')) {
+            const tokens = rawValue.split(":");
+            context.prefix = tokens[0];
+            context.name = tokens[1];
+        } 
+
+        context.namespace = xamlContext.imports[context.prefix ?? ''];
+        return context;
+    }
+
+    private static getAttributeContext(rawValue: string, content: string, xamlContext: XamlContext): Context {
+        const context = new Context();
+        context.name = rawValue;
+        if (rawValue.includes(':')) {
+            const tokens = rawValue.split(":");
+            context.prefix = tokens[0];
+            context.name = tokens[1];
+        } 
+
+        context.namespace = xamlContext.imports[context.prefix ?? ''];
+        if (context.name.includes('.')) {
+            const nameTokens = context.name.split('.');
+            context.parent = ContextService.getTagContext(nameTokens[0], content, xamlContext);
+            context.name = nameTokens[1];
+        }
+        
+        return context;
     }
 }
