@@ -15,8 +15,11 @@ export class XamlService {
     public static activate(context: vscode.ExtensionContext) {
         const schemaSelector = { language: languageId, scheme: 'file' };
     
-        context.subscriptions.push(vscode.languages.registerCompletionItemProvider(schemaSelector, new XamlCompletionItemProvider()));
         context.subscriptions.push(new XamlLinterProvider(context));
+        context.subscriptions.push(vscode.languages.registerCompletionItemProvider(
+            schemaSelector, new XamlCompletionItemProvider(), ':', '.', '<', ' ',
+        ));
+        
     }
 
 

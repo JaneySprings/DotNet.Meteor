@@ -1,4 +1,5 @@
 import { XamlService, languageId  } from './service';
+import { XamlContext, XamlScope } from './types';
 import { ContextService } from './context';
 import * as vscode from 'vscode';
 
@@ -9,114 +10,109 @@ export class XamlCompletionItemProvider implements vscode.CompletionItemProvider
 
         const documentContent = textDocument.getText();
         const offset = textDocument.offsetAt(position);
-        const scope = await ContextService.getContext(documentContent, offset);
-        let completionItems: vscode.CompletionItem[] = [];
+        const context = ContextService.getContext(documentContent, offset);
+        if (textDocument.languageId === languageId && textDocument.fileName.includes(".xaml") && context)
+            return this.getCompletionItems(context);
 
-        if (textDocument.languageId === languageId && textDocument.fileName.includes(".xaml")) {
-            if (scope.tagContext === undefined)
-                return [];
-            
-            // Element
-            if (scope.context === "element") {
-                const xmlns = ContextService.getXmlns(documentContent, scope.tagContext.namespace);
-                const types = XamlService.getTypes(xmlns);
-                for (var i = 0; i < types.length; i++) {
-                    completionItems.push(CompletionCreator.element(types[i]));
+        return [];
+    }
+
+    private getCompletionItems(context: XamlContext): vscode.CompletionItem[] {
+        const items: vscode.CompletionItem[] = [];
+
+        if (context.scope === XamlScope.Tag) {
+            const types = XamlService.getTypes(context.tagContext?.namespace);
+            for (var i = 0; i < types.length; i++) {
+                const ci = new vscode.CompletionItem(types[i].name);
+                ci.kind = vscode.CompletionItemKind.Class;
+                ci.detail = `${types[i].namespace}.${types[i].name}`;
+                items.push(ci);
+            }
+            if (!context.tagContext?.prefix) {
+                for(const key in context.imports) {
+                    if (key !== '') {
+                        const ci = new vscode.CompletionItem(key);
+                        ci.kind = vscode.CompletionItemKind.Module;
+                        ci.detail = context.imports[key];
+                        items.push(ci);
+                    }
                 }
-            // Attribute
-            } else if (scope.context === "attribute") {
-                if (scope.attributeContext?.class !== undefined) {
-                    // Attached property
-                    const propXmlns = ContextService.getXmlns(documentContent, scope.attributeContext.namespace);
-                    const propTypes = XamlService.getTypes(propXmlns);
-                    const propType = propTypes.find(t => t.name === scope.attributeContext?.class);
-                    for (let i = 0; i < propType.attributes.length; i++) {
-                        if (propType.attributes[i].isAttached) {
-                            completionItems.push(CompletionCreator.property(propType.attributes[i]));
+            }
+            return items;
+        }
+
+        if (context.scope === XamlScope.Attribute || context.scope === XamlScope.Multiline) {
+            const types = XamlService.getTypes(context.attributeContext?.parent?.namespace);
+            const findTag = types.find(t => t.name === context.attributeContext?.parent?.name);
+            if (findTag !== undefined) {
+                for (let i = 0; i < findTag.attributes.length; i++) {
+                    if (!findTag.attributes[i].isAttached) {
+                        const ci = new vscode.CompletionItem(findTag.attributes[i].name);
+                        ci.detail = `${findTag.attributes[i].namespace}.${findTag.attributes[i].name}`;
+                        ci.kind = vscode.CompletionItemKind.Property;
+
+                        if (context.scope === XamlScope.Attribute)
+                            ci.insertText = new vscode.SnippetString(`${findTag.attributes[i].name}="$1"`);
+                        if (findTag.attributes[i].isEvent) {
+                            ci.kind = vscode.CompletionItemKind.Event;
+                            if (context.scope === XamlScope.Multiline)
+                                continue;
                         }
-                    }
-                } else {
-                    // All properties
-                    const xmlns = ContextService.getXmlns(documentContent, scope.tagContext?.namespace);
-                    const types = XamlService.getTypes(xmlns);
-                    const findTag = types.find(t => t.name === scope.tagContext?.name);
-                    if (findTag !== undefined) {
-                        for (let i = 0; i < findTag.attributes.length; i++) {
-                            completionItems.push(CompletionCreator.property(findTag.attributes[i], !scope.attributeContext?.specific));
-                        }
-                    }
-                    const propXmlns = ContextService.getXmlns(documentContent, scope.attributeContext?.namespace);
-                    const attachedClasses = XamlService.getAttachedTypes(propXmlns);
-                    for (let i = 0; i < attachedClasses.length; i++) {
-                        completionItems.push(CompletionCreator.attachedClass(attachedClasses[i]));
+
+                        items.push(ci);
                     }
                 }
-            // Value
-            } else if (scope.context === "value") {
-                let findProp: any = undefined;
-                if (scope.attributeContext?.class !== undefined) {
-                    // Attached property
-                    const propXmlns = ContextService.getXmlns(documentContent, scope.attributeContext?.namespace);
-                    const propTypes = XamlService.getTypes(propXmlns);
-                    const findTag = propTypes.find(t => t.name === scope.attributeContext?.class);
-                    if (findTag !== undefined) {
-                        findProp = findTag.attributes.find((t: { name: any; }) => t.name === scope.attributeContext?.name);
-                    }
-                } else {
-                    // All properties
-                    const propXmlns = ContextService.getXmlns(documentContent, scope.tagContext?.namespace);
-                    const propTypes = XamlService.getTypes(propXmlns);
-                    const findTag = propTypes.find(t => t.name === scope.tagContext?.name);
-                    if (findTag !== undefined) {
-                        findProp = findTag.attributes.find((t: { name: any; }) => t.name === scope.attributeContext?.name);
+            }
+            if (context.scope === XamlScope.Attribute) {
+                const staticTypes = XamlService
+                    .getTypes(context.attributeContext?.namespace)
+                    .filter(t => t.attributes.find((a: any) => a.isAttached));
+                for (let i = 0; i < staticTypes.length; i++) {
+                    const ci = new vscode.CompletionItem(staticTypes[i].name, vscode.CompletionItemKind.Module);
+                    ci.detail = `${staticTypes[i].namespace}.${staticTypes[i].name}`;
+                    ci.insertText = new vscode.SnippetString(`${staticTypes[i].name}.$1`);
+                    items.push(ci);
+                }
+            }
+            return items;
+        }
+
+        if (context.scope === XamlScope.Static) {
+            const types = XamlService.getTypes(context.attributeContext?.parent?.namespace);
+            const findTag = types.find(t => t.name === context.attributeContext?.parent?.name);
+            if (findTag !== undefined) {
+                for (let i = 0; i < findTag.attributes.length; i++) {
+                    if (findTag.attributes[i].isAttached) {
+                        const ci = new vscode.CompletionItem(findTag.attributes[i].name);
+                        ci.detail = `${findTag.attributes[i].namespace}.${findTag.attributes[i].name}`;
+                        ci.insertText = new vscode.SnippetString(`${findTag.attributes[i].name}="$1"`);
+                        ci.kind = vscode.CompletionItemKind.Property;
+                        if (findTag.attributes[i].isEvent) 
+                            ci.kind = vscode.CompletionItemKind.Event;
+
+                        items.push(ci);
                     }
                 }
+            }
+            return items;
+        }
+
+        if (context.scope === XamlScope.Value) {
+            const types = XamlService.getTypes(context.attributeContext?.parent?.namespace);
+            const findTag = types.find(t => t.name === context.attributeContext?.parent?.name);
+            if (findTag !== undefined) {
+                const findProp = findTag.attributes.find((a: any) => a.name === context.attributeContext?.name);
                 if (findProp !== undefined) {
                     if (Array.isArray(findProp.type)) {
                         for (let i = 0; i < findProp.type.length; i++) {
-                            completionItems.push(CompletionCreator.value(findProp.type[i]));
+                            items.push(new vscode.CompletionItem(findProp.type[i], vscode.CompletionItemKind.Enum));
                         }
                     }
                 }
             }
+            return items;
         }
 
-        return completionItems;
-    }
-}
-
-class CompletionCreator {
-    public static element(type: any): vscode.CompletionItem {
-        const ci = new vscode.CompletionItem(type.name, vscode.CompletionItemKind.Class);
-        ci.detail = `Class ${type.namespace}.${type.name}`;
-        ci.documentation = type.doc;
-        return ci;
-    }
-
-    public static attachedClass(type: any): vscode.CompletionItem {
-        const ci = new vscode.CompletionItem(type.name, vscode.CompletionItemKind.Module);
-        ci.detail = `Class ${type.namespace}.${type.name}`;
-        ci.documentation = type.doc;
-        ci.insertText = new vscode.SnippetString(`${type.name}.$1`);
-        return ci;
-    }
-
-    public static property(attr: any, format: boolean = true): vscode.CompletionItem {
-        const ci = new vscode.CompletionItem(attr.name);
-        if (format)
-            ci.insertText = new vscode.SnippetString(`${attr.name}="$1"`);
-        ci.documentation = attr.doc;
-        if (attr.isEvent !== undefined && attr.isEvent) {
-            ci.detail = `Event ${attr.namespace}.${attr.name}`;
-            ci.kind = vscode.CompletionItemKind.Event;
-        } else {
-            ci.detail = `Property ${attr.namespace}.${attr.name}`;
-            ci.kind = vscode.CompletionItemKind.Property;
-        }
-        return ci;
-    }
-
-    public static value(value: string): vscode.CompletionItem {
-        return new vscode.CompletionItem(value, vscode.CompletionItemKind.Enum);
+        return items;
     }
 }
