@@ -12,7 +12,7 @@ public class Reflector {
     public SchemaInfo CreateAlias(string path) {
         var assembly = Assembly.LoadFrom(path);
         var elements = new List<TypeInfo>();
-        string xmlNamespace = $"assembly={assembly.GetName().Name}";
+        var schema = new SchemaInfo(assembly.GetName().Name, elements);
 
         foreach (var type in assembly.GetTypes())
             if (type.IsSubclassOf(MauiTypeLoader.BindableObject!) && !type.IsAbstract)
@@ -20,9 +20,9 @@ public class Reflector {
 
         var xmlnsAttribute = assembly.GetCustomAttributes().FirstOrDefault(it => it.GetType() == MauiTypeLoader.XmlnsDefinitionAttribute!);
         if (xmlnsAttribute != null && MauiTypeLoader.XmlnsDefinitionAttribute!.GetProperty("XmlNamespace")?.GetValue(xmlnsAttribute) is string xmlns)
-            xmlNamespace = xmlns;
+            schema.Xmlns = xmlns;
 
-        return new SchemaInfo(xmlNamespace, elements);
+        return schema;
     }
 
     private List<AttributeInfo> GetAttributes(Type type) {
