@@ -23,28 +23,29 @@ export class XamlService {
     }
 
 
-    public static getTypes(namespace: string | undefined): any[] { 
-        if (namespace === undefined)
+    public static getTypes(definition: string | undefined): any[] { 
+        if (definition === undefined)
             return [];
 
-        const schema = this.xamlSchemaAliases.find(x => namespace.includes(x.xmlns));
-        if (schema === undefined) 
-            return [];
-
-        return schema.types;
-    }
-    public static getAttachedTypes(namespace: string | undefined): any[] {
-        const result: any[] = [];
-        if (namespace === undefined)
-            return result;
-
-        const schema = this.xamlSchemaAliases.find(x => namespace.includes(x.xmlns));
-        for (const type of schema.types) {
-            if (type.attributes.find((x: any) => x.isAttached) !== undefined) {
-                result.push(type);
-            }
+        if (definition.startsWith("clr-namespace:")) {
+            if (definition.includes(";assembly="))
+                definition = definition.split(";assembly=")[1];
+            else 
+                definition = definition.replace("clr-namespace:", "");
+            
+            const schema = this.xamlSchemaAliases.find(x => definition === x.assembly);
+            if (schema !== undefined) 
+                return schema.types;
+        } else {
+            const schemas = this.xamlSchemaAliases.filter(x => definition === x.xmlns);
+            const types = [];
+            for (const schema of schemas) 
+                types.push(...schema.types);
+            
+            return types;
         }
-        return result;
+
+        return [];
     }
 
 
