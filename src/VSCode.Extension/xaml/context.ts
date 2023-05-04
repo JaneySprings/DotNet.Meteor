@@ -34,11 +34,11 @@ export class ContextService {
         }
         // Tag with attributes
         if (documentSpan.includes(' ')) {
-            const tagRawValue = documentSpan.substring(1, documentSpan.indexOf(' '));
+            const tagRawValue = documentSpan.substring(1, documentSpan.indexOf(' ')).trim();
             const attributeSpan = documentSpan.substring(documentSpan.lastIndexOf(' ') + 1);
             const equalIndex = attributeSpan.lastIndexOf('=');
             const attributeEndIndex = equalIndex === -1 ? undefined : equalIndex;
-            const attributeRawValue = attributeSpan.substring(0, attributeEndIndex);
+            const attributeRawValue = attributeSpan.substring(0, attributeEndIndex).trim();
             context.tagContext = ContextService.getTagContext(tagRawValue, content, context);
             context.attributeContext = ContextService.getAttributeContext(attributeRawValue, content, context);
             context.scope = XamlScope.Attribute;
