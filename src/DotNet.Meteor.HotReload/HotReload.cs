@@ -1,4 +1,5 @@
 ﻿using System.Net.Sockets;
+using System.Text;
 
 namespace DotNet.Meteor.HotReload;
 
@@ -9,8 +10,9 @@ public static class HotReloadClient {
             throw new FileNotFoundException("XAML file not found", xamlFilePath);
         }
 
-        var xamlContent = File.ReadAllText(xamlFilePath);
-        var classDefinition = ClassDefinitionExtractor.GetClassDefinition(xamlContent);
+        var xamlContent = new StringBuilder(File.ReadAllText(xamlFilePath));
+        var classDefinition = MarkupHelper.GetClassDefinition(xamlContent.ToString());
+        MarkupHelper.RemoveReferenceNames(xamlContent);
 
         if (string.IsNullOrEmpty(classDefinition)) {
             logger?.Invoke($"Class definition not found in XAML file: {xamlFilePath}");
