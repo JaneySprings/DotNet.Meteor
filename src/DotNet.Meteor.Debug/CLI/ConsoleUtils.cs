@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using DotNet.Meteor.HotReload;
 using DotNet.Meteor.Shared;
 using DotNet.Meteor.Xaml;
 using System.Reflection;
@@ -43,6 +44,10 @@ namespace DotNet.Meteor.Debug.CLI {
             var schemaGenerator = new JsonSchemaGenerator(args[1], logger.Error);
             var result = schemaGenerator.CreateTypesAlias();
             Console.WriteLine(JsonConvert.SerializeObject(result));
+        }
+
+        public static void XamlReload(string[] args) {
+            HotReloadClient.SendNotification(int.Parse(args[1]), args[2], logger.Error);
         }
 
         public static void StartSession(string[] args) {

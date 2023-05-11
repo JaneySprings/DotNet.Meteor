@@ -9,6 +9,7 @@ public class Program {
         {  "--all-devices", ConsoleUtils.AllDevices },
         { "--android-sdk-path", ConsoleUtils.AndroidSdkPath },
         { "--analyze-workspace", ConsoleUtils.AnalyzeWorkspace },
+        { "--xaml-reload", ConsoleUtils.XamlReload },
         { "--xaml", ConsoleUtils.XamlGenerate },
         { "--start-session", ConsoleUtils.StartSession }
     };
