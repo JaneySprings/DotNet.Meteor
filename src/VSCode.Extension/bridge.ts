@@ -31,6 +31,13 @@ export class CommandInterface {
             .append("--xaml")
             .appendQuoted(path));
     }
+    public static async xamlReload(port: number, path: string): Promise<boolean>  {
+        return await ProcessRunner.runAsync<boolean>(new ProcessArgumentBuilder("dotnet")
+            .appendQuoted(CommandInterface.toolPath)
+            .append("--xaml-reload")
+            .append(port.toString())
+            .appendQuoted(path));
+    }
 }
 
 class ProcessRunner {

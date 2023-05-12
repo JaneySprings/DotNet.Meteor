@@ -47,7 +47,8 @@ namespace DotNet.Meteor.Debug.CLI {
         }
 
         public static void XamlReload(string[] args) {
-            HotReloadClient.SendNotification(int.Parse(args[1]), args[2], logger.Error);
+            var result = HotReloadClient.SendNotification(int.Parse(args[1]), args[2], logger.Error);
+            Console.WriteLine(JsonConvert.SerializeObject(result));
         }
 
         public static void StartSession(string[] args) {

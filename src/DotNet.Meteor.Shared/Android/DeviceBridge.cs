@@ -21,13 +21,13 @@ namespace DotNet.Meteor.Android {
             return string.Join(Environment.NewLine, result.StandardOutput);
         }
 
-        public static string Forward(string serial, int local, int target) {
+        public static string Forward(string serial, int port) {
             var adb = PathUtils.AdbTool();
             var result = new ProcessRunner(adb, new ProcessArgumentBuilder()
                 .Append("-s", serial)
                 .Append("forward")
-                .Append($"tcp:{local}")
-                .Append($"tcp:{target}"))
+                .Append($"tcp:{port}")
+                .Append($"tcp:{port}"))
                 .WaitForExit();
 
             if (result.ExitCode != 0)

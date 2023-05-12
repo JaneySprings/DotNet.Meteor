@@ -11,13 +11,17 @@ public class LaunchData {
     public DeviceData Device { get; }
     public Project Project { get; }
     public string Target { get; }
+    public int ReloadHostPort { get; }
 
     public bool IsDebug => Target.Equals("debug", StringComparison.OrdinalIgnoreCase);
 
-    public LaunchData(Project project, DeviceData device, string target) {
+    public LaunchData(Project project, DeviceData device, string target, int? reloadHostPort) {
         Project = project;
         Device = device;
         Target = target;
+
+        if (reloadHostPort != null)
+            ReloadHostPort = reloadHostPort.Value;
     }
 
     public void TryLoad(Action<Exception> callback) {
