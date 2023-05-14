@@ -34,10 +34,24 @@ Task("clean").Does(() => {
 ///////////////////////////////////////////////////////////////////////////////
 
 Task("build-debugger")
-   .Does(() => DotNetBuild(MeteorDebugProjectPath, new DotNetBuildSettings {
-      MSBuildSettings = new DotNetMSBuildSettings { AssemblyVersion = version },
-      OutputDirectory = ExtensionAssembliesDirectory,
+   .Does(() => {
+      DotNetBuild(MeteorDebugProjectPath, new DotNetBuildSettings {
+         MSBuildSettings = new DotNetMSBuildSettings { AssemblyVersion = version },
+         OutputDirectory = ExtensionAssembliesDirectory,
+         Configuration = configuration,
+      });
+      DeleteFiles(GetFiles(_Path.Combine(ExtensionAssembliesDirectory, "*.deps.json")));
+      DeleteFiles(GetFiles(_Path.Combine(ExtensionAssembliesDirectory, "*.xml")));
+   });
+
+Task("build-plugin")
+   .Does(() => DotNetPack(MeteorPluginProjectPath, new DotNetPackSettings {
+      OutputDirectory = ArtifactsDirectory,
       Configuration = configuration,
+      MSBuildSettings = new DotNetMSBuildSettings { 
+         AssemblyVersion = version, 
+         Version = version
+      },
    }));
 
 Task("build-tests")
@@ -48,16 +62,6 @@ Task("build-tests")
       Loggers = new[] { "trx" }
    }));
 
-Task("clean-debugger")
-   .WithCriteria(configuration.Equals("release"))
-   .Does(() => {
-      DeleteFiles(GetFiles(
-         _Path.Combine(ExtensionAssembliesDirectory, 
-         _Path.GetFileNameWithoutExtension(MeteorDebugProjectPath))
-      ));
-      DeleteFiles(GetFiles(_Path.Combine(ExtensionAssembliesDirectory, "*.deps.json")));
-      DeleteFiles(GetFiles(_Path.Combine(ExtensionAssembliesDirectory, "*.xml")));
-   });
 
 ///////////////////////////////////////////////////////////////////////////////
 // TYPESCRIPT
@@ -79,7 +83,6 @@ Task("manifest").Does(() => {
 Task("vsix")
    .IsDependentOn("clean")
    .IsDependentOn("build-debugger")
-   .IsDependentOn("clean-debugger")
    .IsDependentOn("manifest")
    .DoesForEach<FilePath>(GetFiles(_Path.Combine(RootDirectory, "*.json")), file => {
       var regex = @"^\s\s(""version"":\s+)("".+"")(,)";

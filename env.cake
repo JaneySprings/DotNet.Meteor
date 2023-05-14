@@ -8,3 +8,4 @@ public string ExtensionAssembliesDirectory => _Path.Combine(ExtensionStagingDire
 
 public string MeteorDebugProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Debug", "DotNet.Meteor.Debug.csproj");
 public string MeteorTestsProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Tests", "DotNet.Meteor.Tests.csproj");
+public string MeteorPluginProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.HotReloadPlugin", "DotNet.Meteor.HotReloadPlugin.csproj");
