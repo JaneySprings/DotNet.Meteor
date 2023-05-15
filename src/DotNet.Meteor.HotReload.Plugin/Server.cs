@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 
-namespace DotNet.Meteor.HotReloadPlugin;
+namespace DotNet.Meteor.HotReload.Plugin;
 
 internal class Server : IMauiInitializeService {
     public int IdePort { get; }
@@ -18,6 +18,12 @@ internal class Server : IMauiInitializeService {
             var client = await tcpListener.AcceptTcpClientAsync();
             var stream = client.GetStream();
             var reader = new StreamReader(stream);
+            var writer = new StreamWriter(stream) { AutoFlush = true };
+
+            //wait for empty message
+            await reader.ReadLineAsync();
+            // send handshake
+            await writer.WriteLineAsync("handshake");
 
             var classDefinition = await reader.ReadLineAsync();
             var xamlContent = await reader.ReadToEndAsync();
@@ -29,7 +35,14 @@ internal class Server : IMauiInitializeService {
             if (targetElement == null)
                 continue;
 
-            targetElement.LoadFromXaml(xamlContent);
+            if (targetElement is VisualElement visualElement)
+                visualElement.Resources.Clear();
+
+            try {
+                targetElement.LoadFromXaml(xamlContent);
+            } catch (Exception e) {
+                System.Diagnostics.Debug.WriteLine("[HotReload]" + e.Message);
+            }
         }
     }
 

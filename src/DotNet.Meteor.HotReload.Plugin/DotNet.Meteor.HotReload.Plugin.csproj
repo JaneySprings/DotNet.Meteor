@@ -8,16 +8,14 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<PackageId>DotNet.Meteor.HotReloadPlugin</PackageId>
+		<PackageId>DotNetMeteor.HotReload.Plugin</PackageId>
 		<Summary>WAIT_FOR_TECHWRITTERS</Summary>
 		<Authors>NikitaRomanov</Authors>
 		<NeutralLanguage>en</NeutralLanguage>
-		<Product>DotNet.Meteor.HotReloadPlugin (net7.0)</Product>
+		<Product>DotNet.Meteor.HotReload.Plugin (net7.0)</Product>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<PackageProjectUrl>https://github.com/CommunityToolkit/Maui</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/JaneySprings/DotNet.Meteor</RepositoryUrl>
-		<UseFullSemVerForNuGet>false</UseFullSemVerForNuGet>
-		<Title>DotNet.Meteor.HotReloadPlugin</Title>
+		<Title>DotNet.Meteor.HotReload.Plugin</Title>
 		<Description>WAIT_FOR_TECHWRITTERS</Description>
 		<PackageIcon>logo.png</PackageIcon>
 		<Product>$(AssemblyName) ($(TargetFramework))</Product>

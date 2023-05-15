@@ -47,7 +47,7 @@ stages:
             repositoryName: '$(Build.Repository.Name)'
             action: 'create'
             tagSource: 'gitTag'
-            assets: 'artifacts/DotNet.Meteor.*.*'
+            assets: 'artifacts/DotNet.Meteor.*'
 
 
 
