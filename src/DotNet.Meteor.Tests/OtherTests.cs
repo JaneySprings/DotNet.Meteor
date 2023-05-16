@@ -1,9 +1,5 @@
 using Xunit;
-using DotNet.Meteor.Processes;
 using DotNet.Meteor.Shared;
-using DotNet.Meteor.Windows;
-using DotNet.Meteor.Android;
-using DotNet.Meteor.Apple;
 
 namespace DotNet.Meteor.Tests;
 

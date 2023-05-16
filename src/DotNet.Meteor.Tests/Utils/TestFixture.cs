@@ -81,6 +81,6 @@ public abstract class TestFixture {
         return assemblyPath;
     }
     protected void DeleteMockData() {
-        Directory.Delete(MockDataDirectory, true);
+       Directory.Delete(MockDataDirectory, true);
     }
 }

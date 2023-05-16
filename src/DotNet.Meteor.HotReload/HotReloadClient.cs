@@ -11,7 +11,7 @@ public static class HotReloadClient {
         }
 
         var xamlContent = new StringBuilder(File.ReadAllText(xamlFilePath));
-        var classDefinition = MarkupHelper.GetClassDefinition(xamlContent.ToString());
+        var classDefinition = MarkupHelper.GetClassDefinition(xamlContent);
         MarkupHelper.RemoveReferenceNames(xamlContent);
 
         if (string.IsNullOrEmpty(classDefinition)) {
