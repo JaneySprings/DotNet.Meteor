@@ -14,6 +14,9 @@ You can use this extension in the `Windows`, `MacOS`, and `Linux` operation syst
 - **XAML IntelliSense** </br>
 The extension provides you with a basic `XAML` syntax highlighting and shows snippets for .NET MAUI / third-party controls (it's necessary to build your project first).
 
+- **XAML Hot Reload** </br>
+Meteor support XAML Hot Reload for any platform. See the instruction below to enable Hot Reload on your project.
+
 - **MAUI Blazor Support** </br>
 The extension allows you to build and debug `MAUI Blazor` apps (including the `.razor` files).
 
@@ -39,16 +42,41 @@ Your can build and debug projects, written in the `F#` language.
 
 ---
 
+## Enable XAML Hot Reload
+
+1. Open a `.csproj` file of your project and add a following package reference:
+
+```xml
+<ItemGroup>
+	<PackageReference Include="DotNetMeteor.HotReload.Plugin" Version="3.*"/>
+</ItemGroup>
+```
+
+2. Enable a Hot Reload Server in your `MauiProgram.cs`:
+```cs
+using DotNet.Meteor.HotReload.Plugin;
+...
+    .UseMauiApp<App>()
+#if DEBUG
+    .EnableHotReload()
+#endif
+```
+3. Now you can run your project and update XAML in real-time!
+
+![image](./img/demo_dbg.gif)
+
+---
+
 ## Compatibility
 
 &emsp;The following table lists supported .NET target platforms and their capabilities:
 
-| Application Type | Build and Run | Debugging |
-|-|:-:|:-:|
-| **WinUI** |✅ | ❌ |
-| **Android** | ✅ | ✅ |
-| **iOS** | ✅ | ✅ |
-| **MacCatalyst** | ✅ | ✅ |
+| Application Type | Build and Run | Hot Reload | Debugging |
+|-|:-:|:-:|:-:|
+| **WinUI** | ✅ | ✅ | ❌ |
+| **Android** | ✅ | ✅ | ✅ |
+| **iOS** | ✅ | ✅ | ✅ |
+| **MacCatalyst** | ✅ | ✅ | ✅ |
 
 &emsp;*You can debug WinUI apps using the C# VSCode extension with attaching the .NET Core Debugger.*
 
