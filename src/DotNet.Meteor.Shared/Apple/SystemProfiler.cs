@@ -9,7 +9,7 @@ namespace DotNet.Meteor.Apple {
         public static List<DeviceData> PhysicalDevices() {
             var profiler = PathUtils.SystemProfilerTool();
             var devices = new List<DeviceData>();
-            var regex = new Regex(@"(iPhone:)[^,]*?Version:\s+(?<ver>\d+.\d+)[^,]*?Serial\sNumber:\s+(?<id>\S+)");
+            var regex = new Regex(@"(?<dev>iPhone|iPad):[^,]*?Version:\s+(?<ver>\d+.\d+)[^,]*?Serial\sNumber:\s+(?<id>\S+)");
 
             ProcessResult result = new ProcessRunner(profiler, new ProcessArgumentBuilder()
                 .Append("SPUSBDataType"))
@@ -22,6 +22,7 @@ namespace DotNet.Meteor.Apple {
 
             foreach (Match match in regex.Matches(output)) {
                 var version = match.Groups["ver"].Value;
+                var device = match.Groups["dev"].Value;
                 var serial = match.Groups["id"].Value;
                 //For modern iOS devices, the serial number is 24 characters long
                 if (serial.Length == 24)
@@ -32,7 +33,7 @@ namespace DotNet.Meteor.Apple {
                     IsRunning = true,
                     IsMobile = true,
                     RuntimeId = Runtimes.iOSArm64,
-                    Name = $"iPhone {version}",
+                    Name = $"{device} {version}",
                     Detail = Details.iOSDevice,
                     Platform = Platforms.iOS,
                     Serial = serial
