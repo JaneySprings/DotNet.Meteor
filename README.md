@@ -61,7 +61,7 @@ using DotNet.Meteor.HotReload.Plugin;
     .EnableHotReload()
 #endif
 ```
-3. Now you can run your project and update XAML in real-time!
+3. Now you can run your project, update XAML and see updates in real-time!
 
 ![image](https://github.com/JaneySprings/DotNet.Meteor/raw/main/demo_hr.gif)
 
