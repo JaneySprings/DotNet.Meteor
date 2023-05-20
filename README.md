@@ -38,7 +38,7 @@ Your can build and debug projects, written in the `F#` language.
 6. Press `F5` to debug the application or `ctrl + F5` to launch the application without debugging.
 7. Enjoy!
 
-![image](./img/demo_dbg.gif)
+![image](https://github.com/JaneySprings/DotNet.Meteor/raw/main/img/demo_dbg.gif)
 
 ---
 
@@ -63,7 +63,7 @@ using DotNet.Meteor.HotReload.Plugin;
 ```
 3. Now you can run your project and update XAML in real-time!
 
-![image](./img/demo_dbg.gif)
+![image](https://github.com/JaneySprings/DotNet.Meteor/raw/main/demo_hr.gif)
 
 ---
 
