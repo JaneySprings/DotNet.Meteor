@@ -1,5 +1,5 @@
 <p align="center">
-<img src="img/header.jpg" width="1180px" alt=".NET Meteor" />
+<img src="https://github.com/JaneySprings/DotNet.Meteor/raw/main/img/header.jpg" width="1180px" alt=".NET Meteor" />
 <a href="https://dev.to/nromanov/boost-net-maui-development-productivity-6-powerful-features-of-net-meteor-for-vs-code-in-windows-mac-linux-d0b">Features</a> | <a href="https://github.com/JaneySprings/DotNet.Meteor/wiki">Documentation</a> | <a href="https://github.com/JaneySprings/DotNet.Meteor/issues">Support</a>
 
 ---
@@ -13,6 +13,9 @@ You can use this extension in the `Windows`, `MacOS`, and `Linux` operation syst
 
 - **XAML IntelliSense** </br>
 The extension provides you with a basic `XAML` syntax highlighting and shows snippets for .NET MAUI / third-party controls (it's necessary to build your project first).
+
+- **XAML Hot Reload** </br>
+Meteor support XAML Hot Reload for any platform. See the instruction below to enable Hot Reload in your project.
 
 - **MAUI Blazor Support** </br>
 The extension allows you to build and debug `MAUI Blazor` apps (including the `.razor` files).
@@ -35,7 +38,32 @@ Your can build and debug projects, written in the `F#` language.
 6. Press `F5` to debug the application or `ctrl + F5` to launch the application without debugging.
 7. Enjoy!
 
-![image](./img/demo_dbg.gif)
+![image](https://github.com/JaneySprings/DotNet.Meteor/raw/main/img/demo_dbg.gif)
+
+---
+
+## Enable XAML Hot Reload
+
+1. Open the `.csproj` file of your project and add the following package reference:
+
+```xml
+<ItemGroup>
+	<PackageReference Include="DotNetMeteor.HotReload.Plugin" Version="3.*"/>
+</ItemGroup>
+```
+
+2. Enable Hot Reload Server in your `MauiProgram.cs`:
+```cs
+using DotNet.Meteor.HotReload.Plugin;
+...
+    .UseMauiApp<App>()
+#if DEBUG
+    .EnableHotReload()
+#endif
+```
+3. Now you can run your project, update XAML and see updates in real-time!
+
+![image](https://github.com/JaneySprings/DotNet.Meteor/raw/main/demo_hr.gif)
 
 ---
 
@@ -43,12 +71,12 @@ Your can build and debug projects, written in the `F#` language.
 
 &emsp;The following table lists supported .NET target platforms and their capabilities:
 
-| Application Type | Build and Run | Debugging |
-|-|:-:|:-:|
-| **WinUI** |✅ | ❌ |
-| **Android** | ✅ | ✅ |
-| **iOS** | ✅ | ✅ |
-| **MacCatalyst** | ✅ | ✅ |
+| Application Type | Build and Run | Hot Reload | Debugging |
+|-|:-:|:-:|:-:|
+| **WinUI** | ✅ | ✅ | ❌ |
+| **Android** | ✅ | ✅ | ✅ |
+| **iOS** | ✅ | ✅ | ✅ |
+| **MacCatalyst** | ✅ | ✅ | ✅ |
 
 &emsp;*You can debug WinUI apps using the C# VSCode extension with attaching the .NET Core Debugger.*
 

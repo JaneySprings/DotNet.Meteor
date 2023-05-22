@@ -7,7 +7,7 @@ import * as path from 'path';
 
 export class CommandInterface {
     private static extensionPath: string = extensions.getExtension(`${res.extensionPublisher}.${res.extensionId}`)?.extensionPath ?? '';
-    private static toolPath: string = path.join(CommandInterface.extensionPath, "extension", "bin", "DotNet.Meteor.Debug.dll"); 
+    private static toolPath: string = path.join(CommandInterface.extensionPath, "extension", "bin", "DotNet.Meteor.CommandLine.dll"); 
 
     public static androidSdk(): string {
         return ProcessRunner.runSync<string>(new ProcessArgumentBuilder("dotnet")
@@ -29,6 +29,13 @@ export class CommandInterface {
         return await ProcessRunner.runAsync<boolean>(new ProcessArgumentBuilder("dotnet")
             .appendQuoted(CommandInterface.toolPath)
             .append("--xaml")
+            .appendQuoted(path));
+    }
+    public static async xamlReload(port: number, path: string): Promise<boolean>  {
+        return await ProcessRunner.runAsync<boolean>(new ProcessArgumentBuilder("dotnet")
+            .appendQuoted(CommandInterface.toolPath)
+            .append("--xaml-reload")
+            .append(port.toString())
             .appendQuoted(path));
     }
 }

@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<UseMaui>true</UseMaui>
+		<SingleProject>true</SingleProject>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<PackageId>DotNetMeteor.HotReload.Plugin</PackageId>
+		<Summary>Hot Reload plugin designed for use with DotNet.Meteor</Summary>
+		<Authors>NikitaRomanov</Authors>
+		<NeutralLanguage>en</NeutralLanguage>
+		<Product>DotNet.Meteor.HotReload.Plugin (net7.0)</Product>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<RepositoryUrl>https://github.com/JaneySprings/DotNet.Meteor</RepositoryUrl>
+		<Title>DotNet.Meteor.HotReload.Plugin</Title>
+		<Description>Hot Reload plugin designed for use with DotNet.Meteor. See https://github.com/JaneySprings/DotNet.Meteor</Description>
+		<PackageIcon>logo.png</PackageIcon>
+		<Product>$(AssemblyName) ($(TargetFramework))</Product>
+		<AssemblyVersion>1.0.0</AssemblyVersion>
+		<Version>1.0.0</Version>
+		<PackageVersion>$(Version)$(VersionSuffix)</PackageVersion>
+		<PackageTags>dotnet,maui,hotreload</PackageTags>
+		<Configurations>Debug</Configurations>
+		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\..\img\logo.png" PackagePath="logo.png" Pack="true" />
+	</ItemGroup>
+
+</Project>

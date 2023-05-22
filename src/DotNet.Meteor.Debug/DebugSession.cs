@@ -88,7 +88,8 @@ public partial class DebugSession : Session {
         var configuration = new LaunchData(
             arguments.ConfigurationProperties["selected_project"].ToObject<Project>()!,
             arguments.ConfigurationProperties["selected_device"].ToObject<DeviceData>()!,
-            arguments.ConfigurationProperties["selected_target"].ToObject<string>()!
+            arguments.ConfigurationProperties["selected_target"].ToObject<string>()!,
+            arguments.ConfigurationProperties["reload_host"].ToObject<int>()
         );
         configuration.TryLoad(ex => throw new ProtocolException($"Failed to load launch configuration. {ex.Message}"));
         this.sourceDownloader.Configure(configuration.Project.Path, s => GetLogger().LogMessage(s));

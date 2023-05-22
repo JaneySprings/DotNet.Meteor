@@ -1,8 +1,8 @@
-import { XamlService } from './xaml/service';
+import { XamlController } from './xaml/service';
 import { Configuration } from './configuration';
 import { CommandInterface } from "./bridge";
 import { PublicExports } from './exports';
-import { StateManager } from './cache';
+import { StateController } from './cache';
 import * as res from './resources';
 import * as models from "./models"
 import * as vscode from 'vscode';
@@ -45,7 +45,7 @@ export class UIController {
             return;
         }
         if (Configuration.project === undefined || Configuration.device === undefined)
-            StateManager.load();
+            StateController.load();
 
         Configuration.project = UIController.projects.find(it => it.name === Configuration.project?.name);
         Configuration.device = UIController.devices.find(it => it.name === Configuration.device?.name);
@@ -67,21 +67,21 @@ export class UIController {
         Configuration.project = item ?? UIController.projects[0];
         UIController._projectStatusItem.text = `${models.Icon.project} ${Configuration.project?.name}`;
         PublicExports.instance.projectChangedEventHandler.invoke(Configuration.project);
-        XamlService.regenerate();
-        StateManager.saveProject();
+        XamlController.regenerate();
+        StateController.saveProject();
     }
     public static performSelectTarget(item: models.Target | undefined = undefined) {
         Configuration.target = item ?? models.Target.Debug;
         UIController._targetStatusItem.text = `${models.Icon.target} ${Configuration.target} | Any CPU`;
         PublicExports.instance.targetChangedEventHandler.invoke(Configuration.target);
-        StateManager.saveTarget();
+        StateController.saveTarget();
     }
     public static performSelectDevice(item: models.Device | undefined = undefined) {
         Configuration.device = item ?? UIController.devices[0];
         const icon = Configuration.device.is_mobile ? models.Icon.device : models.Icon.computer;
         UIController._deviceStatusItem.text = `${icon} ${Configuration.device?.name}`;
         PublicExports.instance.deviceChangedEventHandler.invoke(Configuration.device);
-        StateManager.saveDevice();
+        StateController.saveDevice();
     }
 
     public static async showQuickPickProject() {

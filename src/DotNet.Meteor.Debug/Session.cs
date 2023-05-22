@@ -4,7 +4,6 @@ using DotNet.Meteor.Processes;
 using Mono.Debugging.Client;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
-using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Protocol;
 
 namespace DotNet.Meteor.Debug;
 

@@ -11,7 +11,7 @@
           "xaml",
           "xml"
         ],
-        "program": "./extension/bin/DotNet.Meteor.Debug.dll",
+        "program": "./extension/bin/DotNet.Meteor.CommandLine.dll",
         "args": [
           "--start-session"
         ],
