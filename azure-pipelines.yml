@@ -34,7 +34,7 @@ stages:
           displayName: 'Restore .NET tools'
         - script: npm install -g vsce
           displayName: 'Install VSCode builder'
-        - script: dotnet workload install maui
+        - script: dotnet workload install maui-tizen
           displayName: 'Install MAUI'
         - script: dotnet cake --target=vsix --release-version=$(version) --configuration=release
           displayName: 'Build VSIX'
