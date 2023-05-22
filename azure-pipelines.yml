@@ -36,13 +36,18 @@ stages:
           displayName: 'Install VSCode builder'
         - script: dotnet cake --target=vsix --release-version=$(version) --configuration=release
           displayName: 'Build VSIX'
+        - script: dotnet cake --target=build-plugin --release-version=$(version) --configuration=debug
+          displayName: 'Build HotReloadPlugin'
+        - publish: '$(System.DefaultWorkingDirectory)/artifacts'
+          displayName: 'Publish Artifacts'
+          artifact: artifacts
         - task: GitHubRelease@1
           inputs:
             gitHubConnection: 'upstream'
             repositoryName: '$(Build.Repository.Name)'
             action: 'create'
             tagSource: 'gitTag'
-            assets: 'artifacts/*.vsix'
+            assets: 'artifacts/DotNet.Meteor.*'
 
 
 

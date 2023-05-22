@@ -4,40 +4,40 @@ import * as models from "./models"
 import * as vscode from 'vscode';
 
 
-export class StateManager {
+export class StateController {
     private static context: vscode.ExtensionContext | undefined;
 
 
     public static activate(context: vscode.ExtensionContext) {
-        StateManager.context = context;
+        StateController.context = context;
     }
     public static deactivate() {
-        StateManager.context = undefined;
+        StateController.context = undefined;
     }
 
 
     public static load() {
-        if (StateManager.context === undefined)
+        if (StateController.context === undefined)
             return;
 
-        const project = StateManager.context.workspaceState.get<string>('project');
-        const device = StateManager.context.workspaceState.get<string>('device');
-        const target = StateManager.context.workspaceState.get<models.Target>('target');
+        const project = StateController.context.workspaceState.get<string>('project');
+        const device = StateController.context.workspaceState.get<string>('device');
+        const target = StateController.context.workspaceState.get<models.Target>('target');
 
         Configuration.device = UIController.devices.find(it => it.name === device);
         Configuration.project = UIController.projects.find(it => it.path === project);
         Configuration.target = target;
     }
     public static saveProject() {
-        if (StateManager.context !== undefined)
-             StateManager.context.workspaceState.update('project', Configuration.project?.path);
+        if (StateController.context !== undefined)
+             StateController.context.workspaceState.update('project', Configuration.project?.path);
     }
     public static saveDevice() {
-        if (StateManager.context !== undefined)
-            StateManager.context.workspaceState.update('device', Configuration.device?.name);
+        if (StateController.context !== undefined)
+            StateController.context.workspaceState.update('device', Configuration.device?.name);
     }
     public static saveTarget() {
-        if (StateManager.context !== undefined)
-            StateManager.context.workspaceState.update('target', Configuration.target);
+        if (StateController.context !== undefined)
+            StateController.context.workspaceState.update('target', Configuration.target);
     }
 }

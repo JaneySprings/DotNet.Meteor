@@ -1,5 +1,6 @@
 import { WorkspaceFolder, DebugConfiguration } from 'vscode';
 import { Configuration } from '../configuration';
+import { XamlController } from '../xaml/service';
 import { UIController } from '../controller';
 import { Target } from '../models';
 import * as res from '../resources';
@@ -42,6 +43,7 @@ export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationPro
 		config['selected_project'] = targetProject;
 		config['selected_target'] = Configuration.target;
 		config['debugging_port'] = Configuration.getDebuggingPort();
+		config['reload_host'] = XamlController.getReloadHostPort();
 		
         return config;
 	}

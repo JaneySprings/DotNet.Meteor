@@ -82,12 +82,15 @@ public partial class DebugSession {
 
     private void LaunchAndroid(LaunchData configuration, int port, List<Process> processes) {
         var applicationId = configuration.GetApplicationId();
-
         if (configuration.Device.IsEmulator)
             configuration.Device.Serial = Emulator.Run(configuration.Device.Name).Serial;
 
         DeviceBridge.Shell(configuration.Device.Serial, "forward", "--remove-all");
-        DeviceBridge.Forward(configuration.Device.Serial, port, port);
+
+        if (configuration.ReloadHostPort > 0)
+            DeviceBridge.Forward(configuration.Device.Serial, configuration.ReloadHostPort);
+
+        DeviceBridge.Forward(configuration.Device.Serial, port);
         // DeviceBridge.Uninstall(configuration.Device.Serial, applicationId, this);
         DeviceBridge.Install(configuration.Device.Serial, configuration.OutputAssembly, this);
         DeviceBridge.Shell(configuration.Device.Serial, "setprop", "debug.mono.connect", $"port={port}");

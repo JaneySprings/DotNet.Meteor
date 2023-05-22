@@ -1,4 +1,4 @@
-import { XamlService, languageId  } from './service';
+import { XamlController, languageId  } from './service';
 import { XamlContext, XamlScope } from './types';
 import { ContextService } from './context';
 import * as vscode from 'vscode';
@@ -6,7 +6,7 @@ import * as vscode from 'vscode';
 
 export class XamlCompletionItemProvider implements vscode.CompletionItemProvider {
     async provideCompletionItems (textDocument: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, _context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList> {
-        await XamlService.generate();
+        await XamlController.generate();
 
         const documentContent = textDocument.getText();
         const offset = textDocument.offsetAt(position);
@@ -21,7 +21,7 @@ export class XamlCompletionItemProvider implements vscode.CompletionItemProvider
         const items: vscode.CompletionItem[] = [];
 
         if (context.scope === XamlScope.Tag) {
-            const types = XamlService.getTypes(context.tagContext?.namespace);
+            const types = XamlController.getTypes(context.tagContext?.namespace);
             for (var i = 0; i < types.length; i++) {
                 const ci = new vscode.CompletionItem(types[i].name);
                 ci.kind = vscode.CompletionItemKind.Class;
@@ -42,7 +42,7 @@ export class XamlCompletionItemProvider implements vscode.CompletionItemProvider
         }
 
         if (context.scope === XamlScope.Attribute || context.scope === XamlScope.Multiline) {
-            const types = XamlService.getTypes(context.attributeContext?.parent?.namespace);
+            const types = XamlController.getTypes(context.attributeContext?.parent?.namespace);
             const findTag = types.find(t => t.name === context.attributeContext?.parent?.name);
             if (findTag !== undefined) {
                 for (let i = 0; i < findTag.attributes.length; i++) {
@@ -64,7 +64,7 @@ export class XamlCompletionItemProvider implements vscode.CompletionItemProvider
                 }
             }
             if (context.scope === XamlScope.Attribute) {
-                const staticTypes = XamlService
+                const staticTypes = XamlController
                     .getTypes(context.attributeContext?.namespace)
                     .filter(t => t.attributes.find((a: any) => a.isAttached));
                 for (let i = 0; i < staticTypes.length; i++) {
@@ -78,7 +78,7 @@ export class XamlCompletionItemProvider implements vscode.CompletionItemProvider
         }
 
         if (context.scope === XamlScope.Static) {
-            const types = XamlService.getTypes(context.attributeContext?.parent?.namespace);
+            const types = XamlController.getTypes(context.attributeContext?.parent?.namespace);
             const findTag = types.find(t => t.name === context.attributeContext?.parent?.name);
             if (findTag !== undefined) {
                 for (let i = 0; i < findTag.attributes.length; i++) {
@@ -98,7 +98,7 @@ export class XamlCompletionItemProvider implements vscode.CompletionItemProvider
         }
 
         if (context.scope === XamlScope.Value) {
-            const types = XamlService.getTypes(context.attributeContext?.parent?.namespace);
+            const types = XamlController.getTypes(context.attributeContext?.parent?.namespace);
             const findTag = types.find(t => t.name === context.attributeContext?.parent?.name);
             if (findTag !== undefined) {
                 const findProp = findTag.attributes.find((a: any) => a.name === context.attributeContext?.name);

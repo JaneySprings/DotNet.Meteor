@@ -2,6 +2,7 @@ import { XamlCompletionItemProvider } from './completions';
 import { Configuration } from "../configuration";
 import { XamlLinterProvider } from './linter';
 import { CommandInterface } from "../bridge";
+import * as res from '../resources';
 import * as vscode from 'vscode';
 import * as path from "path";
 import * as fs from "fs";
@@ -9,19 +10,29 @@ import * as fs from "fs";
 
 export const languageId = 'xml';
 
-export class XamlService {
+export class XamlController {
     private static xamlSchemaAliases: any[] = [];
 
     public static activate(context: vscode.ExtensionContext) {
         const schemaSelector = { language: languageId, scheme: 'file' };
-    
+
         context.subscriptions.push(new XamlLinterProvider(context));
         context.subscriptions.push(vscode.languages.registerCompletionItemProvider(
             schemaSelector, new XamlCompletionItemProvider(), ':', '.', '<', ' ',
         ));
-        
+        context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(ev => {
+            if (ev.fileName.endsWith('.xaml') && vscode.debug.activeDebugSession?.configuration.type === res.debuggerMeteorId)
+                CommandInterface.xamlReload(XamlController.getReloadHostPort(), ev.fileName);
+        }));
+
     }
 
+    public static getReloadHostPort(): number {
+        return Configuration.getSetting<number>(
+            res.configIdHotReloadHostPort, 
+            res.configDefaultotReloadHostPort
+        );
+    }
 
     public static getTypes(definition: string | undefined): any[] { 
         if (definition === undefined)
@@ -47,8 +58,6 @@ export class XamlService {
 
         return [];
     }
-
-
     public static async generate() {
         if (this.xamlSchemaAliases.length > 0) 
             return;
@@ -72,6 +81,6 @@ export class XamlService {
     }
     public static regenerate() {
         this.xamlSchemaAliases = [];
-        XamlService.generate();
+        XamlController.generate();
     }
 }

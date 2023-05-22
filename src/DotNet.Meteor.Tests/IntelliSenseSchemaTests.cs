@@ -22,7 +22,7 @@ public class IntelliSenseSchemaTests: TestFixture {
         CreateOutputAssembly("Debug", "net7.0-droid", null, "Microsoft.Maui.Controls.dll", false);
         Thread.Sleep(1000);
 
-        CreateOutputAssemblyFile(Path.GetDirectoryName(expectedPath), "Microsoft.Maui.dll");
+        CreateOutputAssemblyFile(Path.GetDirectoryName(expectedPath)!, "Microsoft.Maui.dll");
 
         var typeLoader = new MauiTypeLoader(projectPath, s => {
             if (!s.Contains("Bad IL format"))

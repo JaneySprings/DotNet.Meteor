@@ -1,8 +1,17 @@
 #addin nuget:?package=Cake.FileHelpers&version=6.1.2
 #addin nuget:?package=Cake.VsCode&version=0.11.1
-#load "env.cake"
 
 using _Path = System.IO.Path;
+
+public string RootDirectory => MakeAbsolute(Directory("./")).ToString();
+
+public string ArtifactsDirectory => _Path.Combine(RootDirectory, "artifacts");
+public string ExtensionStagingDirectory => _Path.Combine(RootDirectory, "extension");
+public string ExtensionAssembliesDirectory => _Path.Combine(ExtensionStagingDirectory, "bin");
+
+public string MeteorMainProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.CommandLine", "DotNet.Meteor.CommandLine.csproj");
+public string MeteorTestsProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Tests", "DotNet.Meteor.Tests.csproj");
+public string MeteorPluginProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.HotReload.Plugin", "DotNet.Meteor.HotReload.Plugin.csproj");
 
 var target = Argument("target", "vsix");
 var version = Argument("release-version", "");
@@ -34,10 +43,24 @@ Task("clean").Does(() => {
 ///////////////////////////////////////////////////////////////////////////////
 
 Task("build-debugger")
-   .Does(() => DotNetBuild(MeteorDebugProjectPath, new DotNetBuildSettings {
-      MSBuildSettings = new DotNetMSBuildSettings { AssemblyVersion = version },
-      OutputDirectory = ExtensionAssembliesDirectory,
+   .Does(() => {
+      DotNetBuild(MeteorMainProjectPath, new DotNetBuildSettings {
+         MSBuildSettings = new DotNetMSBuildSettings { AssemblyVersion = version },
+         OutputDirectory = ExtensionAssembliesDirectory,
+         Configuration = configuration,
+      });
+      DeleteFiles(GetFiles(_Path.Combine(ExtensionAssembliesDirectory, "*.deps.json")));
+      DeleteFiles(GetFiles(_Path.Combine(ExtensionAssembliesDirectory, "*.xml")));
+   });
+
+Task("build-plugin")
+   .Does(() => DotNetPack(MeteorPluginProjectPath, new DotNetPackSettings {
+      OutputDirectory = ArtifactsDirectory,
       Configuration = configuration,
+      MSBuildSettings = new DotNetMSBuildSettings { 
+         AssemblyVersion = version, 
+         Version = version
+      },
    }));
 
 Task("build-tests")
@@ -48,16 +71,6 @@ Task("build-tests")
       Loggers = new[] { "trx" }
    }));
 
-Task("clean-debugger")
-   .WithCriteria(configuration.Equals("release"))
-   .Does(() => {
-      DeleteFiles(GetFiles(
-         _Path.Combine(ExtensionAssembliesDirectory, 
-         _Path.GetFileNameWithoutExtension(MeteorDebugProjectPath))
-      ));
-      DeleteFiles(GetFiles(_Path.Combine(ExtensionAssembliesDirectory, "*.deps.json")));
-      DeleteFiles(GetFiles(_Path.Combine(ExtensionAssembliesDirectory, "*.xml")));
-   });
 
 ///////////////////////////////////////////////////////////////////////////////
 // TYPESCRIPT
@@ -79,7 +92,6 @@ Task("manifest").Does(() => {
 Task("vsix")
    .IsDependentOn("clean")
    .IsDependentOn("build-debugger")
-   .IsDependentOn("clean-debugger")
    .IsDependentOn("manifest")
    .DoesForEach<FilePath>(GetFiles(_Path.Combine(RootDirectory, "*.json")), file => {
       var regex = @"^\s\s(""version"":\s+)("".+"")(,)";

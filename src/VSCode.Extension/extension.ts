@@ -1,9 +1,9 @@
 import { DotNetDebuggerConfiguration } from './tasks/debug';
 import { DotNetTaskProvider } from './tasks/build';
-import { XamlService } from './xaml/service';
+import { XamlController } from './xaml/service';
 import { UIController } from './controller';
 import { PublicExports } from './exports';
-import { StateManager } from './cache';
+import { StateController } from './cache';
 import * as res from './resources';
 import * as vscode from 'vscode';
 
@@ -15,8 +15,8 @@ export function activate(context: vscode.ExtensionContext): PublicExports | unde
 	const exports = new PublicExports();
 
 	UIController.activate(context);
-	XamlService.activate(context);
-	StateManager.activate(context);
+	StateController.activate(context);
+	XamlController.activate(context);
 	UIController.update();
 
 	/* Commands */
@@ -35,12 +35,12 @@ export function activate(context: vscode.ExtensionContext): PublicExports | unde
 	}));
 	context.subscriptions.push(vscode.tasks.onDidEndTask(ev => {
 		if (ev.execution.task.definition.type.includes(res.taskDefinitionId))
-			XamlService.regenerate();
+			XamlController.regenerate();
 	}));
 
 	return exports;
 }
 
 export function deactivate() {
-	StateManager.deactivate();
+	StateController.deactivate();
 }

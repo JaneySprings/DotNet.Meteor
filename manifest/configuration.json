@@ -11,6 +11,11 @@
           "type": "integer",
           "default": 55551,
           "description": "%configuration.description.monoSdbDebuggerPortApple%"
+        },
+        "dotnetMeteor.hotReloadHostPort": {
+          "type": "integer",
+          "default": 9988,
+          "description": "%configuration.description.hotReloadHostPort%"
         }
       }
     }
