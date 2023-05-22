@@ -15,7 +15,7 @@ You can use this extension in the `Windows`, `MacOS`, and `Linux` operation syst
 The extension provides you with a basic `XAML` syntax highlighting and shows snippets for .NET MAUI / third-party controls (it's necessary to build your project first).
 
 - **XAML Hot Reload** </br>
-Meteor support XAML Hot Reload for any platform. See the instruction below to enable Hot Reload on your project.
+Meteor support XAML Hot Reload for any platform. See the instruction below to enable Hot Reload in your project.
 
 - **MAUI Blazor Support** </br>
 The extension allows you to build and debug `MAUI Blazor` apps (including the `.razor` files).
@@ -44,7 +44,7 @@ Your can build and debug projects, written in the `F#` language.
 
 ## Enable XAML Hot Reload
 
-1. Open a `.csproj` file of your project and add a following package reference:
+1. Open the `.csproj` file of your project and add the following package reference:
 
 ```xml
 <ItemGroup>
@@ -52,7 +52,7 @@ Your can build and debug projects, written in the `F#` language.
 </ItemGroup>
 ```
 
-2. Enable a Hot Reload Server in your `MauiProgram.cs`:
+2. Enable Hot Reload Server in your `MauiProgram.cs`:
 ```cs
 using DotNet.Meteor.HotReload.Plugin;
 ...
