@@ -91,7 +91,7 @@ public partial class DebugSession {
             DeviceBridge.Forward(configuration.Device.Serial, configuration.ReloadHostPort);
 
         DeviceBridge.Forward(configuration.Device.Serial, port);
-        // DeviceBridge.Uninstall(configuration.Device.Serial, applicationId, this);
+        DeviceBridge.Uninstall(configuration.Device.Serial, applicationId, this);
         DeviceBridge.Install(configuration.Device.Serial, configuration.OutputAssembly, this);
         DeviceBridge.Shell(configuration.Device.Serial, "setprop", "debug.mono.connect", $"port={port}");
         DeviceBridge.Launch(configuration.Device.Serial, applicationId, this);
