@@ -12,7 +12,12 @@ internal class Server : IMauiInitializeService {
 
     public async void Initialize(IServiceProvider services) {
         var tcpListener = new TcpListener(IPAddress.Loopback, IdePort);
-        tcpListener.Start();
+        try {
+            tcpListener.Start();
+        } catch (Exception e) {
+            Logger.LogError(e);
+            return;
+        }
 
         while (true) {
             var client = await tcpListener.AcceptTcpClientAsync();
@@ -28,40 +33,37 @@ internal class Server : IMauiInitializeService {
             var classDefinition = await reader.ReadLineAsync();
             var xamlContent = await reader.ReadToEndAsync();
             
-            if (Application.Current.MainPage == null)
+            if (Application.Current?.MainPage == null 
+                || string.IsNullOrEmpty(classDefinition) 
+                || string.IsNullOrEmpty(xamlContent))
                 continue;
 
-            var targetElement = GetElement(Application.Current.MainPage, classDefinition);
-            if (targetElement == null)
-                continue;
+            TraverseVisualTree(Application.Current.MainPage, classDefinition, xamlContent);
+        }
+    }
 
-            if (targetElement is VisualElement visualElement)
-                visualElement.Resources.Clear();
+    private void ReloadElement(Element element, string xamlContent) {
+        if (element is VisualElement visualElement)
+            visualElement.Resources.Clear();
 
-            try {
-                targetElement.LoadFromXaml(xamlContent);
-            } catch (Exception e) {
-                System.Diagnostics.Debug.WriteLine("[HotReload]" + e.Message);
-            }
+        try {
+            element.LoadFromXaml(xamlContent);
+        } catch (Exception e) {
+            Logger.LogError(e);
         }
     }
 
 #pragma warning disable CS0618 // Used by hot reload
-    private Element GetElement(Element node, string xClass) {
-        if (node is not Element) 
-            return null;
-        if (node.GetType().FullName == xClass) 
-            return node;
-        if (node.LogicalChildren.Count == 0) 
-            return null;
-    
-        foreach (Element child in node.LogicalChildren) {
-            Element result = GetElement(child, xClass);
-            if (result is not null) 
-                return result;
+    private void TraverseVisualTree(Element node, string xClass, string xamlContent) {
+        foreach (Element child in node.LogicalChildren)
+            TraverseVisualTree(child, xClass, xamlContent);
+
+        if (node.GetType().FullName == xClass) {
+            ReloadElement(node, xamlContent);
+            return;
         }
 
-        return null;
+        return;
     }
 #pragma warning restore CS0618
 }
