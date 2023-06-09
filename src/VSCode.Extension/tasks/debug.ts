@@ -43,7 +43,8 @@ export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationPro
 		config['selected_project'] = targetProject;
 		config['selected_target'] = Configuration.target;
 		config['debugging_port'] = Configuration.getDebuggingPort();
-		config['reload_host'] = XamlController.getReloadHostPort();
+		config['uninstall_app'] = Configuration.getUninstallAppOption();
+		config['reload_host'] = Configuration.getReloadHostPort();
 		
         return config;
 	}

@@ -14,7 +14,7 @@ using Process = System.Diagnostics.Process;
 namespace DotNet.Meteor.Debug;
 
 public partial class DebugSession {
-    private void Connect(LaunchData options, int port) {
+    private void Connect(LaunchConfiguration options, int port) {
         SoftDebuggerStartArgs arguments = null;
 
         if (options.Device.IsAndroid || (options.Device.IsIPhone && !options.Device.IsEmulator)) {
@@ -33,7 +33,7 @@ public partial class DebugSession {
         OnOutputDataReceived("Debugger is ready and listening...");
     }
 
-    private void LaunchApplication(LaunchData configuration, int port, List<Process> processes) {
+    private void LaunchApplication(LaunchConfiguration configuration, int port, List<Process> processes) {
         if (configuration.Device.IsAndroid)
             LaunchAndroid(configuration, port, processes);
         if (configuration.Device.IsIPhone)
@@ -44,7 +44,7 @@ public partial class DebugSession {
             LaunchWindows(configuration, processes);
     }
 
-    private void LaunchApple(LaunchData configuration, int port, List<Process> processes) {
+    private void LaunchApple(LaunchConfiguration configuration, int port, List<Process> processes) {
         if (RuntimeSystem.IsWindows) {
             IDeviceTool.Installer(configuration.Device.Serial, configuration.OutputAssembly, this);
             processes.Add(IDeviceTool.Debug(configuration.Device.Serial, configuration.GetApplicationId(), port, this));
@@ -60,7 +60,7 @@ public partial class DebugSession {
         }
     }
 
-    private void LaunchMacCatalyst(LaunchData configuration, int port) {
+    private void LaunchMacCatalyst(LaunchConfiguration configuration, int port) {
         var tool = DotNet.Meteor.Apple.PathUtils.OpenTool();
         var processRunner = new ProcessRunner(tool, new ProcessArgumentBuilder()
             .AppendQuoted(configuration.OutputAssembly)
@@ -73,14 +73,14 @@ public partial class DebugSession {
             throw new ProtocolException(string.Join(Environment.NewLine, result.StandardError));
     }
 
-    private void LaunchWindows(LaunchData configuration, List<Process> processes) {
+    private void LaunchWindows(LaunchConfiguration configuration, List<Process> processes) {
         var program = new FileInfo(configuration.OutputAssembly);
         var process = new ProcessRunner(program, new ProcessArgumentBuilder(), this)
             .Start();
         processes.Add(process);
     }
 
-    private void LaunchAndroid(LaunchData configuration, int port, List<Process> processes) {
+    private void LaunchAndroid(LaunchConfiguration configuration, int port, List<Process> processes) {
         var applicationId = configuration.GetApplicationId();
         if (configuration.Device.IsEmulator)
             configuration.Device.Serial = Emulator.Run(configuration.Device.Name).Serial;
@@ -91,7 +91,10 @@ public partial class DebugSession {
             DeviceBridge.Forward(configuration.Device.Serial, configuration.ReloadHostPort);
 
         DeviceBridge.Forward(configuration.Device.Serial, port);
-        DeviceBridge.Uninstall(configuration.Device.Serial, applicationId, this);
+
+        if (configuration.UninstallApp)
+            DeviceBridge.Uninstall(configuration.Device.Serial, applicationId, this);
+
         DeviceBridge.Install(configuration.Device.Serial, configuration.OutputAssembly, this);
         DeviceBridge.Shell(configuration.Device.Serial, "setprop", "debug.mono.connect", $"port={port}");
         DeviceBridge.Launch(configuration.Device.Serial, applicationId, this);

@@ -26,6 +26,18 @@ export class Configuration {
 
         return -1;
     }
+    public static getReloadHostPort(): number {
+        return Configuration.getSetting<number>(
+            res.configIdHotReloadHostPort, 
+            res.configDefaultHotReloadHostPort
+        );
+    }
+    public static getUninstallAppOption(): boolean {
+        return Configuration.getSetting<boolean>(
+            res.configIdUninstallApplicationBeforeInstalling, 
+            res.configDefaultUninstallApplicationBeforeInstalling
+        );
+    }
 
     public static isAndroid() { return Configuration.device?.platform?.includes('android') ?? false; }
     public static isApple() { return Configuration.device?.platform?.includes('ios') ?? false; }

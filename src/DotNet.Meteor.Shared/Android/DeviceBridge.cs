@@ -41,7 +41,7 @@ namespace DotNet.Meteor.Android {
             var arguments = new ProcessArgumentBuilder()
                 .Append("-s", serial)
                 .Append("install")
-                .Append("-r").AppendQuoted(apk);
+                .AppendQuoted(apk);
 
             var result = new ProcessRunner(adb, arguments, logger).WaitForExit();
             if (result.ExitCode != 0)

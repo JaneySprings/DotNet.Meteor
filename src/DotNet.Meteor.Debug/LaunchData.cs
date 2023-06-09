@@ -1,27 +1,29 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using DotNet.Meteor.Shared;
+using Newtonsoft.Json.Linq;
 
 namespace DotNet.Meteor.Debug;
 
-public class LaunchData {
+public class LaunchConfiguration {
     public string Framework { get; private set; }
     public string OutputAssembly { get; private set; }
     public DeviceData Device { get; }
     public Project Project { get; }
     public string Target { get; }
     public int ReloadHostPort { get; }
+    public bool UninstallApp { get; }
 
     public bool IsDebug => Target.Equals("debug", StringComparison.OrdinalIgnoreCase);
 
-    public LaunchData(Project project, DeviceData device, string target, int? reloadHostPort) {
-        Project = project;
-        Device = device;
-        Target = target;
-
-        if (reloadHostPort != null)
-            ReloadHostPort = reloadHostPort.Value;
+    public LaunchConfiguration(Dictionary<string, JToken> configurationProperties) {
+        Project = configurationProperties["selected_project"].ToObject<Project>();
+        Device = configurationProperties["selected_device"].ToObject<DeviceData>();
+        Target = configurationProperties["selected_target"].ToObject<string>();
+        ReloadHostPort = configurationProperties["reload_host"].ToObject<int>();
+        UninstallApp = configurationProperties["uninstall_app"].ToObject<bool>();
     }
 
     public void TryLoad(Action<Exception> callback) {
@@ -31,7 +33,7 @@ public class LaunchData {
         } catch (Exception ex) {
             callback(ex);
         }
-    } 
+    }
 
     public string GetApplicationId() {
         if (Device.IsIPhone || Device.IsMacCatalyst) {

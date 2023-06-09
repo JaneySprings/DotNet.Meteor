@@ -23,5 +23,6 @@
 	"configuration.title": ".NET Meteor configuration",
 	"configuration.description.monoSdbDebuggerPortAndroid": "Android's default port of the Mono SDB debugger.",
 	"configuration.description.monoSdbDebuggerPortApple": "iOS's default port of the Mono SDB debugger.",
-	"configuration.description.hotReloadHostPort": "The port of the Hot Reload server."
+	"configuration.description.hotReloadHostPort": "The port of the Hot Reload server.",
+	"configuration.description.uninstallApplicationBeforeInstalling": "Uninstalls the application before installing it again."
 }
