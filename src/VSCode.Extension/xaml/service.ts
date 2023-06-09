@@ -22,16 +22,9 @@ export class XamlController {
         ));
         context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(ev => {
             if (ev.fileName.endsWith('.xaml') && vscode.debug.activeDebugSession?.configuration.type === res.debuggerMeteorId)
-                CommandInterface.xamlReload(XamlController.getReloadHostPort(), ev.fileName);
+                CommandInterface.xamlReload(Configuration.getReloadHostPort(), ev.fileName);
         }));
 
-    }
-
-    public static getReloadHostPort(): number {
-        return Configuration.getSetting<number>(
-            res.configIdHotReloadHostPort, 
-            res.configDefaultotReloadHostPort
-        );
     }
 
     public static getTypes(definition: string | undefined): any[] { 

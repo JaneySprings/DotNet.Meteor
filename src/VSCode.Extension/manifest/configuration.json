@@ -16,6 +16,11 @@
           "type": "integer",
           "default": 9988,
           "description": "%configuration.description.hotReloadHostPort%"
+        },
+        "dotnetMeteor.uninstallApplicationBeforeInstalling": {
+          "type": "boolean",
+          "default": true,
+          "description": "%configuration.description.uninstallApplicationBeforeInstalling%"
         }
       }
     }

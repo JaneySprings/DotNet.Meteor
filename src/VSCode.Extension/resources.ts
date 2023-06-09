@@ -37,4 +37,7 @@ export const configIdMonoSdbDebuggerPortApple = "monoSdbDebuggerPortApple";
 export const configDefaultMonoSdbDebuggerPortApple = 55551;
 
 export const configIdHotReloadHostPort = "hotReloadHostPort";
-export const configDefaultotReloadHostPort = 9988;
+export const configDefaultHotReloadHostPort = 9988;
+
+export const configIdUninstallApplicationBeforeInstalling = "uninstallApplicationBeforeInstalling";
+export const configDefaultUninstallApplicationBeforeInstalling = true;
