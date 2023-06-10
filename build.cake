@@ -76,27 +76,25 @@ Task("build-tests")
 // TYPESCRIPT
 ///////////////////////////////////////////////////////////////////////////////
 
-Task("manifest").Does(() => {
-   var options = System.Text.RegularExpressions.RegexOptions.Multiline;
-   var packageFile = _Path.Combine(RootDirectory, "package.json");
-   var includes = FindRegexMatchesInFile(packageFile, @"""include"": ""(.+)""", options);
-   foreach (string include in includes) {
-      var includePath = include.Split(':')[1].Trim().Replace("\"", string.Empty);
-      var includeFile = _Path.Combine(RootDirectory, includePath);
-      var includeContent = FileReadText(includeFile);
-      includeContent = includeContent.Substring(8, includeContent.Length - 12);
-      ReplaceTextInFiles(packageFile, include, includeContent);
-   }
-});
-
 Task("vsix")
    .IsDependentOn("clean")
    .IsDependentOn("build-debugger")
-   .IsDependentOn("manifest")
    .DoesForEach<FilePath>(GetFiles(_Path.Combine(RootDirectory, "*.json")), file => {
       var regex = @"^\s\s(""version"":\s+)("".+"")(,)";
       var options = System.Text.RegularExpressions.RegexOptions.Multiline;
       ReplaceRegexInFiles(file.ToString(), regex, $"  $1\"{version}\"$3", options);
+   })
+   .Does(() => {
+      var options = System.Text.RegularExpressions.RegexOptions.Multiline;
+      var packageFile = _Path.Combine(RootDirectory, "package.json");
+      var includes = FindRegexMatchesInFile(packageFile, @"""include"": ""(.+)""", options);
+      foreach (string include in includes) {
+         var includePath = include.Split(':')[1].Trim().Replace("\"", string.Empty);
+         var includeFile = _Path.Combine(RootDirectory, includePath);
+         var includeContent = FileReadText(includeFile);
+         includeContent = includeContent.Substring(8, includeContent.Length - 12);
+         ReplaceTextInFiles(packageFile, include, includeContent);
+      }
    })
    .Does(() => VscePackage(new VscePackageSettings {
       OutputFilePath = _Path.Combine(ArtifactsDirectory, $"DotNet.Meteor.{version}-{configuration}.vsix"),
