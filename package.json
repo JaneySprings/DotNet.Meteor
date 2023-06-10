@@ -2,8 +2,8 @@
   "name": "dotnet-meteor",
   "publisher": "nromanov",
   "version": "1.0.0",
-  "description": "%extension.description%",
-  "displayName": "%extension.displayName%",
+  "description": "Run and Debug .NET Apps",
+  "displayName": ".NET Meteor",
   "author": "Nikita Romanov",
   "license": "MIT",
   "icon": "img/logo.png",
@@ -34,12 +34,12 @@
   ],
   "main": "./extension/extension.js",
   "contributes": {
-    "include": "manifest/commands.json",
-    "include": "manifest/tasks.json",
-    "include": "manifest/matchers.json",
-    "include": "manifest/breakpoints.json",
-    "include": "manifest/debuggers.json",
-    "include": "manifest/configuration.json"
+    "include": "src/VSCode.Extension/manifest/commands.json",
+    "include": "src/VSCode.Extension/manifest/tasks.json",
+    "include": "src/VSCode.Extension/manifest/matchers.json",
+    "include": "src/VSCode.Extension/manifest/breakpoints.json",
+    "include": "src/VSCode.Extension/manifest/debuggers.json",
+    "include": "src/VSCode.Extension/manifest/configuration.json"
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
