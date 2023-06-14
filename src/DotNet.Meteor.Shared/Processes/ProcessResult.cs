@@ -4,10 +4,9 @@ using System.Collections.Generic;
 
 namespace DotNet.Meteor.Processes {
     public class ProcessResult {
-        public readonly List<string> StandardOutput;
-        public readonly List<string> StandardError;
-
-        public readonly int ExitCode;
+        public List<string> StandardOutput { get; }
+        public List<string> StandardError  { get; }
+        public int ExitCode  { get; }
 
         public bool Success => this.ExitCode == 0;
 

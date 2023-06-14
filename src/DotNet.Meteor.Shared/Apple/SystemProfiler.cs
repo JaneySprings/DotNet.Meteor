@@ -15,7 +15,7 @@ namespace DotNet.Meteor.Apple {
                 .Append("SPUSBDataType"))
                 .WaitForExit();
 
-            if (result.ExitCode != 0)
+            if (!result.Success)
                 throw new Exception(string.Join(Environment.NewLine, result.StandardError));
 
             var output = string.Join(Environment.NewLine, result.StandardOutput);
@@ -48,7 +48,7 @@ namespace DotNet.Meteor.Apple {
                 .Append("SPHardwareDataType"))
                 .WaitForExit();
 
-            if (result.ExitCode != 0)
+            if (!result.Success)
                 throw new Exception(string.Join(Environment.NewLine, result.StandardError));
 
             var output = string.Join(Environment.NewLine, result.StandardOutput);

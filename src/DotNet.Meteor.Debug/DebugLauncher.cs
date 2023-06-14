@@ -69,7 +69,7 @@ public partial class DebugSession {
         processRunner.SetEnvironmentVariable("__XAMARIN_DEBUG_PORT__", port.ToString());
         var result = processRunner.WaitForExit();
 
-        if (result.ExitCode != 0)
+        if (!result.Success)
             throw new ProtocolException(string.Join(Environment.NewLine, result.StandardError));
     }
 

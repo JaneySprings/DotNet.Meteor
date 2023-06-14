@@ -11,7 +11,7 @@ namespace DotNet.Meteor.Apple {
             var tool = new FileInfo(Path.Combine(PathUtils.IDeviceLocation(), "ideviceinfo.exe"));
             var result = new ProcessRunner(tool).WaitForExit();
 
-            if (result.ExitCode != 0)
+            if (!result.Success)
                 throw new Exception(string.Join(Environment.NewLine, result.StandardError));
 
             return new DeviceData {
@@ -35,7 +35,7 @@ namespace DotNet.Meteor.Apple {
                 .Append("--notify-wait"), logger)
                 .WaitForExit();
 
-            if (result.ExitCode != 0)
+            if (!result.Success)
                 throw new Exception(string.Join(Environment.NewLine, result.StandardError));
         }
 

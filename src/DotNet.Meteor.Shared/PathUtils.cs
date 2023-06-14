@@ -26,14 +26,14 @@ namespace DotNet.Meteor.Shared {
                 .Append("--list-sdks"))
                 .WaitForExit();
 
-            if (result.ExitCode != 0)
-                throw new Exception("Could not find dotnet tool");
+            if (!result.Success)
+                throw new FileNotFoundException("Could not find dotnet tool");
 
             var matches = Regex.Matches(result.StandardOutput.Last(), @"\[(.*?)\]");
             var sdkLocation = matches.FirstOrDefault()?.Groups[1].Value;
 
             if (string.IsNullOrEmpty(sdkLocation) || !Directory.Exists(sdkLocation))
-                throw new Exception("Could not find dotnet sdk");
+                throw new DirectoryNotFoundException("Could not find dotnet sdk");
 
             return Directory.GetParent(sdkLocation).FullName;
         }
@@ -47,7 +47,7 @@ namespace DotNet.Meteor.Shared {
             var dotnetVersion = result.StandardOutput.FirstOrDefault();
 
             if (string.IsNullOrEmpty(dotnetVersion))
-                throw new Exception("Could not find dotnet version");
+                throw new ArgumentException("Could not find dotnet version");
 
             var assembly = new FileInfo(Path.Combine(root, "sdk", dotnetVersion, "MSBuild.dll"));
 
