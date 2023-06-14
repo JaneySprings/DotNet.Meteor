@@ -14,7 +14,7 @@ namespace DotNet.Meteor.Apple {
                 .Append("list"))
                 .WaitForExit();
 
-            if (result.ExitCode != 0)
+            if (!result.Success)
                 throw new Exception(string.Join(Environment.NewLine, result.StandardError));
 
             var output = string.Join(Environment.NewLine, result.StandardOutput);
@@ -57,7 +57,7 @@ namespace DotNet.Meteor.Apple {
                 .Append("devices"))
                 .WaitForExit();
 
-            if (result.ExitCode != 0)
+            if (!result.Success)
                 throw new Exception(string.Join(Environment.NewLine, result.StandardError));
 
             var output = string.Join(Environment.NewLine, result.StandardOutput) + Environment.NewLine;
@@ -96,7 +96,7 @@ namespace DotNet.Meteor.Apple {
 
             var output = string.Join(Environment.NewLine, result.StandardOutput) + Environment.NewLine;
 
-            if (result.ExitCode != 0)
+            if (!result.Success)
                 throw new Exception(string.Join(Environment.NewLine, result.StandardError));
         }
 
@@ -109,7 +109,7 @@ namespace DotNet.Meteor.Apple {
 
             var output = string.Join(Environment.NewLine, result.StandardOutput) + Environment.NewLine;
 
-            if (result.ExitCode != 0)
+            if (!result.Success)
                 throw new Exception(string.Join(Environment.NewLine, result.StandardError));
         }
     }

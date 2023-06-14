@@ -2,7 +2,7 @@
 
 namespace DotNet.Meteor.Processes {
     public class ProcessArgumentBuilder {
-        public List<string> args = new List<string>();
+        private readonly List<string> args = new List<string>();
 
         public ProcessArgumentBuilder Append(string arg) {
             this.args.Add(arg);

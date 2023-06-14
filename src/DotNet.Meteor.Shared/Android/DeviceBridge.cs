@@ -15,7 +15,7 @@ namespace DotNet.Meteor.Android {
                 .Append(args))
                 .WaitForExit();
 
-            if (result.ExitCode != 0)
+            if (!result.Success)
                 return string.Join(Environment.NewLine, result.StandardError);
 
             return string.Join(Environment.NewLine, result.StandardOutput);
@@ -30,7 +30,7 @@ namespace DotNet.Meteor.Android {
                 .Append($"tcp:{port}"))
                 .WaitForExit();
 
-            if (result.ExitCode != 0)
+            if (!result.Success)
                 throw new Exception(string.Join(Environment.NewLine, result.StandardError));
 
             return string.Join(Environment.NewLine, result.StandardOutput);
@@ -44,7 +44,7 @@ namespace DotNet.Meteor.Android {
                 .AppendQuoted(apk);
 
             var result = new ProcessRunner(adb, arguments, logger).WaitForExit();
-            if (result.ExitCode != 0)
+            if (!result.Success)
                 throw new Exception(string.Join(Environment.NewLine, result.StandardError));
         }
 
@@ -69,7 +69,7 @@ namespace DotNet.Meteor.Android {
                 .Append("-l"))
                 .WaitForExit();
 
-            if (result.ExitCode != 0)
+            if (!result.Success)
                 throw new Exception(string.Join(Environment.NewLine, result.StandardError));
 
             string regex = @"^(?<serial>\S+?)(\s+?)\s+(?<state>\S+)";
@@ -93,7 +93,7 @@ namespace DotNet.Meteor.Android {
                 .Append("emu", "avd", "name"))
                 .WaitForExit();
 
-            if (result.ExitCode != 0)
+            if (!result.Success)
                 return string.Empty;
 
             return result.StandardOutput.FirstOrDefault();

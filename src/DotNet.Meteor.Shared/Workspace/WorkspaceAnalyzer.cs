@@ -4,13 +4,15 @@ using System.IO;
 using System;
 
 namespace DotNet.Meteor.Shared {
-
     public static class WorkspaceAnalyzer {
         public static IEnumerable<Project> AnalyzeWorkspace(string workspacePath, Action<string> callback = null) {
-            var projectFiles = Directory.GetFiles(workspacePath, "*.*proj", SearchOption.AllDirectories);
             var projects = new List<Project>();
+            if (!Directory.Exists(workspacePath)) {
+                callback?.Invoke($"Could not find workspace directory {workspacePath}");
+                return projects;
+            }
 
-            foreach (var projectFile in projectFiles) {
+            foreach (var projectFile in Directory.GetFiles(workspacePath, "*.*proj", SearchOption.AllDirectories)) {
                 var project = AnalyzeProject(projectFile, callback);
                 if (project == null)
                     continue;
@@ -57,7 +59,7 @@ namespace DotNet.Meteor.Shared {
                 return frameworks;
             }
 
-            return null;
+            return frameworks;
         }
     }
 }

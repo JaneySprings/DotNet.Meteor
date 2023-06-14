@@ -28,7 +28,7 @@ namespace DotNet.Meteor.Apple {
                 .Append($"--devname={serial}");
             var result = new ProcessRunner(tool, arguments, logger).WaitForExit();
 
-            if (result.ExitCode != 0)
+            if (!result.Success)
                 throw new Exception(string.Join(Environment.NewLine, result.StandardError));
         }
 

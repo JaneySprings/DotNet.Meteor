@@ -191,4 +191,27 @@ public class WorkspaceAnalysisTests: TestFixture {
         Assert.Equal(1, callbackInvokeCount);
         DeleteMockData();
     }
+
+    [Fact]
+    public void IncorrectWorkspacePathTest() {
+        var simpleProjectPath = CreateMockProject(@"
+        <Project Sdk=""Microsoft.NET.Sdk"">
+            <PropertyGroup>
+                <TargetFrameworks>net7.0-maccatalyst</TargetFrameworks>
+                <OutputType>Exe</OutputType>
+            </PropertyGroup>
+        </Project>
+        ");
+        var callbackInvokeCount = 0;
+        var directoryPath = Path.GetDirectoryName(simpleProjectPath)!;
+        var actual = WorkspaceAnalyzer.AnalyzeWorkspace(Path.Combine(directoryPath, "MissingFolder"), message => {
+            Assert.StartsWith("Could not find", message);
+            callbackInvokeCount++;
+        });
+
+        Assert.NotNull(actual);
+        Assert.Empty(actual);
+        Assert.Equal(1, callbackInvokeCount);
+        DeleteMockData();
+    }
 }

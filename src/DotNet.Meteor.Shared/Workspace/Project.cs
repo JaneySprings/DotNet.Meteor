@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using MSPath = System.IO.Path;
+using SystemPath = System.IO.Path;
 
 namespace DotNet.Meteor.Shared {
     public class Project {
@@ -14,8 +14,9 @@ namespace DotNet.Meteor.Shared {
         [JsonProperty("frameworks")] public List<string> Frameworks { get; set; }
 
         public Project(string path) {
-            Name = MSPath.GetFileNameWithoutExtension(path);
-            Path = MSPath.GetFullPath(path);
+            Frameworks = new List<string>();
+            Name = SystemPath.GetFileNameWithoutExtension(path);
+            Path = SystemPath.GetFullPath(path);
         }
 
         public string EvaluateProperty(string name, string defaultValue = null) {
@@ -31,11 +32,11 @@ namespace DotNet.Meteor.Shared {
         }
 
         public string GetOutputAssembly(string configuration, string framework, DeviceData device) {
-            var rootDirectory = MSPath.GetDirectoryName(Path);
-            var outputDirectory = MSPath.Combine(rootDirectory, "bin", configuration, framework);
+            var rootDirectory = SystemPath.GetDirectoryName(Path);
+            var outputDirectory = SystemPath.Combine(rootDirectory, "bin", configuration, framework);
 
             if (!string.IsNullOrEmpty(device.RuntimeId))
-                outputDirectory = MSPath.Combine(outputDirectory, device.RuntimeId);
+                outputDirectory = SystemPath.Combine(outputDirectory, device.RuntimeId);
 
             if (!Directory.Exists(outputDirectory))
                 throw new DirectoryNotFoundException($"Could not find output directory {outputDirectory}");
@@ -45,7 +46,7 @@ namespace DotNet.Meteor.Shared {
                 if (!files.Any())
                     throw new FileNotFoundException($"Could not find \"*-Signed.apk\" in {outputDirectory}");
                 if (files.Length > 1)
-                    throw new Exception($"Finded more than one \"*-Signed.apk\" in {outputDirectory}");
+                    throw new ArgumentException($"Finded more than one \"*-Signed.apk\" in {outputDirectory}");
                 return files.FirstOrDefault();
             }
 
@@ -62,20 +63,19 @@ namespace DotNet.Meteor.Shared {
                 if (!bundle.Any())
                     throw new DirectoryNotFoundException($"Could not find \"*.app\" in {outputDirectory}");
                 if (bundle.Length > 1)
-                    throw new Exception($"Finded more than one \"*.app\" in {outputDirectory}");
+                    throw new ArgumentException($"Finded more than one \"*.app\" in {outputDirectory}");
                 return bundle.FirstOrDefault();
             }
 
             return null;
         }
 
-
         private MatchCollection GetPropertyMatches(string projectPath, string propertyName, bool isEndPoint = false) {
             if (!File.Exists(projectPath))
                 return null;
 
             string content = File.ReadAllText(projectPath);
-            content = Regex.Replace(content, @"<!--.*?-->", string.Empty, RegexOptions.Singleline);
+            content = Regex.Replace(content, "<!--.*?-->", string.Empty, RegexOptions.Singleline);
             /* Find in current project */
             var propertyMatch = new Regex($@"<{propertyName}\s?.*>(.*?)<\/{propertyName}>\s*\n").Matches(content);
             if (propertyMatch.Count > 0)
@@ -83,9 +83,9 @@ namespace DotNet.Meteor.Shared {
             var importRegex = new Regex(@"<Import\s+Project\s*=\s*""(.*?)""");
             /* Find in imported project */
             foreach(Match importMatch in importRegex.Matches(content)) {
-                var basePath = MSPath.GetDirectoryName(projectPath);
+                var basePath = SystemPath.GetDirectoryName(projectPath);
                 var importedProjectName = importMatch.Groups[1].Value;
-                var importedProjectPath = MSPath.Combine(basePath, importedProjectName).ToPlatformPath();
+                var importedProjectPath = SystemPath.Combine(basePath, importedProjectName).ToPlatformPath();
 
                 if (!File.Exists(importedProjectPath))
                     importedProjectPath = importMatch.Groups[1].Value.ToPlatformPath();
@@ -100,7 +100,7 @@ namespace DotNet.Meteor.Shared {
             if (isEndPoint)
                 return null;
             /* Find in Directory.Build.props */
-            var propsFile = GetDirectoryPropsPath(MSPath.GetDirectoryName(projectPath));
+            var propsFile = GetDirectoryPropsPath(SystemPath.GetDirectoryName(projectPath));
             if (propsFile == null)
                 return null;
 
@@ -138,7 +138,7 @@ namespace DotNet.Meteor.Shared {
                 }
                 /* Add separator and property to builder */
                 if (resultSequence.Length != 0)
-                    resultSequence.Append(";");
+                    resultSequence.Append(';');
                 resultSequence.Append(propertyValue);
             }
             return resultSequence.ToString();
