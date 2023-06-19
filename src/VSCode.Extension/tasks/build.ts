@@ -36,8 +36,8 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
         const builder = new ProcessArgumentBuilder('dotnet')
             .append(definition.target.toLowerCase())
             .appendQuoted(Configuration.project!.path)
-            .append(`-c:${Configuration.target}`)
-            .append(`-f:${framework}`);
+            .append(`-p:Configuration=${Configuration.target}`)
+            .append(`-p:TargetFramework=${framework}`);
 
         if (definition.target.toLowerCase() === 'build') 
             builder.append(`-t:Build`);
