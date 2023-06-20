@@ -7,13 +7,10 @@ using DotNet.Meteor.Debug;
 using DotNet.Meteor.Xaml;
 using System.Reflection;
 using Newtonsoft.Json;
-using NLog;
 
 namespace DotNet.Meteor.CommandLine;
 
 public class Program {
-    private static readonly Logger logger = LogManager.GetCurrentClassLogger();
-
     public static readonly Dictionary<string, Action<string[]>> CommandHandler = new() {
         {  "--all-devices", AllDevices },
         { "--android-sdk-path", AndroidSdkPath },
@@ -45,14 +42,13 @@ public class Program {
             Console.WriteLine($" {command}");
     }
 
-
     public static void AllDevices(string[] args) {
-        var devices = DeviceProvider.GetDevices(logger.Error);
+        var devices = DeviceProvider.GetDevices();
         Console.WriteLine(JsonConvert.SerializeObject(devices));
     }
 
     public static void AndroidSdkPath(string[] args) {
-        string path = Android.PathUtils.SdkLocation(logger.Error);
+        string path = Android.PathUtils.SdkLocation();
         Console.WriteLine(JsonConvert.SerializeObject(path));
     }
 
@@ -60,19 +56,19 @@ public class Program {
         var projects = new List<Project>();
 
         for (int i = 1; i < args.Length; i++)
-            projects.AddRange(WorkspaceAnalyzer.AnalyzeWorkspace(args[i], logger.Debug));
+            projects.AddRange(WorkspaceAnalyzer.AnalyzeWorkspace(args[i]));
 
         Console.WriteLine(JsonConvert.SerializeObject(projects));
     }
 
     public static void XamlGenerate(string[] args) {
-        var schemaGenerator = new JsonSchemaGenerator(args[1], logger.Error);
+        var schemaGenerator = new JsonSchemaGenerator(args[1]);
         var result = schemaGenerator.CreateTypesAlias();
         Console.WriteLine(JsonConvert.SerializeObject(result));
     }
 
     public static void XamlReload(string[] args) {
-        var result = HotReloadClient.SendNotification(int.Parse(args[1]), args[2], logger.Error);
+        var result = HotReloadClient.SendNotification(int.Parse(args[1]), args[2]);
         Console.WriteLine(JsonConvert.SerializeObject(result));
     }
 

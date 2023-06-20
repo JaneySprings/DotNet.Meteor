@@ -4,7 +4,6 @@ using System.IO;
 using System.Threading;
 using System.Linq;
 using Mono.Debugging.Soft;
-using DotNet.Meteor.Shared;
 using DotNet.Meteor.Debug.Utilities;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
@@ -82,7 +81,7 @@ public partial class DebugSession : Session {
             }
         };
     }
-#endregion
+#endregion request: Initialize
 #region request: Launch
     protected override LaunchResponse HandleLaunchRequest(LaunchArguments arguments) {
         var configuration = new LaunchConfiguration(arguments.ConfigurationProperties);
@@ -99,7 +98,7 @@ public partial class DebugSession : Session {
         Connect(configuration, port);
         return new LaunchResponse();
     }
-#endregion
+#endregion request: Launch
 #region request: Disconnect
     protected override DisconnectResponse HandleDisconnectRequest(DisconnectArguments arguments) {
         if (this.session?.IsRunning == true)
@@ -118,7 +117,7 @@ public partial class DebugSession : Session {
 
         return new DisconnectResponse();
     }
-#endregion
+#endregion request: Disconnect
 #region request: Continue
     protected override ContinueResponse HandleContinueRequest(ContinueArguments arguments) {
         return DoSafe<ContinueResponse>(() => {
@@ -128,7 +127,7 @@ public partial class DebugSession : Session {
             return new ContinueResponse();
         });
     }
-#endregion
+#endregion request: Continue
 #region request: Next
     protected override NextResponse HandleNextRequest(NextArguments arguments) {
         return DoSafe<NextResponse>(() => {
@@ -138,7 +137,7 @@ public partial class DebugSession : Session {
             return new NextResponse();
         });
     }
-#endregion
+#endregion request: Next
 #region request: StepIn
     protected override StepInResponse HandleStepInRequest(StepInArguments arguments) {
         return DoSafe<StepInResponse>(() => {
@@ -148,7 +147,7 @@ public partial class DebugSession : Session {
             return new StepInResponse();
         });
     }
-#endregion
+#endregion request: StepIn
 #region request: StepOut
     protected override StepOutResponse HandleStepOutRequest(StepOutArguments arguments) {
         return DoSafe<StepOutResponse>(() => {
@@ -158,7 +157,7 @@ public partial class DebugSession : Session {
             return new StepOutResponse();
         });
     }
-#endregion
+#endregion request: StepOut
 #region request: Pause
     protected override PauseResponse HandlePauseRequest(PauseArguments arguments) {
         return DoSafe<PauseResponse>(() => {
@@ -168,11 +167,11 @@ public partial class DebugSession : Session {
             return new PauseResponse();
         });
     }
-#endregion
+#endregion request: Pause
 #region request: SetExceptionBreakpoints
     protected override SetExceptionBreakpointsResponse HandleSetExceptionBreakpointsRequest(SetExceptionBreakpointsArguments arguments) {
         this.session.Breakpoints.ClearCatchpoints();
-        if (arguments.FilterOptions == null || arguments.FilterOptions.Count == 0) 
+        if (arguments.FilterOptions == null || arguments.FilterOptions.Count == 0)
             return new SetExceptionBreakpointsResponse();
 
         foreach (var option in arguments.FilterOptions) {
@@ -188,7 +187,7 @@ public partial class DebugSession : Session {
         }
         return new SetExceptionBreakpointsResponse();
     }
-#endregion
+#endregion request: SetExceptionBreakpoints
 #region request: SetBreakpoints
     protected override SetBreakpointsResponse HandleSetBreakpointsRequest(SetBreakpointsArguments arguments) {
         var breakpoints = new List<DebugProtocol.Breakpoint>();
@@ -226,7 +225,7 @@ public partial class DebugSession : Session {
 
         return new SetBreakpointsResponse(breakpoints);
     }
-#endregion
+#endregion request: SetBreakpoints
 #region request: StackTrace
     protected override StackTraceResponse HandleStackTraceRequest(StackTraceArguments arguments) {
         return DoSafe<StackTraceResponse>(() => {
@@ -241,7 +240,7 @@ public partial class DebugSession : Session {
 
             if (bt?.FrameCount < 0)
                 throw new ProtocolException("No stack trace available");
-            
+
             int totalFrames = bt.FrameCount;
             int startFrame = arguments.StartFrame ?? 0;
             int levels = arguments.Levels ?? totalFrames;
@@ -251,7 +250,7 @@ public partial class DebugSession : Session {
                 var frame = bt.GetFrame(i);
                 var sourceLocation = frame.SourceLocation;
                 string sourceName = string.Empty;
-                
+
                 if (!string.IsNullOrEmpty(sourceLocation.FileName)) {
                     sourceName = Path.GetFileName(sourceLocation.FileName);
                     if (File.Exists(sourceLocation.FileName)) {
@@ -302,7 +301,7 @@ public partial class DebugSession : Session {
             return new StackTraceResponse(stackFrames);
         });
     }
-#endregion
+#endregion request: StackTrace
 #region request: Scopes
     protected override ScopesResponse HandleScopesRequest(ScopesArguments arguments) {
         return DoSafe<ScopesResponse>(() => {
@@ -310,13 +309,15 @@ public partial class DebugSession : Session {
             var frame = this.frameHandles.Get(frameId, null);
             var scopes = new List<DebugProtocol.Scope>();
 
-            if (frame == null) 
+            if (frame == null)
                 throw new ProtocolException("frame not found");
 
-            if (this.exception != null) scopes.Add(new DebugProtocol.Scope() {
-                Name = "Exception",
-                VariablesReference = this.variableHandles.Create(new MonoClient.ObjectValue[] { this.exception })
-            });
+            if (this.exception != null) {
+                scopes.Add(new DebugProtocol.Scope() {
+                    Name = "Exception",
+                    VariablesReference = this.variableHandles.Create(new MonoClient.ObjectValue[] { this.exception })
+                });
+            }
 
             scopes.Add(new DebugProtocol.Scope() {
                 Name = "Local",
@@ -326,12 +327,12 @@ public partial class DebugSession : Session {
             return new ScopesResponse(scopes);
         });
     }
-#endregion
+#endregion request: Scopes
 #region request: Variables
     protected override VariablesResponse HandleVariablesRequest(VariablesArguments arguments) {
         return DoSafe<VariablesResponse>(() => {
             int reference = arguments.VariablesReference;
-            if (reference == -1) 
+            if (reference == -1)
                 throw new ProtocolException("variables: property 'variablesReference' is missing");
 
             var variables = new List<DebugProtocol.Variable>();
@@ -354,7 +355,7 @@ public partial class DebugSession : Session {
             return new VariablesResponse(variables);
         });
     }
-#endregion
+#endregion request: Variables
 #region request: Threads
     protected override ThreadsResponse HandleThreadsRequest(ThreadsArguments arguments) {
         return DoSafe<ThreadsResponse>(() => {
@@ -374,17 +375,17 @@ public partial class DebugSession : Session {
             return new ThreadsResponse(threads);
         });
     }
-#endregion
+#endregion request: Threads
 #region request: Evaluate
     protected override EvaluateResponse HandleEvaluateRequest(EvaluateArguments arguments) {
         return DoSafe<EvaluateResponse>(() => {
-            if (string.IsNullOrEmpty(arguments.Expression)) 
+            if (string.IsNullOrEmpty(arguments.Expression))
                 throw new ProtocolException("expression missing");
 
             var frame = this.frameHandles.Get(arguments.FrameId ?? 0, null);
             if (frame == null)
                 throw new ProtocolException("no active stackframe");
-        
+
             if (!frame.ValidateExpression(arguments.Expression))
                 throw new ProtocolException("invalid expression");
 
@@ -393,26 +394,26 @@ public partial class DebugSession : Session {
 
             if (val.IsEvaluating)
                 throw new ProtocolException("evaluation timeout expected");
-            if (val.Flags.HasFlag(MonoClient.ObjectValueFlags.Error) || val.Flags.HasFlag(MonoClient.ObjectValueFlags.NotSupported)) 
+            if (val.Flags.HasFlag(MonoClient.ObjectValueFlags.Error) || val.Flags.HasFlag(MonoClient.ObjectValueFlags.NotSupported))
                 throw new ProtocolException(val.DisplayValue);
-            if (val.Flags.HasFlag(MonoClient.ObjectValueFlags.Unknown)) 
+            if (val.Flags.HasFlag(MonoClient.ObjectValueFlags.Unknown))
                 throw new ProtocolException("invalid expression");
             if (val.Flags.HasFlag(MonoClient.ObjectValueFlags.Object) && val.Flags.HasFlag(MonoClient.ObjectValueFlags.Namespace))
                 throw new ProtocolException("not available");
-        
+
             int handle = 0;
-            if (val.HasChildren) 
+            if (val.HasChildren)
                 handle = this.variableHandles.Create(val.GetAllChildren());
-        
+
             return new EvaluateResponse(val.DisplayValue, handle);
         });
     }
-#endregion
+#endregion request: Evaluate
 #region request: Source
     protected override SourceResponse HandleSourceRequest(SourceArguments arguments) {
         throw new ProtocolException("No source available");
     }
-    #endregion
+#endregion request: Source
 #region request: ExceptionInfo
     protected override ExceptionInfoResponse HandleExceptionInfoRequest(ExceptionInfoArguments arguments) {
         return DoSafe<ExceptionInfoResponse>(() => {
@@ -425,7 +426,7 @@ public partial class DebugSession : Session {
             };
         });
     }
-#endregion
+#endregion request: ExceptionInfo
 
 #region Event handlers 
 
@@ -449,11 +450,13 @@ public partial class DebugSession : Session {
         Reset();
         this.suspendEvent.Set();
         var ex = GetActiveException((int)e.Thread.Id);
-        if (ex != null) Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Exception) {
-            ThreadId = (int)e.Thread.Id,
-            AllThreadsStopped = true,
-            Text = ex.Message
-        });
+        if (ex != null) {
+            Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Exception) {
+                ThreadId = (int)e.Thread.Id,
+                AllThreadsStopped = true,
+                Text = ex.Message
+            });
+        }
     }
     private void TargetReady(object sender, MonoClient.TargetEventArgs e) {
         this.activeProcess = this.session.GetProcesses().SingleOrDefault();
@@ -488,6 +491,8 @@ public partial class DebugSession : Session {
     private void OnSessionLog(bool isError, string message) {
         if (isError) GetLogger().LogError($"[Error] {message.Trim()}", null);
         else GetLogger().LogMessage($"[Info] {message.Trim()}");
+
+        SendConsoleEvent(OutputEvent.CategoryValue.Stdout, $"[Mono] {message.Trim()}");
     }
     private void OnLog(bool isError, string message) {
         if (isError) OnErrorDataReceived(message);
@@ -497,7 +502,7 @@ public partial class DebugSession : Session {
         SendConsoleEvent(OutputEvent.CategoryValue.Console, message);
     }
 
-#endregion
+#endregion Event handlers 
 #region Helpers
     private void Reset() {
         this.exception = null;
@@ -506,10 +511,12 @@ public partial class DebugSession : Session {
     }
 
     private MonoClient.ThreadInfo FindThread(int threadReference) {
-        if (this.activeProcess != null)
-            foreach (var t in this.activeProcess.GetThreads()) 
-                if (t.Id == threadReference) 
+        if (this.activeProcess != null) {
+            foreach (var t in this.activeProcess.GetThreads()) {
+                if (t.Id == threadReference)
                     return t;
+            }
+        }
 
         return null;
     }
@@ -544,5 +551,5 @@ public partial class DebugSession : Session {
         }
         return null;
     }
-#endregion
+#endregion Helpers
 }

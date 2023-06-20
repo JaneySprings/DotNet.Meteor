@@ -24,12 +24,9 @@ public static class LogConfig {
         configuration.AddTarget("log", commonAsyncTarget);
 
         var errorTarget = new FileTarget() {
-            MaxArchiveFiles = 1,
-            ArchiveNumbering = ArchiveNumberingMode.Date,
-            ArchiveOldFileOnStartup = true,
             FileName = ErrorLogFile,
+            DeleteOldFileOnStartup = true,
             Layout = "${longdate}|${message}${newline}at ${stacktrace:format=Flat:separator= at :reverse=true}${newline}${callsite-filename}[${callsite-linenumber}]",
-            DeleteOldFileOnStartup = true
         };
         var errorAsyncTarget = new AsyncTargetWrapper(errorTarget, 500, AsyncTargetWrapperOverflowAction.Discard);
         configuration.AddTarget("errorLog", errorAsyncTarget);
