@@ -9,8 +9,8 @@ namespace DotNet.Meteor.Apple {
         public static List<DeviceData> VirtualDevices() {
             var devices = new List<DeviceData>();
             var path = PathUtils.SimulatorsLocation();
-            var runtimeId = SystemProfiler.IsArch64() 
-                ? Runtimes.iOSSimulatorArm64 
+            var runtimeId = SystemProfiler.IsArch64()
+                ? Runtimes.iOSSimulatorArm64
                 : Runtimes.iOSSimulatorX64;
 
             foreach (string directory in Directory.GetDirectories(path)) {
