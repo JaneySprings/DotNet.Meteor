@@ -28,7 +28,7 @@ public class LaunchConfiguration {
 
     public void TryLoad(Action<Exception> callback) {
         try {
-            Framework = Project.Frameworks.First(it => it.Contains(Device.Platform, StringComparison.OrdinalIgnoreCase));
+            Framework = Project.Frameworks.First(it => it.Contains(Device.Platform)); //!!!!!!! Equality check
             OutputAssembly = Project.GetOutputAssembly(Target, Framework, Device);
         } catch (Exception ex) {
             callback(ex);
@@ -36,20 +36,20 @@ public class LaunchConfiguration {
     }
 
     public string GetApplicationId() {
-        if (Device.IsIPhone || Device.IsMacCatalyst) {
-            var workingDirectory = Path.GetDirectoryName(Project.Path);
-            var files = Directory.GetFiles(workingDirectory, "Info.plist", SearchOption.AllDirectories)
-                .Where(it => !it.Contains(Path.GetFileName(OutputAssembly)));
+        // if (Device.IsIPhone || Device.IsMacCatalyst) {
+        //     var workingDirectory = Path.GetDirectoryName(Project.Path);
+        //     var files = Directory.GetFiles(workingDirectory, "Info.plist", SearchOption.AllDirectories)
+        //         .Where(it => !it.Contains(Path.GetFileName(OutputAssembly)));
 
-            if (!files.Any())
-                return null;
+        //     if (!files.Any())
+        //         return null;
 
-            var plist = new Apple.PropertyExtractor(files.First());
-            return plist.Extract("CFBundleIdentifier") ?? Project.EvaluateProperty("ApplicationId");
-        }
+        //     var plist = new PropertyExtractor(files.First());
+        //     return plist.Extract("CFBundleIdentifier") ?? Project.EvaluateProperty("ApplicationId");
+        // }
 
-        if (!Device.IsAndroid)
-            return null;
+        // if (!Device.IsAndroid)
+        //     return null;
 
         var assemblyName = Path.GetFileNameWithoutExtension(OutputAssembly);
         return assemblyName.Replace("-Signed", "");

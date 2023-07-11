@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using DotNet.Meteor.HotReload;
-using DotNet.Meteor.Logging;
+﻿using DotNet.Meteor.HotReload;
 using DotNet.Meteor.Shared;
-using DotNet.Meteor.Debug;
 using DotNet.Meteor.Xaml;
 using System.Reflection;
 using Newtonsoft.Json;
 
-namespace DotNet.Meteor.CommandLine;
+namespace DotNet.Meteor.Workspace;
 
 public class Program {
     public static readonly Dictionary<string, Action<string[]>> CommandHandler = new() {
@@ -16,12 +12,10 @@ public class Program {
         { "--android-sdk-path", AndroidSdkPath },
         { "--analyze-workspace", AnalyzeWorkspace },
         { "--xaml-reload", XamlReload },
-        { "--xaml", XamlGenerate },
-        { "--start-session", StartSession }
+        { "--xaml", XamlGenerate }
     };
 
     private static void Main(string[] args) {
-        LogConfig.InitializeLog();
         if (args.Length == 0) {
             Help();
             return;
@@ -48,7 +42,7 @@ public class Program {
     }
 
     public static void AndroidSdkPath(string[] args) {
-        string path = Android.PathUtils.SdkLocation();
+        string path = AndroidUtilities.SdkLocation();
         Console.WriteLine(JsonConvert.SerializeObject(path));
     }
 
@@ -70,10 +64,5 @@ public class Program {
     public static void XamlReload(string[] args) {
         var result = HotReloadClient.SendNotification(int.Parse(args[1]), args[2]);
         Console.WriteLine(JsonConvert.SerializeObject(result));
-    }
-
-    public static void StartSession(string[] args) {
-        var debugSession = new DebugSession(Console.OpenStandardInput(), Console.OpenStandardOutput());
-        debugSession.Start();
     }
 }

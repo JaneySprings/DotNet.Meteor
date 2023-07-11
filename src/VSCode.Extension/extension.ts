@@ -6,6 +6,7 @@ import { PublicExports } from './exports';
 import { StateController } from './cache';
 import * as res from './resources';
 import * as vscode from 'vscode';
+import { CommandController } from './bridge';
 
 
 export function activate(context: vscode.ExtensionContext): PublicExports | undefined {
@@ -16,6 +17,7 @@ export function activate(context: vscode.ExtensionContext): PublicExports | unde
 
 	UIController.activate(context);
 	StateController.activate(context);
+	CommandController.activate(context);
 	XamlController.activate(context);
 	UIController.update();
 

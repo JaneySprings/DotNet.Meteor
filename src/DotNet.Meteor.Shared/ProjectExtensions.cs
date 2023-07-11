@@ -1,42 +1,29 @@
 using System;
-using System.Text;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
-using System.Collections.Generic;
-using Newtonsoft.Json;
-using SystemPath = System.IO.Path;
 
 namespace DotNet.Meteor.Shared {
-    public class Project {
-        [JsonProperty("name")] public string Name { get; set; }
-        [JsonProperty("path")] public string Path { get; set; }
-        [JsonProperty("frameworks")] public List<string> Frameworks { get; set; }
-
-        public Project(string path) {
-            Frameworks = new List<string>();
-            Name = SystemPath.GetFileNameWithoutExtension(path);
-            Path = SystemPath.GetFullPath(path);
-        }
-
-        public string EvaluateProperty(string name, string defaultValue = null) {
-            var propertyMatches = GetPropertyMatches(Path, name);
+    public static class ProjectExtensions {
+        public static string EvaluateProperty(this Project project, string name, string defaultValue = null) {
+            var propertyMatches = project.GetPropertyMatches(project.Path, name);
             if (propertyMatches == null)
                 return defaultValue;
 
-            var propertyValue = GetPropertyValue(name, propertyMatches);
+            var propertyValue = project.GetPropertyValue(name, propertyMatches);
             if (string.IsNullOrEmpty(propertyValue))
                 return defaultValue;
 
             return propertyValue;
         }
 
-        public string GetOutputAssembly(string configuration, string framework, DeviceData device) {
-            var rootDirectory = SystemPath.GetDirectoryName(Path);
-            var outputDirectory = SystemPath.Combine(rootDirectory, "bin", configuration, framework);
+        public static string GetOutputAssembly(this Project project, string configuration, string framework, DeviceData device) {
+            var rootDirectory = Path.GetDirectoryName(project.Path)!;
+            var outputDirectory = Path.Combine(rootDirectory, "bin", configuration, framework);
 
             if (!string.IsNullOrEmpty(device.RuntimeId))
-                outputDirectory = SystemPath.Combine(outputDirectory, device.RuntimeId);
+                outputDirectory = Path.Combine(outputDirectory, device.RuntimeId);
 
             if (!Directory.Exists(outputDirectory))
                 throw new DirectoryNotFoundException($"Could not find output directory {outputDirectory}");
@@ -51,7 +38,7 @@ namespace DotNet.Meteor.Shared {
             }
 
             if (device.IsWindows) {
-                var executableName = EvaluateProperty("AssemblyName", Name);
+                var executableName = project.EvaluateProperty("AssemblyName", project.Name);
                 var files = Directory.GetFiles(outputDirectory, $"{executableName}.exe", SearchOption.AllDirectories);
                 if (!files.Any())
                     throw new FileNotFoundException($"Could not find \"{executableName}.exe\" in {outputDirectory}");
@@ -70,7 +57,7 @@ namespace DotNet.Meteor.Shared {
             return null;
         }
 
-        private MatchCollection GetPropertyMatches(string projectPath, string propertyName, bool isEndPoint = false) {
+        private static MatchCollection GetPropertyMatches(this Project project, string projectPath, string propertyName, bool isEndPoint = false) {
             if (!File.Exists(projectPath))
                 return null;
 
@@ -83,16 +70,16 @@ namespace DotNet.Meteor.Shared {
             var importRegex = new Regex(@"<Import\s+Project\s*=\s*""(.*?)""");
             /* Find in imported project */
             foreach(Match importMatch in importRegex.Matches(content)) {
-                var basePath = SystemPath.GetDirectoryName(projectPath);
+                var basePath = Path.GetDirectoryName(projectPath)!;
                 var importedProjectName = importMatch.Groups[1].Value;
-                var importedProjectPath = SystemPath.Combine(basePath, importedProjectName).ToPlatformPath();
+                var importedProjectPath = Path.Combine(basePath, importedProjectName).ToPlatformPath();
 
                 if (!File.Exists(importedProjectPath))
                     importedProjectPath = importMatch.Groups[1].Value.ToPlatformPath();
                 if (!File.Exists(importedProjectPath))
                     return null;
 
-                var importedProjectPropertyMatches = GetPropertyMatches(importedProjectPath, propertyName, isEndPoint);
+                var importedProjectPropertyMatches = project.GetPropertyMatches(importedProjectPath, propertyName, isEndPoint);
                 if (importedProjectPropertyMatches != null)
                     return importedProjectPropertyMatches;
             }
@@ -100,26 +87,14 @@ namespace DotNet.Meteor.Shared {
             if (isEndPoint)
                 return null;
             /* Find in Directory.Build.props */
-            var propsFile = GetDirectoryPropsPath(SystemPath.GetDirectoryName(projectPath));
+            var propsFile = GetDirectoryPropsPath(Path.GetDirectoryName(projectPath)!);
             if (propsFile == null)
                 return null;
 
-            return GetPropertyMatches(propsFile, propertyName, true);
+            return project.GetPropertyMatches(propsFile, propertyName, true);
         }
 
-        private string GetDirectoryPropsPath(string workspacePath) {
-            var propFiles = Directory.GetFiles(workspacePath, "Directory.Build.props", SearchOption.TopDirectoryOnly);
-            if (propFiles.Length > 0)
-                return propFiles[0];
-
-            var parentDirectory = Directory.GetParent(workspacePath);
-            if (parentDirectory == null)
-                return null;
-
-            return GetDirectoryPropsPath(parentDirectory.FullName);
-        }
-
-        private string GetPropertyValue(string propertyName, MatchCollection matches) {
+        private static string GetPropertyValue(this Project project, string propertyName, MatchCollection matches) {
             var includeRegex = new Regex(@"\$\((?<inc>.*?)\)");
             var resultSequence = new StringBuilder();
             /* Process all property entrance */
@@ -133,7 +108,7 @@ namespace DotNet.Meteor.Shared {
                 /* If property reference other property */
                 foreach (Match includeMatch in includeRegex.Matches(propertyValue)) {
                     var includePropertyName = includeMatch.Groups["inc"].Value;
-                    var includePropertyValue = EvaluateProperty(includePropertyName);
+                    var includePropertyValue = project.EvaluateProperty(includePropertyName);
                     propertyValue = propertyValue.Replace($"$({includePropertyName})", includePropertyValue ?? "");
                 }
                 /* Add separator and property to builder */
@@ -142,6 +117,18 @@ namespace DotNet.Meteor.Shared {
                 resultSequence.Append(propertyValue);
             }
             return resultSequence.ToString();
+        }
+
+        private static string GetDirectoryPropsPath(string workspacePath) {
+            var propFiles = Directory.GetFiles(workspacePath, "Directory.Build.props", SearchOption.TopDirectoryOnly);
+            if (propFiles.Length > 0)
+                return propFiles[0];
+
+            var parentDirectory = Directory.GetParent(workspacePath);
+            if (parentDirectory == null)
+                return null;
+
+            return GetDirectoryPropsPath(parentDirectory.FullName);
         }
     }
 }

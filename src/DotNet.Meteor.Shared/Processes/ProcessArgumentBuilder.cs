@@ -20,7 +20,7 @@ namespace DotNet.Meteor.Processes {
         }
 
         public override string ToString() {
-            return string.Join(' ', this.args);
+            return string.Join(" ", this.args);
         }
     }
 }

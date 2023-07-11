@@ -1,9 +1,8 @@
 using System;
 using System.IO;
-using DotNet.Meteor.Shared;
 
-namespace DotNet.Meteor.Android {
-    public static class PathUtils {
+namespace DotNet.Meteor.Shared {
+    public static class AndroidUtilities {
         public static string SdkLocation() {
             string path = Environment.GetEnvironmentVariable("ANDROID_SDK_ROOT");
             if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
@@ -45,7 +44,7 @@ namespace DotNet.Meteor.Android {
         }
 
         public static FileInfo AdbTool() {
-            string sdk = PathUtils.SdkLocation();
+            string sdk = AndroidUtilities.SdkLocation();
             string path = Path.Combine(sdk, "platform-tools", "adb" + RuntimeSystem.ExecExtension);
 
             if (!File.Exists(path))
@@ -55,7 +54,7 @@ namespace DotNet.Meteor.Android {
         }
 
         public static FileInfo EmulatorTool() {
-            string sdk = PathUtils.SdkLocation();
+            string sdk = AndroidUtilities.SdkLocation();
             string path = Path.Combine(sdk, "emulator", "emulator" + RuntimeSystem.ExecExtension);
 
             if (!File.Exists(path))
@@ -65,7 +64,7 @@ namespace DotNet.Meteor.Android {
         }
 
         public static FileInfo AvdTool() {
-            string sdk = PathUtils.SdkLocation();
+            string sdk = AndroidUtilities.SdkLocation();
             string tools = Path.Combine(sdk, "cmdline-tools");
             FileInfo newestTool = null;
 

@@ -7,9 +7,10 @@ public string RootDirectory => MakeAbsolute(Directory("./")).ToString();
 
 public string ArtifactsDirectory => _Path.Combine(RootDirectory, "artifacts");
 public string ExtensionStagingDirectory => _Path.Combine(RootDirectory, "extension");
-public string ExtensionAssembliesDirectory => _Path.Combine(ExtensionStagingDirectory, "bin");
+public string ExtensionBinariesDirectory => _Path.Combine(ExtensionStagingDirectory, "bin");
 
-public string MeteorMainProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.CommandLine", "DotNet.Meteor.CommandLine.csproj");
+public string MeteorWorkspaceProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Workspace", "DotNet.Meteor.Workspace.csproj");
+public string MeteorDebugProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Debug", "DotNet.Meteor.Debug.csproj");
 public string MeteorTestsProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Tests", "DotNet.Meteor.Tests.csproj");
 public string MeteorPluginProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.HotReload.Plugin", "DotNet.Meteor.HotReload.Plugin.csproj");
 
@@ -44,13 +45,18 @@ Task("clean").Does(() => {
 
 Task("build-debugger")
    .Does(() => {
-      DotNetBuild(MeteorMainProjectPath, new DotNetBuildSettings {
+      DotNetBuild(MeteorDebugProjectPath, new DotNetBuildSettings {
          MSBuildSettings = new DotNetMSBuildSettings { AssemblyVersion = version },
-         OutputDirectory = ExtensionAssembliesDirectory,
          Configuration = configuration,
       });
-      DeleteFiles(GetFiles(_Path.Combine(ExtensionAssembliesDirectory, "*.deps.json")));
-      DeleteFiles(GetFiles(_Path.Combine(ExtensionAssembliesDirectory, "*.xml")));
+      DotNetBuild(MeteorWorkspaceProjectPath, new DotNetBuildSettings {
+         MSBuildSettings = new DotNetMSBuildSettings { AssemblyVersion = version },
+         Configuration = configuration,
+      });
+      DeleteFiles(GetFiles(_Path.Combine(ExtensionBinariesDirectory, "**", "*.xml")));
+      DeleteDirectories(GetDirectories(_Path.Combine(ExtensionBinariesDirectory, "**", "runtimes", "android-*")), new DeleteDirectorySettings { 
+         Recursive = true 
+      });
    });
 
 Task("build-plugin")

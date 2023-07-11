@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 using DotNet.Meteor.Processes;
 
 namespace DotNet.Meteor.Shared {
-    public static class PathUtils {
+    public static class CommonUtilities {
         public static string DotNetRootLocation() {
             string dotnet = Environment.GetEnvironmentVariable("DOTNET_ROOT");
 
@@ -30,7 +30,7 @@ namespace DotNet.Meteor.Shared {
                 throw new FileNotFoundException("Could not find dotnet tool");
 
             var matches = Regex.Matches(result.StandardOutput.Last(), @"\[(.*?)\]");
-            var sdkLocation = matches.FirstOrDefault()?.Groups[1].Value;
+            var sdkLocation = matches.Count != 0 ? matches[0].Groups[1].Value : null;
 
             if (string.IsNullOrEmpty(sdkLocation) || !Directory.Exists(sdkLocation))
                 throw new DirectoryNotFoundException("Could not find dotnet sdk");
