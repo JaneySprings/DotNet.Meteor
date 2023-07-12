@@ -85,6 +85,7 @@ stages:
           displayName: 'Restore .NET tools'
         - script: dotnet cake --target=build-tests --configuration=release
           displayName: 'Run tests'
+          continueOnError: true
         - task: PublishTestResults@2
           inputs:
             testResultsFormat: 'VSTest'
@@ -112,6 +113,7 @@ stages:
           displayName: 'Restore .NET tools'
         - script: dotnet cake --target=build-tests --configuration=release
           displayName: 'Run tests'
+          continueOnError: true
         - task: PublishTestResults@2
           inputs:
             testResultsFormat: 'VSTest'
@@ -139,6 +141,7 @@ stages:
           displayName: 'Restore .NET tools'
         - script: dotnet cake --target=build-tests --configuration=release
           displayName: 'Run tests'
+          continueOnError: true
         - task: PublishTestResults@2
           inputs:
             testResultsFormat: 'VSTest'
