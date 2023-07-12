@@ -11,6 +11,7 @@ public static class WindowsTool {
             IsRunning = true,
             IsMobile = false,
             Name = Environment.MachineName,
+            RuntimeId = Runtimes.WindowsX64,
             OSVersion = osVersion,
             Detail = Details.Windows,
             Platform = Platforms.Windows

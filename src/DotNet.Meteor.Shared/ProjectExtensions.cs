@@ -18,45 +18,6 @@ namespace DotNet.Meteor.Shared {
             return propertyValue;
         }
 
-        public static string GetOutputAssembly(this Project project, string configuration, string framework, DeviceData device) {
-            var rootDirectory = Path.GetDirectoryName(project.Path)!;
-            var outputDirectory = Path.Combine(rootDirectory, "bin", configuration, framework);
-
-            if (!string.IsNullOrEmpty(device.RuntimeId))
-                outputDirectory = Path.Combine(outputDirectory, device.RuntimeId);
-
-            if (!Directory.Exists(outputDirectory))
-                throw new DirectoryNotFoundException($"Could not find output directory {outputDirectory}");
-
-            if (device.IsAndroid) {
-                var files = Directory.GetFiles(outputDirectory, "*-Signed.apk", SearchOption.TopDirectoryOnly);
-                if (!files.Any())
-                    throw new FileNotFoundException($"Could not find \"*-Signed.apk\" in {outputDirectory}");
-                if (files.Length > 1)
-                    throw new ArgumentException($"Finded more than one \"*-Signed.apk\" in {outputDirectory}");
-                return files.FirstOrDefault();
-            }
-
-            if (device.IsWindows) {
-                var executableName = project.EvaluateProperty("AssemblyName", project.Name);
-                var files = Directory.GetFiles(outputDirectory, $"{executableName}.exe", SearchOption.AllDirectories);
-                if (!files.Any())
-                    throw new FileNotFoundException($"Could not find \"{executableName}.exe\" in {outputDirectory}");
-                return files.FirstOrDefault();
-            }
-
-            if (device.IsIPhone || device.IsMacCatalyst) {
-                var bundle = Directory.GetDirectories(outputDirectory, "*.app", SearchOption.TopDirectoryOnly);
-                if (!bundle.Any())
-                    throw new DirectoryNotFoundException($"Could not find \"*.app\" in {outputDirectory}");
-                if (bundle.Length > 1)
-                    throw new ArgumentException($"Finded more than one \"*.app\" in {outputDirectory}");
-                return bundle.FirstOrDefault();
-            }
-
-            return null;
-        }
-
         private static MatchCollection GetPropertyMatches(this Project project, string projectPath, string propertyName, bool isEndPoint = false) {
             if (!File.Exists(projectPath))
                 return null;
@@ -117,6 +78,49 @@ namespace DotNet.Meteor.Shared {
                 resultSequence.Append(propertyValue);
             }
             return resultSequence.ToString();
+        }
+
+        public static string FindOutputApplication(this Project project, string configuration, string framework, DeviceData device, Func<string, string> errorHandler = null) {
+            var rootDirectory = Path.GetDirectoryName(project.Path)!;
+            var baseOutputDirectory = Path.Combine(rootDirectory, "bin", configuration, framework);
+
+            if (!string.IsNullOrEmpty(device.RuntimeId)) 
+                baseOutputDirectory = Path.Combine(baseOutputDirectory, device.RuntimeId);
+
+            var result = FindOutputApplicationWithDirectoryPath(baseOutputDirectory, project, device);
+            if (string.IsNullOrEmpty(result))
+                return errorHandler?.Invoke($"Could not find output application in {baseOutputDirectory}");
+
+            return result;
+        }
+
+        private static string FindOutputApplicationWithDirectoryPath(string directoryPath, Project project, DeviceData device, Func<string, string> errorHandler = null) {
+            if (!Directory.Exists(directoryPath))
+                return errorHandler?.Invoke($"Could not find output directory {directoryPath}");
+
+            if (device.IsAndroid) {
+                var files = Directory.GetFiles(directoryPath, "*-Signed.apk", SearchOption.TopDirectoryOnly);
+                if (files.Length > 1)
+                    return errorHandler?.Invoke($"Finded more than one \"*-Signed.apk\" in {directoryPath}");
+                return files.FirstOrDefault();
+            }
+
+            if (device.IsWindows) {
+                var executableName = project.EvaluateProperty("AssemblyName", project.Name);
+                var files = Directory.GetFiles(directoryPath, $"{executableName}.exe", SearchOption.TopDirectoryOnly);
+                if (files.Length > 1)
+                    return errorHandler?.Invoke($"Finded more than one \"{executableName}.exe\" in {directoryPath}");
+                return files.FirstOrDefault();
+            }
+
+            if (device.IsIPhone || device.IsMacCatalyst) {
+                var bundle = Directory.GetDirectories(directoryPath, "*.app", SearchOption.TopDirectoryOnly);
+                if (bundle.Length > 1)
+                    return errorHandler?.Invoke($"Finded more than one \"*.app\" in {directoryPath}");
+                return bundle.FirstOrDefault();
+            }
+
+            return null;
         }
 
         private static string GetDirectoryPropsPath(string workspacePath) {
