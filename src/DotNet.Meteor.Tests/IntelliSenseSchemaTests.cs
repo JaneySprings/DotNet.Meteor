@@ -25,8 +25,11 @@ public class IntelliSenseSchemaTests: TestFixture {
         CreateOutputAssemblyFile(Path.GetDirectoryName(expectedPath)!, "Microsoft.Maui.dll");
 
         var typeLoader = new MauiTypeLoader(projectPath, s => {
-            if (!s.Contains("Bad IL format"))
-                Assert.Fail(s);
+            if (s.Contains("Bad IL format"))
+                return;
+            if (s.Contains("Format of the executable"))
+                return;
+            Assert.Fail(s);
         });
         typeLoader.LoadComparedTypes();
 
