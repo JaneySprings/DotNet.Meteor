@@ -76,7 +76,7 @@ public class WorkspaceBundleLocatorTests: TestFixture {
         var projectPath = CreateMockProject(SimpleProject);
         var project = WorkspaceAnalyzer.AnalyzeProject(projectPath);
 
-        Assert.Throws<DirectoryNotFoundException>(() => project.FindOutputApplication(configuration, framework, device));
+        Assert.Throws<ArgumentException>(() => project.FindOutputApplication(configuration, framework, device));
         DeleteMockData();
     }
 }
