@@ -42,14 +42,10 @@ stages:
           displayName: 'Restore Node.js modules'
         - script: dotnet tool restore
           displayName: 'Restore .NET tools'
-        - script: dotnet workload install maui-tizen
-          displayName: 'Restore .NET MAUI'
         - script: npm install -g vsce
           displayName: 'Install VSCode builder'
         - script: dotnet cake --target=vsix --release-version=$(version) --configuration=release
           displayName: 'Build VSIX'
-        - script: dotnet cake --target=plugin --release-version=$(version) --configuration=debug
-          displayName: 'Build Plugin'
         - publish: '$(System.DefaultWorkingDirectory)/artifacts'
           displayName: 'Publish Artifacts'
           artifact: artifacts
