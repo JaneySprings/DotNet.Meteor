@@ -37,6 +37,7 @@ stages:
         - task: UseDotNet@2
           inputs:
             version: '8.x'
+            includePreviewVersions: true
         - script: npm install
           displayName: 'Restore Node.js modules'
         - script: dotnet tool restore
@@ -79,6 +80,7 @@ stages:
         - task: UseDotNet@2
           inputs:
             version: '8.x'
+            includePreviewVersions: true
         - script: dotnet tool restore
           displayName: 'Restore .NET tools'
         - script: dotnet cake --target=build-tests --configuration=release
@@ -105,6 +107,7 @@ stages:
         - task: UseDotNet@2
           inputs:
             version: '8.x'
+            includePreviewVersions: true
         - script: dotnet tool restore
           displayName: 'Restore .NET tools'
         - script: dotnet cake --target=build-tests --configuration=release
@@ -131,6 +134,7 @@ stages:
         - task: UseDotNet@2
           inputs:
             version: '8.x'
+            includePreviewVersions: true
         - script: dotnet tool restore
           displayName: 'Restore .NET tools'
         - script: dotnet cake --target=build-tests --configuration=release
