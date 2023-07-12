@@ -65,15 +65,14 @@ class ProcessRunner {
         return JSON.parse(result);
     }
     public static async runAsync<TModel>(builder: ProcessArgumentBuilder): Promise<TModel> {
-        return new Promise<TModel>((resolve, reject) => {
+        return new Promise<TModel>(resolve => {
             exec(builder.build(), (error, stdout, stderr) => {
                 if (error) {
-                    console.error(error);
-                    reject(error);
-                } else {
-                    const item: TModel = JSON.parse(stdout.toString());
-                    resolve(item);
+                    console.error(error.message);
+                    throw new Error(stderr);
                 }
+
+                resolve(JSON.parse(stdout.toString()));
             })
         });
     }
