@@ -42,7 +42,7 @@ stages:
           displayName: 'Restore Node.js modules'
         - script: dotnet tool restore
           displayName: 'Restore .NET tools'
-        - script: dotnet workload install maui
+        - script: dotnet workload install maui-tizen
           displayName: 'Restore .NET MAUI'
         - script: npm install -g vsce
           displayName: 'Install VSCode builder'
