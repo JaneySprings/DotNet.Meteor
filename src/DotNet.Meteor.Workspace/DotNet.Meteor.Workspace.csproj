@@ -3,6 +3,7 @@
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
+		<OutputPath>$(MSBuildThisFileDirectory)..\..\extension\bin</OutputPath>
 	</PropertyGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\DotNet.Meteor.HotReload\DotNet.Meteor.HotReload.csproj" />

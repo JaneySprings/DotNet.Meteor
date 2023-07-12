@@ -46,6 +46,8 @@ stages:
           displayName: 'Install VSCode builder'
         - script: dotnet cake --target=vsix --release-version=$(version) --configuration=release
           displayName: 'Build VSIX'
+        - script: dotnet cake --target=plugin --release-version=$(version) --configuration=debug
+          displayName: 'Build Plugin'
         - publish: '$(System.DefaultWorkingDirectory)/artifacts'
           displayName: 'Publish Artifacts'
           artifact: artifacts
@@ -55,7 +57,7 @@ stages:
             repositoryName: '$(Build.Repository.Name)'
             action: 'create'
             tagSource: 'gitTag'
-            assets: 'artifacts/DotNet.Meteor.*'
+            assets: 'artifacts/DotNet*'
 
 
 
@@ -83,7 +85,7 @@ stages:
             includePreviewVersions: true
         - script: dotnet tool restore
           displayName: 'Restore .NET tools'
-        - script: dotnet cake --target=build-tests --configuration=release
+        - script: dotnet cake --target=test --configuration=release
           displayName: 'Run tests'
           continueOnError: true
         - task: PublishTestResults@2
@@ -111,7 +113,7 @@ stages:
             includePreviewVersions: true
         - script: dotnet tool restore
           displayName: 'Restore .NET tools'
-        - script: dotnet cake --target=build-tests --configuration=release
+        - script: dotnet cake --target=test --configuration=release
           displayName: 'Run tests'
           continueOnError: true
         - task: PublishTestResults@2
@@ -139,7 +141,7 @@ stages:
             includePreviewVersions: true
         - script: dotnet tool restore
           displayName: 'Restore .NET tools'
-        - script: dotnet cake --target=build-tests --configuration=release
+        - script: dotnet cake --target=test --configuration=release
           displayName: 'Run tests'
           continueOnError: true
         - task: PublishTestResults@2
