@@ -1,5 +1,6 @@
 using Xunit;
 using DotNet.Meteor.Shared;
+using DotNet.Meteor.Workspace;
 
 namespace DotNet.Meteor.Tests;
 
