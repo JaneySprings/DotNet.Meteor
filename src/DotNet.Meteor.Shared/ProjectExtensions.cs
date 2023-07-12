@@ -94,6 +94,10 @@ namespace DotNet.Meteor.Shared {
             return result;
         }
 
+        public static string FindOutputApplication(this Project project, string configuration, string framework, DeviceData device) {
+            return FindOutputApplication(project, configuration, framework, device, message => throw new ArgumentException(message));
+        }
+
         private static string FindOutputApplicationWithDirectoryPath(string directoryPath, Project project, DeviceData device, Func<string, string> errorHandler = null) {
             if (!Directory.Exists(directoryPath))
                 return errorHandler?.Invoke($"Could not find output directory {directoryPath}");
@@ -107,9 +111,9 @@ namespace DotNet.Meteor.Shared {
 
             if (device.IsWindows) {
                 var executableName = project.EvaluateProperty("AssemblyName", project.Name);
-                var files = Directory.GetFiles(directoryPath, $"{executableName}.exe", SearchOption.TopDirectoryOnly);
+                var files = Directory.GetFiles(directoryPath, $"{executableName}.exe", SearchOption.AllDirectories);
                 if (files.Length > 1)
-                    return errorHandler?.Invoke($"Finded more than one \"{executableName}.exe\" in {directoryPath}");
+                    return errorHandler?.Invoke($"Finded more than one \"{executableName}.exe\" in {directoryPath} and subdirectories");
                 return files.FirstOrDefault();
             }
 
