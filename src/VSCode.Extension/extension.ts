@@ -13,11 +13,13 @@ export function activate(context: vscode.ExtensionContext): PublicExports | unde
 	if (vscode.workspace.workspaceFolders === undefined) 
 		return undefined;
 
+	if (!CommandController.activate(context))
+		return undefined;
+	
 	const exports = new PublicExports();
-
+	
 	UIController.activate(context);
 	StateController.activate(context);
-	CommandController.activate(context);
 	XamlController.activate(context);
 	UIController.update();
 
