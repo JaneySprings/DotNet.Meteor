@@ -1,16 +1,26 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudio.Shared.VSCodeDebugProtocol" Version="17.2.60629.1" />
-    <ProjectReference Include="..\Mono.Debugger\Mono.Debugger.Soft\Mono.Debugger.Soft.csproj" />
-    <ProjectReference Include="..\Mono.Debugger\Mono.Debugging.Soft\Mono.Debugging.Soft.csproj" />
-    <ProjectReference Include="..\DotNet.Meteor.Shared\DotNet.Meteor.Shared.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Mono.Cecil" Version="0.11.4" />
-    <PackageReference Include="Mono.Options" Version="6.12.0.148" />
-    <PackageReference Include="NLog" Version="5.1.1" />
-  </ItemGroup>
+	<PropertyGroup>
+		<TargetFramework>net472</TargetFramework>
+		<OutputType>Exe</OutputType>
+		<LangVersion>latest</LangVersion>
+		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+		<OutputPath>$(MSBuildThisFileDirectory)..\..\extension\bin</OutputPath>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.VisualStudio.Shared.VSCodeDebugProtocol" Version="17.2.60629.1" />
+		<ProjectReference Include="..\Mono.Debugger\Mono.Debugger.Soft\Mono.Debugger.Soft.csproj" />
+		<ProjectReference Include="..\Mono.Debugger\Mono.Debugging.Soft\Mono.Debugging.Soft.csproj" />
+		<ProjectReference Include="..\DotNet.Meteor.Shared\DotNet.Meteor.Shared.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Reference Include="System.Net.Http" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Mono.Cecil" Version="0.11.4" />
+		<PackageReference Include="Mono.Options" Version="6.12.0.148" />
+		<PackageReference Include="NLog" Version="5.1.1" />
+	</ItemGroup>
 </Project>

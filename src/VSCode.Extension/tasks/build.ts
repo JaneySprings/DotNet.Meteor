@@ -1,6 +1,6 @@
 import { ProcessArgumentBuilder } from '../bridge';
 import { Configuration } from '../configuration';
-import { CommandInterface } from '../bridge';
+import { CommandController } from '../bridge';
 import * as res from '../resources';
 import * as vscode from 'vscode';
 
@@ -11,7 +11,7 @@ interface DotNetTaskDefinition extends vscode.TaskDefinition {
 }
 
 export class DotNetTaskProvider implements vscode.TaskProvider {
-    private androidSdkDirectory: string = CommandInterface.androidSdk();
+    private androidSdkDirectory: string = CommandController.androidSdk();
 
     resolveTask(task: vscode.Task, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Task> { 
         const resolvedTask = this.getTask(task.definition as DotNetTaskDefinition);

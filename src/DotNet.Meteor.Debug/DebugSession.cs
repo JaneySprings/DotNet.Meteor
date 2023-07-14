@@ -85,17 +85,15 @@ public partial class DebugSession : Session {
 #region request: Launch
     protected override LaunchResponse HandleLaunchRequest(LaunchArguments arguments) {
         var configuration = new LaunchConfiguration(arguments.ConfigurationProperties);
-        configuration.TryLoad(ex => throw new ProtocolException($"Failed to load launch configuration. {ex.Message}"));
         this.sourceDownloader.Configure(configuration.Project.Path, s => GetLogger().LogMessage(s));
-        var port = arguments.ConfigurationProperties["debugging_port"].ToObject<int>()!;
 
-        if (port == 0)
-            port = Extensions.FindFreePort();
-        if (port < 1)
-            throw new ProtocolException($"Invalid port '{port}'");
+        if (configuration.DebugPort == 0)
+            configuration.DebugPort = Extensions.FindFreePort();
+        if (configuration.DebugPort < 1)
+            throw new ProtocolException($"Invalid port '{configuration.DebugPort}'");
 
-        LaunchApplication(configuration, port, this.processes);
-        Connect(configuration, port);
+        LaunchApplication(configuration, configuration.DebugPort, this.processes);
+        Connect(configuration, configuration.DebugPort);
         return new LaunchResponse();
     }
 #endregion request: Launch

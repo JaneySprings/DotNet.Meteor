@@ -1,5 +1,5 @@
 using Xunit;
-using DotNet.Meteor.Shared;
+using DotNet.Meteor.Workspace;
 
 namespace DotNet.Meteor.Tests;
 
@@ -18,6 +18,7 @@ public class WorkspaceAnalysisTests: TestFixture {
         ");
         var actual = WorkspaceAnalyzer.AnalyzeProject(projectPath);
 
+        Assert.NotNull(actual);
         Assert.Equal(ProjectName, actual.Name);
         Assert.Equal(projectPath, actual.Path);
         Assert.Equal("net7.0-android", string.Join(',', actual.Frameworks));
@@ -39,6 +40,7 @@ public class WorkspaceAnalysisTests: TestFixture {
         </Project>
         ");
         var actual = WorkspaceAnalyzer.AnalyzeProject(projectPath);
+        Assert.NotNull(actual);
         Assertion.CollectionsAreEqual(actual.Frameworks, new List<string>() {
             "net7.0-android",
             "net6.0-ios",
@@ -61,6 +63,7 @@ public class WorkspaceAnalysisTests: TestFixture {
         </Project>
         ");
         var actual = WorkspaceAnalyzer.AnalyzeProject(simpleProjectPath);
+        Assert.NotNull(actual);
         Assertion.CollectionsAreEqual(actual.Frameworks, new List<string>() {
             "net7.0-android",
             "net7.0-maccatalyst",
@@ -85,6 +88,7 @@ public class WorkspaceAnalysisTests: TestFixture {
         </Project>
         ");
         var actual = WorkspaceAnalyzer.AnalyzeProject(simpleProjectPath);
+        Assert.NotNull(actual);
         Assertion.CollectionsAreEqual(actual.Frameworks, new List<string>() {
             "net7.0-maccatalyst",
             "net7.0-windows10.0.19041.0",
@@ -117,6 +121,7 @@ public class WorkspaceAnalysisTests: TestFixture {
         </Project>
         ");
         var actual = WorkspaceAnalyzer.AnalyzeProject(simpleProjectPath);
+        Assert.NotNull(actual);
         Assertion.CollectionsAreEqual(actual.Frameworks, new List<string>() {
             "net7.0-maccatalyst"
         });
@@ -142,6 +147,7 @@ public class WorkspaceAnalysisTests: TestFixture {
         </Project>
         ");
         var actual = WorkspaceAnalyzer.AnalyzeProject(simpleProjectPath);
+        Assert.NotNull(actual);
         Assertion.CollectionsAreEqual(actual.Frameworks, new List<string>() {
             "net7.0-ios"
         });
@@ -166,6 +172,7 @@ public class WorkspaceAnalysisTests: TestFixture {
         </Project>
         ");
         var actual = WorkspaceAnalyzer.AnalyzeProject(simpleProjectPath);
+        Assert.NotNull(actual);
         Assertion.CollectionsAreEqual(actual.Frameworks, new List<string>() {
             "net7.0-maccatalyst"
         });

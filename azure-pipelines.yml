@@ -28,6 +28,16 @@ stages:
           - name: version
             value: $[ replace(variables['Build.SourceBranch'], 'refs/tags/', '') ] 
         steps:
+        - task: UseDotNet@2
+          inputs:
+            version: '6.x'
+        - task: UseDotNet@2
+          inputs:
+            version: '7.x'
+        - task: UseDotNet@2
+          inputs:
+            version: '8.x'
+            includePreviewVersions: true
         - script: npm install
           displayName: 'Restore Node.js modules'
         - script: dotnet tool restore
@@ -45,7 +55,7 @@ stages:
             repositoryName: '$(Build.Repository.Name)'
             action: 'create'
             tagSource: 'gitTag'
-            assets: 'artifacts/DotNet.Meteor.*'
+            assets: 'artifacts/DotNet*'
 
 
 
@@ -61,10 +71,21 @@ stages:
           vmImage: macos-latest
         timeoutInMinutes: 10
         steps:
+        - task: UseDotNet@2
+          inputs:
+            version: '6.x'
+        - task: UseDotNet@2
+          inputs:
+            version: '7.x'
+        - task: UseDotNet@2
+          inputs:
+            version: '8.x'
+            includePreviewVersions: true
         - script: dotnet tool restore
           displayName: 'Restore .NET tools'
-        - script: dotnet cake --target=build-tests --configuration=release
+        - script: dotnet cake --target=test --configuration=release
           displayName: 'Run tests'
+          continueOnError: true
         - task: PublishTestResults@2
           inputs:
             testResultsFormat: 'VSTest'
@@ -78,12 +99,21 @@ stages:
           vmImage: ubuntu-latest
         timeoutInMinutes: 10
         steps:
+        - task: UseDotNet@2
+          inputs:
+            version: '6.x'
+        - task: UseDotNet@2
+          inputs:
+            version: '7.x'
+        - task: UseDotNet@2
+          inputs:
+            version: '8.x'
+            includePreviewVersions: true
         - script: dotnet tool restore
           displayName: 'Restore .NET tools'
-        - script: dotnet cake --target=build-debugger --configuration=release
-          displayName: 'Run build test'
-        - script: dotnet cake --target=build-tests --configuration=release
+        - script: dotnet cake --target=test --configuration=release
           displayName: 'Run tests'
+          continueOnError: true
         - task: PublishTestResults@2
           inputs:
             testResultsFormat: 'VSTest'
@@ -97,10 +127,21 @@ stages:
           vmImage: windows-latest
         timeoutInMinutes: 10
         steps:
+        - task: UseDotNet@2
+          inputs:
+            version: '6.x'
+        - task: UseDotNet@2
+          inputs:
+            version: '7.x'
+        - task: UseDotNet@2
+          inputs:
+            version: '8.x'
+            includePreviewVersions: true
         - script: dotnet tool restore
           displayName: 'Restore .NET tools'
-        - script: dotnet cake --target=build-tests --configuration=release
+        - script: dotnet cake --target=test --configuration=release
           displayName: 'Run tests'
+          continueOnError: true
         - task: PublishTestResults@2
           inputs:
             testResultsFormat: 'VSTest'

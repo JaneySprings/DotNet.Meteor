@@ -1,7 +1,7 @@
 import { XamlCompletionItemProvider } from './completions';
 import { Configuration } from "../configuration";
 import { XamlLinterProvider } from './linter';
-import { CommandInterface } from "../bridge";
+import { CommandController } from "../bridge";
 import * as res from '../resources';
 import * as vscode from 'vscode';
 import * as path from "path";
@@ -22,7 +22,7 @@ export class XamlController {
         ));
         context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(ev => {
             if (ev.fileName.endsWith('.xaml') && vscode.debug.activeDebugSession?.configuration.type === res.debuggerMeteorId)
-                CommandInterface.xamlReload(Configuration.getReloadHostPort(), ev.fileName);
+                CommandController.xamlReload(Configuration.getReloadHostPort(), ev.fileName);
         }));
 
     }
@@ -59,7 +59,7 @@ export class XamlController {
         if (projectPath === undefined)
             return;
 
-        await CommandInterface.xamlSchema(projectPath);
+        await CommandController.xamlSchema(projectPath);
 
         const generatedPath = path.join(path.dirname(projectPath), '.meteor', 'generated');
         if (fs.existsSync(generatedPath) === false)

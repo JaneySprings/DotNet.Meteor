@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using DotNet.Meteor.Shared;
+using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Newtonsoft.Json.Linq;
 
 namespace DotNet.Meteor.Debug;
@@ -13,8 +14,9 @@ public class LaunchConfiguration {
     public DeviceData Device { get; }
     public Project Project { get; }
     public string Target { get; }
-    public int ReloadHostPort { get; }
     public bool UninstallApp { get; }
+    public int ReloadHostPort { get; }
+    public int DebugPort { get; set; }
 
     public bool IsDebug => Target.Equals("debug", StringComparison.OrdinalIgnoreCase);
 
@@ -24,29 +26,26 @@ public class LaunchConfiguration {
         Target = configurationProperties["selected_target"].ToObject<string>();
         ReloadHostPort = configurationProperties["reload_host"].ToObject<int>();
         UninstallApp = configurationProperties["uninstall_app"].ToObject<bool>();
-    }
-
-    public void TryLoad(Action<Exception> callback) {
-        try {
-            Framework = Project.Frameworks.First(it => it.Contains(Device.Platform, StringComparison.OrdinalIgnoreCase));
-            OutputAssembly = Project.GetOutputAssembly(Target, Framework, Device);
-        } catch (Exception ex) {
-            callback(ex);
-        }
+        DebugPort = configurationProperties["debugging_port"].ToObject<int>();
+        
+        Framework = Project.Frameworks.First(it => it.ContainsInsensitive(Device.Platform));
+        OutputAssembly = Project.FindOutputApplication(Target, Framework, Device, message => {
+            throw new ProtocolException($"Failed to load launch configuration. {message}");
+        });
     }
 
     public string GetApplicationId() {
-        if (Device.IsIPhone || Device.IsMacCatalyst) {
-            var workingDirectory = Path.GetDirectoryName(Project.Path);
-            var files = Directory.GetFiles(workingDirectory, "Info.plist", SearchOption.AllDirectories)
-                .Where(it => !it.Contains(Path.GetFileName(OutputAssembly)));
+        // if (Device.IsIPhone || Device.IsMacCatalyst) {
+        //     var workingDirectory = Path.GetDirectoryName(Project.Path);
+        //     var files = Directory.GetFiles(workingDirectory, "Info.plist", SearchOption.AllDirectories)
+        //         .Where(it => !it.Contains(Path.GetFileName(OutputAssembly)));
 
-            if (!files.Any())
-                return null;
+        //     if (!files.Any())
+        //         return null;
 
-            var plist = new Apple.PropertyExtractor(files.First());
-            return plist.Extract("CFBundleIdentifier") ?? Project.EvaluateProperty("ApplicationId");
-        }
+        //     var plist = new PropertyExtractor(files.First());
+        //     return plist.Extract("CFBundleIdentifier") ?? Project.EvaluateProperty("ApplicationId");
+        // }
 
         if (!Device.IsAndroid)
             return null;

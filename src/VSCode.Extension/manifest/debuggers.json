@@ -11,11 +11,13 @@
           "xaml",
           "xml"
         ],
-        "program": "./extension/bin/DotNet.Meteor.CommandLine.dll",
-        "args": [
-          "--start-session"
-        ],
-        "runtime": "dotnet",
+        "program": "./extension/bin/net472/DotNet.Meteor.Debug.exe",
+        "osx": {
+          "runtime": "mono"
+        },
+        "linux": {
+          "runtime": "mono"
+        },
         "initialConfigurations": [
           {
             "name": "%debugger.meteor.title%",

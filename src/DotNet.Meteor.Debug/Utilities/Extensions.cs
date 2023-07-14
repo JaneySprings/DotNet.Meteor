@@ -1,9 +1,5 @@
 using System.Net;
 using System.Net.Sockets;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Mono.Debugging.Client;
-using Mono.Debugging.Soft;
 
 namespace DotNet.Meteor.Debug.Utilities;
 

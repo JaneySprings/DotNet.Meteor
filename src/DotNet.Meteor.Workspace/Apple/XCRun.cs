@@ -1,14 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Text.RegularExpressions;
 using DotNet.Meteor.Processes;
 using DotNet.Meteor.Shared;
 
-namespace DotNet.Meteor.Apple {
+namespace DotNet.Meteor.Workspace.Apple {
     public static class XCRun {
         public static List<DeviceData> Simulators() {
-            FileInfo tool = PathUtils.XCRunTool();
+            FileInfo tool = AppleUtilities.XCRunTool();
             ProcessResult result = new ProcessRunner(tool, new ProcessArgumentBuilder()
                 .Append("simctl")
                 .Append("list"))
@@ -50,7 +47,7 @@ namespace DotNet.Meteor.Apple {
         }
 
         public static List<DeviceData> PhysicalDevices() {
-            FileInfo tool = PathUtils.XCRunTool();
+            FileInfo tool = AppleUtilities.XCRunTool();
             ProcessResult result = new ProcessRunner(tool, new ProcessArgumentBuilder()
                 .Append("xctrace")
                 .Append("list")
@@ -86,8 +83,8 @@ namespace DotNet.Meteor.Apple {
             return devices;
         }
 
-        public static void ShutdownAll(IProcessLogger logger = null) {
-            FileInfo tool = PathUtils.XCRunTool();
+        public static void ShutdownAll(IProcessLogger? logger = null) {
+            FileInfo tool = AppleUtilities.XCRunTool();
             ProcessResult result = new ProcessRunner(tool, new ProcessArgumentBuilder()
                 .Append("simctl")
                 .Append("shutdown")
@@ -100,8 +97,8 @@ namespace DotNet.Meteor.Apple {
                 throw new Exception(string.Join(Environment.NewLine, result.StandardError));
         }
 
-        public static void LaunchSimulator(string serial, IProcessLogger logger = null) {
-            var tool = PathUtils.OpenTool();
+        public static void LaunchSimulator(string serial, IProcessLogger? logger = null) {
+            var tool = AppleUtilities.OpenTool();
             ProcessResult result = new ProcessRunner(tool, new ProcessArgumentBuilder()
                 .Append("-a", "Simulator")
                 .Append("--args", "-CurrentDeviceUDID", serial), logger)
