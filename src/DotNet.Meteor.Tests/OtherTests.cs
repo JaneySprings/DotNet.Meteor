@@ -7,7 +7,7 @@ public class OtherTests: TestFixture {
 
     [Fact]
     public void AndroidSdkDirectoryTests() {
-        var sdkLocation = Android.PathUtils.SdkLocation();
+        var sdkLocation = AndroidUtilities.SdkLocation();
         Assert.NotNull(sdkLocation);
         Assert.True(Directory.Exists(sdkLocation));
     }

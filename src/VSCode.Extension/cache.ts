@@ -1,14 +1,14 @@
 import { Configuration } from './configuration';
 import { UIController } from './controller';
+import { ExtensionContext } from 'vscode';
 import * as models from "./models"
-import * as vscode from 'vscode';
 
 
 export class StateController {
-    private static context: vscode.ExtensionContext | undefined;
+    private static context: ExtensionContext | undefined;
 
 
-    public static activate(context: vscode.ExtensionContext) {
+    public static activate(context: ExtensionContext) {
         StateController.context = context;
     }
     public static deactivate() {

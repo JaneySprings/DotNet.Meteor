@@ -1,6 +1,6 @@
 import { XamlController } from './xaml/service';
 import { Configuration } from './configuration';
-import { CommandInterface } from "./bridge";
+import { CommandController } from "./bridge";
 import { PublicExports } from './exports';
 import { StateController } from './cache';
 import * as res from './resources';
@@ -34,8 +34,8 @@ export class UIController {
 
     public static async update() {
         const folders = vscode.workspace.workspaceFolders!.map(it => it.uri.fsPath);
-        UIController.projects = await CommandInterface.getProjects(folders);
-        UIController.devices = await CommandInterface.getDevices();
+        UIController.projects = await CommandController.getProjects(folders);
+        UIController.devices = await CommandController.getDevices();
 
         if (UIController.projects.length === 0 || UIController.devices.length === 0) {
             UIController._projectStatusItem.hide();
@@ -114,7 +114,7 @@ export class UIController {
             picker.hide();
         });
 
-        UIController.devices = await CommandInterface.getDevices();
+        UIController.devices = await CommandController.getDevices();
 
         const items: vscode.QuickPickItem[] = [];
         for (let i of UIController.devices.keys()) {

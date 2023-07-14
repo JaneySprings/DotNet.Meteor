@@ -6,14 +6,18 @@ import { PublicExports } from './exports';
 import { StateController } from './cache';
 import * as res from './resources';
 import * as vscode from 'vscode';
+import { CommandController } from './bridge';
 
 
 export function activate(context: vscode.ExtensionContext): PublicExports | undefined {
 	if (vscode.workspace.workspaceFolders === undefined) 
 		return undefined;
 
+	if (!CommandController.activate(context))
+		return undefined;
+	
 	const exports = new PublicExports();
-
+	
 	UIController.activate(context);
 	StateController.activate(context);
 	XamlController.activate(context);

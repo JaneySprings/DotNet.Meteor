@@ -7,29 +7,20 @@ public string RootDirectory => MakeAbsolute(Directory("./")).ToString();
 
 public string ArtifactsDirectory => _Path.Combine(RootDirectory, "artifacts");
 public string ExtensionStagingDirectory => _Path.Combine(RootDirectory, "extension");
-public string ExtensionAssembliesDirectory => _Path.Combine(ExtensionStagingDirectory, "bin");
+public string ExtensionBinariesDirectory => _Path.Combine(ExtensionStagingDirectory, "bin");
 
-public string MeteorMainProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.CommandLine", "DotNet.Meteor.CommandLine.csproj");
+public string MeteorWorkspaceProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Workspace", "DotNet.Meteor.Workspace.csproj");
+public string MeteorDebugProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Debug", "DotNet.Meteor.Debug.csproj");
 public string MeteorTestsProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Tests", "DotNet.Meteor.Tests.csproj");
 public string MeteorPluginProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.HotReload.Plugin", "DotNet.Meteor.HotReload.Plugin.csproj");
 
 var target = Argument("target", "vsix");
-var version = Argument("release-version", "");
+var version = Argument("release-version", "23.2.0");
 var configuration = Argument("configuration", "debug");
 
 ///////////////////////////////////////////////////////////////////////////////
 // COMMON
 ///////////////////////////////////////////////////////////////////////////////
-
-Setup(context => {
-   if (string.IsNullOrEmpty(version)) {
-      var major = DateTime.Now.ToString("yy");
-      var minor = DateTime.Now.Month < 7 ? "1" : "2";
-      var build = DateTime.Now.DayOfYear;
-      version = $"{major}.{minor}.{major}{build:000}";
-   }
-   Information("Building DotNet.Meteor {0}-{1}", version, configuration);
-});
 
 Task("clean").Does(() => {
    CleanDirectory(ArtifactsDirectory);
@@ -42,20 +33,25 @@ Task("clean").Does(() => {
 // DOTNET
 ///////////////////////////////////////////////////////////////////////////////
 
-Task("build-debugger")
+Task("debugger")
    .Does(() => {
-      DotNetBuild(MeteorMainProjectPath, new DotNetBuildSettings {
+      DotNetBuild(MeteorDebugProjectPath, new DotNetBuildSettings {
          MSBuildSettings = new DotNetMSBuildSettings { AssemblyVersion = version },
-         OutputDirectory = ExtensionAssembliesDirectory,
          Configuration = configuration,
       });
-      DeleteFiles(GetFiles(_Path.Combine(ExtensionAssembliesDirectory, "*.deps.json")));
-      DeleteFiles(GetFiles(_Path.Combine(ExtensionAssembliesDirectory, "*.xml")));
+      DotNetBuild(MeteorWorkspaceProjectPath, new DotNetBuildSettings {
+         MSBuildSettings = new DotNetMSBuildSettings { AssemblyVersion = version },
+         Configuration = configuration,
+      });
+      DeleteFiles(GetFiles(_Path.Combine(ExtensionBinariesDirectory, "**", "*.xml")));
+      DeleteDirectories(GetDirectories(
+         _Path.Combine(ExtensionBinariesDirectory, "**", "runtimes", "android-*")), 
+         new DeleteDirectorySettings { Recursive = true }
+      );
    });
 
-Task("build-plugin")
+Task("plugin")
    .Does(() => DotNetPack(MeteorPluginProjectPath, new DotNetPackSettings {
-      OutputDirectory = ArtifactsDirectory,
       Configuration = configuration,
       MSBuildSettings = new DotNetMSBuildSettings { 
          AssemblyVersion = version, 
@@ -63,7 +59,7 @@ Task("build-plugin")
       },
    }));
 
-Task("build-tests")
+Task("test")
    .Does(() => DotNetTest(MeteorTestsProjectPath, new DotNetTestSettings {  
       Configuration = configuration,
       Verbosity = DotNetVerbosity.Quiet,
@@ -78,7 +74,7 @@ Task("build-tests")
 
 Task("vsix")
    .IsDependentOn("clean")
-   .IsDependentOn("build-debugger")
+   .IsDependentOn("debugger")
    .DoesForEach<FilePath>(GetFiles(_Path.Combine(RootDirectory, "*.json")), file => {
       var regex = @"^\s\s(""version"":\s+)("".+"")(,)";
       var options = System.Text.RegularExpressions.RegexOptions.Multiline;

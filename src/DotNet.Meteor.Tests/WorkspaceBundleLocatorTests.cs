@@ -1,5 +1,6 @@
 using Xunit;
 using DotNet.Meteor.Shared;
+using DotNet.Meteor.Workspace;
 
 namespace DotNet.Meteor.Tests;
 
@@ -47,7 +48,7 @@ public class WorkspaceBundleLocatorTests: TestFixture {
         var expectedPath = device.IsIPhone || device.IsMacCatalyst
             ? CreateOutputBundle(configuration, framework, device.RuntimeId, bundleName)
             : CreateOutputAssembly(configuration, framework, device.RuntimeId, bundleName, includeWinX64Dir);
-        var actualPath = project.GetOutputAssembly(configuration, framework, device);
+        var actualPath = project.FindOutputApplication(configuration, framework, device);
 
         Assert.Equal(expectedPath, actualPath);
         DeleteMockData();
@@ -75,7 +76,7 @@ public class WorkspaceBundleLocatorTests: TestFixture {
         var projectPath = CreateMockProject(SimpleProject);
         var project = WorkspaceAnalyzer.AnalyzeProject(projectPath);
 
-        Assert.Throws<DirectoryNotFoundException>(() => project.GetOutputAssembly(configuration, framework, device));
+        Assert.Throws<ArgumentException>(() => project.FindOutputApplication(configuration, framework, device));
         DeleteMockData();
     }
 }

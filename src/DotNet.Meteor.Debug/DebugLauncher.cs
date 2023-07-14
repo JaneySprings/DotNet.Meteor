@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using DotNet.Meteor.Shared;
 using DotNet.Meteor.Processes;
-using DotNet.Meteor.Android;
-using DotNet.Meteor.Apple;
 using System.Net;
 using Mono.Debugging.Soft;
 using DotNet.Meteor.Debug.Sdb;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Process = System.Diagnostics.Process;
+using DotNet.Meteor.Debug.Sdk;
 
 namespace DotNet.Meteor.Debug;
 
@@ -61,7 +60,7 @@ public partial class DebugSession {
     }
 
     private void LaunchMacCatalyst(LaunchConfiguration configuration, int port) {
-        var tool = DotNet.Meteor.Apple.PathUtils.OpenTool();
+        var tool = AppleUtilities.OpenTool();
         var processRunner = new ProcessRunner(tool, new ProcessArgumentBuilder()
             .AppendQuoted(configuration.OutputAssembly)
         );
@@ -83,7 +82,7 @@ public partial class DebugSession {
     private void LaunchAndroid(LaunchConfiguration configuration, int port, List<Process> processes) {
         var applicationId = configuration.GetApplicationId();
         if (configuration.Device.IsEmulator)
-            configuration.Device.Serial = Emulator.Run(configuration.Device.Name).Serial;
+            configuration.Device.Serial = AndroidEmulator.Run(configuration.Device.Name).Serial;
 
         DeviceBridge.Shell(configuration.Device.Serial, "forward", "--remove-all");
 
