@@ -6,7 +6,7 @@
 
 ## Overview
 
-&emsp;The .NET Meteor allows you to build, debug `.NET 6` / `.NET 7` apps and deploy them to devices or emulators.
+&emsp;The .NET Meteor allows you to build, debug `.NET` apps and deploy them to devices or emulators.
 
 - **Cross-Platform** </br>
 You can use this extension in the `Windows`, `MacOS`, and `Linux` operation systems.
