@@ -81,17 +81,22 @@ namespace DotNet.Meteor.Shared {
         }
 
         public static string FindOutputApplication(this Project project, string configuration, string framework, DeviceData device, Func<string, string> errorHandler = null) {
-            var rootDirectory = Path.GetDirectoryName(project.Path)!;
+            var rootDirectory = Path.GetDirectoryName(project.Path);
             var baseOutputDirectory = Path.Combine(rootDirectory, "bin", configuration, framework);
+            var outputAssemblyPath = string.Empty;
 
-            if (!string.IsNullOrEmpty(device.RuntimeId)) 
-                baseOutputDirectory = Path.Combine(baseOutputDirectory, device.RuntimeId);
+            if (!string.IsNullOrEmpty(device.RuntimeId)) {
+                var baseOutputDirectoryWithRuntimeId = Path.Combine(baseOutputDirectory, device.RuntimeId);
+                outputAssemblyPath = FindOutputApplicationWithDirectoryPath(baseOutputDirectoryWithRuntimeId, project, device);
+                if (!string.IsNullOrEmpty(outputAssemblyPath))
+                    return outputAssemblyPath;
+            }
 
-            var result = FindOutputApplicationWithDirectoryPath(baseOutputDirectory, project, device);
-            if (string.IsNullOrEmpty(result))
+            outputAssemblyPath = FindOutputApplicationWithDirectoryPath(baseOutputDirectory, project, device);
+            if (string.IsNullOrEmpty(outputAssemblyPath))
                 return errorHandler?.Invoke($"Could not find output application in {baseOutputDirectory}");
 
-            return result;
+            return outputAssemblyPath;
         }
 
         public static string FindOutputApplication(this Project project, string configuration, string framework, DeviceData device) {
@@ -105,7 +110,7 @@ namespace DotNet.Meteor.Shared {
             if (device.IsAndroid) {
                 var files = Directory.GetFiles(directoryPath, "*-Signed.apk", SearchOption.TopDirectoryOnly);
                 if (files.Length > 1)
-                    return errorHandler?.Invoke($"Finded more than one \"*-Signed.apk\" in {directoryPath}");
+                    return errorHandler?.Invoke($"Finded more than one \"*-Signed.apk\" in {directoryPath} and subdirectories");
                 return files.FirstOrDefault();
             }
 
