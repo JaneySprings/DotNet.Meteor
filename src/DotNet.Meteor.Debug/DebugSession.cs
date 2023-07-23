@@ -16,10 +16,10 @@ namespace DotNet.Meteor.Debug;
 public partial class DebugSession : Session {
     private MonoClient.ObjectValue exception;
     private MonoClient.ProcessInfo activeProcess;
+    private SymbolServer symbolServer;
 
     private readonly List<Process> processes = new List<Process>();
     private readonly AutoResetEvent suspendEvent = new AutoResetEvent(false);
-    private readonly SourceDownloader sourceDownloader = new SourceDownloader();
     private readonly Handles<MonoClient.StackFrame> frameHandles = new Handles<MonoClient.StackFrame>();
     private readonly Handles<MonoClient.ObjectValue[]> variableHandles = new Handles<MonoClient.ObjectValue[]>();
     private readonly Dictionary<int, DebugProtocol.Thread> seenThreads = new Dictionary<int, DebugProtocol.Thread>();
@@ -85,7 +85,7 @@ public partial class DebugSession : Session {
 #region request: Launch
     protected override LaunchResponse HandleLaunchRequest(LaunchArguments arguments) {
         var configuration = new LaunchConfiguration(arguments.ConfigurationProperties);
-        this.sourceDownloader.Configure(configuration.Project.Path, s => GetLogger().LogMessage(s));
+        symbolServer = new SymbolServer(configuration.Project.Path);
 
         if (configuration.DebugPort == 0)
             configuration.DebugPort = Extensions.FindFreePort();
@@ -264,7 +264,7 @@ public partial class DebugSession : Session {
                 }
                 if (sourceLocation.SourceLink != null && source == null) {
                     sourceName = Path.GetFileName(sourceLocation.SourceLink.RelativeFilePath);
-                    string path = this.sourceDownloader.DownloadSourceFile(sourceLocation.SourceLink.Uri, sourceLocation.SourceLink.RelativeFilePath);
+                    string path = symbolServer.DownloadSourceFile(sourceLocation.SourceLink.Uri, sourceLocation.SourceLink.RelativeFilePath);
                     if (!string.IsNullOrEmpty(path)) {
                         hint = DebugProtocol.StackFrame.PresentationHintValue.Normal;
                         source = new DebugProtocol.Source() {
