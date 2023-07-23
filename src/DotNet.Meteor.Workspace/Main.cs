@@ -43,7 +43,7 @@ public class Program {
 
     public static void AndroidSdkPath(string[] args) {
         string path = AndroidUtilities.SdkLocation();
-        Console.WriteLine(JsonConvert.SerializeObject(path));
+        Console.WriteLine(path);
     }
 
     public static void AnalyzeWorkspace(string[] args) {

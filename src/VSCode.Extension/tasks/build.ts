@@ -1,6 +1,5 @@
+import { ConfigurationController } from '../configuration';
 import { ProcessArgumentBuilder } from '../bridge';
-import { Configuration } from '../configuration';
-import { CommandController } from '../bridge';
 import * as res from '../resources';
 import * as vscode from 'vscode';
 
@@ -11,8 +10,6 @@ interface DotNetTaskDefinition extends vscode.TaskDefinition {
 }
 
 export class DotNetTaskProvider implements vscode.TaskProvider {
-    private androidSdkDirectory: string = CommandController.androidSdk();
-
     resolveTask(task: vscode.Task, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Task> { 
         const resolvedTask = this.getTask(task.definition as DotNetTaskDefinition);
         return resolvedTask ? resolvedTask : task;
@@ -29,14 +26,14 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
         return task ? [ task ] : [];
     }
     private getTask(definition: DotNetTaskDefinition): vscode.Task | undefined {
-        if (!Configuration.validate())
+        if (!ConfigurationController.validate())
             return undefined;
     
-        const framework = Configuration.project!.frameworks?.find(it => it.includes(Configuration.device!.platform!))
+        const framework = ConfigurationController.project!.frameworks?.find(it => it.includes(ConfigurationController.device!.platform!))
         const builder = new ProcessArgumentBuilder('dotnet')
             .append(definition.target.toLowerCase())
-            .appendQuoted(Configuration.project!.path)
-            .append(`-p:Configuration=${Configuration.target}`)
+            .appendQuoted(ConfigurationController.project!.path)
+            .append(`-p:Configuration=${ConfigurationController.target}`)
             .append(`-p:TargetFramework=${framework}`);
 
         if (definition.target.toLowerCase() === 'build') 
@@ -47,14 +44,14 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
             return undefined;
         }
 
-        if (Configuration.device!.runtime_id) {
-            builder.append(`-p:RuntimeIdentifier=${Configuration.device!.runtime_id}`);
+        if (ConfigurationController.device!.runtime_id) {
+            builder.append(`-p:RuntimeIdentifier=${ConfigurationController.device!.runtime_id}`);
         }
-        if (Configuration.isAndroid()) {
+        if (ConfigurationController.isAndroid()) {
             builder.append('-p:EmbedAssembliesIntoApk=true');
-            builder.append(`-p:AndroidSdkDirectory="${this.androidSdkDirectory}"`);
+            builder.append(`-p:AndroidSdkDirectory="${ConfigurationController.androidSdkDirectory}"`);
         }
-        if (Configuration.isWindows()) {
+        if (ConfigurationController.isWindows()) {
             builder.append('-p:WindowsPackageType=None');
             builder.append('-p:WinUISDKReferences=false');
         }

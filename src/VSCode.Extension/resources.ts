@@ -27,7 +27,8 @@ export const messageNoFrameworkFound = "Supported framework not found. Make sure
 export const messageNoProjectFound = "Selected project not found. Make sure you have selected a project in the status bar.";
 export const messageNoDeviceFound = "Incorrect selected device. Make sure you have selected a device.";
 export const messageDeviceLoading = "Fetching devices...";
-export const messageRuntimeNotFound= ".NET Meteor requires LTS version of .NET SDK (.NET 6.0 LTS and higher).";
+export const messageRuntimeNotFound = ".NET Meteor could not find a compatible .NET runtime on your machine. Make sure you have installed .NET 6.0 or later.";
+export const messageEmbeddedRuntimeNotFound = ".NET Meteor could not find embedded binaries for your .NET runtime version. Maybe you have old version of the extension?";
 
 export const configId = "dotnetMeteor";
 
