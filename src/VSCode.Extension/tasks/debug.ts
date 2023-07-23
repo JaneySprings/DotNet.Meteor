@@ -1,5 +1,5 @@
 import { WorkspaceFolder, DebugConfiguration } from 'vscode';
-import { Configuration } from '../configuration';
+import { ConfigurationController } from '../configuration';
 import { XamlController } from '../xaml/service';
 import { UIController } from '../controller';
 import { Target } from '../models';
@@ -12,17 +12,17 @@ export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationPro
 									config: DebugConfiguration, 
 									token?: vscode.CancellationToken): Promise<DebugConfiguration | undefined> {
 		
-		if (!Configuration.validate())
+		if (!ConfigurationController.validate())
 			return undefined;
 
-		const targetDevice = { ...Configuration.device };
-		const targetProject = { ...Configuration.project };
+		const targetDevice = { ...ConfigurationController.device };
+		const targetProject = { ...ConfigurationController.project };
 		
-		if (!config.noDebug && Configuration.isWindows()) {
+		if (!config.noDebug && ConfigurationController.isWindows()) {
 			vscode.window.showErrorMessage(res.messageDebugNotSupportedWin);
 			return undefined;
 		}
-		if (!config.noDebug && Configuration.target === Target.Release) {
+		if (!config.noDebug && ConfigurationController.target === Target.Release) {
 			vscode.window.showErrorMessage(res.messageDebugNotSupported);
 			return undefined;
 		}
@@ -41,10 +41,10 @@ export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationPro
 		
         config['selected_device'] = targetDevice;
 		config['selected_project'] = targetProject;
-		config['selected_target'] = Configuration.target;
-		config['debugging_port'] = Configuration.getDebuggingPort();
-		config['uninstall_app'] = Configuration.getUninstallAppOption();
-		config['reload_host'] = Configuration.getReloadHostPort();
+		config['selected_target'] = ConfigurationController.target;
+		config['debugging_port'] = ConfigurationController.getDebuggingPort();
+		config['uninstall_app'] = ConfigurationController.getUninstallAppOption();
+		config['reload_host'] = ConfigurationController.getReloadHostPort();
 		
         return config;
 	}

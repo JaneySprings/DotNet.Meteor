@@ -1,5 +1,5 @@
 import { XamlCompletionItemProvider } from './completions';
-import { Configuration } from "../configuration";
+import { ConfigurationController } from "../configuration";
 import { XamlLinterProvider } from './linter';
 import { CommandController } from "../bridge";
 import * as res from '../resources';
@@ -22,7 +22,7 @@ export class XamlController {
         ));
         context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(ev => {
             if (ev.fileName.endsWith('.xaml') && vscode.debug.activeDebugSession?.configuration.type === res.debuggerMeteorId)
-                CommandController.xamlReload(Configuration.getReloadHostPort(), ev.fileName);
+                CommandController.xamlReload(ConfigurationController.getReloadHostPort(), ev.fileName);
         }));
 
     }
@@ -55,7 +55,7 @@ export class XamlController {
         if (this.xamlSchemaAliases.length > 0) 
             return;
 
-        const projectPath = Configuration.project?.path;
+        const projectPath = ConfigurationController.project?.path;
         if (projectPath === undefined)
             return;
 

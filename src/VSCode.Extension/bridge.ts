@@ -1,15 +1,16 @@
-import { execSync, exec } from 'child_process';
+import { spawnSync, exec } from 'child_process';
 import { Project, Device } from './models';
 import * as res from './resources';
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as fs from 'fs';
 
 
 export class CommandController {
     private static toolPath: string;
 
     public static activate(context: vscode.ExtensionContext): boolean {
-        const qualifiedVersion = CommandController.runtimeVersion();
+        const qualifiedVersion = CommandController.runtimeVersion() ?? "";
         const qualifiedVersionRegex = new RegExp('^\\d+\\.\\d+', ''); 
         const versionRegexCollection = qualifiedVersionRegex.exec(qualifiedVersion);
         if (!versionRegexCollection || versionRegexCollection.length === 0) {
@@ -19,14 +20,20 @@ export class CommandController {
 
         const version = versionRegexCollection[0];
         const extensionPath = vscode.extensions.getExtension(`${res.extensionPublisher}.${res.extensionId}`)?.extensionPath ?? '';
-        CommandController.toolPath = path.join(extensionPath, "extension", "bin", `net${version}`, "DotNet.Meteor.Workspace.dll");
+        const extensionBinaryPath = path.join(extensionPath, "extension", "bin", `net${version}`);
+        if (!fs.existsSync(extensionBinaryPath)) {
+            vscode.window.showErrorMessage(res.messageEmbeddedRuntimeNotFound);
+            return false;
+        }
+
+        CommandController.toolPath = path.join(extensionBinaryPath, "DotNet.Meteor.Workspace.dll");
         return true;
     }
 
-    public static androidSdk(): string {
-        return ProcessRunner.runSync<string>(new ProcessArgumentBuilder("dotnet")
-            .appendQuoted(CommandController.toolPath)
-            .append("--android-sdk-path"));
+    public static androidSdk(): string | undefined {
+        return ProcessRunner.runSync("dotnet", 
+            `${CommandController.toolPath}`, 
+            "--android-sdk-path");
     }
     public static async getDevices(): Promise<Device[]> {
         return await ProcessRunner.runAsync<Device[]>(new ProcessArgumentBuilder("dotnet")
@@ -52,24 +59,25 @@ export class CommandController {
             .append(port.toString())
             .appendQuoted(path));
     }
-    public static runtimeVersion(): string {
-        return ProcessRunner.execSync(new ProcessArgumentBuilder("dotnet")
-            .append("--version"));
+    public static runtimeVersion(): string | undefined {
+        return ProcessRunner.runSync("dotnet", "--version");
     }
 }
 
 class ProcessRunner {
-    public static execSync(builder: ProcessArgumentBuilder): string {
-        return execSync(builder.build()).toString()
-    }
-    public static runSync<TModel>(builder: ProcessArgumentBuilder): TModel {
-        const result = ProcessRunner.execSync(builder);
-        return JSON.parse(result);
+    public static runSync(command: string, ...args: string[]): string | undefined {
+        const result = spawnSync(command, args);
+        if (result.error) {
+            console.error(result.error);
+            return undefined;
+        }
+        return result.stdout.toString().trimEnd();
     }
     public static async runAsync<TModel>(builder: ProcessArgumentBuilder): Promise<TModel> {
         return new Promise<TModel>((resolve, reject) => {
             exec(builder.build(), (error, stdout, stderr) => {
                 if (error) {
+                    console.error(stderr);
                     vscode.window.showErrorMessage(`${res.extensionId}: ${stderr}`);
                     reject(stderr);
                 }

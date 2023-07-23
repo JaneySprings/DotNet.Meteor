@@ -1,5 +1,5 @@
 import { XamlController } from './xaml/service';
-import { Configuration } from './configuration';
+import { ConfigurationController } from './configuration';
 import { CommandController } from "./bridge";
 import { PublicExports } from './exports';
 import { StateController } from './cache';
@@ -44,15 +44,15 @@ export class UIController {
             PublicExports.instance.invokeAll();
             return;
         }
-        if (Configuration.project === undefined || Configuration.device === undefined)
+        if (ConfigurationController.project === undefined || ConfigurationController.device === undefined)
             StateController.load();
 
-        Configuration.project = UIController.projects.find(it => it.name === Configuration.project?.name);
-        Configuration.device = UIController.devices.find(it => it.name === Configuration.device?.name);
+        ConfigurationController.project = UIController.projects.find(it => it.name === ConfigurationController.project?.name);
+        ConfigurationController.device = UIController.devices.find(it => it.name === ConfigurationController.device?.name);
 
-        UIController.performSelectProject(Configuration.project);
-        UIController.performSelectTarget(Configuration.target);
-        UIController.performSelectDevice(Configuration.device);
+        UIController.performSelectProject(ConfigurationController.project);
+        UIController.performSelectTarget(ConfigurationController.target);
+        UIController.performSelectDevice(ConfigurationController.device);
 
         UIController._targetStatusItem.show();
         UIController._deviceStatusItem.show();
@@ -64,23 +64,23 @@ export class UIController {
 
 //#region UI Commands
     public static performSelectProject(item: models.Project | undefined = undefined) {
-        Configuration.project = item ?? UIController.projects[0];
-        UIController._projectStatusItem.text = `${models.Icon.project} ${Configuration.project?.name}`;
-        PublicExports.instance.projectChangedEventHandler.invoke(Configuration.project);
+        ConfigurationController.project = item ?? UIController.projects[0];
+        UIController._projectStatusItem.text = `${models.Icon.project} ${ConfigurationController.project?.name}`;
+        PublicExports.instance.projectChangedEventHandler.invoke(ConfigurationController.project);
         XamlController.regenerate();
         StateController.saveProject();
     }
     public static performSelectTarget(item: models.Target | undefined = undefined) {
-        Configuration.target = item ?? models.Target.Debug;
-        UIController._targetStatusItem.text = `${models.Icon.target} ${Configuration.target} | Any CPU`;
-        PublicExports.instance.targetChangedEventHandler.invoke(Configuration.target);
+        ConfigurationController.target = item ?? models.Target.Debug;
+        UIController._targetStatusItem.text = `${models.Icon.target} ${ConfigurationController.target} | Any CPU`;
+        PublicExports.instance.targetChangedEventHandler.invoke(ConfigurationController.target);
         StateController.saveTarget();
     }
     public static performSelectDevice(item: models.Device | undefined = undefined) {
-        Configuration.device = item ?? UIController.devices[0];
-        const icon = Configuration.device.is_mobile ? models.Icon.device : models.Icon.computer;
-        UIController._deviceStatusItem.text = `${icon} ${Configuration.device?.name}`;
-        PublicExports.instance.deviceChangedEventHandler.invoke(Configuration.device);
+        ConfigurationController.device = item ?? UIController.devices[0];
+        const icon = ConfigurationController.device.is_mobile ? models.Icon.device : models.Icon.computer;
+        UIController._deviceStatusItem.text = `${icon} ${ConfigurationController.device?.name}`;
+        PublicExports.instance.deviceChangedEventHandler.invoke(ConfigurationController.device);
         StateController.saveDevice();
     }
 

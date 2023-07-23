@@ -1,7 +1,7 @@
 {
   "name": "dotnet-meteor",
   "publisher": "nromanov",
-  "version": "1.0.0",
+  "version": "23.2.0",
   "description": "Run and Debug .NET Apps",
   "displayName": ".NET Meteor",
   "author": "Nikita Romanov",
@@ -42,15 +42,18 @@
     "include": "src/VSCode.Extension/manifest/configuration.json"
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./src/VSCode.Extension/tsconfig.json --sourceMap false",
-    "watch": "tsc -watch -p ./src/VSCode.Extension/tsconfig.json"
+    "vscode:prepublish": "npm run package",
+    "watch": "tsc -watch -p ./src/VSCode.Extension/tsconfig.json",
+    "package": "webpack --mode production --config ./src/VSCode.Extension/webpack.config.js"
   },
   "devDependencies": {
     "@types/node": "16.x",
     "@types/sax": "^1.2.4",
     "@types/vscode": "^1.73.0",
-    "typescript": "^4.8.4"
+    "typescript": "^4.8.4",
+    "ts-loader": "^9.4.1",
+    "webpack": "^5.74.0",
+    "webpack-cli": "^4.10.0"
   },
   "dependencies": {
     "sax": "^1.2.4"

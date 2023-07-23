@@ -1,12 +1,13 @@
 import { DotNetDebuggerConfiguration } from './tasks/debug';
+import { ConfigurationController } from './configuration';
 import { DotNetTaskProvider } from './tasks/build';
 import { XamlController } from './xaml/service';
+import { CommandController } from './bridge';
 import { UIController } from './controller';
 import { PublicExports } from './exports';
 import { StateController } from './cache';
 import * as res from './resources';
 import * as vscode from 'vscode';
-import { CommandController } from './bridge';
 
 
 export function activate(context: vscode.ExtensionContext): PublicExports | undefined {
@@ -18,9 +19,10 @@ export function activate(context: vscode.ExtensionContext): PublicExports | unde
 	
 	const exports = new PublicExports();
 	
-	UIController.activate(context);
+	ConfigurationController.activate(context);
 	StateController.activate(context);
 	XamlController.activate(context);
+	UIController.activate(context);
 	UIController.update();
 
 	/* Commands */

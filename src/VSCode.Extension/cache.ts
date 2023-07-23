@@ -1,4 +1,4 @@
-import { Configuration } from './configuration';
+import { ConfigurationController } from './configuration';
 import { UIController } from './controller';
 import { ExtensionContext } from 'vscode';
 import * as models from "./models"
@@ -24,20 +24,20 @@ export class StateController {
         const device = StateController.context.workspaceState.get<string>('device');
         const target = StateController.context.workspaceState.get<models.Target>('target');
 
-        Configuration.device = UIController.devices.find(it => it.name === device);
-        Configuration.project = UIController.projects.find(it => it.path === project);
-        Configuration.target = target;
+        ConfigurationController.device = UIController.devices.find(it => it.name === device);
+        ConfigurationController.project = UIController.projects.find(it => it.path === project);
+        ConfigurationController.target = target;
     }
     public static saveProject() {
         if (StateController.context !== undefined)
-             StateController.context.workspaceState.update('project', Configuration.project?.path);
+             StateController.context.workspaceState.update('project', ConfigurationController.project?.path);
     }
     public static saveDevice() {
         if (StateController.context !== undefined)
-            StateController.context.workspaceState.update('device', Configuration.device?.name);
+            StateController.context.workspaceState.update('device', ConfigurationController.device?.name);
     }
     public static saveTarget() {
         if (StateController.context !== undefined)
-            StateController.context.workspaceState.update('target', Configuration.target);
+            StateController.context.workspaceState.update('target', ConfigurationController.target);
     }
 }

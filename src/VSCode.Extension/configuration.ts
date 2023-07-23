@@ -1,64 +1,70 @@
-import { Project, Device, Target } from "./models"
-import { window, workspace } from 'vscode';
+import { window, workspace, ExtensionContext } from 'vscode';
+import { Project, Device, Target } from "./models";
+import { CommandController } from './bridge';
 import { UIController } from "./controller";
 import * as res from './resources';
 
 
-export class Configuration {
+export class ConfigurationController {
+    public static androidSdkDirectory: string | undefined;
     public static project: Project | undefined;
     public static device: Device | undefined;
     public static target: Target | undefined;
 
-    public static getSetting<TResult>(id: string, fallback: TResult): TResult {
-        return workspace.getConfiguration(res.configId).get(id) ?? fallback;
+    public static activate(context: ExtensionContext) {
+        ConfigurationController.androidSdkDirectory = CommandController.androidSdk();
     }
+
     public static getDebuggingPort(): number {
-        if (Configuration.isAndroid()) return Configuration.getSetting(
+        if (ConfigurationController.isAndroid()) return ConfigurationController.getSetting(
             res.configIdMonoSdbDebuggerPortAndroid,
             res.configDefaultMonoSdbDebuggerPortAndroid
         );
-        if (Configuration.isApple()) return Configuration.getSetting(
+        if (ConfigurationController.isApple()) return ConfigurationController.getSetting(
             res.configIdMonoSdbDebuggerPortApple,
             res.configDefaultMonoSdbDebuggerPortApple
         );
-        if (Configuration.isMacCatalyst() || Configuration.isWindows())
+        if (ConfigurationController.isMacCatalyst() || ConfigurationController.isWindows())
             return 0;
 
         return -1;
     }
     public static getReloadHostPort(): number {
-        return Configuration.getSetting<number>(
+        return ConfigurationController.getSetting<number>(
             res.configIdHotReloadHostPort, 
             res.configDefaultHotReloadHostPort
         );
     }
     public static getUninstallAppOption(): boolean {
-        return Configuration.getSetting<boolean>(
+        return ConfigurationController.getSetting<boolean>(
             res.configIdUninstallApplicationBeforeInstalling, 
             res.configDefaultUninstallApplicationBeforeInstalling
         );
     }
 
-    public static isAndroid() { return Configuration.device?.platform?.includes('android') ?? false; }
-    public static isApple() { return Configuration.device?.platform?.includes('ios') ?? false; }
-    public static isMacCatalyst() { return Configuration.device?.platform?.includes('maccatalyst') ?? false; }
-    public static isWindows() { return Configuration.device?.platform?.includes('windows') ?? false; }
-
+    public static isMacCatalyst() { return ConfigurationController.device?.platform === 'maccatalyst'; }
+    public static isWindows() { return ConfigurationController.device?.platform === 'windows'; }
+    public static isAndroid() { return ConfigurationController.device?.platform === 'android'; }
+    public static isApple() { return ConfigurationController.device?.platform === 'ios'; }
 
     public static validate(): boolean {
-        if (!Configuration.project || !Configuration.project.path) {
+        if (!ConfigurationController.project || !ConfigurationController.project.path) {
             window.showErrorMessage(res.messageNoProjectFound);
             return false;
         }
-        if (!Configuration.device || !Configuration.device.platform) {
+        if (!ConfigurationController.device || !ConfigurationController.device.platform) {
             window.showErrorMessage(res.messageNoDeviceFound);
             return false;
         }
-        if (!UIController.devices.some(it => it.name === Configuration.device?.name)) {
+        if (!UIController.devices.some(it => it.name === ConfigurationController.device?.name)) {
             window.showErrorMessage(res.messageDeviceNotExists);
             return false;
         }
 
         return true;
+    }
+
+    private static getSetting<TResult>(id: string, fallback: TResult): TResult {
+        return workspace.getConfiguration(res.configId).get(id) ?? fallback;
     }
 } 
