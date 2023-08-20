@@ -6,7 +6,8 @@
         "properties": {
           "target": {
             "type": "string",
-            "default": "Build",
+            "default": "build",
+            "enum": [ "build", "publish" ],
             "description": "%task.meteor.description.target%"
           },
           "args": {

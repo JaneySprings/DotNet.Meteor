@@ -4,30 +4,21 @@ import * as res from '../resources';
 import * as vscode from 'vscode';
 
 
-interface DotNetTaskDefinition extends vscode.TaskDefinition {
-    target: string;
-    args?: string[];
-}
-
 export class DotNetTaskProvider implements vscode.TaskProvider {
     resolveTask(task: vscode.Task, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Task> { 
-        const resolvedTask = this.getTask(task.definition as DotNetTaskDefinition);
-        return resolvedTask ? resolvedTask : task;
+        return this.getTask(task.definition)
     }
     provideTasks(token: vscode.CancellationToken): vscode.ProviderResult<vscode.Task[]> {
-        return this.getTasks();
-    }
-
-    private getTasks(): vscode.Task[] {
-        const task = this.getTask({ 
-            type: res.taskDefinitionId,
-            target: res.taskDefinitionDefaultTarget,
-        });
+        const task = this.getTask({ type: res.taskDefinitionId, target: res.taskDefinitionDefaultTarget });
         return task ? [ task ] : [];
     }
-    private getTask(definition: DotNetTaskDefinition): vscode.Task | undefined {
+
+    private getTask(definition: vscode.TaskDefinition): vscode.Task | undefined {
         if (!ConfigurationController.validate())
             return undefined;
+
+        if (!definition.target)
+            definition.target = res.taskDefinitionDefaultTarget;
     
         const framework = ConfigurationController.project!.frameworks?.find(it => it.includes(ConfigurationController.device!.platform!))
         const builder = new ProcessArgumentBuilder('dotnet')
@@ -35,9 +26,6 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
             .appendQuoted(ConfigurationController.project!.path)
             .append(`-p:Configuration=${ConfigurationController.target}`)
             .append(`-p:TargetFramework=${framework}`);
-
-        if (definition.target.toLowerCase() === 'build') 
-            builder.append(`-t:Build`);
         
         if (!framework) {
             vscode.window.showErrorMessage(res.messageNoFrameworkFound);
@@ -56,7 +44,7 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
             builder.append('-p:WinUISDKReferences=false');
         }
 
-        definition.args?.forEach(arg => builder.override(arg));
+        definition.args?.forEach((arg: string) => builder.override(arg));
         
         return new vscode.Task(
             definition, 
