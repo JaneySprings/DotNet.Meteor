@@ -1,6 +1,5 @@
 import { WorkspaceFolder, DebugConfiguration } from 'vscode';
 import { ConfigurationController } from '../configuration';
-import { XamlController } from '../xaml/service';
 import { UIController } from '../controller';
 import { Target } from '../models';
 import * as res from '../resources';
@@ -12,12 +11,11 @@ export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationPro
 									config: DebugConfiguration, 
 									token?: vscode.CancellationToken): Promise<DebugConfiguration | undefined> {
 		
-		if (!ConfigurationController.validate())
+		if (!ConfigurationController.isActive())
+			return undefined;
+		if (!ConfigurationController.isValid())
 			return undefined;
 
-		const targetDevice = { ...ConfigurationController.device };
-		const targetProject = { ...ConfigurationController.project };
-		
 		if (!config.noDebug && ConfigurationController.isWindows()) {
 			vscode.window.showErrorMessage(res.messageDebugNotSupportedWin);
 			return undefined;
@@ -26,6 +24,9 @@ export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationPro
 			vscode.window.showErrorMessage(res.messageDebugNotSupported);
 			return undefined;
 		}
+
+		const targetDevice = { ...ConfigurationController.device };
+		const targetProject = { ...ConfigurationController.project };
 
 		if (config.device !== undefined) 
 			UIController.performSelectDevice(UIController.devices.find(d => d.name === config.device));

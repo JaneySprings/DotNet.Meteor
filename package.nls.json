@@ -1,4 +1,5 @@
 {
+	"extension.displayName": ".NET Meteor",
 	"command.title.selectActiveProject": ".NET Meteor: Select workspace project",
 	"command.id.selectActiveProject": "dotnet-meteor.selectActiveProject",
 

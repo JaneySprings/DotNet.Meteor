@@ -47,12 +47,12 @@ export class ConfigurationController {
     public static isAndroid() { return ConfigurationController.device?.platform === 'android'; }
     public static isApple() { return ConfigurationController.device?.platform === 'ios'; }
 
-    public static validate(): boolean {
-        if (!ConfigurationController.project || !ConfigurationController.project.path) {
+    public static isValid(): boolean {
+        if (!ConfigurationController.project?.path) {
             window.showErrorMessage(res.messageNoProjectFound);
             return false;
         }
-        if (!ConfigurationController.device || !ConfigurationController.device.platform) {
+        if (!ConfigurationController.device?.platform) {
             window.showErrorMessage(res.messageNoDeviceFound);
             return false;
         }
@@ -62,6 +62,9 @@ export class ConfigurationController {
         }
 
         return true;
+    }
+    public static isActive(): boolean {
+        return ConfigurationController.project !== undefined && ConfigurationController.device !== undefined;
     }
 
     private static getSetting<TResult>(id: string, fallback: TResult): TResult {

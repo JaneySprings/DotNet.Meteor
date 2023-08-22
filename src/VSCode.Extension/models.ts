@@ -18,7 +18,7 @@ export enum Target {
 export class Project {
     public name!: string;
     public path!: string;
-    public frameworks: string[] | undefined;
+    public frameworks!: string[];
 }
 
 export class Device {

@@ -1,5 +1,5 @@
-import { XamlController } from './xaml/service';
 import { ConfigurationController } from './configuration';
+import { XamlController } from './xaml/service';
 import { CommandController } from "./bridge";
 import { PublicExports } from './exports';
 import { StateController } from './cache';

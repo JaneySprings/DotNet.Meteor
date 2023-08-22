@@ -1,6 +1,7 @@
 
 export const extensionId = "dotnet-meteor";
 export const extensionPublisher = "nromanov";
+export const extensionDisplayName = ".NET Meteor";
 
 export const commandIdSelectActiveProject = "dotnet-meteor.selectActiveProject";
 export const commandTitleSelectActiveProject = ".NET Meteor: Select workspace project";
@@ -14,7 +15,7 @@ export const commandTitleSelectActiveDevice = ".NET Meteor: Select device";
 export const commandIdFocusOnDebug = "workbench.debug.action.focusRepl";
 
 export const taskDefinitionId = "dotnet-meteor.task";
-export const taskDefinitionDefaultTarget = "Build";
+export const taskDefinitionDefaultTarget = "build";
 export const taskProblemMatcherId = "dotnet-meteor.problemMatcher";
 
 export const debuggerMeteorId = "dotnet-meteor.debugger";
