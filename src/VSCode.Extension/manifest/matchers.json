@@ -2,6 +2,8 @@
     "problemMatchers": [
       {
         "name": "%task.meteor.problemMatcher%",
+        "source": "%extension.displayName%",
+        "owner": "%extension.displayName%",
         "pattern": {
           "regexp": "^(.*.xaml)\\((\\d+),(\\d+)\\):.*?(error|warning)\\s.*?:\\s(.*)$",
           "file": 1,

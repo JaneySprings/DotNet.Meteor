@@ -1,4 +1,5 @@
 import { languageId } from './service';
+import * as res from './../resources';
 import * as vscode from 'vscode';
 import * as sax from 'sax';
 
@@ -9,7 +10,7 @@ export class XamlLinterProvider implements vscode.Disposable {
     private linterActive = false;
 
     constructor(context: vscode.ExtensionContext) {
-        this.diagnosticCollection = vscode.languages.createDiagnosticCollection();
+        this.diagnosticCollection = vscode.languages.createDiagnosticCollection(res.extensionDisplayName);
         context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(async evnt => await this.validateDocument(evnt.document)));
         context.subscriptions.push(vscode.workspace.onDidOpenTextDocument(async doc => await this.validateDocument(doc, 100)));
     }
