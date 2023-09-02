@@ -47,7 +47,9 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
         return new vscode.Task(
             definition, 
             vscode.TaskScope.Workspace, 
-            definition.target, 
+            /* It will be nice to use the 'definition.target' property 
+            * but it's a huge breaking change for users */
+            definition.target.charAt(0).toUpperCase() + definition.target.slice(1),
             res.extensionId,
             new vscode.ShellExecution(builder.build()),
             `$${res.taskProblemMatcherId}`
