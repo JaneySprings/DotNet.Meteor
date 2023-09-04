@@ -16,6 +16,7 @@ export const commandIdFocusOnDebug = "workbench.debug.action.focusRepl";
 
 export const taskDefinitionId = "dotnet-meteor.task";
 export const taskDefinitionDefaultTarget = "build";
+export const taskDefinitionDefaultTargetCapitalized = "Build";
 export const taskProblemMatcherId = "dotnet-meteor.problemMatcher";
 
 export const debuggerMeteorId = "dotnet-meteor.debugger";

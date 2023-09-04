@@ -34,7 +34,7 @@ export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationPro
 			targetDevice!.runtime_id = config.runtime;
 
 		if (!config.type && !config.request && !config.name) {
-			config.preLaunchTask = `${res.extensionId}: ${res.taskDefinitionDefaultTarget}`
+			config.preLaunchTask = `${res.extensionId}: ${res.taskDefinitionDefaultTargetCapitalized}`
 			config.name = res.debuggerMeteorTitle;
 			config.type = res.debuggerMeteorId;
 			config.request = 'launch';
