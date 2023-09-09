@@ -45,6 +45,8 @@ internal class Server : IMauiInitializeService {
     private void ReloadElement(Element element, string xamlContent) {
         if (element is VisualElement visualElement)
             visualElement.Resources.Clear();
+        if (element is Page page)
+            page.ToolbarItems.Clear();
 
         try {
             element.LoadFromXaml(xamlContent);

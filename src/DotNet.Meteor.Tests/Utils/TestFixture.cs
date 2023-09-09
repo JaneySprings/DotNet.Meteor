@@ -1,5 +1,7 @@
 using Xunit;
 using System.Reflection;
+using System.Text;
+using System.Xml.Linq;
 
 namespace DotNet.Meteor.Tests;
 
@@ -82,5 +84,17 @@ public abstract class TestFixture {
     }
     protected void DeleteMockData() {
        Directory.Delete(MockDataDirectory, true);
+    }
+    protected List<string> FindAllXNames(StringBuilder stringBuilder) {
+        var names = new List<string>();
+        var xaml = XDocument.Parse(stringBuilder.ToString());
+        var xElements = xaml.Descendants().ToList();
+        foreach (var xElement in xElements) {
+            var attribute = xElement.Attributes().FirstOrDefault(a => a.Name.LocalName == "Name");
+            if (attribute != null)
+                names.Add(attribute.Value);
+        }
+
+        return names;
     }
 }
