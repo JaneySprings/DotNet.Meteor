@@ -60,6 +60,10 @@ export class ConfigurationController {
             window.showErrorMessage(res.messageDeviceNotExists);
             return false;
         }
+        if (!ConfigurationController.project.frameworks.some(it => it.includes(ConfigurationController.device!.platform!))) {
+            window.showErrorMessage(res.messageNoFrameworkFound);
+            return false;
+        }
 
         return true;
     }
