@@ -10,13 +10,25 @@ public static class MarkupHelper {
         return xClassAttribute?.Value;
     }
 
-    public static void RemoveReferenceNames(StringBuilder xamlContent) {
+    public static void ModifyReferenceNames(StringBuilder xamlContent) {
         var xaml = XDocument.Parse(xamlContent.ToString());
         var xElements = xaml.Descendants().ToList();
         foreach (var xElement in xElements) {
             var xNameAttribute = xElement.Attributes().FirstOrDefault(a => a.Name.LocalName == "Name");
             if (xNameAttribute != null) {
-                xNameAttribute.Remove();
+                var oldName = xNameAttribute.Value;
+                var newName = oldName + $"_{DateTime.UtcNow.Ticks.ToString("X")}";
+                xNameAttribute.Value = newName;
+
+                foreach (var xElement2 in xElements) {
+                    var xAttributes = xElement2.Attributes().ToList();
+                    foreach (var xAttribute in xAttributes) {
+                        if (xAttribute.Value.Contains($"x:Reference {oldName}"))
+                            xAttribute.Value = xAttribute.Value.Replace($"x:Reference {oldName}", $"x:Reference {newName}");
+                        /* TODO: Handle other scenarios" */
+                    }
+                }
+
             }
         }
 

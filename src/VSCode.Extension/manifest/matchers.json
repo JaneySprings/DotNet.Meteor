@@ -5,12 +5,13 @@
         "source": "%extension.displayName%",
         "owner": "%extension.displayName%",
         "pattern": {
-          "regexp": "^(.*.xaml)\\((\\d+),(\\d+)\\):.*?(error|warning)\\s.*?:\\s(.*)$",
+          "regexp": "^(.*.xaml)\\((\\d+),(\\d+)\\):.*?(error|warning)\\s(.*?):\\s(.*)$",
           "file": 1,
           "line": 2,
           "column": 3,
           "severity": 4,
-          "message": 5
+          "code": 5,
+          "message": 6
         }
       }
     ]

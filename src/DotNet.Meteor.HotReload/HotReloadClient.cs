@@ -12,7 +12,7 @@ public static class HotReloadClient {
 
         var xamlContent = new StringBuilder(File.ReadAllText(xamlFilePath));
         var classDefinition = MarkupHelper.GetClassDefinition(xamlContent);
-        MarkupHelper.RemoveReferenceNames(xamlContent);
+        MarkupHelper.ModifyReferenceNames(xamlContent);
 
         if (string.IsNullOrEmpty(classDefinition)) {
             logger?.Invoke($"Class definition not found in XAML file: {xamlFilePath}");
