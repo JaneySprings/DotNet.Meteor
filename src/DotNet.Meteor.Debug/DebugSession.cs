@@ -9,7 +9,6 @@ using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 using MonoClient = Mono.Debugging.Client;
 using DebugProtocol = Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
-using Process = System.Diagnostics.Process;
 
 namespace DotNet.Meteor.Debug;
 
@@ -18,7 +17,7 @@ public partial class DebugSession : Session {
     private MonoClient.ProcessInfo activeProcess;
     private SymbolServer symbolServer;
 
-    private readonly List<Process> processes = new List<Process>();
+    private readonly List<Action> disposables = new List<Action>();
     private readonly AutoResetEvent suspendEvent = new AutoResetEvent(false);
     private readonly Handles<MonoClient.StackFrame> frameHandles = new Handles<MonoClient.StackFrame>();
     private readonly Handles<MonoClient.ObjectValue[]> variableHandles = new Handles<MonoClient.ObjectValue[]>();
@@ -92,7 +91,7 @@ public partial class DebugSession : Session {
         if (configuration.DebugPort < 1)
             throw new ProtocolException($"Invalid port '{configuration.DebugPort}'");
 
-        LaunchApplication(configuration, configuration.DebugPort, this.processes);
+        LaunchApplication(configuration, configuration.DebugPort);
         Connect(configuration, configuration.DebugPort);
         return new LaunchResponse();
     }
@@ -102,10 +101,10 @@ public partial class DebugSession : Session {
         if (this.session?.IsRunning == true)
             this.session.Stop();
 
-        foreach(var process in this.processes)
-            process.Kill();
+        foreach(var disposable in disposables)
+            disposable.Invoke();
 
-        this.processes.Clear();
+        this.disposables.Clear();
         if (this.session != null) {
             if (!this.session.HasExited)
                 this.session.Exit();
@@ -211,7 +210,7 @@ public partial class DebugSession : Session {
             // Logpoint
             if (breakpoint != null && breakpointInfo.LogMessage != null) {
                 breakpoint.HitAction = MonoClient.HitAction.PrintExpression;
-                breakpoint.TraceExpression = $"LogPoint: {breakpointInfo.LogMessage}";
+                breakpoint.TraceExpression = $"[LogPoint]: {breakpointInfo.LogMessage}";
             }
 
             breakpoints.Add(new DebugProtocol.Breakpoint() {

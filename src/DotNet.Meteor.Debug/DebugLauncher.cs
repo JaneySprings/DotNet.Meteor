@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using DotNet.Meteor.Shared;
 using DotNet.Meteor.Processes;
 using System.Net;
 using Mono.Debugging.Soft;
 using DotNet.Meteor.Debug.Sdb;
-using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
-using Process = System.Diagnostics.Process;
 using DotNet.Meteor.Debug.Sdk;
+using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 
 namespace DotNet.Meteor.Debug;
 
@@ -16,46 +14,48 @@ public partial class DebugSession {
     private void Connect(LaunchConfiguration options, int port) {
         SoftDebuggerStartArgs arguments = null;
 
-        if (options.Device.IsAndroid || (options.Device.IsIPhone && !options.Device.IsEmulator)) {
-            arguments = new ClientConnectionProvider(IPAddress.Loopback, port, options.Project.Name) {
-                MaxConnectionAttempts = 100,
-                TimeBetweenConnectionAttempts = 500
-            };
-        } else if (options.Device.IsIPhone || options.Device.IsMacCatalyst) {
+        if (options.Device.IsAndroid || (options.Device.IsIPhone && !options.Device.IsEmulator))
+            arguments = new ClientConnectionProvider(IPAddress.Loopback, port, options.Project.Name);
+        else if (options.Device.IsIPhone || options.Device.IsMacCatalyst)
             arguments = new ServerConnectionProvider(IPAddress.Loopback, port, options.Project.Name);
-        }
 
         if (arguments == null || !options.IsDebug)
             return;
 
-        this.session.Run(new SoftDebuggerStartInfo(arguments), this.sessionOptions);
+        session.Run(new SoftDebuggerStartInfo(arguments), sessionOptions);
         OnOutputDataReceived("Debugger is ready and listening...");
     }
 
-    private void LaunchApplication(LaunchConfiguration configuration, int port, List<Process> processes) {
+    private void LaunchApplication(LaunchConfiguration configuration, int port) {
         if (configuration.Device.IsAndroid)
-            LaunchAndroid(configuration, port, processes);
+            LaunchAndroid(configuration, port);
         if (configuration.Device.IsIPhone)
-            LaunchApple(configuration, port, processes);
+            LaunchApple(configuration, port);
         if (configuration.Device.IsMacCatalyst)
             LaunchMacCatalyst(configuration, port);
         if (configuration.Device.IsWindows)
-            LaunchWindows(configuration, processes);
+            LaunchWindows(configuration);
     }
 
-    private void LaunchApple(LaunchConfiguration configuration, int port, List<Process> processes) {
+    private void LaunchApple(LaunchConfiguration configuration, int port) {
         if (RuntimeSystem.IsWindows) {
             IDeviceTool.Installer(configuration.Device.Serial, configuration.OutputAssembly, this);
-            processes.Add(IDeviceTool.Debug(configuration.Device.Serial, configuration.GetApplicationId(), port, this));
+            
+            var debugProcess = IDeviceTool.Debug(configuration.Device.Serial, configuration.GetApplicationId(), port, this);
+            disposables.Add(() => debugProcess.Kill());
             return;
         }
 
         if (configuration.Device.IsEmulator) {
-            processes.Add(MonoLaunch.DebugSim(configuration.Device.Serial, configuration.OutputAssembly, port, this));
+            var debugProcess = MonoLaunch.DebugSim(configuration.Device.Serial, configuration.OutputAssembly, port, this);
+            disposables.Add(() => debugProcess.Kill());
         } else {
-            processes.Add(MonoLaunch.TcpTunnel(configuration.Device.Serial, port, this));
+            var forwardingProcess = MonoLaunch.TcpTunnel(configuration.Device.Serial, port, this);
             MonoLaunch.InstallDev(configuration.Device.Serial, configuration.OutputAssembly, this);
-            processes.Add(MonoLaunch.DebugDev(configuration.Device.Serial, configuration.OutputAssembly, port, this));
+            
+            var debugProcess = MonoLaunch.DebugDev(configuration.Device.Serial, configuration.OutputAssembly, port, this);
+            disposables.Add(() => debugProcess.Kill());
+            disposables.Add(() => forwardingProcess.Kill());
         }
     }
 
@@ -72,19 +72,16 @@ public partial class DebugSession {
             throw new ProtocolException(string.Join(Environment.NewLine, result.StandardError));
     }
 
-    private void LaunchWindows(LaunchConfiguration configuration, List<Process> processes) {
+    private void LaunchWindows(LaunchConfiguration configuration) {
         var program = new FileInfo(configuration.OutputAssembly);
-        var process = new ProcessRunner(program, new ProcessArgumentBuilder(), this)
-            .Start();
-        processes.Add(process);
+        var process = new ProcessRunner(program, new ProcessArgumentBuilder(), this).Start();
+        disposables.Add(() => process.Kill());
     }
 
-    private void LaunchAndroid(LaunchConfiguration configuration, int port, List<Process> processes) {
+    private void LaunchAndroid(LaunchConfiguration configuration, int port) {
         var applicationId = configuration.GetApplicationId();
         if (configuration.Device.IsEmulator)
             configuration.Device.Serial = AndroidEmulator.Run(configuration.Device.Name).Serial;
-
-        DeviceBridge.Shell(configuration.Device.Serial, "forward", "--remove-all");
 
         if (configuration.ReloadHostPort > 0)
             DeviceBridge.Forward(configuration.Device.Serial, configuration.ReloadHostPort);
@@ -99,7 +96,11 @@ public partial class DebugSession {
         DeviceBridge.Launch(configuration.Device.Serial, applicationId, this);
         DeviceBridge.Flush(configuration.Device.Serial);
 
-        processes.Add(DeviceBridge.Logcat(configuration.Device.Serial, "system,crash", "*:I", this));
-        processes.Add(DeviceBridge.Logcat(configuration.Device.Serial, "main", "DOTNET:I", this));
+        var logcatFirstChannelProcess = DeviceBridge.Logcat(configuration.Device.Serial, "system,crash", "*:I", this);
+        var logcatSecondChannelProcess = DeviceBridge.Logcat(configuration.Device.Serial, "main", "DOTNET:I", this);
+
+        disposables.Add(() => logcatFirstChannelProcess.Kill());
+        disposables.Add(() => logcatSecondChannelProcess.Kill());
+        disposables.Add(() => DeviceBridge.RemoveForward(configuration.Device.Serial));
     }
 }
