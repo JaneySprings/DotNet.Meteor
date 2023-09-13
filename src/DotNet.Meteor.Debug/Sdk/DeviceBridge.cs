@@ -38,6 +38,20 @@ public static class DeviceBridge {
         return string.Join(Environment.NewLine, result.StandardOutput);
     }
 
+    public static string RemoveForward(string serial) {
+        var adb = AndroidUtilities.AdbTool();
+        var result = new ProcessRunner(adb, new ProcessArgumentBuilder()
+            .Append("-s", serial)
+            .Append("forward")
+            .Append("--remove-all"))
+            .WaitForExit();
+
+        if (!result.Success)
+            throw new Exception(string.Join(Environment.NewLine, result.StandardError));
+
+        return string.Join(Environment.NewLine, result.StandardOutput);
+    }
+
     public static void Install(string serial, string apk, IProcessLogger logger = null) {
         var adb = AndroidUtilities.AdbTool();
         var arguments = new ProcessArgumentBuilder()
