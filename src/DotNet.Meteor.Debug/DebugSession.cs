@@ -449,9 +449,10 @@ public partial class DebugSession : Session {
         var ex = GetActiveException((int)e.Thread.Id);
         if (ex != null) {
             Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Exception) {
+                Description = "Paused on exception",
                 ThreadId = (int)e.Thread.Id,
                 AllThreadsStopped = true,
-                Text = ex.Message
+                Text = ex.Type
             });
         }
     }
