@@ -24,7 +24,7 @@ export class StateController {
         const device = StateController.context.workspaceState.get<string>('device');
         const target = StateController.context.workspaceState.get<models.Target>('target');
 
-        ConfigurationController.device = UIController.devices.find(it => it.name === device);
+        ConfigurationController.device = UIController.devices.find(it => StateController.getDeviceId(it) === device);
         ConfigurationController.project = UIController.projects.find(it => it.path === project);
         ConfigurationController.target = target;
     }
@@ -34,10 +34,14 @@ export class StateController {
     }
     public static saveDevice() {
         if (StateController.context !== undefined)
-            StateController.context.workspaceState.update('device', ConfigurationController.device?.name);
+            StateController.context.workspaceState.update('device', StateController.getDeviceId(ConfigurationController.device));
     }
     public static saveTarget() {
         if (StateController.context !== undefined)
             StateController.context.workspaceState.update('target', ConfigurationController.target);
+    }
+
+    private static getDeviceId(device: models.IDevice | undefined): string {
+        return device ? `${device.name}_${device.platform}_${device.os_version}` : 'null';
     }
 }
