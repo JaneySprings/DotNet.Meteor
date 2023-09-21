@@ -69,11 +69,11 @@ export class XamlController {
         const files = await fs.promises.readdir(generatedPath);
         for (const file of files) {
             const filePath = path.join(generatedPath, file);
-            const dataArray = JSON.parse(fs.readFileSync(filePath).toString());
-            if (dataArray.version && dataArray.version !== XamlController.extensionVersion)
+            const alias = JSON.parse(fs.readFileSync(filePath).toString());
+            if (!alias.version || (alias.version && alias.version !== XamlController.extensionVersion))
                 continue;
 
-            this.xamlSchemaAliases.push(dataArray);
+            this.xamlSchemaAliases.push(alias);
         }
     }
     public static regenerate() {
