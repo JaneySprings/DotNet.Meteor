@@ -12,9 +12,11 @@ export const languageId = 'xml';
 
 export class XamlController {
     private static xamlSchemaAliases: any[] = [];
+    private static extensionVersion: string;
 
     public static activate(context: vscode.ExtensionContext) {
         const schemaSelector = { language: languageId, scheme: 'file' };
+        XamlController.extensionVersion = context.extension.packageJSON.version;
 
         context.subscriptions.push(new XamlLinterProvider(context));
         context.subscriptions.push(vscode.languages.registerCompletionItemProvider(
@@ -60,7 +62,6 @@ export class XamlController {
             return;
 
         await CommandController.xamlSchema(projectPath);
-
         const generatedPath = path.join(path.dirname(projectPath), '.meteor', 'generated');
         if (fs.existsSync(generatedPath) === false)
             return;
@@ -69,6 +70,9 @@ export class XamlController {
         for (const file of files) {
             const filePath = path.join(generatedPath, file);
             const dataArray = JSON.parse(fs.readFileSync(filePath).toString());
+            if (dataArray.version && dataArray.version !== XamlController.extensionVersion)
+                continue;
+
             this.xamlSchemaAliases.push(dataArray);
         }
     }

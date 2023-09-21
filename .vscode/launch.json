@@ -15,7 +15,7 @@
 			"outFiles": [
 				"${workspaceFolder}/extension/**/*.js"
 			],
-			"preLaunchTask": "${defaultBuildTask}"
+			"preLaunchTask": "tsc: watch"
 		},
 		{
             "name": ".NET Core Launch (console)",

@@ -4,17 +4,17 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"type": "npm",
-			"script": "watch",
-			"problemMatcher": "$tsc-watch",
-			"isBackground": true,
-			"presentation": {
-				"reveal": "never"
-			},
+			"type": "typescript",
+			"tsconfig": "src/VSCode.Extension/tsconfig.json",
+			"option": "watch",
+			"problemMatcher": [
+				"$tsc-watch"
+			],
 			"group": {
 				"kind": "build",
 				"isDefault": true
-			}
+			},
+			"label": "tsc: watch"
 		},
 		{
             "label": "build",
@@ -25,30 +25,6 @@
                 "${workspaceFolder}/src/DotNet.Meteor.Debug/DotNet.Meteor.Debug.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
-            ],
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "publish",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "publish",
-                "${workspaceFolder}/src/DotNet.Meteor.Debug/DotNet.Meteor.Debug.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
-            ],
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "watch",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "watch",
-                "run",
-                "--project",
-                "${workspaceFolder}/src/DotNet.Meteor.Debug/DotNet.Meteor.Debug.csproj"
             ],
             "problemMatcher": "$msCompile"
         }

@@ -33,7 +33,9 @@ export class XamlCompletionItemProvider implements vscode.CompletionItemProvider
         const types = XamlController.getTypes(context.tagContext?.namespace);
         for (var i = 0; i < types.length; i++) {
             const ci = new vscode.CompletionItem(types[i].name, vscode.CompletionItemKind.Class);
-            ci.detail = `${types[i].namespace}.${types[i].name}`;
+            if (types[i].isObsolete)
+                ci.tags = [vscode.CompletionItemTag.Deprecated];
+            ci.detail = types[i].type;
             items.push(ci);
         }
 
@@ -64,11 +66,13 @@ export class XamlCompletionItemProvider implements vscode.CompletionItemProvider
             for (let i = 0; i < findTag.attributes.length; i++) {
                 if (!findTag.attributes[i].isAttached) {
                     const ci = new vscode.CompletionItem(findTag.attributes[i].name);
-                    ci.detail = `${findTag.attributes[i].namespace}.${findTag.attributes[i].name}`;
+                    ci.detail = findTag.attributes[i].type;
                     ci.kind = vscode.CompletionItemKind.Property;
-
+    
                     if (context.scope === XamlScope.Attribute)
-                        ci.insertText = new vscode.SnippetString(`${findTag.attributes[i].name}="$1"`);
+                        ci.insertText = new vscode.SnippetString(`${findTag.attributes[i].name}="$0"`);
+                    if (findTag.attributes[i].isObsolete)
+                        ci.tags = [vscode.CompletionItemTag.Deprecated];
                     if (findTag.attributes[i].isEvent) {
                         ci.kind = vscode.CompletionItemKind.Event;
                         if (context.scope === XamlScope.Multiline)
@@ -85,8 +89,10 @@ export class XamlCompletionItemProvider implements vscode.CompletionItemProvider
                 .filter(t => t.attributes.find((a: any) => a.isAttached));
             for (let i = 0; i < staticTypes.length; i++) {
                 const ci = new vscode.CompletionItem(staticTypes[i].name, vscode.CompletionItemKind.Module);
-                ci.detail = `${staticTypes[i].namespace}.${staticTypes[i].name}`;
-                ci.insertText = new vscode.SnippetString(`${staticTypes[i].name}.$1`);
+                if (staticTypes[i].isObsolete)
+                    ci.tags = [vscode.CompletionItemTag.Deprecated];
+                ci.detail = staticTypes[i].type;
+                ci.insertText = new vscode.SnippetString(`${staticTypes[i].name}.$0`);
                 items.push(ci);
             }
         }
@@ -100,9 +106,11 @@ export class XamlCompletionItemProvider implements vscode.CompletionItemProvider
             for (let i = 0; i < findTag.attributes.length; i++) {
                 if (findTag.attributes[i].isAttached) {
                     const ci = new vscode.CompletionItem(findTag.attributes[i].name);
-                    ci.detail = `${findTag.attributes[i].namespace}.${findTag.attributes[i].name}`;
-                    ci.insertText = new vscode.SnippetString(`${findTag.attributes[i].name}="$1"`);
+                    ci.detail = findTag.attributes[i].type;
+                    ci.insertText = new vscode.SnippetString(`${findTag.attributes[i].name}="$0"`);
                     ci.kind = vscode.CompletionItemKind.Property;
+                    if (findTag.attributes[i].isObsolete)
+                        ci.tags = [vscode.CompletionItemTag.Deprecated];
                     if (findTag.attributes[i].isEvent) 
                         ci.kind = vscode.CompletionItemKind.Event;
 
@@ -119,9 +127,14 @@ export class XamlCompletionItemProvider implements vscode.CompletionItemProvider
         if (findTag !== undefined) {
             const findProp = findTag.attributes.find((a: any) => a.name === context.attributeContext?.name);
             if (findProp !== undefined) {
-                if (Array.isArray(findProp.type)) {
-                    for (let i = 0; i < findProp.type.length; i++) {
-                        items.push(new vscode.CompletionItem(findProp.type[i], vscode.CompletionItemKind.Enum));
+                if (findProp.values) {
+                    for (let i = 0; i < findProp.values.length; i++) {
+                        const ci = new vscode.CompletionItem(findProp.values[i].name);
+                        ci.detail = findProp.values[i].type;
+                        ci.kind = vscode.CompletionItemKind.EnumMember;
+                        if (findProp.values[i].isObsolete)
+                            ci.tags = [vscode.CompletionItemTag.Deprecated];
+                        items.push(ci);
                     }
                 }
             }

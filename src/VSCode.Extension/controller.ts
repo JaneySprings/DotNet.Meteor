@@ -13,8 +13,8 @@ export class UIController {
     private static _targetStatusItem: vscode.StatusBarItem;
     private static _deviceStatusItem: vscode.StatusBarItem;
 
-    public static projects: models.Project[];
-    public static devices: models.Device[];
+    public static projects: models.IProject[];
+    public static devices: models.IDevice[];
 
 
 //#region Lifecycle
@@ -63,7 +63,7 @@ export class UIController {
 //#endregion
 
 //#region UI Commands
-    public static performSelectProject(item: models.Project | undefined = undefined) {
+    public static performSelectProject(item: models.IProject | undefined = undefined) {
         ConfigurationController.project = item ?? UIController.projects[0];
         UIController._projectStatusItem.text = `${models.Icon.project} ${ConfigurationController.project?.name}`;
         PublicExports.instance.projectChangedEventHandler.invoke(ConfigurationController.project);
@@ -76,7 +76,7 @@ export class UIController {
         PublicExports.instance.targetChangedEventHandler.invoke(ConfigurationController.target);
         StateController.saveTarget();
     }
-    public static performSelectDevice(item: models.Device | undefined = undefined) {
+    public static performSelectDevice(item: models.IDevice | undefined = undefined) {
         ConfigurationController.device = item ?? UIController.devices[0];
         const icon = ConfigurationController.device.is_mobile ? models.Icon.device : models.Icon.computer;
         UIController._deviceStatusItem.text = `${icon} ${ConfigurationController.device?.name}`;

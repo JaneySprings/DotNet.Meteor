@@ -1,5 +1,5 @@
 import { window, workspace, ExtensionContext } from 'vscode';
-import { Project, Device, Target } from "./models";
+import { IProject, IDevice, Target } from "./models";
 import { CommandController } from './bridge';
 import { UIController } from "./controller";
 import * as res from './resources';
@@ -7,8 +7,8 @@ import * as res from './resources';
 
 export class ConfigurationController {
     public static androidSdkDirectory: string | undefined;
-    public static project: Project | undefined;
-    public static device: Device | undefined;
+    public static project: IProject | undefined;
+    public static device: IDevice | undefined;
     public static target: Target | undefined;
 
     public static activate(context: ExtensionContext) {

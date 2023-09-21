@@ -1,5 +1,5 @@
 import { spawnSync, exec } from 'child_process';
-import { Project, Device } from './models';
+import { IProject, IDevice } from './models';
 import * as res from './resources';
 import * as vscode from 'vscode';
 import * as path from 'path';
@@ -35,13 +35,13 @@ export class CommandController {
             `${CommandController.toolPath}`, 
             "--android-sdk-path");
     }
-    public static async getDevices(): Promise<Device[]> {
-        return await ProcessRunner.runAsync<Device[]>(new ProcessArgumentBuilder("dotnet")
+    public static async getDevices(): Promise<IDevice[]> {
+        return await ProcessRunner.runAsync<IDevice[]>(new ProcessArgumentBuilder("dotnet")
             .appendQuoted(CommandController.toolPath)
             .append("--all-devices"));
     }
-    public static async getProjects(folders: string[]): Promise<Project[]> {
-        return await ProcessRunner.runAsync<Project[]>(new ProcessArgumentBuilder("dotnet")
+    public static async getProjects(folders: string[]): Promise<IProject[]> {
+        return await ProcessRunner.runAsync<IProject[]>(new ProcessArgumentBuilder("dotnet")
             .appendQuoted(CommandController.toolPath)
             .append("--analyze-workspace")
             .appendQuoted(...folders));
