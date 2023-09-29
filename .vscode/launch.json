@@ -22,8 +22,8 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/src/DotNet.Meteor.Debug/bin/Debug/net7.0/DotNet.Meteor.CommandLine.dll",
             "args": ["--start-session"],
+            "program": "${workspaceFolder}/extension/bin/net8.0/DotNet.Meteor.Workspace.dll",
             "cwd": "${workspaceFolder}/src/DotNet.Meteor.Debug",
             "console": "internalConsole",
             "stopAtEntry": false

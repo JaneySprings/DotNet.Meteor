@@ -31,12 +31,7 @@ namespace DotNet.Meteor.Shared {
             var importRegex = new Regex(@"<Import\s+Project\s*=\s*""(.*?)""");
             /* Find in imported project */
             foreach(Match importMatch in importRegex.Matches(content)) {
-                var basePath = Path.GetDirectoryName(projectPath)!;
-                var importedProjectName = importMatch.Groups[1].Value;
-                var importedProjectPath = Path.Combine(basePath, importedProjectName).ToPlatformPath();
-
-                if (!File.Exists(importedProjectPath))
-                    importedProjectPath = importMatch.Groups[1].Value.ToPlatformPath();
+                var importedProjectPath = ResolveImportPath(projectPath, importMatch.Groups[1].Value);
                 if (!File.Exists(importedProjectPath))
                     return null;
 
@@ -142,6 +137,15 @@ namespace DotNet.Meteor.Shared {
                 return null;
 
             return GetDirectoryPropsPath(parentDirectory.FullName);
+        }
+
+        private static string ResolveImportPath(string filePath, string importPath) {
+            var thisFileDirectory = Path.GetDirectoryName(filePath);
+            var importFilePath = importPath.Replace("$(MSBuildThisFileDirectory)", thisFileDirectory + Path.DirectorySeparatorChar);
+            if (Path.IsPathRooted(importFilePath))
+                return Path.GetFullPath(importFilePath);
+
+            return Path.GetFullPath(Path.Combine(thisFileDirectory, importFilePath));
         }
     }
 }

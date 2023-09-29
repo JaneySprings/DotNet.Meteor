@@ -221,4 +221,100 @@ public class WorkspaceAnalysisTests: TestFixture {
         Assert.Equal(1, callbackInvokeCount);
         DeleteMockData();
     }
+
+    [Fact]
+    public void AnalyzeProjectWithCustomPropsWithThisFileDirectoryReference() {
+        var propsReference = CreateCustomProps("MyProps.props", @"
+        <Project>
+            <PropertyGroup>
+                <TargetFrameworks>net8.0-ios</TargetFrameworks>
+                <OutputType>Exe</OutputType>
+                <UseMaui>true</UseMaui>
+            </PropertyGroup>
+        </Project>
+        ");
+        var simpleProjectPath = CreateMockProject(@$"
+        <Project Sdk=""Microsoft.NET.Sdk"">
+            <Import Project=""$(MSBuildThisFileDirectory)../MyProps.props""/>
+        </Project>
+        ");
+        var actual = WorkspaceAnalyzer.AnalyzeProject(simpleProjectPath);
+        Assert.NotNull(actual);
+        Assertion.CollectionsAreEqual(actual.Frameworks, new List<string>() {
+            "net8.0-ios"
+        });
+        DeleteMockData();
+    }
+
+    [Fact]
+    public void AnalyzeProjectWithCustomPropsWithThisFileDirectoryReference_BackSlash() {
+        var propsReference = CreateCustomProps("MyProps.props", @"
+        <Project>
+            <PropertyGroup>
+                <TargetFrameworks>net8.0-ios</TargetFrameworks>
+                <OutputType>Exe</OutputType>
+                <UseMaui>true</UseMaui>
+            </PropertyGroup>
+        </Project>
+        ");
+        var simpleProjectPath = CreateMockProject(@$"
+        <Project Sdk=""Microsoft.NET.Sdk"">
+            <Import Project=""$(MSBuildThisFileDirectory)..\MyProps.props""/>
+        </Project>
+        ");
+        var actual = WorkspaceAnalyzer.AnalyzeProject(simpleProjectPath);
+        Assert.NotNull(actual);
+        Assertion.CollectionsAreEqual(actual.Frameworks, new List<string>() {
+            "net8.0-ios"
+        });
+        DeleteMockData();
+    }
+
+    [Fact]
+    public void AnalyzeProjectWithCustomPropsRelativePath() {
+        var propsReference = CreateCustomProps("MyProps.props", @"
+        <Project>
+            <PropertyGroup>
+                <TargetFrameworks>net8.0-ios</TargetFrameworks>
+                <OutputType>Exe</OutputType>
+                <UseMaui>true</UseMaui>
+            </PropertyGroup>
+        </Project>
+        ");
+        var simpleProjectPath = CreateMockProject(@$"
+        <Project Sdk=""Microsoft.NET.Sdk"">
+            <Import Project=""../MyProps.props""/>
+        </Project>
+        ");
+        var actual = WorkspaceAnalyzer.AnalyzeProject(simpleProjectPath);
+        Assert.NotNull(actual);
+        Assertion.CollectionsAreEqual(actual.Frameworks, new List<string>() {
+            "net8.0-ios"
+        });
+        DeleteMockData();
+    }
+
+    [Fact]
+    public void AnalyzeProjectWithCustomPropsRelativePath_BackSlash() {
+        var propsReference = CreateCustomProps("MyProps.props", @"
+        <Project>
+            <PropertyGroup>
+                <TargetFrameworks>net8.0-ios</TargetFrameworks>
+                <OutputType>Exe</OutputType>
+                <UseMaui>true</UseMaui>
+            </PropertyGroup>
+        </Project>
+        ");
+        var simpleProjectPath = CreateMockProject(@$"
+        <Project Sdk=""Microsoft.NET.Sdk"">
+            <Import Project=""..\MyProps.props""/>
+        </Project>
+        ");
+        var actual = WorkspaceAnalyzer.AnalyzeProject(simpleProjectPath);
+        Assert.NotNull(actual);
+        Assertion.CollectionsAreEqual(actual.Frameworks, new List<string>() {
+            "net8.0-ios"
+        });
+        DeleteMockData();
+    }
 }
