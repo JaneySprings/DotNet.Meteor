@@ -143,9 +143,9 @@ namespace DotNet.Meteor.Shared {
             var thisFileDirectory = Path.GetDirectoryName(filePath);
             var importFilePath = importPath.Replace("$(MSBuildThisFileDirectory)", thisFileDirectory + Path.DirectorySeparatorChar);
             if (Path.IsPathRooted(importFilePath))
-                return Path.GetFullPath(importFilePath);
+                return Path.GetFullPath(importFilePath).ToPlatformPath();
 
-            return Path.GetFullPath(Path.Combine(thisFileDirectory, importFilePath));
+            return Path.GetFullPath(Path.Combine(thisFileDirectory, importFilePath)).ToPlatformPath();
         }
     }
 }
