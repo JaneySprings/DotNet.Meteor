@@ -74,7 +74,7 @@ public static class DeviceBridge {
     }
 
     public static void Launch(string serial, string pkg, IProcessLogger logger = null) {
-        string result = Shell(serial, "monkey", "-p", pkg, "1");
+        string result = Shell(serial, "monkey", "--pct-syskeys", "0", "-p", pkg, "1");
         logger?.OnOutputDataReceived(result);
     }
 
