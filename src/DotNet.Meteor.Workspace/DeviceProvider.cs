@@ -12,7 +12,7 @@ public static class DeviceProvider {
         try { /* Windows Devices */
             if (RuntimeSystem.IsWindows) {
                 devices.Add(WindowsTool.WindowsDevice());
-                devices.Add(IDeviceTool.Info());
+                //TODO: devices.Add(IDeviceTool.Info());
             }
         } catch (Exception e) { errorHandler?.Invoke(e); }
 
