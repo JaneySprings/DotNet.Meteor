@@ -25,20 +25,36 @@ internal class Server : IMauiInitializeService {
             var reader = new StreamReader(stream);
             var writer = new StreamWriter(stream) { AutoFlush = true };
 
-            //wait for empty message
+            // wait for empty message
             await reader.ReadLineAsync();
             // send handshake
             await writer.WriteLineAsync("handshake");
 
             var classDefinition = await reader.ReadLineAsync();
             var xamlContent = await reader.ReadToEndAsync();
+            var mainPage = Application.Current?.MainPage;
             
-            if (Application.Current?.MainPage == null 
-                || string.IsNullOrEmpty(classDefinition) 
-                || string.IsNullOrEmpty(xamlContent))
+            if (mainPage == null || string.IsNullOrEmpty(classDefinition) || string.IsNullOrEmpty(xamlContent))
                 continue;
 
-            TraverseVisualTree(Application.Current.MainPage, classDefinition, xamlContent);
+            // Modal pages are on top of the navigation stack
+            if (mainPage.Navigation.ModalStack.Count > 0) {
+                var modalPage = mainPage.Navigation.ModalStack.Last();
+                if (modalPage != null) {
+                    TraverseVisualTree(modalPage, classDefinition, xamlContent);
+                    continue;
+                }
+            }
+            // Pages are on the navigation stack
+            if (mainPage.Navigation.NavigationStack.Count > 0) {
+                var page = mainPage.Navigation.NavigationStack.Last();
+                if (page != null) {
+                    TraverseVisualTree(page, classDefinition, xamlContent);
+                    continue;
+                }
+            }
+            // Fall back to the main page
+            TraverseVisualTree(mainPage, classDefinition, xamlContent);
         }
     }
 
