@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using DotNet.Meteor.Processes;
 
 namespace DotNet.Meteor.Shared {
@@ -41,23 +42,13 @@ namespace DotNet.Meteor.Shared {
         public static FileInfo MLaunchTool() {
             string dotnetPath = Shared.CommonUtilities.DotNetRootLocation();
             string sdkPath = Path.Combine(dotnetPath, "packs", "Microsoft.iOS.Sdk");
-            FileInfo newestTool = null;
-
-            foreach (string directory in Directory.GetDirectories(sdkPath)) {
-                string mlaunchPath = Path.Combine(directory, "tools", "bin", "mlaunch");
-
-                if (File.Exists(mlaunchPath)) {
-                    var tool = new FileInfo(mlaunchPath);
-
-                    if (newestTool == null || tool.CreationTime > newestTool.CreationTime)
-                        newestTool = tool;
-                }
-            }
-
-            if (newestTool == null || !newestTool.Exists)
+            var toolLocations = Directory.GetDirectories(sdkPath);
+            if (toolLocations.Length == 0)
                 throw new Exception("Could not find mlaunch tool");
 
-            return newestTool;
+            var latestToolDirectory = toolLocations.OrderByDescending(x => Path.GetFileName(x)).First();
+            var latestToolPath = Path.Combine(latestToolDirectory, "tools", "bin", "mlaunch");
+            return new FileInfo(latestToolPath);
         }
 
         public static string IDeviceLocation() {
