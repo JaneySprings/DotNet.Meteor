@@ -9,6 +9,9 @@ public static class ApkTool {
         }
 
         var tempDirectory = Path.Combine(assembliesDirectory, "_temp");
+        if (Directory.Exists(tempDirectory))
+            Directory.Delete(tempDirectory, true);
+
         Directory.CreateDirectory(tempDirectory);
         ZipFile.ExtractToDirectory(apkFile, tempDirectory);
 
