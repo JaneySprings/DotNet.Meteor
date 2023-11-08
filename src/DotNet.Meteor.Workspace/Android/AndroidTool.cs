@@ -15,20 +15,37 @@ public static class AndroidTool {
             runningAvds.Add(DeviceBridge.EmuName(serial), serial);
         }
 
-        foreach (var file in Directory.GetFiles(avdHome, "*.ini")) {
-            var ini = new IniFile(file);
-            var name = Path.GetFileNameWithoutExtension(file);
+        if (Directory.Exists(avdHome)) {
+            foreach (var file in Directory.GetFiles(avdHome, "*.ini")) {
+                var ini = new IniFile(file);
+                var name = Path.GetFileNameWithoutExtension(file);
+                avds.Add(new DeviceData {
+                    Name = name,
+                    Serial = runningAvds.ContainsKey(name) ? runningAvds[name] : null,
+                    Detail = Details.AndroidEmulator,
+                    Platform = Platforms.Android,
+                    OSVersion = ini.GetField("target") ?? "Unknown",
+                    IsRunning = runningAvds.ContainsKey(name),
+                    IsEmulator = true,
+                    IsMobile = true
+                });
+                runningAvds.Remove(name);
+                ini.Free();
+            }
+        }
+
+        // Add all running AVDs that aren't in the AVD folder
+        foreach (var avd in runningAvds) {
             avds.Add(new DeviceData {
-                Name = name,
-                Serial = runningAvds.ContainsKey(name) ? runningAvds[name] : null,
+                Name = avd.Key,
+                Serial = avd.Value,
                 Detail = Details.AndroidEmulator,
                 Platform = Platforms.Android,
-                OSVersion = ini.GetField("target") ?? "Unknown",
-                IsRunning = runningAvds.ContainsKey(name),
+                OSVersion = $"android-{DeviceBridge.Shell(avd.Value, "getprop", "ro.build.version.sdk")}",
+                IsRunning = true,
                 IsEmulator = true,
                 IsMobile = true
             });
-            ini.Free();
         }
 
         return avds;
