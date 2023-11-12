@@ -2,7 +2,7 @@
 using DotNet.Meteor.Shared;
 using DotNet.Meteor.Xaml;
 using System.Reflection;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace DotNet.Meteor.Workspace;
 
@@ -38,7 +38,7 @@ public class Program {
 
     public static void AllDevices(string[] args) {
         var devices = DeviceProvider.GetDevices();
-        Console.WriteLine(JsonConvert.SerializeObject(devices));
+        Console.WriteLine(JsonSerializer.Serialize(devices, TrimmableContext.Default.ListDeviceData));
     }
 
     public static void AndroidSdkPath(string[] args) {
@@ -52,17 +52,17 @@ public class Program {
         for (int i = 1; i < args.Length; i++)
             projects.AddRange(WorkspaceAnalyzer.AnalyzeWorkspace(args[i]));
 
-        Console.WriteLine(JsonConvert.SerializeObject(projects));
+        Console.WriteLine(JsonSerializer.Serialize(projects, TrimmableContext.Default.ListProject));
     }
 
     public static void XamlGenerate(string[] args) {
         var schemaGenerator = new JsonSchemaGenerator(args[1]);
         var result = schemaGenerator.CreateTypesAlias();
-        Console.WriteLine(JsonConvert.SerializeObject(result));
+        Console.WriteLine(JsonSerializer.Serialize(result, TrimmableContext.Default.Boolean));
     }
 
     public static void XamlReload(string[] args) {
         var result = HotReloadClient.SendNotification(int.Parse(args[1]), args[2]);
-        Console.WriteLine(JsonConvert.SerializeObject(result));
+        Console.WriteLine(JsonSerializer.Serialize(result, TrimmableContext.Default.Boolean));
     }
 }

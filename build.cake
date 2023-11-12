@@ -37,7 +37,7 @@ Task("debugger").Does(() => {
 		MSBuildSettings = new DotNetMSBuildSettings { AssemblyVersion = version },
 		Configuration = configuration,
 	});
-	DotNetBuild(MeteorWorkspaceProjectPath, new DotNetBuildSettings {
+	DotNetPublish(MeteorWorkspaceProjectPath, new DotNetPublishSettings {
 		MSBuildSettings = new DotNetMSBuildSettings { AssemblyVersion = version },
 		Configuration = configuration,
 	});
