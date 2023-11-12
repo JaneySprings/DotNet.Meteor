@@ -10,23 +10,15 @@ export class CommandController {
     private static toolPath: string;
 
     public static activate(context: vscode.ExtensionContext): boolean {
-        const qualifiedVersion = CommandController.runtimeVersion() ?? "";
-        const qualifiedVersionRegex = new RegExp('^\\d+\\.\\d+', ''); 
-        const versionRegexCollection = qualifiedVersionRegex.exec(qualifiedVersion);
-        if (!versionRegexCollection || versionRegexCollection.length === 0) {
-            vscode.window.showErrorMessage(res.messageRuntimeNotFound);
-            return false;
-        }
-
-        const version = versionRegexCollection[0];
         const extensionPath = vscode.extensions.getExtension(`${res.extensionPublisher}.${res.extensionId}`)?.extensionPath ?? '';
-        const extensionBinaryPath = path.join(extensionPath, "extension", "bin", `net${version}`);
+        const extensionBinaryPath = path.join(extensionPath, "extension", "bin", "net8.0");
+        const executableExtension = process.platform === 'win32' ? '.exe' : '';
         if (!fs.existsSync(extensionBinaryPath)) {
             vscode.window.showErrorMessage(res.messageEmbeddedRuntimeNotFound);
             return false;
         }
 
-        CommandController.toolPath = path.join(extensionBinaryPath, "DotNet.Meteor.Workspace.dll");
+        CommandController.toolPath = path.join(extensionBinaryPath, "DotNet.Meteor.Workspace" + executableExtension);
         return true;
     }
 
@@ -36,31 +28,24 @@ export class CommandController {
             "--android-sdk-path");
     }
     public static async getDevices(): Promise<IDevice[]> {
-        return await ProcessRunner.runAsync<IDevice[]>(new ProcessArgumentBuilder("dotnet")
-            .appendQuoted(CommandController.toolPath)
+        return await ProcessRunner.runAsync<IDevice[]>(new ProcessArgumentBuilder(CommandController.toolPath)
             .append("--all-devices"));
     }
     public static async getProjects(folders: string[]): Promise<IProject[]> {
-        return await ProcessRunner.runAsync<IProject[]>(new ProcessArgumentBuilder("dotnet")
-            .appendQuoted(CommandController.toolPath)
+        return await ProcessRunner.runAsync<IProject[]>(new ProcessArgumentBuilder(CommandController.toolPath)
             .append("--analyze-workspace")
             .appendQuoted(...folders));
     }
     public static async xamlSchema(path: string): Promise<boolean>  {
-        return await ProcessRunner.runAsync<boolean>(new ProcessArgumentBuilder("dotnet")
-            .appendQuoted(CommandController.toolPath)
+        return await ProcessRunner.runAsync<boolean>(new ProcessArgumentBuilder(CommandController.toolPath)
             .append("--xaml")
             .appendQuoted(path));
     }
     public static async xamlReload(port: number, path: string): Promise<boolean>  {
-        return await ProcessRunner.runAsync<boolean>(new ProcessArgumentBuilder("dotnet")
-            .appendQuoted(CommandController.toolPath)
+        return await ProcessRunner.runAsync<boolean>(new ProcessArgumentBuilder(CommandController.toolPath)
             .append("--xaml-reload")
             .append(port.toString())
             .appendQuoted(path));
-    }
-    public static runtimeVersion(): string | undefined {
-        return ProcessRunner.runSync("dotnet", "--version");
     }
 }
 
