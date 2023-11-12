@@ -1,6 +1,5 @@
 import { XamlCompletionItemProvider } from './completions';
 import { ConfigurationController } from "../configuration";
-import { XamlLinterProvider } from './linter';
 import { CommandController } from "../bridge";
 import * as res from '../resources';
 import * as vscode from 'vscode';
@@ -18,7 +17,6 @@ export class XamlController {
         const schemaSelector = { language: languageId, scheme: 'file' };
         XamlController.extensionVersion = context.extension.packageJSON.version;
 
-        context.subscriptions.push(new XamlLinterProvider(context));
         context.subscriptions.push(vscode.languages.registerCompletionItemProvider(
             schemaSelector, new XamlCompletionItemProvider(), ':', '.', '<', ' ',
         ));
