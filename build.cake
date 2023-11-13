@@ -96,7 +96,8 @@ void ExecuteCommand(string command, string arguments) {
 		arguments = $"/c \"{command} {arguments}\"";
 		command = "cmd";
 	}
-	StartProcess(command, arguments);
+	if (StartProcess(command, arguments) != 0)
+		throw new Exception("Command exited with non-zero exit code.");
 }
 
 RunTarget(target);

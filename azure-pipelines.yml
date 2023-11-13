@@ -41,6 +41,8 @@ stages:
           displayName: 'Restore Node.js modules'
         - script: npm install -g vsce
           displayName: 'Install VSCode builder'
+        - script: npm install -g webpack
+          displayName: 'Install Webpack'
 
         - script: dotnet cake --target=vsix --release-version=$(version) --configuration=release --arch=linux-x64
           displayName: 'Build VSIX (linux-x64)'
@@ -71,6 +73,8 @@ stages:
           displayName: 'Restore Node.js modules'
         - script: npm install -g vsce
           displayName: 'Install VSCode builder'
+        - script: npm install -g webpack
+          displayName: 'Install Webpack'
 
         - script: dotnet cake --target=vsix --release-version=$(version) --configuration=release --arch=osx-x64
           displayName: 'Build VSIX (osx-x64)'
@@ -101,6 +105,8 @@ stages:
           displayName: 'Restore Node.js modules'
         - script: npm install -g vsce
           displayName: 'Install VSCode builder'
+        - script: npm install -g webpack
+          displayName: 'Install Webpack'
 
         - script: dotnet cake --target=vsix --release-version=$(version) --configuration=release --arch=win-x64
           displayName: 'Build VSIX (win-x64)'
