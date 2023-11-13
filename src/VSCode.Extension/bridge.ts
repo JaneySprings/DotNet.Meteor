@@ -63,7 +63,6 @@ class ProcessRunner {
             exec(builder.build(), (error, stdout, stderr) => {
                 if (error) {
                     console.error(stderr);
-                    vscode.window.showErrorMessage(`${res.extensionId}: ${stderr}`);
                     reject(stderr);
                 }
 

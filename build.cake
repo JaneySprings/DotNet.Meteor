@@ -14,7 +14,8 @@ public string MeteorTestsProjectPath => _Path.Combine(RootDirectory, "src", "Dot
 public string MeteorPluginProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.HotReload.Plugin", "DotNet.Meteor.HotReload.Plugin.csproj");
 
 var target = Argument("target", "vsix");
-var version = Argument("release-version", "23.2.0");
+var runtime = Argument("arch", "osx-arm64");
+var version = Argument("release-version", "1.0.0");
 var configuration = Argument("configuration", "debug");
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -40,6 +41,7 @@ Task("debugger").Does(() => {
 	DotNetPublish(MeteorWorkspaceProjectPath, new DotNetPublishSettings {
 		MSBuildSettings = new DotNetMSBuildSettings { AssemblyVersion = version },
 		Configuration = configuration,
+		Runtime = runtime,
 	});
 	DeleteFiles(GetFiles(_Path.Combine(ExtensionBinariesDirectory, "**", "*.xml")));
 	DeleteDirectories(GetDirectories(
@@ -78,20 +80,23 @@ Task("vsix")
 		ReplaceRegexInFiles(package, regex, $"  $1\"{version}\"$3", options);
 	})
 	.Does(() => {
-		var options = System.Text.RegularExpressions.RegexOptions.Multiline;
-		var packageFile = _Path.Combine(RootDirectory, "package.json");
-		var includes = FindRegexMatchesInFile(packageFile, @"""include"": ""(.+)""", options);
-		foreach (string include in includes) {
-			var includePath = include.Split(':')[1].Trim().Replace("\"", string.Empty);
-			var includeFile = _Path.Combine(RootDirectory, includePath);
-			var includeContent = FileReadText(includeFile);
-			includeContent = includeContent.Substring(8, includeContent.Length - 12);
-			ReplaceTextInFiles(packageFile, include, includeContent);
+		switch (runtime) {
+			case "win-x64": runtime = "win32-x64"; break;
+			case "win-arm64": runtime = "win32-arm64"; break;
+			case "osx-x64": runtime = "darwin-x64"; break;
+			case "osx-arm64": runtime = "darwin-arm64"; break;
 		}
-	})
-	.Does(() => {
-		var output = _Path.Combine(ArtifactsDirectory, $"DotNet.Meteor.{version}-{configuration}.vsix");
-		StartProcess("vsce", $"package --out {output}");
+		var output = _Path.Combine(ArtifactsDirectory, $"DotNet.Meteor.v{version}_{runtime}.vsix");
+		ExecuteCommand("vsce", $"package --target {runtime} --out {output}");
 	});
+
+
+void ExecuteCommand(string command, string arguments) {
+	if (Environment.OSVersion.Platform == PlatformID.Win32NT) {
+		arguments = $"/c \"{command} {arguments}\"";
+		command = "cmd";
+	}
+	StartProcess(command, arguments);
+}
 
 RunTarget(target);
