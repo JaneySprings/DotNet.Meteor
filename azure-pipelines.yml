@@ -118,8 +118,6 @@ stages:
         condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')
         pool:
           vmImage: ubuntu-latest
-        variables:
-        - group: secrets
         timeoutInMinutes: 4 
         steps:
         - download: current
