@@ -23,16 +23,14 @@
             "request": "launch",
             "preLaunchTask": "build",
             "args": ["--start-session"],
-            "program": "${workspaceFolder}/extension/bin/net8.0/DotNet.Meteor.Workspace.dll",
-            "cwd": "${workspaceFolder}/src/DotNet.Meteor.Debug",
-            "console": "internalConsole",
-            "stopAtEntry": false
+            "program": "${workspaceFolder}/extension/bin/DotNet.Meteor.Workspace.dll",
+            "console": "internalConsole"
         },
         {
             "name": ".NET Core Attach",
             "type": "coreclr",
             "request": "attach",
-			"requireExactSource": false
+			"processName": "DotNet.Meteor.Workspace"
         }
 	]
 }

@@ -34,20 +34,14 @@ Task("clean").Does(() => {
 ///////////////////////////////////////////////////////////////////////////////
 
 Task("debugger").Does(() => {
-	DotNetBuild(MeteorDebugProjectPath, new DotNetBuildSettings {
-		MSBuildSettings = new DotNetMSBuildSettings { AssemblyVersion = version },
-		Configuration = configuration,
-	});
 	DotNetPublish(MeteorWorkspaceProjectPath, new DotNetPublishSettings {
-		MSBuildSettings = new DotNetMSBuildSettings { AssemblyVersion = version },
+		MSBuildSettings = new DotNetMSBuildSettings { 
+			ArgumentCustomization = args => args.Append("/p:NuGetVersionRoslyn=4.5.0"),
+			AssemblyVersion = version
+		},
 		Configuration = configuration,
 		Runtime = runtime,
 	});
-	DeleteFiles(GetFiles(_Path.Combine(ExtensionBinariesDirectory, "**", "*.xml")));
-	DeleteDirectories(GetDirectories(
-		_Path.Combine(ExtensionBinariesDirectory, "**", "runtimes", "android-*")), 
-		new DeleteDirectorySettings { Recursive = true }
-	);
 });
 
 Task("plugin").Does(() => DotNetPack(MeteorPluginProjectPath, new DotNetPackSettings {

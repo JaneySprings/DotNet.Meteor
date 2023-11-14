@@ -22,9 +22,22 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/src/DotNet.Meteor.Debug/DotNet.Meteor.Debug.csproj",
+                "${workspaceFolder}/src/DotNet.Meteor.Workspace/DotNet.Meteor.Workspace.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+		{
+            "label": "vsix",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "cake",
+                "--target=vsix",
+                "--arch=osx-arm64",
+                "--configuration=release",
+                "--release-version=4.0.0"
             ],
             "problemMatcher": "$msCompile"
         }

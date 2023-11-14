@@ -21,12 +21,12 @@ public class LaunchConfiguration {
     public bool IsDebug => Target.Equals("debug", StringComparison.OrdinalIgnoreCase);
 
     public LaunchConfiguration(Dictionary<string, JToken> configurationProperties) {
-        Project = configurationProperties["selected_project"].ToObject<Project>();
-        Device = configurationProperties["selected_device"].ToObject<DeviceData>();
-        Target = configurationProperties["selected_target"].ToObject<string>();
-        ReloadHostPort = configurationProperties["reload_host"].ToObject<int>();
-        UninstallApp = configurationProperties["uninstall_app"].ToObject<bool>();
-        DebugPort = configurationProperties["debugging_port"].ToObject<int>();
+        Project = configurationProperties["selected_project"].ToObject<Project>(TrimmableContext.Default.Project);
+        Device = configurationProperties["selected_device"].ToObject<DeviceData>(TrimmableContext.Default.DeviceData);
+        Target = configurationProperties["selected_target"].ToObject<string>(TrimmableContext.Default.String);
+        ReloadHostPort = configurationProperties["reload_host"].ToObject<int>(TrimmableContext.Default.Int32);
+        UninstallApp = configurationProperties["uninstall_app"].ToObject<bool>(TrimmableContext.Default.Boolean);
+        DebugPort = configurationProperties["debugging_port"].ToObject<int>(TrimmableContext.Default.Int32);
         
         Framework = Project.Frameworks.First(it => it.ContainsInsensitive(Device.Platform));
         OutputAssembly = Project.FindOutputApplication(Target, Framework, Device, message => {

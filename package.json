@@ -127,12 +127,9 @@
           "xaml",
           "xml"
         ],
-        "program": "./extension/bin/net472/DotNet.Meteor.Debug.exe",
-        "osx": {
-          "runtime": "mono"
-        },
-        "linux": {
-          "runtime": "mono"
+        "program": "./extension/bin/DotNet.Meteor.Workspace",
+        "windows": {
+          "program": "./extension/bin/DotNet.Meteor.Workspace.exe"
         },
         "initialConfigurations": [
           {

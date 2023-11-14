@@ -10,6 +10,7 @@ namespace DotNet.Meteor.Debug;
 public abstract class Session: DebugAdapterBase, IProcessLogger {
 
     protected Session(Stream input, Stream output) {
+        Logging.LogConfig.InitializeLog();
         base.InitializeProtocolClient(input, output);
     }
 

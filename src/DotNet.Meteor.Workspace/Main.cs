@@ -1,4 +1,5 @@
-﻿using DotNet.Meteor.HotReload;
+﻿using DotNet.Meteor.Debug;
+using DotNet.Meteor.HotReload;
 using DotNet.Meteor.Shared;
 using DotNet.Meteor.Xaml;
 using System.Reflection;
@@ -12,12 +13,13 @@ public class Program {
         { "--android-sdk-path", AndroidSdkPath },
         { "--analyze-workspace", AnalyzeWorkspace },
         { "--xaml-reload", XamlReload },
-        { "--xaml", XamlGenerate }
+        { "--xaml", XamlGenerate },
+        { "--help", Help }
     };
 
     private static void Main(string[] args) {
         if (args.Length == 0) {
-            Help();
+            StartDebug(args);
             return;
         }
 
@@ -25,7 +27,7 @@ public class Program {
             command.Invoke(args);
     }
 
-    public static void Help() {
+    public static void Help(string[] args) {
         var version = Assembly.GetExecutingAssembly().GetName().Version;
         var name = Assembly.GetExecutingAssembly().GetName().Name;
         Console.WriteLine($"{name} version {version?.Major}.{version?.Minor}.{version?.Build} for Visual Studio Code");
@@ -64,5 +66,10 @@ public class Program {
     public static void XamlReload(string[] args) {
         var result = HotReloadClient.SendNotification(int.Parse(args[1]), args[2]);
         Console.WriteLine(JsonSerializer.Serialize(result, TrimmableContext.Default.Boolean));
+    }
+
+    public static void StartDebug(string[] args) {
+        var debugSession = new DebugSession(Console.OpenStandardInput(), Console.OpenStandardOutput());
+        debugSession.Start();
     }
 }

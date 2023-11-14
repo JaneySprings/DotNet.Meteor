@@ -11,7 +11,7 @@ export class CommandController {
 
     public static activate(context: vscode.ExtensionContext): boolean {
         const extensionPath = vscode.extensions.getExtension(`${res.extensionPublisher}.${res.extensionId}`)?.extensionPath ?? '';
-        const extensionBinaryPath = path.join(extensionPath, "extension", "bin", "net8.0");
+        const extensionBinaryPath = path.join(extensionPath, "extension", "bin");
         const executableExtension = process.platform === 'win32' ? '.exe' : '';
         if (!fs.existsSync(extensionBinaryPath)) {
             vscode.window.showErrorMessage(res.messageEmbeddedRuntimeNotFound);
@@ -23,9 +23,7 @@ export class CommandController {
     }
 
     public static androidSdk(): string | undefined {
-        return ProcessRunner.runSync("dotnet", 
-            `${CommandController.toolPath}`, 
-            "--android-sdk-path");
+        return ProcessRunner.runSync(CommandController.toolPath, "--android-sdk-path");
     }
     public static async getDevices(): Promise<IDevice[]> {
         return await ProcessRunner.runAsync<IDevice[]>(new ProcessArgumentBuilder(CommandController.toolPath)
