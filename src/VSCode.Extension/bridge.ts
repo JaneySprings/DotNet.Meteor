@@ -3,7 +3,6 @@ import { IProject, IDevice } from './models';
 import * as res from './resources';
 import * as vscode from 'vscode';
 import * as path from 'path';
-import * as fs from 'fs';
 
 
 export class CommandController {
@@ -11,14 +10,8 @@ export class CommandController {
 
     public static activate(context: vscode.ExtensionContext): boolean {
         const extensionPath = vscode.extensions.getExtension(`${res.extensionPublisher}.${res.extensionId}`)?.extensionPath ?? '';
-        const extensionBinaryPath = path.join(extensionPath, "extension", "bin");
         const executableExtension = process.platform === 'win32' ? '.exe' : '';
-        if (!fs.existsSync(extensionBinaryPath)) {
-            vscode.window.showErrorMessage(res.messageEmbeddedRuntimeNotFound);
-            return false;
-        }
-
-        CommandController.toolPath = path.join(extensionBinaryPath, "DotNet.Meteor.Workspace" + executableExtension);
+        CommandController.toolPath = path.join(extensionPath, "extension", "bin", "DotNet.Meteor.Workspace" + executableExtension);
         return true;
     }
 

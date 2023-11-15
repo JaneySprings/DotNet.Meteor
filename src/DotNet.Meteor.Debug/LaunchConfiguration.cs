@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using DotNet.Meteor.Shared;
+using DotNet.Meteor.Debug.Extensions;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Newtonsoft.Json.Linq;
 

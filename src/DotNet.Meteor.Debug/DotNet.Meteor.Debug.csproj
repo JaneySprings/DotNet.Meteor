@@ -3,6 +3,7 @@
 
 	<PropertyGroup>
 		<Nullable>disable</Nullable>
+		<ImplicitUsings>disable</ImplicitUsings>
 	</PropertyGroup>
 
 	<ItemGroup>

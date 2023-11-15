@@ -4,7 +4,7 @@ using System.IO;
 using System.Threading;
 using System.Linq;
 using Mono.Debugging.Soft;
-using DotNet.Meteor.Debug.Utilities;
+using DotNet.Meteor.Debug.Extensions;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 using MonoClient = Mono.Debugging.Client;
@@ -89,7 +89,7 @@ public partial class DebugSession : Session {
         symbolServer = new SymbolServer(configuration.Project.Path);
 
         if (configuration.DebugPort == 0)
-            configuration.DebugPort = Extensions.FindFreePort();
+            configuration.DebugPort = ServerExtensions.FindFreePort();
         if (configuration.DebugPort < 1)
             throw new ProtocolException($"Invalid port '{configuration.DebugPort}'");
 

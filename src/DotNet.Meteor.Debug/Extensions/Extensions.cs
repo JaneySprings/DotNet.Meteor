@@ -1,9 +1,9 @@
 using System.Net;
 using System.Net.Sockets;
 
-namespace DotNet.Meteor.Debug.Utilities;
+namespace DotNet.Meteor.Debug.Extensions;
 
-public static class Extensions {
+public static class ServerExtensions {
     public static int FindFreePort() {
         TcpListener listener = null;
         try {
@@ -18,6 +18,8 @@ public static class Extensions {
     public static string ToThreadName(this string threadName, int threadId) {
         if (!string.IsNullOrEmpty(threadName))
             return threadName;
+        if (threadId == 1)
+            return "Main Thread";
         return $"Thread #{threadId}";
     }
 }

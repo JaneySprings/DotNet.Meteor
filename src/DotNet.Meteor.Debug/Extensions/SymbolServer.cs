@@ -5,7 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 
-namespace DotNet.Meteor.Debug.Utilities;
+namespace DotNet.Meteor.Debug.Extensions;
 
 public class SymbolServer {
     private readonly string sourceDirectory;

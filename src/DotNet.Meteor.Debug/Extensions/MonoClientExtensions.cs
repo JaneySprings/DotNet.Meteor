@@ -2,7 +2,7 @@ using System;
 using Mono.Debugging.Client;
 using DebugProtocol =  Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 
-namespace DotNet.Meteor.Debug;
+namespace DotNet.Meteor.Debug.Extensions;
 
 public static class MonoClientExtensions {
     public static StackFrame GetFrameSafe(this Backtrace bt, int n) {

@@ -3,7 +3,7 @@ using System.Text.Json.Serialization.Metadata;
 using Newtonsoft.Json.Linq;
 using NewtonConverter = Newtonsoft.Json.JsonConvert;
 
-namespace DotNet.Meteor.Debug;
+namespace DotNet.Meteor.Debug.Extensions;
 
 public static class ConfigurationExtensions {
     public static T ToObject<T>(this JToken jtoken, JsonTypeInfo<T> type) {

@@ -9,6 +9,7 @@
 		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
 		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 		<!-- <PublishTrimmed>true</PublishTrimmed> -->
+		<!-- <TrimMode>partial</TrimMode> -->
 		<SelfContained>true</SelfContained>
 	</PropertyGroup>
 
