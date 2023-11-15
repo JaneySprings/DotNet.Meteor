@@ -20,10 +20,10 @@ stages:
     condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')
     dependsOn: []
     jobs:
-      - job: Linux
+      - job: Build
         pool:
-          vmImage: ubuntu-latest
-        timeoutInMinutes: 6
+          vmImage: macos-latest
+        timeoutInMinutes: 10
         variables:
           - name: version
             value: $[ replace(variables['Build.SourceBranch'], 'refs/tags/', '') ] 
@@ -56,13 +56,13 @@ stages:
         - publish: '$(System.DefaultWorkingDirectory)/artifacts'
           displayName: 'Publish Artifacts'
           artifact: 'VSIX Build'
-        - task: GitHubRelease@1
-          inputs:
-            gitHubConnection: 'upstream'
-            repositoryName: '$(Build.Repository.Name)'
-            action: 'create'
-            tagSource: 'gitTag'
-            assets: '$(Pipeline.Workspace)/**/*.vsix'
+        # - task: GitHubRelease@1
+        #   inputs:
+        #     gitHubConnection: 'upstream'
+        #     repositoryName: '$(Build.Repository.Name)'
+        #     action: 'create'
+        #     tagSource: 'gitTag'
+        #     assets: '$(Pipeline.Workspace)/**/*.vsix'
 
 
 
