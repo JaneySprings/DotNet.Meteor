@@ -24,8 +24,8 @@ var configuration = Argument("configuration", "debug");
 Task("clean").Does(() => {
 	CleanDirectory(ArtifactsDirectory);
 	CleanDirectory(ExtensionStagingDirectory);
-	CleanDirectories(_Path.Combine(RootDirectory, "**", "bin"));
-	CleanDirectories(_Path.Combine(RootDirectory, "**", "obj"));
+	CleanDirectories(_Path.Combine(RootDirectory, "src", "**", "bin"));
+	CleanDirectories(_Path.Combine(RootDirectory, "src", "**", "obj"));
 });
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -71,10 +71,11 @@ Task("test").Does(() => DotNetTest(MeteorTestsProjectPath, new DotNetTestSetting
 Task("vsix")
 	.IsDependentOn("clean")
 	.IsDependentOn("debugger")
-	.DoesForEach<FilePath>(GetFiles(_Path.Combine(RootDirectory, "*.json")), file => {
+	.Does(() => {
+		var package = _Path.Combine(RootDirectory, "package.json");
 		var regex = @"^\s\s(""version"":\s+)("".+"")(,)";
 		var options = System.Text.RegularExpressions.RegexOptions.Multiline;
-		ReplaceRegexInFiles(file.ToString(), regex, $"  $1\"{version}\"$3", options);
+		ReplaceRegexInFiles(package, regex, $"  $1\"{version}\"$3", options);
 	})
 	.Does(() => {
 		var options = System.Text.RegularExpressions.RegexOptions.Multiline;

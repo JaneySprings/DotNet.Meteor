@@ -43,7 +43,7 @@ export class ProjectItem implements QuickPickItem {
     constructor(project: IProject) {
         this.label = project.name;
         this.detail = project.path;
-        this.description = project.frameworks?.join('  ') ?? "frameworks not found";
+        this.description = project.frameworks?.join('  ');
         this.item = project;
     }
 }

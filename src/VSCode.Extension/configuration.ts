@@ -41,6 +41,11 @@ export class ConfigurationController {
             res.configDefaultUninstallApplicationBeforeInstalling
         );
     }
+    public static getTargetFramework(): string | undefined {
+        return ConfigurationController.project?.frameworks.find(it => {
+            return it.includes(ConfigurationController.device?.platform ?? 'undefined');
+        });
+    }
 
     public static isMacCatalyst() { return ConfigurationController.device?.platform === 'maccatalyst'; }
     public static isWindows() { return ConfigurationController.device?.platform === 'windows'; }
@@ -60,7 +65,7 @@ export class ConfigurationController {
             window.showErrorMessage(res.messageDeviceNotExists);
             return false;
         }
-        if (!ConfigurationController.project.frameworks.some(it => it.includes(ConfigurationController.device!.platform!))) {
+        if (!ConfigurationController.getTargetFramework()) {
             window.showErrorMessage(res.messageNoFrameworkFound);
             return false;
         }
