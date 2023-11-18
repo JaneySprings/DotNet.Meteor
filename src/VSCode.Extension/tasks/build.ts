@@ -22,12 +22,9 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
             .append(definition.target.toLowerCase());
 
         if (ConfigurationController.isActive()) {
-            const framework = ConfigurationController.project!.frameworks
-                .find(it => it.includes(ConfigurationController.device!.platform ?? 'undefined'))
-            
             builder.appendQuoted(ConfigurationController.project!.path)
                 .append(`-p:Configuration=${ConfigurationController.target}`)
-                .append(`-p:TargetFramework=${framework}`);
+                .append(`-p:TargetFramework=${ConfigurationController.getTargetFramework()}`);
 
             if (ConfigurationController.device!.runtime_id) {
                 builder.append(`-p:RuntimeIdentifier=${ConfigurationController.device!.runtime_id}`);
