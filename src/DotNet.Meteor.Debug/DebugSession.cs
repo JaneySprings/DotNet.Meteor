@@ -226,7 +226,7 @@ public partial class DebugSession : Session {
 #region request: StackTrace
     protected override StackTraceResponse HandleStackTraceRequest(StackTraceArguments arguments) {
         return DoSafe<StackTraceResponse>(() => {
-            MonoClient.ThreadInfo thread = this.session.ActiveThread;
+            var thread = this.session.ActiveThread;
             if (thread.Id != arguments.ThreadId) {
                 thread = FindThread(arguments.ThreadId);
                 thread?.SetActive();
@@ -244,7 +244,12 @@ public partial class DebugSession : Session {
             for (int i = startFrame; i < Math.Min(startFrame + levels, totalFrames); i++) {
                 DebugProtocol.Source source = null;
                 var hint = DebugProtocol.StackFrame.PresentationHintValue.Unknown;
-                var frame = bt.GetFrame(i);
+                var frame = bt.GetFrameSafe(i);
+                if (frame == null) {
+                    stackFrames.Add(new DebugProtocol.StackFrame(0, "<unknown>", 0, 0));
+                    continue;
+                }
+
                 var sourceLocation = frame.SourceLocation;
                 string sourceName = string.Empty;
 
@@ -541,7 +546,8 @@ public partial class DebugSession : Session {
             return null;
 
         for (int i = 0; i < thread.Backtrace.FrameCount; i++) {
-            var ex = thread.Backtrace.GetFrame(i).GetException();
+            var frame = thread.Backtrace.GetFrameSafe(i);
+            var ex = frame?.GetException();
             if (ex != null) {
                 this.exception = ex.Instance;
                 return ex;
