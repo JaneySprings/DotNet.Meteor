@@ -22,7 +22,7 @@ public partial class DebugSession {
         if (arguments == null || !options.IsDebug)
             return;
 
-        session.Run(new SoftDebuggerStartInfo(arguments), sessionOptions);
+        session.Run(new SoftDebuggerStartInfo(arguments), options.DebuggerSessionOptions);
         OnOutputDataReceived("Debugger is ready and listening...");
     }
 

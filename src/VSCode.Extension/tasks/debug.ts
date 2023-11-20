@@ -46,6 +46,7 @@ export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationPro
 		config['debugging_port'] = ConfigurationController.getDebuggingPort();
 		config['uninstall_app'] = ConfigurationController.getUninstallAppOption();
 		config['reload_host'] = ConfigurationController.getReloadHostPort();
+		config['debugger_options'] = ConfigurationController.getDebuggerOptions();
 		
         return config;
 	}

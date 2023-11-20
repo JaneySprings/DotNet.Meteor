@@ -46,6 +46,25 @@ export class ConfigurationController {
             return it.includes(ConfigurationController.device?.platform ?? 'undefined');
         });
     }
+    public static getDebuggerOptions(): any {
+        return {
+            evaluation_timeout: ConfigurationController.getSettingOrDefault<number>(res.configIdDebuggerOptionsEvaluationTimeout),
+            member_evaluation_timeout: ConfigurationController.getSettingOrDefault<number>(res.configIdDebuggerOptionsMemberEvaluationTimeout),
+            allow_target_invoke: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsAllowTargetInvoke),
+            allow_method_evaluation: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsAllowMethodEvaluation),
+            allow_to_string_calls: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsAllowToStringCalls),
+            flatten_hierarchy: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsFlattenHierarchy),
+            group_private_members: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsGroupPrivateMembers),
+            group_static_members: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsGroupStaticMembers),
+            use_external_type_resolver: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsUseExternalTypeResolver),
+            integer_display_format: ConfigurationController.getSettingOrDefault<string>(res.configIdDebuggerOptionsIntegerDisplayFormat),
+            current_exception_tag: ConfigurationController.getSettingOrDefault<string>(res.configIdDebuggerOptionsCurrentExceptionTag),
+            ellipsize_strings: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsEllipsizeStrings),
+            ellipsized_length: ConfigurationController.getSettingOrDefault<number>(res.configIdDebuggerOptionsEllipsizedLength),
+            chunk_raw_strings: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsChunkRawStrings),
+            ienumerable: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsIenumerable),
+        };
+    }
 
     public static isMacCatalyst() { return ConfigurationController.device?.platform === 'maccatalyst'; }
     public static isWindows() { return ConfigurationController.device?.platform === 'windows'; }
@@ -78,5 +97,8 @@ export class ConfigurationController {
 
     private static getSetting<TResult>(id: string, fallback: TResult): TResult {
         return workspace.getConfiguration(res.configId).get(id) ?? fallback;
+    }
+    private static getSettingOrDefault<TResult>(id: string): TResult | undefined {
+        return workspace.getConfiguration(res.configId).get(id);
     }
 } 

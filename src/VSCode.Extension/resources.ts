@@ -47,3 +47,20 @@ export const configDefaultHotReloadHostPort = 9988;
 
 export const configIdUninstallApplicationBeforeInstalling = "uninstallApplicationBeforeInstalling";
 export const configDefaultUninstallApplicationBeforeInstalling = true;
+
+export const configIdDebuggerOptions = "debuggerOptions";
+export const configIdDebuggerOptionsEvaluationTimeout = `${configIdDebuggerOptions}.evaluationTimeout`;
+export const configIdDebuggerOptionsMemberEvaluationTimeout = `${configIdDebuggerOptions}.memberEvaluationTimeout`;
+export const configIdDebuggerOptionsAllowTargetInvoke = `${configIdDebuggerOptions}.allowTargetInvoke`;
+export const configIdDebuggerOptionsAllowMethodEvaluation = `${configIdDebuggerOptions}.allowMethodEvaluation`;
+export const configIdDebuggerOptionsAllowToStringCalls = `${configIdDebuggerOptions}.allowToStringCalls`;
+export const configIdDebuggerOptionsFlattenHierarchy = `${configIdDebuggerOptions}.flattenHierarchy`;
+export const configIdDebuggerOptionsGroupPrivateMembers = `${configIdDebuggerOptions}.groupPrivateMembers`;
+export const configIdDebuggerOptionsGroupStaticMembers = `${configIdDebuggerOptions}.groupStaticMembers`;
+export const configIdDebuggerOptionsUseExternalTypeResolver = `${configIdDebuggerOptions}.useExternalTypeResolver`;
+export const configIdDebuggerOptionsIntegerDisplayFormat = `${configIdDebuggerOptions}.integerDisplayFormat`;
+export const configIdDebuggerOptionsCurrentExceptionTag = `${configIdDebuggerOptions}.currentExceptionTag`;
+export const configIdDebuggerOptionsEllipsizeStrings = `${configIdDebuggerOptions}.ellipsizeStrings`;
+export const configIdDebuggerOptionsEllipsizedLength = `${configIdDebuggerOptions}.ellipsizedLength`;
+export const configIdDebuggerOptionsChunkRawStrings = `${configIdDebuggerOptions}.chunkRawStrings`;
+export const configIdDebuggerOptionsIenumerable = `${configIdDebuggerOptions}.ienumerable`;

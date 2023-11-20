@@ -22,26 +22,7 @@ public partial class DebugSession : Session {
     private readonly Handles<MonoClient.StackFrame> frameHandles = new Handles<MonoClient.StackFrame>();
     private readonly Handles<MonoClient.ObjectValue[]> variableHandles = new Handles<MonoClient.ObjectValue[]>();
     private readonly Dictionary<int, DebugProtocol.Thread> seenThreads = new Dictionary<int, DebugProtocol.Thread>();
-    private readonly SoftDebuggerSession session = new SoftDebuggerSession {
-        Breakpoints = new MonoClient.BreakpointStore()
-    };
-    private readonly MonoClient.DebuggerSessionOptions sessionOptions = new MonoClient.DebuggerSessionOptions {
-        EvaluationOptions = new MonoClient.EvaluationOptions {
-            EvaluationTimeout = 5000,
-            MemberEvaluationTimeout = 5000,
-            UseExternalTypeResolver = false,
-            AllowMethodEvaluation = true,
-            GroupPrivateMembers = true,
-            GroupStaticMembers = true,
-            AllowToStringCalls = true,
-            AllowTargetInvoke = true,
-            ChunkRawStrings = false,
-            EllipsizeStrings = false,
-            CurrentExceptionTag = "$exception",
-            IntegerDisplayFormat = MonoClient.IntegerDisplayFormat.Decimal,
-            StackFrameFormat = new MonoClient.StackFrameFormat()
-        }
-    };
+    private readonly SoftDebuggerSession session = new SoftDebuggerSession();
 
     public DebugSession(Stream input, Stream output): base(input, output) {
         MonoClient.DebuggerLoggingService.CustomLogger = new MonoLogger();
@@ -393,8 +374,8 @@ public partial class DebugSession : Session {
             if (!frame.ValidateExpression(arguments.Expression))
                 throw new ProtocolException("invalid expression");
 
-            var val = frame.GetExpressionValue(arguments.Expression, this.sessionOptions.EvaluationOptions);
-            val.WaitHandle.WaitOne(this.sessionOptions.EvaluationOptions.EvaluationTimeout);
+            var val = frame.GetExpressionValue(arguments.Expression, session.Options.EvaluationOptions);
+            val.WaitHandle.WaitOne(session.Options.EvaluationOptions.EvaluationTimeout);
 
             if (val.IsEvaluating)
                 throw new ProtocolException("evaluation timeout expected");

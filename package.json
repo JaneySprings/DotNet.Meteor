@@ -189,6 +189,87 @@
           "type": "boolean",
           "default": true,
           "description": "%configuration.description.uninstallApplicationBeforeInstalling%"
+        },
+
+
+        "dotnetMeteor.debuggerOptions.evaluationTimeout": {
+          "type":"integer",
+          "default": 5000,
+          "description": "%configuration.description.debuggerOptions.evaluationTimeout%"
+        },
+        "dotnetMeteor.debuggerOptions.memberEvaluationTimeout": {
+          "type":"integer",
+          "default": 5000,
+          "description": "%configuration.description.debuggerOptions.memberEvaluationTimeout%"
+        },
+        "dotnetMeteor.debuggerOptions.allowTargetInvoke": {
+          "type": "boolean",
+          "default": true,
+          "description": "%configuration.description.debuggerOptions.allowTargetInvoke%"
+        },
+        "dotnetMeteor.debuggerOptions.allowMethodEvaluation": {
+          "type": "boolean",
+          "default": true,
+          "description": "%configuration.description.debuggerOptions.allowMethodEvaluation%"
+        },
+        "dotnetMeteor.debuggerOptions.allowToStringCalls": {
+          "type": "boolean",
+          "default": true,
+          "description": "%configuration.description.debuggerOptions.allowToStringCalls%"
+        },
+        "dotnetMeteor.debuggerOptions.flattenHierarchy": {
+          "type": "boolean",
+          "default": false,
+          "description": "%configuration.description.debuggerOptions.flattenHierarchy%"
+        },
+        "dotnetMeteor.debuggerOptions.groupPrivateMembers": {
+          "type": "boolean",
+          "default": true,
+          "description": "%configuration.description.debuggerOptions.groupPrivateMembers%"
+        },
+        "dotnetMeteor.debuggerOptions.groupStaticMembers": {
+          "type": "boolean",
+          "default": true,
+          "description": "%configuration.description.debuggerOptions.groupStaticMembers%"
+        },
+        "dotnetMeteor.debuggerOptions.useExternalTypeResolver": {
+          "type": "boolean",
+          "default": false,
+          "description": "%configuration.description.debuggerOptions.useExternalTypeResolver%"
+        },
+        "dotnetMeteor.debuggerOptions.currentExceptionTag": {
+          "type": "string",
+          "default": "$exception",
+          "description": "%configuration.description.debuggerOptions.currentExceptionTag%"
+        },
+        "dotnetMeteor.debuggerOptions.ellipsizeStrings": {
+          "type": "boolean",
+          "default": false,
+          "description": "%configuration.description.debuggerOptions.ellipsizeStrings%"
+        },
+        "dotnetMeteor.debuggerOptions.ellipsizedLength": {
+          "type": "integer",
+          "default": 100,
+          "description": "%configuration.description.debuggerOptions.ellipsizedLength%"
+        },
+        "dotnetMeteor.debuggerOptions.chunkRawStrings": {
+          "type": "boolean",
+          "default": false,
+          "description": "%configuration.description.debuggerOptions.chunkRawStrings%"
+        },
+        "dotnetMeteor.debuggerOptions.ienumerable": {
+          "type": "boolean",
+          "default": false,
+          "description": "%configuration.description.debuggerOptions.ienumerable%"
+        },
+        "dotnetMeteor.debuggerOptions.integerDisplayFormat": {
+          "type": "string",
+          "default": "Decimal",
+          "description": "%configuration.description.debuggerOptions.integerDisplayFormat%",
+          "enum": [
+            "Decimal",
+            "Hexadecimal"
+          ]
         }
       }
     }

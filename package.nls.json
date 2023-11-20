@@ -25,5 +25,21 @@
 	"configuration.description.monoSdbDebuggerPortAndroid": "Android's default port of the Mono SDB debugger.",
 	"configuration.description.monoSdbDebuggerPortApple": "iOS's default port of the Mono SDB debugger.",
 	"configuration.description.hotReloadHostPort": "The port of the Hot Reload server.",
-	"configuration.description.uninstallApplicationBeforeInstalling": "Uninstalls the application before installing it again."
+	"configuration.description.uninstallApplicationBeforeInstalling": "Uninstalls the application before installing it again.",
+
+	"configuration.description.debuggerOptions.evaluationTimeout": "To be added.",
+	"configuration.description.debuggerOptions.memberEvaluationTimeout": "To be added.",
+	"configuration.description.debuggerOptions.allowTargetInvoke": "To be added.",
+	"configuration.description.debuggerOptions.allowMethodEvaluation": "To be added.",
+	"configuration.description.debuggerOptions.allowToStringCalls": "To be added.",
+	"configuration.description.debuggerOptions.flattenHierarchy": "To be added.",
+	"configuration.description.debuggerOptions.groupPrivateMembers": "To be added.",
+	"configuration.description.debuggerOptions.groupStaticMembers": "To be added.",
+	"configuration.description.debuggerOptions.useExternalTypeResolver": "To be added.",
+	"configuration.description.debuggerOptions.currentExceptionTag": "To be added.",
+	"configuration.description.debuggerOptions.ellipsizeStrings": "To be added.",
+	"configuration.description.debuggerOptions.ellipsizedLength": "To be added.",
+	"configuration.description.debuggerOptions.chunkRawStrings": "To be added.",
+	"configuration.description.debuggerOptions.ienumerable": "To be added.",
+	"configuration.description.debuggerOptions.integerDisplayFormat": "To be added."
 }

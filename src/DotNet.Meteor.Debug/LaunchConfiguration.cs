@@ -6,20 +6,25 @@ using DotNet.Meteor.Shared;
 using DotNet.Meteor.Debug.Extensions;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Newtonsoft.Json.Linq;
+using Mono.Debugging.Client;
 
 namespace DotNet.Meteor.Debug;
 
 public class LaunchConfiguration {
-    public string Framework { get; private set; }
-    public string OutputAssembly { get; private set; }
+    public DebuggerSessionOptions DebuggerSessionOptions { get; }
     public DeviceData Device { get; }
     public Project Project { get; }
+
+    public string OutputAssembly { get; }
+    public string Framework { get; }
     public string Target { get; }
     public bool UninstallApp { get; }
+
     public int ReloadHostPort { get; }
     public int DebugPort { get; set; }
 
     public bool IsDebug => Target.Equals("debug", StringComparison.OrdinalIgnoreCase);
+
 
     public LaunchConfiguration(Dictionary<string, JToken> configurationProperties) {
         Project = configurationProperties["selected_project"].ToObject<Project>(TrimmableContext.Default.Project);
@@ -29,6 +34,7 @@ public class LaunchConfiguration {
         UninstallApp = configurationProperties["uninstall_app"].ToObject<bool>(TrimmableContext.Default.Boolean);
         DebugPort = configurationProperties["debugging_port"].ToObject<int>(TrimmableContext.Default.Int32);
         
+        DebuggerSessionOptions = GetDebuggerSessionOptions(configurationProperties["debugger_options"]);
         Framework = Project.Frameworks.First(it => it.ContainsInsensitive(Device.Platform));
         OutputAssembly = Project.FindOutputApplication(Target, Framework, Device, message => {
             throw new ProtocolException($"Failed to load launch configuration. {message}");
@@ -36,22 +42,35 @@ public class LaunchConfiguration {
     }
 
     public string GetApplicationId() {
-        // if (Device.IsIPhone || Device.IsMacCatalyst) {
-        //     var workingDirectory = Path.GetDirectoryName(Project.Path);
-        //     var files = Directory.GetFiles(workingDirectory, "Info.plist", SearchOption.AllDirectories)
-        //         .Where(it => !it.Contains(Path.GetFileName(OutputAssembly)));
-
-        //     if (!files.Any())
-        //         return null;
-
-        //     var plist = new PropertyExtractor(files.First());
-        //     return plist.Extract("CFBundleIdentifier") ?? Project.EvaluateProperty("ApplicationId");
-        // }
-
         if (!Device.IsAndroid)
-            return null;
+            throw new ProtocolException("Application ID not implemented.");
 
         var assemblyName = Path.GetFileNameWithoutExtension(OutputAssembly);
         return assemblyName.Replace("-Signed", "");
+    }
+
+    private DebuggerSessionOptions GetDebuggerSessionOptions(JToken debuggerJsonToken) {
+        var debuggerOptions = MonoClientExtensions.DefaultDebuggerOptions;
+        var options = debuggerJsonToken.ToObject<DebuggerOptions>(DebuggerOptionsContext.Default.DebuggerOptions);
+        if (options == null)
+            return debuggerOptions;
+
+        debuggerOptions.EvaluationOptions.EvaluationTimeout = options.EvaluationTimeout;
+        debuggerOptions.EvaluationOptions.MemberEvaluationTimeout = options.MemberEvaluationTimeout;
+        debuggerOptions.EvaluationOptions.AllowTargetInvoke = options.AllowTargetInvoke;
+        debuggerOptions.EvaluationOptions.AllowMethodEvaluation = options.AllowMethodEvaluation;
+        debuggerOptions.EvaluationOptions.AllowToStringCalls = options.AllowToStringCalls;
+        debuggerOptions.EvaluationOptions.FlattenHierarchy = options.FlattenHierarchy;
+        debuggerOptions.EvaluationOptions.GroupPrivateMembers = options.GroupPrivateMembers;
+        debuggerOptions.EvaluationOptions.GroupStaticMembers = options.GroupStaticMembers;
+        debuggerOptions.EvaluationOptions.UseExternalTypeResolver = options.UseExternalTypeResolver;
+        debuggerOptions.EvaluationOptions.CurrentExceptionTag = options.CurrentExceptionTag;
+        debuggerOptions.EvaluationOptions.EllipsizeStrings = options.EllipsizeStrings;
+        debuggerOptions.EvaluationOptions.EllipsizedLength = options.EllipsizedLength;
+        debuggerOptions.EvaluationOptions.ChunkRawStrings = options.ChunkRawStrings;
+        debuggerOptions.EvaluationOptions.IEnumerable = options.IEnumerable;
+        debuggerOptions.EvaluationOptions.IntegerDisplayFormat = DebuggerOptions.GetIntegerDisplayFormat(options.IntegerDisplayFormat);
+
+        return debuggerOptions;
     }
 }
