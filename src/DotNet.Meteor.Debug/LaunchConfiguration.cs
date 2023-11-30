@@ -50,7 +50,7 @@ public class LaunchConfiguration {
     }
 
     private DebuggerSessionOptions GetDebuggerSessionOptions(JToken debuggerJsonToken) {
-        var debuggerOptions = MonoClientExtensions.DefaultDebuggerOptions;
+        var debuggerOptions = ServerExtensions.DefaultDebuggerOptions;
         var options = debuggerJsonToken.ToObject<DebuggerOptions>(DebuggerOptionsContext.Default.DebuggerOptions);
         if (options == null)
             return debuggerOptions;
@@ -68,7 +68,6 @@ public class LaunchConfiguration {
         debuggerOptions.EvaluationOptions.EllipsizeStrings = options.EllipsizeStrings;
         debuggerOptions.EvaluationOptions.EllipsizedLength = options.EllipsizedLength;
         debuggerOptions.EvaluationOptions.ChunkRawStrings = options.ChunkRawStrings;
-        debuggerOptions.EvaluationOptions.IEnumerable = options.IEnumerable;
         debuggerOptions.EvaluationOptions.IntegerDisplayFormat = DebuggerOptions.GetIntegerDisplayFormat(options.IntegerDisplayFormat);
 
         return debuggerOptions;

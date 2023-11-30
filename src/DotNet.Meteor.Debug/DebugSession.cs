@@ -27,21 +27,20 @@ public partial class DebugSession : Session {
     public DebugSession(Stream input, Stream output): base(input, output) {
         MonoClient.DebuggerLoggingService.CustomLogger = new MonoLogger();
 
-        this.session.LogWriter = OnSessionLog;
-        this.session.DebugWriter = OnDebugLog;
-        this.session.OutputWriter = OnLog;
+        session.LogWriter = OnSessionLog;
+        session.DebugWriter = OnDebugLog;
+        session.OutputWriter = OnLog;
+        session.ExceptionHandler = OnExceptionHandled;
 
-        this.session.ExceptionHandler = OnExceptionHandled;
-
-        this.session.TargetStopped += TargetStopped;
-        this.session.TargetHitBreakpoint += TargetHitBreakpoint;
-        this.session.TargetExceptionThrown += TargetExceptionThrown;
-        this.session.TargetUnhandledException += TargetExceptionThrown;
-        this.session.TargetReady += TargetReady;
-        this.session.TargetExited += TargetExited;
-        this.session.TargetInterrupted += TargetInterrupted;
-        this.session.TargetThreadStarted += TargetThreadStarted;
-        this.session.TargetThreadStopped += TargetThreadStopped;
+        session.TargetStopped += TargetStopped;
+        session.TargetHitBreakpoint += TargetHitBreakpoint;
+        session.TargetExceptionThrown += TargetExceptionThrown;
+        session.TargetUnhandledException += TargetExceptionThrown;
+        session.TargetReady += TargetReady;
+        session.TargetExited += TargetExited;
+        session.TargetInterrupted += TargetInterrupted;
+        session.TargetThreadStarted += TargetThreadStarted;
+        session.TargetThreadStopped += TargetThreadStopped;
     }
 
     protected override MonoClient.ICustomLogger GetLogger() => MonoClient.DebuggerLoggingService.CustomLogger;

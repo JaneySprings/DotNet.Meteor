@@ -257,11 +257,6 @@
           "default": false,
           "description": "%configuration.description.debuggerOptions.chunkRawStrings%"
         },
-        "dotnetMeteor.debuggerOptions.ienumerable": {
-          "type": "boolean",
-          "default": false,
-          "description": "%configuration.description.debuggerOptions.ienumerable%"
-        },
         "dotnetMeteor.debuggerOptions.integerDisplayFormat": {
           "type": "string",
           "default": "Decimal",

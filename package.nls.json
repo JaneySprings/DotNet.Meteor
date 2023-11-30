@@ -40,6 +40,5 @@
 	"configuration.description.debuggerOptions.ellipsizeStrings": "To be added.",
 	"configuration.description.debuggerOptions.ellipsizedLength": "To be added.",
 	"configuration.description.debuggerOptions.chunkRawStrings": "To be added.",
-	"configuration.description.debuggerOptions.ienumerable": "To be added.",
 	"configuration.description.debuggerOptions.integerDisplayFormat": "To be added."
 }

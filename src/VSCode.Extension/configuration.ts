@@ -61,8 +61,7 @@ export class ConfigurationController {
             current_exception_tag: ConfigurationController.getSettingOrDefault<string>(res.configIdDebuggerOptionsCurrentExceptionTag),
             ellipsize_strings: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsEllipsizeStrings),
             ellipsized_length: ConfigurationController.getSettingOrDefault<number>(res.configIdDebuggerOptionsEllipsizedLength),
-            chunk_raw_strings: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsChunkRawStrings),
-            ienumerable: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsIenumerable),
+            chunk_raw_strings: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsChunkRawStrings)
         };
     }
 

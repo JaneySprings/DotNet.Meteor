@@ -63,4 +63,3 @@ export const configIdDebuggerOptionsCurrentExceptionTag = `${configIdDebuggerOpt
 export const configIdDebuggerOptionsEllipsizeStrings = `${configIdDebuggerOptions}.ellipsizeStrings`;
 export const configIdDebuggerOptionsEllipsizedLength = `${configIdDebuggerOptions}.ellipsizedLength`;
 export const configIdDebuggerOptionsChunkRawStrings = `${configIdDebuggerOptions}.chunkRawStrings`;
-export const configIdDebuggerOptionsIenumerable = `${configIdDebuggerOptions}.ienumerable`;
