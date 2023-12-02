@@ -14,14 +14,14 @@ public static class ServerExtensions {
         EvaluationOptions = new EvaluationOptions {
             EvaluationTimeout = 5000,
             MemberEvaluationTimeout = 5000,
-            UseExternalTypeResolver = false,
+            UseExternalTypeResolver = true,
             AllowMethodEvaluation = true,
             GroupPrivateMembers = true,
             GroupStaticMembers = true,
             AllowToStringCalls = true,
             AllowTargetInvoke = true,
-            ChunkRawStrings = false,
-            EllipsizeStrings = false,
+            EllipsizeStrings = true,
+            EllipsizedLength = 260,
             CurrentExceptionTag = "$exception",
             IntegerDisplayFormat = IntegerDisplayFormat.Decimal,
             StackFrameFormat = new StackFrameFormat()

@@ -44,9 +44,6 @@ public class DebuggerOptions {
     [JsonPropertyName("ellipsized_length")]
     public int EllipsizedLength { get; set; } = ServerExtensions.DefaultDebuggerOptions.EvaluationOptions.EllipsizedLength;
 
-    [JsonPropertyName("chunk_raw_strings")]
-    public bool ChunkRawStrings { get; set; } = ServerExtensions.DefaultDebuggerOptions.EvaluationOptions.ChunkRawStrings;
-
     internal static IntegerDisplayFormat GetIntegerDisplayFormat(string value) {
         if (value == Mono.Debugging.Client.IntegerDisplayFormat.Decimal.ToString())
             return Mono.Debugging.Client.IntegerDisplayFormat.Decimal;

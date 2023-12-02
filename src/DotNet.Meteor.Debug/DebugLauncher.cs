@@ -20,7 +20,7 @@ public partial class DebugSession {
             arguments = new ServerConnectionProvider(IPAddress.Loopback, port, options.Project.Name);
 
         if (arguments == null || !options.IsDebug)
-            return;
+            throw new ProtocolException("Unable to connect to the debugger");
 
         session.Run(new SoftDebuggerStartInfo(arguments), options.DebuggerSessionOptions);
         OnOutputDataReceived("Debugger is ready and listening...");

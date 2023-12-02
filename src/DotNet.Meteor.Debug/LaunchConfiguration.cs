@@ -67,7 +67,6 @@ public class LaunchConfiguration {
         debuggerOptions.EvaluationOptions.CurrentExceptionTag = options.CurrentExceptionTag;
         debuggerOptions.EvaluationOptions.EllipsizeStrings = options.EllipsizeStrings;
         debuggerOptions.EvaluationOptions.EllipsizedLength = options.EllipsizedLength;
-        debuggerOptions.EvaluationOptions.ChunkRawStrings = options.ChunkRawStrings;
         debuggerOptions.EvaluationOptions.IntegerDisplayFormat = DebuggerOptions.GetIntegerDisplayFormat(options.IntegerDisplayFormat);
 
         return debuggerOptions;

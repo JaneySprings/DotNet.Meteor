@@ -15,6 +15,7 @@ namespace DotNet.Meteor.Debug;
 public partial class DebugSession : Session {
     private MonoClient.ObjectValue exception;
     private MonoClient.ProcessInfo activeProcess;
+    private ExternalTypeResolver typeResolver;
     private SymbolServer symbolServer;
 
     private readonly List<Action> disposables = new List<Action>();
@@ -67,6 +68,10 @@ public partial class DebugSession : Session {
     protected override LaunchResponse HandleLaunchRequest(LaunchArguments arguments) {
         var configuration = new LaunchConfiguration(arguments.ConfigurationProperties);
         symbolServer = new SymbolServer(configuration.Project.Path);
+        typeResolver = new ExternalTypeResolver(configuration.Project.Path, configuration.DebuggerSessionOptions);
+
+        disposables.Add(() => typeResolver.Dispose());
+        session.TypeResolverHandler = typeResolver.Handle;
 
         if (configuration.DebugPort == 0)
             configuration.DebugPort = ServerExtensions.FindFreePort();
@@ -84,7 +89,7 @@ public partial class DebugSession : Session {
             this.session.Stop();
 
         foreach(var disposable in disposables)
-            disposable.Invoke();
+            DoSafe(() => disposable.Invoke());
 
         this.disposables.Clear();
         if (this.session != null) {

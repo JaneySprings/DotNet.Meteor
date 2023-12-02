@@ -62,4 +62,3 @@ export const configIdDebuggerOptionsIntegerDisplayFormat = `${configIdDebuggerOp
 export const configIdDebuggerOptionsCurrentExceptionTag = `${configIdDebuggerOptions}.currentExceptionTag`;
 export const configIdDebuggerOptionsEllipsizeStrings = `${configIdDebuggerOptions}.ellipsizeStrings`;
 export const configIdDebuggerOptionsEllipsizedLength = `${configIdDebuggerOptions}.ellipsizedLength`;
-export const configIdDebuggerOptionsChunkRawStrings = `${configIdDebuggerOptions}.chunkRawStrings`;

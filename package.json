@@ -215,7 +215,7 @@
         "dotnetMeteor.debuggerOptions.allowToStringCalls": {
           "type": "boolean",
           "default": true,
-          "description": "%configuration.description.debuggerOptions.allowToStringCalls%"
+          "markdownDescription": "%configuration.description.debuggerOptions.allowToStringCalls%"
         },
         "dotnetMeteor.debuggerOptions.flattenHierarchy": {
           "type": "boolean",
@@ -234,8 +234,8 @@
         },
         "dotnetMeteor.debuggerOptions.useExternalTypeResolver": {
           "type": "boolean",
-          "default": false,
-          "description": "%configuration.description.debuggerOptions.useExternalTypeResolver%"
+          "default": true,
+          "markdownDescription": "%configuration.description.debuggerOptions.useExternalTypeResolver%"
         },
         "dotnetMeteor.debuggerOptions.currentExceptionTag": {
           "type": "string",
@@ -244,18 +244,13 @@
         },
         "dotnetMeteor.debuggerOptions.ellipsizeStrings": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "%configuration.description.debuggerOptions.ellipsizeStrings%"
         },
         "dotnetMeteor.debuggerOptions.ellipsizedLength": {
           "type": "integer",
-          "default": 100,
+          "default": 260,
           "description": "%configuration.description.debuggerOptions.ellipsizedLength%"
-        },
-        "dotnetMeteor.debuggerOptions.chunkRawStrings": {
-          "type": "boolean",
-          "default": false,
-          "description": "%configuration.description.debuggerOptions.chunkRawStrings%"
         },
         "dotnetMeteor.debuggerOptions.integerDisplayFormat": {
           "type": "string",
