@@ -168,7 +168,7 @@
       }
     ],
     "configuration": {
-      "title": "%configuration.title%",
+      "title": "%extension.displayName%",
       "properties": {
         "dotnetMeteor.monoSdbDebuggerPortAndroid": {
           "type": "integer",
