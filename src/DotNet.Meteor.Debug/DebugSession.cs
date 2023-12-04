@@ -78,8 +78,8 @@ public partial class DebugSession : Session {
         if (configuration.DebugPort < 1)
             throw new ProtocolException($"Invalid port '{configuration.DebugPort}'");
 
-        LaunchApplication(configuration, configuration.DebugPort);
-        Connect(configuration, configuration.DebugPort);
+        LaunchApplication(configuration);
+        Connect(configuration);
         return new LaunchResponse();
     }
 #endregion request: Launch

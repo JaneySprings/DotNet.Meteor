@@ -16,18 +16,13 @@ export class ConfigurationController {
     }
 
     public static getDebuggingPort(): number {
-        if (ConfigurationController.isAndroid()) return ConfigurationController.getSetting(
-            res.configIdMonoSdbDebuggerPortAndroid,
-            res.configDefaultMonoSdbDebuggerPortAndroid
-        );
-        if (ConfigurationController.isApple()) return ConfigurationController.getSetting(
-            res.configIdMonoSdbDebuggerPortApple,
-            res.configDefaultMonoSdbDebuggerPortApple
-        );
-        if (ConfigurationController.isMacCatalyst() || ConfigurationController.isWindows())
-            return 0;
+        if (ConfigurationController.isAndroid()) 
+            return ConfigurationController.getSetting(res.configIdMonoSdbDebuggerPortAndroid, res.configDefaultMonoSdbDebuggerPortAndroid);
 
-        return -1;
+        if (ConfigurationController.isAppleMobile() && !ConfigurationController.device?.is_emulator) 
+            return ConfigurationController.getSetting(res.configIdMonoSdbDebuggerPortApple, res.configDefaultMonoSdbDebuggerPortApple);
+
+        return 0;
     }
     public static getReloadHostPort(): number {
         return ConfigurationController.getSetting<number>(
@@ -67,7 +62,7 @@ export class ConfigurationController {
     public static isMacCatalyst() { return ConfigurationController.device?.platform === 'maccatalyst'; }
     public static isWindows() { return ConfigurationController.device?.platform === 'windows'; }
     public static isAndroid() { return ConfigurationController.device?.platform === 'android'; }
-    public static isApple() { return ConfigurationController.device?.platform === 'ios'; }
+    public static isAppleMobile() { return ConfigurationController.device?.platform === 'ios'; }
 
     public static isValid(): boolean {
         if (!ConfigurationController.project?.path) {
