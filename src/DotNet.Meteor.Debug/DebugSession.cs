@@ -75,6 +75,8 @@ public partial class DebugSession : Session {
             SupportsLogPoints = true,
             SupportsExceptionOptions = true,
             SupportsExceptionFilterOptions = true,
+            SupportsCompletionsRequest = true,
+            CompletionTriggerCharacters = new List<string> { ".", ",", " ", "(", "$", "<" },
             ExceptionBreakpointFilters = new List<ExceptionBreakpointsFilter> {
                 ExceptionsFilter.AllExceptions
             }
@@ -429,6 +431,24 @@ public partial class DebugSession : Session {
         });
     }
 #endregion request: ExceptionInfo
+#region request: Completions
+    protected override CompletionsResponse HandleCompletionsRequest(CompletionsArguments arguments) {
+        return DoSafe<CompletionsResponse>(() => {
+            if (string.IsNullOrEmpty(arguments.Text))
+                throw new ProtocolException("expression missing");
+
+            var frame = this.frameHandles.Get(arguments.FrameId ?? 0, null);
+            if (frame == null)
+                throw new ProtocolException("no active stackframe");
+
+            var completionData = frame.GetExpressionCompletionData(arguments.Text);
+            if (completionData == null || completionData.Items == null)
+                return new CompletionsResponse();
+
+            return new CompletionsResponse(completionData.Items.Select(x => x.ToCompletionItem()).ToList());
+        });
+    }
+#endregion request: Completions
 
 #region Event handlers 
 
