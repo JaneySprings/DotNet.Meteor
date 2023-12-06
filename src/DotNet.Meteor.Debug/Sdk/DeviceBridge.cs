@@ -32,9 +32,6 @@ public static class DeviceBridge {
             .Append($"tcp:{port}"))
             .WaitForExit();
 
-        if (!result.Success)
-            throw new Exception(string.Join(Environment.NewLine, result.StandardError));
-
         return string.Join(Environment.NewLine, result.StandardOutput);
     }
 

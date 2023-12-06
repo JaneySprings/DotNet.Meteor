@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using Newtonsoft.Json.Linq;
 using NewtonConverter = Newtonsoft.Json.JsonConvert;
+using DebugProtocol =  Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 
 namespace DotNet.Meteor.Debug.Extensions;
 
@@ -48,6 +49,7 @@ public static class ServerExtensions {
         }
 	}
 
+
     public static string ToThreadName(this string threadName, int threadId) {
         if (!string.IsNullOrEmpty(threadName))
             return threadName;
@@ -65,5 +67,30 @@ public static class ServerExtensions {
             return default;
 
         return JsonSerializer.Deserialize(json, type);
+    }
+
+    public static DebugProtocol.CompletionItem ToCompletionItem(this CompletionItem item) {
+        return new DebugProtocol.CompletionItem() {
+            Type = item.Flags.ToCompletionItemType(),
+            SortText = item.Name,
+            Label = item.Name,
+        };
+    }
+
+    private static DebugProtocol.CompletionItemType ToCompletionItemType(this ObjectValueFlags flags) {
+        if (flags.HasFlag(ObjectValueFlags.Method))
+            return DebugProtocol.CompletionItemType.Method;
+        if (flags.HasFlag(ObjectValueFlags.Field))
+            return DebugProtocol.CompletionItemType.Field;
+        if (flags.HasFlag(ObjectValueFlags.Property))
+            return DebugProtocol.CompletionItemType.Property;
+        if (flags.HasFlag(ObjectValueFlags.Namespace))
+            return DebugProtocol.CompletionItemType.Module;
+        if (flags.HasFlag(ObjectValueFlags.Type))
+            return DebugProtocol.CompletionItemType.Class;
+        if (flags.HasFlag(ObjectValueFlags.Variable))
+            return DebugProtocol.CompletionItemType.Variable;
+
+        return DebugProtocol.CompletionItemType.Text;
     }
 }
