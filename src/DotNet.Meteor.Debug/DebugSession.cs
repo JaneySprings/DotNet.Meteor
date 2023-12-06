@@ -57,7 +57,7 @@ public partial class DebugSession : Session {
             SupportsExceptionOptions = true,
             SupportsExceptionFilterOptions = true,
             SupportsCompletionsRequest = true,
-            CompletionTriggerCharacters = new List<string> { ".", ":", " ", "(", "$", "<" },
+            CompletionTriggerCharacters = new List<string> { ".", ",", " ", "(", "$", "<" },
             ExceptionBreakpointFilters = new List<ExceptionBreakpointsFilter> {
                 ExceptionsFilter.AllExceptions
             }
