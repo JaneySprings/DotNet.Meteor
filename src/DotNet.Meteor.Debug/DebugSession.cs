@@ -426,7 +426,13 @@ public partial class DebugSession : Session {
             if (frame == null)
                 throw new ProtocolException("no active stackframe");
 
-            var completionData = frame.GetExpressionCompletionData(arguments.Text);
+            string resolvedText = null;
+            if (session.Options.EvaluationOptions.UseExternalTypeResolver) {
+                var evaluator = session.GetEvaluator(frame);
+                resolvedText = evaluator?.Resolve(session, frame.SourceLocation, arguments.Text);
+            }
+
+            var completionData = frame.GetExpressionCompletionData(resolvedText ?? arguments.Text);
             if (completionData == null || completionData.Items == null)
                 return new CompletionsResponse();
 
