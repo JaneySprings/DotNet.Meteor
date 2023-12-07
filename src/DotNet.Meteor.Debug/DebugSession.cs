@@ -57,7 +57,7 @@ public partial class DebugSession : Session {
             SupportsExceptionOptions = true,
             SupportsExceptionFilterOptions = true,
             SupportsCompletionsRequest = true,
-            CompletionTriggerCharacters = new List<string> { ".", ",", " ", "(", "$", "<" },
+            CompletionTriggerCharacters = new List<string> { "." },
             ExceptionBreakpointFilters = new List<ExceptionBreakpointsFilter> {
                 ExceptionsFilter.AllExceptions
             }
@@ -428,8 +428,11 @@ public partial class DebugSession : Session {
 
             string resolvedText = null;
             if (session.Options.EvaluationOptions.UseExternalTypeResolver) {
-                var evaluator = session.GetEvaluator(frame);
-                resolvedText = evaluator?.Resolve(session, frame.SourceLocation, arguments.Text);
+                var lastTriggerIndex = arguments.Text.LastIndexOf('.');
+                if (lastTriggerIndex > 0) {
+                    resolvedText = frame.ResolveExpression(arguments.Text.Substring(0, lastTriggerIndex));
+                    resolvedText += arguments.Text.Substring(lastTriggerIndex);
+                }
             }
 
             var completionData = frame.GetExpressionCompletionData(resolvedText ?? arguments.Text);
