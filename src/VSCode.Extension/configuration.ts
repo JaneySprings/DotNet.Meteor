@@ -7,6 +7,7 @@ import * as res from './resources';
 
 export class ConfigurationController {
     public static androidSdkDirectory: string | undefined;
+    public static profiler: string | undefined;
     public static project: IProject | undefined;
     public static device: IDevice | undefined;
     public static target: Target | undefined;
@@ -25,11 +26,12 @@ export class ConfigurationController {
         return 0;
     }
     public static getReloadHostPort(): number {
-        return ConfigurationController.getSetting<number>(
-            res.configIdHotReloadHostPort, 
-            res.configDefaultHotReloadHostPort
-        );
+        return ConfigurationController.getSetting<number>(res.configIdHotReloadHostPort, res.configDefaultHotReloadHostPort);
     }
+    public static getProfilerPort(): number {
+        return ConfigurationController.getSetting<number>(res.configIdProfilerPort, res.configDefaultProfilerPort);
+    }
+
     public static getUninstallAppOption(): boolean {
         return ConfigurationController.getSetting<boolean>(
             res.configIdUninstallApplicationBeforeInstalling, 

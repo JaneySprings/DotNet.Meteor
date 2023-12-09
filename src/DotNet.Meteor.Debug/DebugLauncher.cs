@@ -19,7 +19,7 @@ public partial class DebugSession {
         else if (configuration.Device.IsIPhone || configuration.Device.IsMacCatalyst)
             arguments = new ServerConnectionProvider(IPAddress.Loopback, configuration.DebugPort, configuration.Project.Name);
 
-        if (arguments == null || !configuration.IsDebug)
+        if (arguments == null || !configuration.IsDebugConfiguration)
             throw new ProtocolException("Unable to connect to the debugger");
 
         session.Run(new SoftDebuggerStartInfo(arguments), configuration.DebuggerSessionOptions);
@@ -67,9 +67,7 @@ public partial class DebugSession {
 
     private void LaunchMacCatalyst(LaunchConfiguration configuration) {
         var tool = AppleUtilities.OpenTool();
-        var processRunner = new ProcessRunner(tool, new ProcessArgumentBuilder()
-            .AppendQuoted(configuration.OutputAssembly)
-        );
+        var processRunner = new ProcessRunner(tool, new ProcessArgumentBuilder().AppendQuoted(configuration.OutputAssembly));
         processRunner.SetEnvironmentVariable("__XAMARIN_DEBUG_HOSTS__", "127.0.0.1");
         processRunner.SetEnvironmentVariable("__XAMARIN_DEBUG_PORT__", configuration.DebugPort.ToString());
         var result = processRunner.WaitForExit();

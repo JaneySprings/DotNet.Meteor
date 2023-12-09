@@ -11,30 +11,37 @@ using Mono.Debugging.Client;
 namespace DotNet.Meteor.Debug;
 
 public class LaunchConfiguration {
-    public DebuggerSessionOptions DebuggerSessionOptions { get; }
-    public DeviceData Device { get; }
-    public Project Project { get; }
+    public DebuggerSessionOptions DebuggerSessionOptions { get; init; }
+    public DeviceData Device { get; init; }
+    public Project Project { get; init; }
 
-    public string OutputAssembly { get; }
-    public string Framework { get; }
-    public string Target { get; }
-    public bool UninstallApp { get; }
+    public string OutputAssembly { get; init; }
+    public string Framework { get; init; }
+    public string Target { get; init; }
+    public bool UninstallApp { get; init; }
 
-    public int ReloadHostPort { get; }
     public int DebugPort { get; set; }
+    public int ReloadHostPort { get; init; }
+    public int ProfilerPort { get; init; }
+    public string ProfilerMode { get; init; }
 
-    public bool IsDebug => Target.Equals("debug", StringComparison.OrdinalIgnoreCase);
-
+    public bool IsDebugConfiguration => Target.Equals("debug", StringComparison.OrdinalIgnoreCase);
+    public bool IsProfileConfiguration => !string.IsNullOrEmpty(ProfilerMode);
+    public string TempDirectoryPath => Path.Combine(Path.GetDirectoryName(Project.Path), ".meteor");
 
     public LaunchConfiguration(Dictionary<string, JToken> configurationProperties) {
-        Project = configurationProperties["selected_project"].ToObject<Project>(TrimmableContext.Default.Project);
-        Device = configurationProperties["selected_device"].ToObject<DeviceData>(TrimmableContext.Default.DeviceData);
-        Target = configurationProperties["selected_target"].ToObject<string>(TrimmableContext.Default.String);
-        ReloadHostPort = configurationProperties["reload_host"].ToObject<int>(TrimmableContext.Default.Int32);
-        UninstallApp = configurationProperties["uninstall_app"].ToObject<bool>(TrimmableContext.Default.Boolean);
-        DebugPort = configurationProperties["debugging_port"].ToObject<int>(TrimmableContext.Default.Int32);
+        Project = configurationProperties["selectedProject"].ToObject<Project>(TrimmableContext.Default.Project);
+        Device = configurationProperties["selectedDevice"].ToObject<DeviceData>(TrimmableContext.Default.DeviceData);
+        Target = configurationProperties["selectedTarget"].ToObject<string>(TrimmableContext.Default.String);
+        ReloadHostPort = configurationProperties["reloadHost"].ToObject<int>(TrimmableContext.Default.Int32);
+        ProfilerPort = configurationProperties["profilerPort"].ToObject<int>(TrimmableContext.Default.Int32);
+        UninstallApp = configurationProperties["uninstallApp"].ToObject<bool>(TrimmableContext.Default.Boolean);
+        DebugPort = configurationProperties["debuggingPort"].ToObject<int>(TrimmableContext.Default.Int32);
         
-        DebuggerSessionOptions = GetDebuggerSessionOptions(configurationProperties["debugger_options"]);
+        if (configurationProperties.TryGetValue("profilerMode", out var profilerModeToken))
+            ProfilerMode = profilerModeToken.ToObject<string>(TrimmableContext.Default.String);
+        
+        DebuggerSessionOptions = GetDebuggerSessionOptions(configurationProperties["debuggerOptions"]);
         Framework = Project.Frameworks.First(it => it.ContainsInsensitive(Device.Platform));
         OutputAssembly = Project.FindOutputApplication(Target, Framework, Device, message => {
             throw new ProtocolException($"Failed to load launch configuration. {message}");

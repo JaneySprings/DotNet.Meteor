@@ -12,9 +12,9 @@ public class SymbolServer {
     private readonly string binariesDirectory;
     private readonly HttpClient httpClient;
 
-    public SymbolServer(string csprojPath) {
+    public SymbolServer(string tempFolder) {
         this.httpClient = new HttpClient();
-        this.sourceDirectory = Path.Combine(Path.GetDirectoryName(csprojPath), ".meteor", "sources");
+        this.sourceDirectory = Path.Combine(tempFolder, "sources");
         this.binariesDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
         if (!Directory.Exists(this.sourceDirectory))

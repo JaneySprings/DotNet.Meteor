@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Net;
 using System.Net.Sockets;
 using Mono.Debugging.Client;
 
@@ -10,9 +9,12 @@ internal class ExternalTypeResolver {
     private readonly DebuggerSessionOptions sessionOptions;
     private readonly string resolvedConnectionInfoPath;
 
-    public ExternalTypeResolver(string projectFile, DebuggerSessionOptions options) {
+    public ExternalTypeResolver(string tempFolder, DebuggerSessionOptions options) {
         sessionOptions = options;
-        resolvedConnectionInfoPath = Path.Combine(Path.GetDirectoryName(projectFile), ".meteor", "resolve.drc");
+        resolvedConnectionInfoPath = Path.Combine(tempFolder, "resolve.drc");
+       
+        if (!Directory.Exists(tempFolder))
+            Directory.CreateDirectory(tempFolder);
         if (options.EvaluationOptions.UseExternalTypeResolver)
             File.WriteAllText(resolvedConnectionInfoPath, string.Empty);
     }

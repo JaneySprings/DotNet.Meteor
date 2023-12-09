@@ -16,12 +16,13 @@ export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationPro
 		if (!ConfigurationController.isValid())
 			return undefined;
 
-		if (!config.noDebug && ConfigurationController.isWindows()) {
-			vscode.window.showErrorMessage(res.messageDebugNotSupportedWin);
+		ConfigurationController.profiler = config['profilerMode'];
+		if (!config.noDebug && (ConfigurationController.target === Target.Release || ConfigurationController.profiler)) {
+			vscode.window.showErrorMessage(res.messageDebugNotSupported);
 			return undefined;
 		}
-		if (!config.noDebug && ConfigurationController.target === Target.Release) {
-			vscode.window.showErrorMessage(res.messageDebugNotSupported);
+		if (!config.noDebug && ConfigurationController.isWindows()) {
+			vscode.window.showErrorMessage(res.messageDebugNotSupportedWin);
 			return undefined;
 		}
 
@@ -40,13 +41,14 @@ export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationPro
 			config.request = 'launch';
 		}
 		
-        config['selected_device'] = targetDevice;
-		config['selected_project'] = targetProject;
-		config['selected_target'] = ConfigurationController.target;
-		config['debugging_port'] = ConfigurationController.getDebuggingPort();
-		config['uninstall_app'] = ConfigurationController.getUninstallAppOption();
-		config['reload_host'] = ConfigurationController.getReloadHostPort();
-		config['debugger_options'] = ConfigurationController.getDebuggerOptions();
+        config['selectedDevice'] = targetDevice;
+		config['selectedProject'] = targetProject;
+		config['selectedTarget'] = ConfigurationController.target;
+		config['debuggingPort'] = ConfigurationController.getDebuggingPort();
+		config['uninstallApp'] = ConfigurationController.getUninstallAppOption();
+		config['reloadHost'] = ConfigurationController.getReloadHostPort();
+		config['profilerPort'] = ConfigurationController.getProfilerPort();
+		config['debuggerOptions'] = ConfigurationController.getDebuggerOptions();
 		
         return config;
 	}

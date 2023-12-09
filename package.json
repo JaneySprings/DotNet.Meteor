@@ -156,11 +156,16 @@
             "properties": {
               "device": {
                 "type": "string",
-                "description": "%debugger.meteor.device.description%"
+                "description": "%debugger.meteor.description.device%"
               },
               "runtime": {
                 "type": "string",
-                "description": "%debugger.meteor.runtime.description%"
+                "description": "%debugger.meteor.description.runtime%"
+              },
+              "profilerMode": {
+                "type": "string",
+                "enum": [ "trace", "gcdump" ],
+                "description": "%debugger.meteor.description.profilerMode%"
               }
             }
           }
@@ -184,6 +189,11 @@
           "type": "integer",
           "default": 9988,
           "description": "%configuration.description.hotReloadHostPort%"
+        },
+        "dotnetMeteor.profilerPort": {
+          "type": "integer",
+          "default": 9000,
+          "description": "%configuration.description.profilerPort%"
         },
         "dotnetMeteor.uninstallApplicationBeforeInstalling": {
           "type": "boolean",

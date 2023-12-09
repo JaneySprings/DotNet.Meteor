@@ -55,11 +55,21 @@ Your can build and debug projects, written in the `F#` language.
 2. Enable Hot Reload Server in your `MauiProgram.cs`:
 ```cs
 using DotNet.Meteor.HotReload.Plugin;
-...
-    .UseMauiApp<App>()
+
+public static class MauiProgram
+{
+	public static MauiApp CreateMauiApp()
+	{
+		var builder = MauiApp.CreateBuilder();
+		builder
+            .UseMauiApp<App>()
 #if DEBUG
-    .EnableHotReload()
+            .EnableHotReload()
 #endif
+            ...
+		return builder.Build();
+	}
+}
 ```
 3. Now you can run your project, update XAML and see updates in real-time!
 

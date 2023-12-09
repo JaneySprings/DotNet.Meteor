@@ -37,6 +37,13 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
                 builder.append('-p:WindowsPackageType=None');
                 builder.append('-p:WinUISDKReferences=false');
             }
+
+            if (ConfigurationController.isAndroid() && ConfigurationController.profiler)
+                builder.append('-p:AndroidEnableProfiler=true');
+            if (ConfigurationController.isAppleMobile() && ConfigurationController.profiler)
+                builder.append('-p:MtouchProfiling=true');
+            if (ConfigurationController.isMacCatalyst() && ConfigurationController.profiler)
+                builder.append('-p:Profiling=true');
         }
 
         definition.args?.forEach((arg: string) => builder.override(arg));

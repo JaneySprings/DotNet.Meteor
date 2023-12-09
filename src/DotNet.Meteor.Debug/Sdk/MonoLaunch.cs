@@ -64,4 +64,15 @@ public static class MonoLaunch {
             .Append($"--device=:v2:udid={serial}");
         return new ProcessRunner(tool, arguments, logger).Start();
     }
+
+    public static Process ProfileSim(string serial, string bundlePath, int port, IProcessLogger logger = null) {
+        var tool = AppleUtilities.MLaunchTool();
+        var arguments = new ProcessArgumentBuilder()
+            .Append( "--launchsim").AppendQuoted(bundlePath)
+            .Append("--argument", "--connection-mode")
+            .Append("--argument", "none")
+            .Append($"--setenv:DOTNET_DiagnosticPorts=127.0.0.1:{port},suspend")
+            .Append($"--device=:v2:udid={serial}");
+        return new ProcessRunner(tool, arguments, logger).Start();
+    }
 }

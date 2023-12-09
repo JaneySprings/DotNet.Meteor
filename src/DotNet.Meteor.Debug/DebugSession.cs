@@ -67,8 +67,8 @@ public partial class DebugSession : Session {
 #region request: Launch
     protected override LaunchResponse HandleLaunchRequest(LaunchArguments arguments) {
         var configuration = new LaunchConfiguration(arguments.ConfigurationProperties);
-        symbolServer = new SymbolServer(configuration.Project.Path);
-        typeResolver = new ExternalTypeResolver(configuration.Project.Path, configuration.DebuggerSessionOptions);
+        symbolServer = new SymbolServer(configuration.TempDirectoryPath);
+        typeResolver = new ExternalTypeResolver(configuration.TempDirectoryPath, configuration.DebuggerSessionOptions);
 
         disposables.Add(() => typeResolver.Dispose());
         session.TypeResolverHandler = typeResolver.Handle;
@@ -77,6 +77,11 @@ public partial class DebugSession : Session {
             configuration.DebugPort = ServerExtensions.FindFreePort();
         if (configuration.DebugPort < 1)
             throw new ProtocolException($"Invalid port '{configuration.DebugPort}'");
+
+        if (configuration.IsProfileConfiguration) {
+            ProfileApplication(configuration);
+            return new LaunchResponse();
+        }
 
         LaunchApplication(configuration);
         Connect(configuration);

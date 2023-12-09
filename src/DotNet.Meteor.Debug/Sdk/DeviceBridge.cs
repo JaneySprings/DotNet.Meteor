@@ -35,11 +35,37 @@ public static class DeviceBridge {
         return string.Join(Environment.NewLine, result.StandardOutput);
     }
 
+    public static string Reverse(string serial, int target, int destination) {
+        var adb = AndroidUtilities.AdbTool();
+        var result = new ProcessRunner(adb, new ProcessArgumentBuilder()
+            .Append("-s", serial)
+            .Append("reverse")
+            .Append($"tcp:{target}")
+            .Append($"tcp:{destination}"))
+            .WaitForExit();
+
+        return string.Join(Environment.NewLine, result.StandardOutput);
+    }
+
     public static string RemoveForward(string serial) {
         var adb = AndroidUtilities.AdbTool();
         var result = new ProcessRunner(adb, new ProcessArgumentBuilder()
             .Append("-s", serial)
             .Append("forward")
+            .Append("--remove-all"))
+            .WaitForExit();
+
+        if (!result.Success)
+            throw new Exception(string.Join(Environment.NewLine, result.StandardError));
+
+        return string.Join(Environment.NewLine, result.StandardOutput);
+    }
+
+    public static string RemoveReverse(string serial) {
+        var adb = AndroidUtilities.AdbTool();
+        var result = new ProcessRunner(adb, new ProcessArgumentBuilder()
+            .Append("-s", serial)
+            .Append("reverse")
             .Append("--remove-all"))
             .WaitForExit();
 

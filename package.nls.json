@@ -18,12 +18,14 @@
 	"debugger.meteor.id": "dotnet-meteor.debugger",
 	"debugger.meteor.title": ".NET Meteor Debugger",
 	"debugger.meteor.description": "A new configuration for launching .NET apps.",
-	"debugger.meteor.device.description": "Overrides a target device with the specified device.",
-	"debugger.meteor.runtime.description": "Overrides a device's runtime identifier with the specified identifier.",
+	"debugger.meteor.description.device": "Overrides a target device with the specified device.",
+	"debugger.meteor.description.runtime": "Overrides a device's runtime identifier with the specified identifier.",
+	"debugger.meteor.description.profilerMode": "To be added.",
 
 	"configuration.description.monoSdbDebuggerPortAndroid": "Android's default port of the Mono SDB debugger.",
 	"configuration.description.monoSdbDebuggerPortApple": "iOS's default port of the Mono SDB debugger.",
 	"configuration.description.hotReloadHostPort": "The port of the Hot Reload server.",
+	"configuration.description.profilerPort": "To be added.",
 	"configuration.description.uninstallApplicationBeforeInstalling": "Uninstalls the application before installing it again.",
 
 	"configuration.description.debuggerOptions.evaluationTimeout": "Expression evaluation timeout in the debugging window.",
