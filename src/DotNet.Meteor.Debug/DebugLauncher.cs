@@ -54,14 +54,14 @@ public partial class DebugSession {
 
         if (configuration.Device.IsEmulator) {
             var debugProcess = MonoLaunch.DebugSim(configuration.Device.Serial, configuration.OutputAssembly, configuration.DebugPort, this);
-            disposables.Add(() => debugProcess.Kill());
+            disposables.Add(() => debugProcess.Terminate());
         } else {
             var forwardingProcess = MonoLaunch.TcpTunnel(configuration.Device.Serial, configuration.DebugPort, this);
             MonoLaunch.InstallDev(configuration.Device.Serial, configuration.OutputAssembly, this);
             
             var debugProcess = MonoLaunch.DebugDev(configuration.Device.Serial, configuration.OutputAssembly, configuration.DebugPort, this);
-            disposables.Add(() => debugProcess.Kill());
-            disposables.Add(() => forwardingProcess.Kill());
+            disposables.Add(() => debugProcess.Terminate());
+            disposables.Add(() => forwardingProcess.Terminate());
         }
     }
 
@@ -79,7 +79,7 @@ public partial class DebugSession {
     private void LaunchWindows(LaunchConfiguration configuration) {
         var program = new FileInfo(configuration.OutputAssembly);
         var process = new ProcessRunner(program, new ProcessArgumentBuilder(), this).Start();
-        disposables.Add(() => process.Kill());
+        disposables.Add(() => process.Terminate());
     }
 
     private void LaunchAndroid(LaunchConfiguration configuration) {
@@ -103,8 +103,8 @@ public partial class DebugSession {
         var logcatFirstChannelProcess = DeviceBridge.Logcat(configuration.Device.Serial, "system,crash", "*:I", this);
         var logcatSecondChannelProcess = DeviceBridge.Logcat(configuration.Device.Serial, "main", "DOTNET:I", this);
 
-        disposables.Add(() => logcatFirstChannelProcess.Kill());
-        disposables.Add(() => logcatSecondChannelProcess.Kill());
+        disposables.Add(() => logcatFirstChannelProcess.Terminate());
+        disposables.Add(() => logcatSecondChannelProcess.Terminate());
         disposables.Add(() => DeviceBridge.RemoveForward(configuration.Device.Serial));
     }
 }

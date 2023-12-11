@@ -10,7 +10,7 @@
 		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 		<!-- <PublishTrimmed>true</PublishTrimmed> -->
 		<!-- <TrimMode>partial</TrimMode> -->
-		<SelfContained>true</SelfContained>
+		<SelfContained>false</SelfContained>
 	</PropertyGroup>
 
 	<ItemGroup>

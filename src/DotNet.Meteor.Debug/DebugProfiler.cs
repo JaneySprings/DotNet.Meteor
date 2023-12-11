@@ -32,13 +32,13 @@ public partial class DebugSession {
         if (configuration.Device.IsEmulator) {
             var routerProcess = DSRouter.ServerToServer(configuration.ProfilerPort, this);
             Thread.Sleep(1000); // wait for router to start
-            var traceProcess = Trace.Collect(routerProcess.Id, resultFilePath, this);
 
+            var traceProcess = Trace.Collect(routerProcess.Id, resultFilePath, this);
             var simProcess = MonoLaunch.ProfileSim(configuration.Device.Serial, configuration.OutputAssembly, configuration.ProfilerPort, this);
 
-            disposables.Add(() => simProcess.Kill());
-            disposables.Add(() => traceProcess.Kill());
-            disposables.Add(() => routerProcess.Kill());
+            disposables.Add(() => traceProcess.Terminate());
+            disposables.Add(() => routerProcess.Terminate());
+            disposables.Add(() => simProcess.Terminate());
         } else {
             // // var forwardingProcess = MonoLaunch.TcpTunnel(configuration.Device.Serial, configuration.ProfilerPort, this);
             // var routerProcess = DSRouter.ServerToClient(configuration.ProfilerPort, this);
@@ -59,19 +59,19 @@ public partial class DebugSession {
     private void ProfileMacCatalyst(LaunchConfiguration configuration) {
         var applicationName = Path.GetFileNameWithoutExtension(configuration.OutputAssembly);
         var resultFilePath = Path.Combine(configuration.TempDirectoryPath, $"{applicationName}.bin");
-        var homeDirectory = RuntimeSystem.HomeDirectory;
+        var diagnosticPort = Path.Combine(RuntimeSystem.HomeDirectory, "desktop-port");
 
         var tool = AppleUtilities.OpenTool();
         var processRunner = new ProcessRunner(tool, new ProcessArgumentBuilder().AppendQuoted(configuration.OutputAssembly));
-        processRunner.SetEnvironmentVariable("DOTNET_DiagnosticPorts", $"{homeDirectory}/desktop-port,suspend");
+        processRunner.SetEnvironmentVariable("DOTNET_DiagnosticPorts", $"{diagnosticPort},suspend");
         
-        var traceProcess = Trace.Collect(Path.Combine(homeDirectory, "desktop-port"), resultFilePath, this);
+        var traceProcess = Trace.Collect(diagnosticPort, resultFilePath, this);
         var appLaunchResult = processRunner.WaitForExit();
 
         if (!appLaunchResult.Success)
             throw new Exception(string.Join(Environment.NewLine, appLaunchResult.StandardError));
 
-        disposables.Add(() => traceProcess.Kill());
+        disposables.Add(() => traceProcess.Terminate());
     }
 
     private void ProfileAndroid(LaunchConfiguration configuration) {
@@ -93,10 +93,9 @@ public partial class DebugSession {
         DeviceBridge.Install(configuration.Device.Serial, configuration.OutputAssembly, this);
         DeviceBridge.Launch(configuration.Device.Serial, applicationId, this);
 
+        disposables.Add(() => traceProcess.Terminate());
+        disposables.Add(() => routerProcess.Terminate());
         disposables.Add(() => DeviceBridge.Shell(configuration.Device.Serial, "am", "force-stop", applicationId));
-        disposables.Add(() => Thread.Sleep(2000) /* wait for trace to make json report */);
         disposables.Add(() => DeviceBridge.RemoveForward(configuration.Device.Serial));
-        disposables.Add(() => traceProcess.Kill());
-        disposables.Add(() => routerProcess.Kill());
     }
 }
