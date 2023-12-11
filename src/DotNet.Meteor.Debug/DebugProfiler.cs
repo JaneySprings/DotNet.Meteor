@@ -27,14 +27,13 @@ public partial class DebugSession {
 
     private void ProfileApple(LaunchConfiguration configuration) {
         var applicationName = Path.GetFileNameWithoutExtension(configuration.OutputAssembly);
-        var resultFilePath = Path.Combine(configuration.TempDirectoryPath, $"{applicationName}.bin");
-    
-        if (configuration.Device.IsEmulator) {
-            var routerProcess = DSRouter.ServerToServer(configuration.ProfilerPort, this);
-            Thread.Sleep(1000); // wait for router to start
+        var resultFilePath = Path.Combine(configuration.TempDirectoryPath, $"{applicationName}.nettrace");
+        var diagnosticPort = Path.Combine(RuntimeSystem.HomeDirectory, "simulator-port");
 
-            var traceProcess = Trace.Collect(routerProcess.Id, resultFilePath, this);
+        if (configuration.Device.IsEmulator) {
+            var routerProcess = DSRouter.ClientToServer(diagnosticPort, $"127.0.0.1:{configuration.ProfilerPort}", this);
             var simProcess = MonoLaunch.ProfileSim(configuration.Device.Serial, configuration.OutputAssembly, configuration.ProfilerPort, this);
+            var traceProcess = Trace.Collect(diagnosticPort, resultFilePath, this);
 
             disposables.Add(() => traceProcess.Terminate());
             disposables.Add(() => routerProcess.Terminate());
@@ -58,7 +57,7 @@ public partial class DebugSession {
 
     private void ProfileMacCatalyst(LaunchConfiguration configuration) {
         var applicationName = Path.GetFileNameWithoutExtension(configuration.OutputAssembly);
-        var resultFilePath = Path.Combine(configuration.TempDirectoryPath, $"{applicationName}.bin");
+        var resultFilePath = Path.Combine(configuration.TempDirectoryPath, $"{applicationName}.nettrace");
         var diagnosticPort = Path.Combine(RuntimeSystem.HomeDirectory, "desktop-port");
 
         var tool = AppleUtilities.OpenTool();
@@ -68,15 +67,15 @@ public partial class DebugSession {
         var traceProcess = Trace.Collect(diagnosticPort, resultFilePath, this);
         var appLaunchResult = processRunner.WaitForExit();
 
+        disposables.Add(() => traceProcess.Terminate());
+
         if (!appLaunchResult.Success)
             throw new Exception(string.Join(Environment.NewLine, appLaunchResult.StandardError));
-
-        disposables.Add(() => traceProcess.Terminate());
     }
 
     private void ProfileAndroid(LaunchConfiguration configuration) {
         var applicationId = configuration.GetApplicationId();
-        var resultFilePath = Path.Combine(configuration.TempDirectoryPath, $"{applicationId}.bin");
+        var resultFilePath = Path.Combine(configuration.TempDirectoryPath, $"{applicationId}.nettrace");
         if (configuration.Device.IsEmulator)
             configuration.Device.Serial = AndroidEmulator.Run(configuration.Device.Name).Serial;
 
@@ -96,6 +95,6 @@ public partial class DebugSession {
         disposables.Add(() => traceProcess.Terminate());
         disposables.Add(() => routerProcess.Terminate());
         disposables.Add(() => DeviceBridge.Shell(configuration.Device.Serial, "am", "force-stop", applicationId));
-        disposables.Add(() => DeviceBridge.RemoveForward(configuration.Device.Serial));
+        disposables.Add(() => DeviceBridge.RemoveReverse(configuration.Device.Serial));
     }
 }

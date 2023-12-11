@@ -1,8 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 using DotNet.Meteor.Processes;
 using DotNet.Meteor.Shared;
 
@@ -27,11 +25,12 @@ public static class DSRouter {
         return new ProcessRunner(dsrouter, arguments, logger).Start();
     }
 
-    public static Process ClientToServer(int port, IProcessLogger logger = null) {
+    public static Process ClientToServer(string ipcc, string tcps, IProcessLogger logger = null) {
         var dsrouter = DSRouter.DSRouterTool();
         var arguments = new ProcessArgumentBuilder()
             .Append("client-server")
-            .Append("-tcps", $"127.0.0.1:{port}");
+            .Append("-ipcc", ipcc)
+            .Append("-tcps", tcps);
         return new ProcessRunner(dsrouter, arguments, logger).Start();
     }
 
