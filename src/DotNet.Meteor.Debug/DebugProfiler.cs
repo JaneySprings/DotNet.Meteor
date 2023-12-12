@@ -4,6 +4,7 @@ using DotNet.Meteor.Shared;
 using DotNet.Meteor.Processes;
 using DotNet.Meteor.Debug.Sdk;
 using DotNet.Meteor.Debug.Sdk.Profiling;
+using DotNet.Meteor.Debug.Extensions;
 using System.Threading;
 
 namespace DotNet.Meteor.Debug;
@@ -28,9 +29,9 @@ public partial class DebugSession {
     private void ProfileApple(LaunchConfiguration configuration) {
         var applicationName = Path.GetFileNameWithoutExtension(configuration.OutputAssembly);
         var resultFilePath = Path.Combine(configuration.TempDirectoryPath, $"{applicationName}.nettrace");
-        var diagnosticPort = Path.Combine(RuntimeSystem.HomeDirectory, "simulator-port");
 
         if (configuration.Device.IsEmulator) {
+            var diagnosticPort = Path.Combine(RuntimeSystem.HomeDirectory, "simulator-port");
             var routerProcess = DSRouter.ClientToServer(diagnosticPort, $"127.0.0.1:{configuration.ProfilerPort}", this);
             var simProcess = MonoLaunch.ProfileSim(configuration.Device.Serial, configuration.OutputAssembly, configuration.ProfilerPort, this);
             var traceProcess = Trace.Collect(diagnosticPort, resultFilePath, this);
@@ -39,19 +40,17 @@ public partial class DebugSession {
             disposables.Add(() => routerProcess.Terminate());
             disposables.Add(() => simProcess.Terminate());
         } else {
-            // // var forwardingProcess = MonoLaunch.TcpTunnel(configuration.Device.Serial, configuration.ProfilerPort, this);
-            // var routerProcess = DSRouter.ServerToClient(configuration.ProfilerPort, this);
-            
-            
-            // MonoLaunch.InstallDev(configuration.Device.Serial, configuration.OutputAssembly, this);
-            // var devProcess = MonoLaunch.ProfileDev(configuration.Device.Serial, configuration.OutputAssembly, configuration.ProfilerPort, this);
-            // Thread.Sleep(10000); // wait for router to start
-            // var traceProcess = Trace.Collect(routerProcess.Id, resultFilePath, this);
+            var diagnosticPort = Path.Combine(RuntimeSystem.HomeDirectory, $"device-{DateTime.Now.Ticks}"); // Because after first try it shows 'Address already in use'
+            var routerProcess = DSRouter.ServerToClient(diagnosticPort, $"127.0.0.1:{configuration.ProfilerPort}", forwardApple: true, this);
 
-            // disposables.Add(() => devProcess.Kill());
-            // // disposables.Add(() => forwardingProcess.Kill());
-            // disposables.Add(() => traceProcess.Kill());
-            // disposables.Add(() => routerProcess.Kill());
+            MonoLaunch.InstallDev(configuration.Device.Serial, configuration.OutputAssembly, this);
+            var devProcess = MonoLaunch.ProfileDev(configuration.Device.Serial, configuration.OutputAssembly, configuration.ProfilerPort, new CatchStartLogger(this, () => {
+                var traceProcess = Trace.Collect($"{diagnosticPort},connect", resultFilePath, this);
+                disposables.Insert(0, () => traceProcess.Terminate());
+            }));
+    
+            disposables.Add(() => routerProcess.Terminate());
+            disposables.Add(() => devProcess.Terminate());
         }
     }
 

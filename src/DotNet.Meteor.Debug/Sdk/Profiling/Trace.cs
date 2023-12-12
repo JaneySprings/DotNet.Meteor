@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using DotNet.Meteor.Debug.Extensions;
 using DotNet.Meteor.Processes;
 using DotNet.Meteor.Shared;
 using Microsoft.Diagnostics.Tools.Trace;

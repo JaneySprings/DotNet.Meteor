@@ -54,6 +54,20 @@ public static class MonoLaunch {
         return new ProcessRunner(tool, arguments, logger).Start();
     }
 
+    public static Process ProfileDev(string serial, string bundlePath, int port, IProcessLogger logger = null) {
+        var tool = AppleUtilities.MLaunchTool();
+        var arguments = new ProcessArgumentBuilder()
+            .Append( "--launchdev").AppendQuoted(bundlePath) // '--setenv:DOTNET_DiagnosticPorts=127.0.0.1:9001,suspend,listen'
+            .Append($"--devname={serial}")
+            .Append( "--argument=-monodevelop-port")
+            .Append($"--argument={port}")
+            .Append( "--argument=--connection-mode")
+            .Append( "--argument=none")
+            .Append($"--setenv=DOTNET_DiagnosticPorts=127.0.0.1:{port},suspend,listen")
+            .Append( "--wait-for-exit");
+        return new ProcessRunner(tool, arguments, logger).Start();
+    }
+
     public static Process DebugSim(string serial, string bundlePath, int port, IProcessLogger logger = null) {
         var tool = AppleUtilities.MLaunchTool();
         var arguments = new ProcessArgumentBuilder()

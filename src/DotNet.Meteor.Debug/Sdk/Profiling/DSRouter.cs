@@ -34,6 +34,19 @@ public static class DSRouter {
         return new ProcessRunner(dsrouter, arguments, logger).Start();
     }
 
+    public static Process ServerToClient(string ipcs, string tcpc, bool forwardApple = false, IProcessLogger logger = null) {
+        var dsrouter = DSRouter.DSRouterTool();
+        var arguments = new ProcessArgumentBuilder()
+            .Append("server-client")
+            .Append("-ipcs", ipcs)
+            .Append("-tcpc", tcpc);
+
+        if (forwardApple)
+            arguments.Append("--forward-port", "iOS");
+
+        return new ProcessRunner(dsrouter, arguments, logger).Start();
+    }
+
     // public static ProfilingTask ServerToServer(string ipc, string tcp) {
     //     var cancellationTokenSource = new CancellationTokenSource();
     //     var token = cancellationTokenSource.Token;
