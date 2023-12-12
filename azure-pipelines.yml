@@ -152,11 +152,13 @@ stages:
           displayName: 'Restore .NET tools'
         - script: dotnet cake --target=test --configuration=release
           displayName: 'Run tests'
+          continueOnError: true
         - task: PublishTestResults@2
           inputs:
             testResultsFormat: 'VSTest'
             testResultsFiles: 'artifacts/*.trx'
             failTaskOnFailedTests: true
+            failTaskOnMissingResultsFile: true
 #//////////////////////////////////////////////////////////////////////
 #// Linux Tests
 #//////////////////////////////////////////////////////////////////////
@@ -172,11 +174,13 @@ stages:
           displayName: 'Restore .NET tools'
         - script: dotnet cake --target=test --configuration=release
           displayName: 'Run tests'
+          continueOnError: true
         - task: PublishTestResults@2
           inputs:
             testResultsFormat: 'VSTest'
             testResultsFiles: 'artifacts/*.trx'
             failTaskOnFailedTests: true
+            failTaskOnMissingResultsFile: true
 #//////////////////////////////////////////////////////////////////////
 #// Windows Tests
 #//////////////////////////////////////////////////////////////////////
@@ -192,8 +196,11 @@ stages:
           displayName: 'Restore .NET tools'
         - script: dotnet cake --target=test --configuration=release
           displayName: 'Run tests'
+          continueOnError: true
         - task: PublishTestResults@2
           inputs:
             testResultsFormat: 'VSTest'
             testResultsFiles: 'artifacts/*.trx'
             failTaskOnFailedTests: true
+            failTaskOnMissingResultsFile: true
+
