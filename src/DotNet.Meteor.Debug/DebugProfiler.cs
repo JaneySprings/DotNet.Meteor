@@ -22,7 +22,7 @@ public partial class DebugSession {
                 ProfileMacCatalyst(configuration);
 
             if (configuration.Device.IsWindows)
-                throw new NotSupportedException("Windows is not supported yet");
+                ProfileWindows(configuration);
         });
     }
 
@@ -95,5 +95,16 @@ public partial class DebugSession {
         disposables.Add(() => routerProcess.Terminate());
         disposables.Add(() => DeviceBridge.Shell(configuration.Device.Serial, "am", "force-stop", applicationId));
         disposables.Add(() => DeviceBridge.RemoveReverse(configuration.Device.Serial));
+    }
+
+    private void ProfileWindows(LaunchConfiguration configuration) {
+        var applicationName = Path.GetFileNameWithoutExtension(configuration.OutputAssembly);
+        var resultFilePath = Path.Combine(configuration.TempDirectoryPath, $"{applicationName}.nettrace");
+
+        var exeProcess = new ProcessRunner(new FileInfo(configuration.OutputAssembly), null, this).Start();
+        var traceProcess = Trace.Collect(exeProcess.Id, resultFilePath, this);
+
+        disposables.Add(() => traceProcess.Terminate());
+        disposables.Add(() => exeProcess.Terminate());
     }
 }
