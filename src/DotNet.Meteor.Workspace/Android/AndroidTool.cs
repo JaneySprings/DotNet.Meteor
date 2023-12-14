@@ -7,7 +7,7 @@ public static class AndroidTool {
     public static List<DeviceData> VirtualDevices() {
         var runningAvds = new Dictionary<string, string>();
         var avds = new List<DeviceData>();
-        var avdHome = AndroidUtilities.AvdLocation();
+        var avdHome = AndroidSdk.AvdLocation();
 
         foreach(var serial in DeviceBridge.Devices()) {
             if (!serial.StartsWith("emulator-"))

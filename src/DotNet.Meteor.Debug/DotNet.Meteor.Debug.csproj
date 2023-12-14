@@ -1,4 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<OutputPath>$(MSBuildThisFileDirectory)..\..\extension\bin\Debug</OutputPath>
+		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+	</PropertyGroup>
+
 	<Import Project="..\Common.Build.props" />
 
 	<PropertyGroup>
@@ -18,6 +24,5 @@
 	<ItemGroup>
 		<PackageReference Include="Mono.Cecil" Version="0.11.4" />
 		<PackageReference Include="Mono.Options" Version="6.12.0.148" />
-		<PackageReference Include="NLog" Version="5.2.4" />
 	</ItemGroup>
 </Project>

@@ -6,7 +6,7 @@ namespace DotNet.Meteor.Workspace.Apple;
 
 public static class SystemProfiler {
     public static List<DeviceData> PhysicalDevices() {
-        var profiler = AppleUtilities.SystemProfilerTool();
+        var profiler = AppleSdk.SystemProfilerTool();
         var devices = new List<DeviceData>();
         var regex = new Regex(@"(?<dev>iPhone|iPad):[^,]*?Version:\s+(?<ver>\d+.\d+)[^,]*?Serial\sNumber:\s+(?<id>\S+)");
 
@@ -42,7 +42,7 @@ public static class SystemProfiler {
     }
 
     public static bool IsArch64() {
-        var profiler = AppleUtilities.SystemProfilerTool();
+        var profiler = AppleSdk.SystemProfilerTool();
         ProcessResult result = new ProcessRunner(profiler, new ProcessArgumentBuilder()
             .Append("SPHardwareDataType"))
             .WaitForExit();

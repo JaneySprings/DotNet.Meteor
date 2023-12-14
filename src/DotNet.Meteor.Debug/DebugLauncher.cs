@@ -66,7 +66,7 @@ public partial class DebugSession {
     }
 
     private void LaunchMacCatalyst(LaunchConfiguration configuration) {
-        var tool = AppleUtilities.OpenTool();
+        var tool = AppleSdk.OpenTool();
         var processRunner = new ProcessRunner(tool, new ProcessArgumentBuilder().AppendQuoted(configuration.OutputAssembly));
         processRunner.SetEnvironmentVariable("__XAMARIN_DEBUG_HOSTS__", "127.0.0.1");
         processRunner.SetEnvironmentVariable("__XAMARIN_DEBUG_PORT__", configuration.DebugPort.ToString());

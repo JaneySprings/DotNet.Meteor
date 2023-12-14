@@ -1,7 +1,7 @@
 using System.Text;
 using System.Xml.Linq;
 
-namespace DotNet.Meteor.HotReload;
+namespace DotNet.Meteor.Xaml.HotReload;
 
 public static class MarkupHelper {
     public static string? GetClassDefinition(StringBuilder xamlContent) {

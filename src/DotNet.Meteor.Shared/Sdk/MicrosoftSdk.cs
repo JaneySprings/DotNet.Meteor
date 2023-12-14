@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 using DotNet.Meteor.Processes;
 
 namespace DotNet.Meteor.Shared {
-    public static class CommonUtilities {
+    public static class MicrosoftSdk {
         public static string DotNetRootLocation() {
             string dotnet = Environment.GetEnvironmentVariable("DOTNET_ROOT");
 

@@ -1,16 +1,16 @@
 ﻿using DotNet.Meteor.Shared;
+using DotNet.Meteor.Xaml.HotReload;
 using NLog;
 using System.Reflection;
 using System.Text.Json;
 
-namespace DotNet.Meteor.Workspace;
+namespace DotNet.Meteor.Xaml;
 
 public class Program {
     private static readonly Logger logger = LogManager.GetCurrentClassLogger();
     public static readonly Dictionary<string, Action<string[]>> CommandHandler = new() {
-        { "--all-devices", AllDevices },
-        { "--android-sdk-path", AndroidSdkPath },
-        { "--analyze-workspace", AnalyzeWorkspace },
+        { "--xaml", XamlGenerate },
+        { "--xaml-reload", XamlReload },
         { "--help", Help }
     };
 
@@ -36,22 +36,14 @@ public class Program {
             Console.WriteLine($" {command}");
     }
 
-    public static void AllDevices(string[] args) {
-        var devices = DeviceProvider.GetDevices(logger.Error);
-        Console.WriteLine(JsonSerializer.Serialize(devices, TrimmableContext.Default.ListDeviceData));
+    public static void XamlGenerate(string[] args) {
+        var schemaGenerator = new JsonSchemaGenerator(args[1], logger.Error);
+        var result = schemaGenerator.CreateTypesAlias();
+        Console.WriteLine(JsonSerializer.Serialize(result, TrimmableContext.Default.Boolean));
     }
 
-    public static void AndroidSdkPath(string[] args) {
-        string path = AndroidSdk.SdkLocation();
-        Console.WriteLine(path);
-    }
-
-    public static void AnalyzeWorkspace(string[] args) {
-        var projects = new List<Project>();
-
-        for (int i = 1; i < args.Length; i++)
-            projects.AddRange(WorkspaceAnalyzer.AnalyzeWorkspace(args[i], logger.Info));
-
-        Console.WriteLine(JsonSerializer.Serialize(projects, TrimmableContext.Default.ListProject));
+    public static void XamlReload(string[] args) {
+        var result = HotReloadClient.SendNotification(int.Parse(args[1]), args[2], logger.Error);
+        Console.WriteLine(JsonSerializer.Serialize(result, TrimmableContext.Default.Boolean));
     }
 }

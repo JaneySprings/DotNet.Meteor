@@ -1,22 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
-	<Import Project="..\Common.Build.props" />
-
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<PublishDir>$(MSBuildThisFileDirectory)..\..\extension\bin</PublishDir>
-		<OutputPath>$(MSBuildThisFileDirectory)..\..\extension\bin</OutputPath>
-		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-		<!-- <PublishTrimmed>true</PublishTrimmed> -->
-		<!-- <TrimMode>partial</TrimMode> -->
-		<SelfContained>false</SelfContained>
+		<OutputPath>$(MSBuildThisFileDirectory)..\..\extension\bin\Workspace</OutputPath>
 	</PropertyGroup>
 
+	<Import Project="..\Common.Build.props" />
+
 	<ItemGroup>
-		<ProjectReference Include="..\DotNet.Meteor.Debug\DotNet.Meteor.Debug.csproj" />
-		<ProjectReference Include="..\DotNet.Meteor.HotReload\DotNet.Meteor.HotReload.csproj" />
 		<ProjectReference Include="..\DotNet.Meteor.Shared\DotNet.Meteor.Shared.csproj" />
-		<ProjectReference Include="..\DotNet.Meteor.Xaml\DotNet.Meteor.Xaml.csproj" />
 	</ItemGroup>
 </Project>

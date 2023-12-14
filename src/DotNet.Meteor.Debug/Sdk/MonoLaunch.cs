@@ -8,7 +8,7 @@ namespace DotNet.Meteor.Debug.Sdk;
 
 public static class MonoLaunch {
     public static Process TcpTunnel(string serial, int port, IProcessLogger logger = null) {
-        FileInfo tool = AppleUtilities.MLaunchTool();
+        FileInfo tool = AppleSdk.MLaunchTool();
         return new ProcessRunner(tool, new ProcessArgumentBuilder()
             .Append($"--tcp-tunnel={port}:{port}")
             .Append($"--devname={serial}"), logger)
@@ -16,7 +16,7 @@ public static class MonoLaunch {
     }
 
     public static void InstallDev(string serial, string bundlePath, IProcessLogger logger = null) {
-        var tool = AppleUtilities.MLaunchTool();
+        var tool = AppleSdk.MLaunchTool();
         new ProcessRunner(tool, new ProcessArgumentBuilder()
             .Append( "--installdev").AppendQuoted(bundlePath)
             .Append($"--devname={serial}"), logger)
@@ -24,7 +24,7 @@ public static class MonoLaunch {
     }
 
     public static void LaunchDev(string serial, string bundlePath, IProcessLogger logger = null) {
-        var tool = AppleUtilities.MLaunchTool();
+        var tool = AppleSdk.MLaunchTool();
         var arguments = new ProcessArgumentBuilder()
             .Append( "--launchdev").AppendQuoted(bundlePath)
             .Append($"--devname={serial}");
@@ -35,7 +35,7 @@ public static class MonoLaunch {
     }
 
     public static Process LaunchSim(string serial, string bundlePath, IProcessLogger logger = null) {
-        var tool = AppleUtilities.MLaunchTool();
+        var tool = AppleSdk.MLaunchTool();
         var arguments = new ProcessArgumentBuilder()
             .Append( "--launchsim").AppendQuoted(bundlePath)
             .Append($"--device=:v2:udid={serial}");
@@ -43,7 +43,7 @@ public static class MonoLaunch {
     }
 
     public static Process DebugDev(string serial, string bundlePath, int port, IProcessLogger logger = null) {
-        var tool = AppleUtilities.MLaunchTool();
+        var tool = AppleSdk.MLaunchTool();
         var arguments = new ProcessArgumentBuilder()
             .Append( "--launchdev").AppendQuoted(bundlePath)
             .Append($"--devname={serial}")
@@ -55,7 +55,7 @@ public static class MonoLaunch {
     }
 
     public static Process ProfileDev(string serial, string bundlePath, int port, IProcessLogger logger = null) {
-        var tool = AppleUtilities.MLaunchTool();
+        var tool = AppleSdk.MLaunchTool();
         var arguments = new ProcessArgumentBuilder()
             .Append( "--launchdev").AppendQuoted(bundlePath) // '--setenv:DOTNET_DiagnosticPorts=127.0.0.1:9001,suspend,listen'
             .Append($"--devname={serial}")
@@ -69,7 +69,7 @@ public static class MonoLaunch {
     }
 
     public static Process DebugSim(string serial, string bundlePath, int port, IProcessLogger logger = null) {
-        var tool = AppleUtilities.MLaunchTool();
+        var tool = AppleSdk.MLaunchTool();
         var arguments = new ProcessArgumentBuilder()
             .Append( "--launchsim").AppendQuoted(bundlePath)
             .Append( "--argument=-monodevelop-port")
@@ -80,7 +80,7 @@ public static class MonoLaunch {
     }
 
     public static Process ProfileSim(string serial, string bundlePath, int port, IProcessLogger logger = null) {
-        var tool = AppleUtilities.MLaunchTool();
+        var tool = AppleSdk.MLaunchTool();
         var arguments = new ProcessArgumentBuilder()
             .Append( "--launchsim").AppendQuoted(bundlePath)
             .Append("--argument", "--connection-mode")

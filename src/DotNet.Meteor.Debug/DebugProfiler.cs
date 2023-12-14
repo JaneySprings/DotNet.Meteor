@@ -33,10 +33,11 @@ public partial class DebugSession {
         if (configuration.Device.IsEmulator) {
             var diagnosticPort = Path.Combine(RuntimeSystem.HomeDirectory, "simulator-port");
             var routerProcess = DSRouter.ClientToServer(diagnosticPort, $"127.0.0.1:{configuration.ProfilerPort}", this);
-            var simProcess = MonoLaunch.ProfileSim(configuration.Device.Serial, configuration.OutputAssembly, configuration.ProfilerPort, this);
-            var traceProcess = Trace.Collect(diagnosticPort, resultFilePath, this);
-
-            disposables.Add(() => traceProcess.Terminate());
+            var simProcess = MonoLaunch.ProfileSim(configuration.Device.Serial, configuration.OutputAssembly, configuration.ProfilerPort, new CatchStartLogger(this, () => {
+                var traceProcess = Trace.Collect(diagnosticPort, resultFilePath, this);
+                disposables.Insert(0, () => traceProcess.Terminate());
+            }));
+           
             disposables.Add(() => routerProcess.Terminate());
             disposables.Add(() => simProcess.Terminate());
         } else {
@@ -59,7 +60,7 @@ public partial class DebugSession {
         var resultFilePath = Path.Combine(configuration.TempDirectoryPath, $"{applicationName}.nettrace");
         var diagnosticPort = Path.Combine(RuntimeSystem.HomeDirectory, "desktop-port");
 
-        var tool = AppleUtilities.OpenTool();
+        var tool = AppleSdk.OpenTool();
         var processRunner = new ProcessRunner(tool, new ProcessArgumentBuilder().AppendQuoted(configuration.OutputAssembly));
         processRunner.SetEnvironmentVariable("DOTNET_DiagnosticPorts", $"{diagnosticPort},suspend");
         

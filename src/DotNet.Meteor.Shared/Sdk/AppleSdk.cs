@@ -4,7 +4,7 @@ using System.Linq;
 using DotNet.Meteor.Processes;
 
 namespace DotNet.Meteor.Shared {
-    public static class AppleUtilities {
+    public static class AppleSdk {
         public static string XCodePath() {
             var selector = new FileInfo(Path.Combine("/usr", "bin", "xcode-select"));
             ProcessResult result = new ProcessRunner(selector, new ProcessArgumentBuilder()
@@ -40,7 +40,7 @@ namespace DotNet.Meteor.Shared {
         }
 
         public static FileInfo MLaunchTool() {
-            string dotnetPath = Shared.CommonUtilities.DotNetRootLocation();
+            string dotnetPath = Shared.MicrosoftSdk.DotNetRootLocation();
             string sdkPath = Path.Combine(dotnetPath, "packs", "Microsoft.iOS.Sdk");
             var toolLocations = Directory.GetDirectories(sdkPath);
             if (toolLocations.Length == 0)
@@ -52,7 +52,7 @@ namespace DotNet.Meteor.Shared {
         }
 
         public static string IDeviceLocation() {
-            string dotnetPath = Shared.CommonUtilities.DotNetRootLocation();
+            string dotnetPath = Shared.MicrosoftSdk.DotNetRootLocation();
             string sdkPath = Path.Combine(dotnetPath, "packs", "Microsoft.iOS.Windows.Sdk");
             DirectoryInfo newestTool = null;
 

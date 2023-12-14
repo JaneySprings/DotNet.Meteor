@@ -4,13 +4,14 @@ using DotNet.Meteor.Processes;
 using Mono.Debugging.Client;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
+using DotNet.Meteor.Shared;
 
 namespace DotNet.Meteor.Debug;
 
 public abstract class Session: DebugAdapterBase, IProcessLogger {
 
     protected Session(Stream input, Stream output) {
-        Logging.LogConfig.InitializeLog();
+        LogConfig.InitializeLog();
         base.InitializeProtocolClient(input, output);
     }
 

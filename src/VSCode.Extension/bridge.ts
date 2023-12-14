@@ -6,34 +6,36 @@ import * as path from 'path';
 
 
 export class CommandController {
-    private static toolPath: string;
+    private static workspaceToolPath: string;
+    private static xamlToolPath: string;
 
     public static activate(context: vscode.ExtensionContext): boolean {
         const extensionPath = vscode.extensions.getExtension(`${res.extensionPublisher}.${res.extensionId}`)?.extensionPath ?? '';
         const executableExtension = process.platform === 'win32' ? '.exe' : '';
-        CommandController.toolPath = path.join(extensionPath, "extension", "bin", "DotNet.Meteor.Workspace" + executableExtension);
+        CommandController.workspaceToolPath = path.join(extensionPath, "extension", "bin", "Workspace", "DotNet.Meteor.Workspace" + executableExtension);
+        CommandController.xamlToolPath = path.join(extensionPath, "extension", "bin", "Xaml", "DotNet.Meteor.Xaml" + executableExtension);
         return true;
     }
 
     public static androidSdk(): string | undefined {
-        return ProcessRunner.runSync(CommandController.toolPath, "--android-sdk-path");
+        return ProcessRunner.runSync(CommandController.workspaceToolPath, "--android-sdk-path");
     }
     public static async getDevices(): Promise<IDevice[]> {
-        return await ProcessRunner.runAsync<IDevice[]>(new ProcessArgumentBuilder(CommandController.toolPath)
+        return await ProcessRunner.runAsync<IDevice[]>(new ProcessArgumentBuilder(CommandController.workspaceToolPath)
             .append("--all-devices"));
     }
     public static async getProjects(folders: string[]): Promise<IProject[]> {
-        return await ProcessRunner.runAsync<IProject[]>(new ProcessArgumentBuilder(CommandController.toolPath)
+        return await ProcessRunner.runAsync<IProject[]>(new ProcessArgumentBuilder(CommandController.workspaceToolPath)
             .append("--analyze-workspace")
             .appendQuoted(...folders));
     }
     public static async xamlSchema(path: string): Promise<boolean>  {
-        return await ProcessRunner.runAsync<boolean>(new ProcessArgumentBuilder(CommandController.toolPath)
+        return await ProcessRunner.runAsync<boolean>(new ProcessArgumentBuilder(CommandController.xamlToolPath)
             .append("--xaml")
             .appendQuoted(path));
     }
     public static async xamlReload(port: number, path: string): Promise<boolean>  {
-        return await ProcessRunner.runAsync<boolean>(new ProcessArgumentBuilder(CommandController.toolPath)
+        return await ProcessRunner.runAsync<boolean>(new ProcessArgumentBuilder(CommandController.xamlToolPath)
             .append("--xaml-reload")
             .append(port.toString())
             .appendQuoted(path));

@@ -13,10 +13,6 @@
             "path": "src/Mono.Debugger/Mono.Debugging.Soft"
         },
         {
-            "name": "DotNet.Meteor.HotReload",
-            "path": "src/DotNet.Meteor.HotReload"
-        },
-        {
             "name": "DotNet.Meteor.HotReload.Plugin",
             "path": "src/DotNet.Meteor.HotReload.Plugin"
         },
@@ -107,6 +103,8 @@
         "terminal.integrated.cwd": "${workspaceFolder:VSCode.Extension}/../../",
         "files.exclude": {
             ".config": true,
+            "**/bin": true,
+            "**/obj": true,
             "node_modules": true,
             "package-lock.json": true,
         }
