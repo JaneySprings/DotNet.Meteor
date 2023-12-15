@@ -3,7 +3,7 @@ using NLog;
 using System.Reflection;
 using System.Text.Json;
 
-namespace DotNet.Meteor.Xaml;
+namespace DotNet.Meteor.HotReload;
 
 public class Program {
     private static readonly Logger logger = LogManager.GetCurrentClassLogger();
@@ -15,8 +15,7 @@ public class Program {
         }
 
         LogConfig.InitializeLog();
-        var schemaGenerator = new JsonSchemaGenerator(args[0], logger.Error);
-        var result = schemaGenerator.CreateTypesAlias();
+        var result = HotReloadClient.SendNotification(int.Parse(args[0]), args[1], logger.Error);
         Console.WriteLine(JsonSerializer.Serialize(result, TrimmableContext.Default.Boolean));
     }
 

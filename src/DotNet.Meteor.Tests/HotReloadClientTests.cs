@@ -1,5 +1,5 @@
 using System.Text;
-using DotNet.Meteor.Xaml.HotReload;
+using DotNet.Meteor.HotReload;
 using Xunit;
 
 namespace DotNet.Meteor.Tests;

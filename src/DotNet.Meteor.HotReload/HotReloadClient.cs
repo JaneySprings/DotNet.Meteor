@@ -1,7 +1,7 @@
 ﻿using System.Net.Sockets;
 using System.Text;
 
-namespace DotNet.Meteor.Xaml.HotReload;
+namespace DotNet.Meteor.HotReload;
 
 public static class HotReloadClient {
     public static bool SendNotification(int port, string xamlFilePath, Action<string>? logger = null) {

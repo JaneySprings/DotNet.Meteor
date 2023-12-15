@@ -1,6 +1,6 @@
 import { XamlCompletionItemProvider } from './completions';
 import { ConfigurationController } from "../configuration";
-import { CommandController } from "../bridge";
+import { CommandController } from './bridge';
 import * as res from '../resources';
 import * as vscode from 'vscode';
 import * as path from "path";
@@ -16,15 +16,15 @@ export class XamlController {
     public static activate(context: vscode.ExtensionContext) {
         const schemaSelector = { language: languageId, scheme: 'file' };
         XamlController.extensionVersion = context.extension.packageJSON.version;
+        CommandController.activate(context);
 
         context.subscriptions.push(vscode.languages.registerCompletionItemProvider(
             schemaSelector, new XamlCompletionItemProvider(), ':', '.', '<', ' ',
         ));
-        context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(ev => {
-            if (ev.fileName.endsWith('.xaml') && vscode.debug.activeDebugSession?.configuration.type === res.debuggerMeteorId)
-                CommandController.xamlReload(ConfigurationController.getReloadHostPort(), ev.fileName);
+        context.subscriptions.push(vscode.tasks.onDidEndTask(ev => {
+            if (ev.execution.task.definition.type.includes(res.taskDefinitionId))
+                XamlController.regenerate();
         }));
-
     }
 
     public static getTypes(definition: string | undefined): any[] { 

@@ -1,43 +1,36 @@
 {
     "folders": [
         {
-            "name": "Mono.Debugger.Soft",
             "path": "src/Mono.Debugger/Mono.Debugger.Soft"
         },
         {
-            "name": "Mono.Debugging",
             "path": "src/Mono.Debugger/Mono.Debugging"
         },
         {
-            "name": "Mono.Debugging.Soft",
             "path": "src/Mono.Debugger/Mono.Debugging.Soft"
         },
         {
-            "name": "DotNet.Meteor.HotReload.Plugin",
             "path": "src/DotNet.Meteor.HotReload.Plugin"
         },
         {
-            "name": "DotNet.Meteor.Xaml",
-            "path": "src/DotNet.Meteor.Xaml"
-        },
-        {
-            "name": "DotNet.Meteor.Shared",
             "path": "src/DotNet.Meteor.Shared"
         },
         {
-            "name": "DotNet.Meteor.Debug",
+            "path": "src/DotNet.Meteor.Xaml"
+        },
+        {
+            "path": "src/DotNet.Meteor.HotReload"
+        },
+        {
             "path": "src/DotNet.Meteor.Debug"
         },
         {
-            "name": "DotNet.Meteor.Workspace",
             "path": "src/DotNet.Meteor.Workspace"
         },
         {
-            "name": "DotNet.Meteor.Tests",
             "path": "src/DotNet.Meteor.Tests"
         },
         {
-            "name": "VSCode.Extension",
             "path": "src/VSCode.Extension"
         }
     ],
@@ -102,7 +95,6 @@
         "dotrush.additionalWorkspaceArguments": "NuGetVersionRoslyn=4.5.0",
         "terminal.integrated.cwd": "${workspaceFolder:VSCode.Extension}/../../",
         "files.exclude": {
-            ".config": true,
             "**/bin": true,
             "**/obj": true,
             "node_modules": true,

@@ -14,11 +14,9 @@ export function activate(context: vscode.ExtensionContext): PublicExports | unde
 	if (vscode.workspace.workspaceFolders === undefined) 
 		return undefined;
 
-	if (!CommandController.activate(context))
-		return undefined;
-	
 	const exports = new PublicExports();
 	
+	CommandController.activate(context);
 	ConfigurationController.activate(context);
 	StateController.activate(context);
 	XamlController.activate(context);
@@ -38,14 +36,14 @@ export function activate(context: vscode.ExtensionContext): PublicExports | unde
 	context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider(res.debuggerMeteorId, new DotNetDebuggerConfiguration()));
 	context.subscriptions.push(vscode.tasks.registerTaskProvider(res.taskDefinitionId, new DotNetTaskProvider()));
 	/* Events */
+	context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(ev => {
+		if (ev.fileName.endsWith('.xaml') && vscode.debug.activeDebugSession?.configuration.type === res.debuggerMeteorId)
+			CommandController.xamlReload(ConfigurationController.getReloadHostPort(), ev.fileName);
+	}));
 	context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(UIController.update));
 	context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(ev => {
 		if (ev.fileName.endsWith('proj') || ev.fileName.endsWith('.props'))
 			UIController.update();
-	}));
-	context.subscriptions.push(vscode.tasks.onDidEndTask(ev => {
-		if (ev.execution.task.definition.type.includes(res.taskDefinitionId))
-			XamlController.regenerate();
 	}));
 
 	return exports;

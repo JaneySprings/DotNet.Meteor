@@ -7,14 +7,13 @@ import * as path from 'path';
 
 export class CommandController {
     private static workspaceToolPath: string;
-    private static xamlToolPath: string;
+    private static reloadToolPath: string;
 
-    public static activate(context: vscode.ExtensionContext): boolean {
+    public static activate(context: vscode.ExtensionContext) {
         const extensionPath = vscode.extensions.getExtension(`${res.extensionPublisher}.${res.extensionId}`)?.extensionPath ?? '';
         const executableExtension = process.platform === 'win32' ? '.exe' : '';
         CommandController.workspaceToolPath = path.join(extensionPath, "extension", "bin", "Workspace", "DotNet.Meteor.Workspace" + executableExtension);
-        CommandController.xamlToolPath = path.join(extensionPath, "extension", "bin", "Xaml", "DotNet.Meteor.Xaml" + executableExtension);
-        return true;
+        CommandController.reloadToolPath = path.join(extensionPath, "extension", "bin", "HotReload", "DotNet.Meteor.HotReload" + executableExtension);
     }
 
     public static androidSdk(): string | undefined {
@@ -29,20 +28,14 @@ export class CommandController {
             .append("--analyze-workspace")
             .appendQuoted(...folders));
     }
-    public static async xamlSchema(path: string): Promise<boolean>  {
-        return await ProcessRunner.runAsync<boolean>(new ProcessArgumentBuilder(CommandController.xamlToolPath)
-            .append("--xaml")
-            .appendQuoted(path));
-    }
     public static async xamlReload(port: number, path: string): Promise<boolean>  {
-        return await ProcessRunner.runAsync<boolean>(new ProcessArgumentBuilder(CommandController.xamlToolPath)
-            .append("--xaml-reload")
+        return await ProcessRunner.runAsync<boolean>(new ProcessArgumentBuilder(CommandController.reloadToolPath)
             .append(port.toString())
             .appendQuoted(path));
     }
 }
 
-class ProcessRunner {
+export class ProcessRunner {
     public static runSync(command: string, ...args: string[]): string | undefined {
         const result = spawnSync(command, args);
         if (result.error) {
