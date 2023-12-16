@@ -31,7 +31,7 @@ Your can build and debug projects, written in the `F#` language.
 ## Run the Application
 
 1. Open a project's folder.
-2. Open the Run and Debug VSCode tab and click the `create a launch.json file`.
+2. Open the `Run and Debug` VSCode tab and click the `create a launch.json file`.
 3. In the opened panel, select the `.NET Meteor Debugger`.
 4. In the status bar, select a project (if your opened folder contains several projects) and a configuration (the debug is the default).
 5. In the status bar, click the device name and select a target device/emulator from the opened panel.
@@ -74,6 +74,39 @@ public static class MauiProgram
 3. Now you can run your project, update XAML and see updates in real-time!
 
 ![image](https://github.com/JaneySprings/DotNet.Meteor/raw/main/img/demo_hr.gif)
+
+---
+
+## Profile the Application
+
+1. Open a project's folder.
+2. Open the Run and Debug VSCode tab and click the `create a launch.json file`.
+3. In the opened panel, select the `.NET Meteor Debugger`.
+4. Specify a profiler mode option in the generated configuration:
+```json
+{
+	"name": ".NET Meteor Profiler",
+	"type": "dotnet-meteor.debugger",
+	"request": "launch",
+	"profilerMode": "trace",
+	"preLaunchTask": "dotnet-meteor: Build"
+}
+```
+5. In the status bar, select a project (if your opened folder contains several projects) and a configuration (the debug is the default). Click the device name and select a target device/emulator from the opened panel.
+6. Press `ctrl + F5` to launch the application without debugging.
+7. When the application is launched, you will see the message:
+```
+Output File    : /Users/You/.../MauiProf/.meteor/com.companyname.mauiprof.nettrace
+```
+8. To stop profiling, click on `Stop Debugging` in the VSCode. **Don't close the application manually, it may damage the report.** After completion, you will see the message:
+```
+Trace completed.
+Writing:	/Users/You/.../MauiProf/.meteor/com.companyname.mauiprof.speedscope.json
+Conversion complete
+```
+9. You can see the `json` report in the `.meteor` folder of your project. I recommend using the [Speedscope in VSCode](https://marketplace.visualstudio.com/items?itemName=sransara.speedscope-in-vscode) extension to view it or you can upload it directly to the [speedscope](https://www.speedscope.app) site.
+
+![image](https://github.com/JaneySprings/DotNet.Meteor/raw/main/img/demo_trace.gif)
 
 ---
 

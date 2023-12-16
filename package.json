@@ -164,7 +164,7 @@
               },
               "profilerMode": {
                 "type": "string",
-                "enum": [ "trace", "gcdump" ],
+                "enum": [ "trace" ],
                 "description": "%debugger.meteor.description.profilerMode%"
               }
             }
@@ -190,10 +190,10 @@
           "default": 9988,
           "description": "%configuration.description.hotReloadHostPort%"
         },
-        "dotnetMeteor.profilerPort": {
+        "dotnetMeteor.profilerHostPort": {
           "type": "integer",
           "default": 9000,
-          "description": "%configuration.description.profilerPort%"
+          "description": "%configuration.description.profilerHostPort%"
         },
         "dotnetMeteor.uninstallApplicationBeforeInstalling": {
           "type": "boolean",

@@ -20,12 +20,12 @@
 	"debugger.meteor.description": "A new configuration for launching .NET apps.",
 	"debugger.meteor.description.device": "Overrides a target device with the specified device.",
 	"debugger.meteor.description.runtime": "Overrides a device's runtime identifier with the specified identifier.",
-	"debugger.meteor.description.profilerMode": "To be added.",
+	"debugger.meteor.description.profilerMode": "Specifies the way profiling data is collected.",
 
 	"configuration.description.monoSdbDebuggerPortAndroid": "Android's default port of the Mono SDB debugger.",
 	"configuration.description.monoSdbDebuggerPortApple": "iOS's default port of the Mono SDB debugger.",
 	"configuration.description.hotReloadHostPort": "The port of the Hot Reload server.",
-	"configuration.description.profilerPort": "To be added.",
+	"configuration.description.profilerHostPort": "Specifies the port number used by the profiler",
 	"configuration.description.uninstallApplicationBeforeInstalling": "Uninstalls the application before installing it again.",
 
 	"configuration.description.debuggerOptions.evaluationTimeout": "Expression evaluation timeout in the debugging window.",

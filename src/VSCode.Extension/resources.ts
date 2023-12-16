@@ -45,8 +45,8 @@ export const configDefaultMonoSdbDebuggerPortApple = 55551;
 export const configIdHotReloadHostPort = "hotReloadHostPort";
 export const configDefaultHotReloadHostPort = 9988;
 
-export const configIdProfilerPort = "profilerPort";
-export const configDefaultProfilerPort = 9000;
+export const configIdProfilerHostPort = "profilerHostPort";
+export const configDefaultProfilerHostPort = 9000;
 
 export const configIdUninstallApplicationBeforeInstalling = "uninstallApplicationBeforeInstalling";
 export const configDefaultUninstallApplicationBeforeInstalling = true;

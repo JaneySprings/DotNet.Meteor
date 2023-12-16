@@ -29,7 +29,7 @@ export class ConfigurationController {
         return ConfigurationController.getSetting<number>(res.configIdHotReloadHostPort, res.configDefaultHotReloadHostPort);
     }
     public static getProfilerPort(): number {
-        return ConfigurationController.getSetting<number>(res.configIdProfilerPort, res.configDefaultProfilerPort);
+        return ConfigurationController.getSetting<number>(res.configIdProfilerHostPort, res.configDefaultProfilerHostPort);
     }
 
     public static getUninstallAppOption(): boolean {
