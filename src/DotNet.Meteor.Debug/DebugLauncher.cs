@@ -19,9 +19,7 @@ public partial class DebugSession {
         else if (configuration.Device.IsIPhone || configuration.Device.IsMacCatalyst)
             arguments = new ServerConnectionProvider(IPAddress.Loopback, configuration.DebugPort, configuration.Project.Name);
 
-        if (arguments == null || !configuration.IsDebugConfiguration)
-            throw new ProtocolException("Unable to connect to the debugger");
-
+        ArgumentNullException.ThrowIfNull(arguments, "Debugger connection arguments not implemented.");
         session.Run(new SoftDebuggerStartInfo(arguments), configuration.DebuggerSessionOptions);
         OnOutputDataReceived("Debugger is ready and listening...");
     }

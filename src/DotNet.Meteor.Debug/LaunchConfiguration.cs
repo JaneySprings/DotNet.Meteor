@@ -25,8 +25,10 @@ public class LaunchConfiguration {
     public int ProfilerPort { get; init; }
     public string ProfilerMode { get; init; }
 
-    public bool IsDebugConfiguration => Target.Equals("debug", StringComparison.OrdinalIgnoreCase);
-    public bool IsProfileConfiguration => !string.IsNullOrEmpty(ProfilerMode);
+    public bool IsProfilingConfiguration => !string.IsNullOrEmpty(ProfilerMode);
+    public bool IsTraceProfiling => ProfilerMode.Equals("trace", StringComparison.OrdinalIgnoreCase);
+    public bool IsGCDumpProfiling => ProfilerMode.Equals("gcdump", StringComparison.OrdinalIgnoreCase);
+
     public string TempDirectoryPath => Path.Combine(Path.GetDirectoryName(Project.Path), ".meteor");
 
     public LaunchConfiguration(Dictionary<string, JToken> configurationProperties) {

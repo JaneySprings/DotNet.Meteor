@@ -34,7 +34,7 @@ public partial class DebugSession {
             var diagnosticPort = Path.Combine(RuntimeSystem.HomeDirectory, "simulator-port");
             var routerProcess = DSRouter.ClientToServer(diagnosticPort, $"127.0.0.1:{configuration.ProfilerPort}", this);
             var simProcess = MonoLaunch.ProfileSim(configuration.Device.Serial, configuration.OutputAssembly, configuration.ProfilerPort, new CatchStartLogger(this, () => {
-                var traceProcess = Trace.Collect(diagnosticPort, resultFilePath, this);
+                var traceProcess = Trace.Collect(diagnosticPort, resultFilePath, configuration.ProfilerMode, this);
                 disposables.Insert(0, () => traceProcess.Terminate());
             }));
            
@@ -46,7 +46,7 @@ public partial class DebugSession {
 
             MonoLaunch.InstallDev(configuration.Device.Serial, configuration.OutputAssembly, this);
             var devProcess = MonoLaunch.ProfileDev(configuration.Device.Serial, configuration.OutputAssembly, configuration.ProfilerPort, new CatchStartLogger(this, () => {
-                var traceProcess = Trace.Collect($"{diagnosticPort},connect", resultFilePath, this);
+                var traceProcess = Trace.Collect($"{diagnosticPort},connect", resultFilePath, configuration.ProfilerMode, this);
                 disposables.Insert(0, () => traceProcess.Terminate());
             }));
     
@@ -64,7 +64,7 @@ public partial class DebugSession {
         var processRunner = new ProcessRunner(tool, new ProcessArgumentBuilder().AppendQuoted(configuration.OutputAssembly));
         processRunner.SetEnvironmentVariable("DOTNET_DiagnosticPorts", $"{diagnosticPort},suspend");
         
-        var traceProcess = Trace.Collect(diagnosticPort, resultFilePath, this);
+        var traceProcess = Trace.Collect(diagnosticPort, resultFilePath, configuration.ProfilerMode, this);
         var appLaunchResult = processRunner.WaitForExit();
 
         disposables.Add(() => traceProcess.Terminate());
@@ -84,7 +84,7 @@ public partial class DebugSession {
         
         var routerProcess = DSRouter.ServerToServer(configuration.ProfilerPort+1, this);
         Thread.Sleep(1000); // wait for router to start
-        var traceProcess = Trace.Collect(routerProcess.Id, resultFilePath, this);
+        var traceProcess = Trace.Collect(routerProcess.Id, resultFilePath, configuration.ProfilerMode, this);
         Thread.Sleep(1000); // wait for trace to start
 
         if (configuration.UninstallApp)
@@ -99,11 +99,14 @@ public partial class DebugSession {
     }
 
     private void ProfileWindows(LaunchConfiguration configuration) {
+        if (configuration.IsGCDumpProfiling)
+            throw new NotSupportedException("GCDump profiling is not supported on Windows");
+
         var applicationName = Path.GetFileNameWithoutExtension(configuration.OutputAssembly);
         var resultFilePath = Path.Combine(configuration.TempDirectoryPath, $"{applicationName}.nettrace");
 
         var exeProcess = new ProcessRunner(new FileInfo(configuration.OutputAssembly), null, this).Start();
-        var traceProcess = Trace.Collect(exeProcess.Id, resultFilePath, this);
+        var traceProcess = Trace.Collect(exeProcess.Id, resultFilePath, configuration.ProfilerMode, this);
 
         disposables.Add(() => traceProcess.Terminate());
         disposables.Add(() => exeProcess.Terminate());

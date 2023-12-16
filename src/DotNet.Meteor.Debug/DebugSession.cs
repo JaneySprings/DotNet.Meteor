@@ -78,7 +78,7 @@ public partial class DebugSession : Session {
         if (configuration.DebugPort < 1)
             throw new ProtocolException($"Invalid port '{configuration.DebugPort}'");
 
-        if (configuration.IsProfileConfiguration) {
+        if (configuration.IsProfilingConfiguration) {
             ProfileApplication(configuration);
             return new LaunchResponse();
         }
