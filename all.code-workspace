@@ -10,22 +10,22 @@
             "path": "src/Mono.Debugger/Mono.Debugging.Soft"
         },
         {
-            "path": "src/DotNet.Meteor.HotReload.Plugin"
-        },
-        {
             "path": "src/DotNet.Meteor.Shared"
-        },
-        {
-            "path": "src/DotNet.Meteor.Xaml"
         },
         {
             "path": "src/DotNet.Meteor.HotReload"
         },
         {
-            "path": "src/DotNet.Meteor.Debug"
+            "path": "src/DotNet.Meteor.HotReload.Plugin"
+        },
+        {
+            "path": "src/DotNet.Meteor.Xaml"
         },
         {
             "path": "src/DotNet.Meteor.Workspace"
+        },
+        {
+            "path": "src/DotNet.Meteor.Debug"
         },
         {
             "path": "src/DotNet.Meteor.Tests"

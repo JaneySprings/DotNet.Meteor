@@ -25,7 +25,7 @@
 	"configuration.description.monoSdbDebuggerPortAndroid": "Android's default port of the Mono SDB debugger.",
 	"configuration.description.monoSdbDebuggerPortApple": "iOS's default port of the Mono SDB debugger.",
 	"configuration.description.hotReloadHostPort": "The port of the Hot Reload server.",
-	"configuration.description.profilerHostPort": "Specifies the port number used by the profiler",
+	"configuration.description.profilerHostPort": "Specifies the port number used by the profiler.",
 	"configuration.description.uninstallApplicationBeforeInstalling": "Uninstalls the application before installing it again.",
 
 	"configuration.description.debuggerOptions.evaluationTimeout": "Expression evaluation timeout in the debugging window.",

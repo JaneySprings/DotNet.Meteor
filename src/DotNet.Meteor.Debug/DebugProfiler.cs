@@ -31,7 +31,7 @@ public partial class DebugSession {
         var resultFilePath = Path.Combine(configuration.TempDirectoryPath, $"{applicationName}.nettrace");
 
         if (configuration.Device.IsEmulator) {
-            var diagnosticPort = Path.Combine(RuntimeSystem.HomeDirectory, "simulator-port");
+            var diagnosticPort = Path.Combine(RuntimeSystem.HomeDirectory, $"simulator-{DateTime.Now.Ticks}"); // Never fails with constant address but maybe it's better
             var routerProcess = DSRouter.ClientToServer(diagnosticPort, $"127.0.0.1:{configuration.ProfilerPort}", this);
             var simProcess = MonoLaunch.ProfileSim(configuration.Device.Serial, configuration.OutputAssembly, configuration.ProfilerPort, new CatchStartLogger(this, () => {
                 var traceProcess = Trace.Collect(diagnosticPort, resultFilePath, configuration.ProfilerMode, this);
@@ -58,7 +58,7 @@ public partial class DebugSession {
     private void ProfileMacCatalyst(LaunchConfiguration configuration) {
         var applicationName = Path.GetFileNameWithoutExtension(configuration.OutputAssembly);
         var resultFilePath = Path.Combine(configuration.TempDirectoryPath, $"{applicationName}.nettrace");
-        var diagnosticPort = Path.Combine(RuntimeSystem.HomeDirectory, "desktop-port");
+        var diagnosticPort = Path.Combine(RuntimeSystem.HomeDirectory, $"desktop-{DateTime.Now.Ticks}"); // Because sometimes it fails with 'Address already in use'
 
         var tool = AppleSdk.OpenTool();
         var processRunner = new ProcessRunner(tool, new ProcessArgumentBuilder().AppendQuoted(configuration.OutputAssembly));
