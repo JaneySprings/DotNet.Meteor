@@ -58,17 +58,17 @@ using DotNet.Meteor.HotReload.Plugin;
 
 public static class MauiProgram
 {
-	public static MauiApp CreateMauiApp()
-	{
-		var builder = MauiApp.CreateBuilder();
-		builder
+    public static MauiApp CreateMauiApp()
+    {
+        var builder = MauiApp.CreateBuilder();
+        builder
             .UseMauiApp<App>()
 #if DEBUG
             .EnableHotReload()
 #endif
-            ...
-		return builder.Build();
-	}
+        ...
+        return builder.Build();
+    }
 }
 ```
 3. Now you can run your project, update XAML and see updates in real-time!
