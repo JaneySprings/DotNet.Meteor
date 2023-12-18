@@ -7,6 +7,7 @@ using System.Text.Json.Serialization.Metadata;
 using Newtonsoft.Json.Linq;
 using NewtonConverter = Newtonsoft.Json.JsonConvert;
 using DebugProtocol =  Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
+using System.IO;
 
 namespace DotNet.Meteor.Debug.Extensions;
 
@@ -39,6 +40,11 @@ public static class ServerExtensions {
         } finally {
             listener.Stop();
         }
+    }
+    public static bool TryDeleteFile(string path) {
+        if (File.Exists(path))
+            File.Delete(path);
+        return !File.Exists(path);
     }
 
     public static StackFrame GetFrameSafe(this Backtrace bt, int n) {

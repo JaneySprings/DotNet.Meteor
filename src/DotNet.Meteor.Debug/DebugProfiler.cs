@@ -31,7 +31,7 @@ public partial class DebugSession {
         var resultFilePath = Path.Combine(configuration.TempDirectoryPath, $"{applicationName}.nettrace");
 
         if (configuration.Device.IsEmulator) {
-            var diagnosticPort = Path.Combine(RuntimeSystem.HomeDirectory, $"simulator-{DateTime.Now.Ticks}"); // Never fails with constant address but maybe it's better
+            var diagnosticPort = Path.Combine(RuntimeSystem.HomeDirectory, "simulator-port.lock");
             var routerProcess = DSRouter.ClientToServer(diagnosticPort, $"127.0.0.1:{configuration.ProfilerPort}", this);
             var simProcess = MonoLaunch.ProfileSim(configuration.Device.Serial, configuration.OutputAssembly, configuration.ProfilerPort, new CatchStartLogger(this, () => {
                 var traceProcess = Trace.Collect(diagnosticPort, resultFilePath, configuration.ProfilerMode, this);
@@ -40,8 +40,9 @@ public partial class DebugSession {
            
             disposables.Add(() => routerProcess.Terminate());
             disposables.Add(() => simProcess.Terminate());
+            disposables.Add(() => ServerExtensions.TryDeleteFile(diagnosticPort));
         } else {
-            var diagnosticPort = Path.Combine(RuntimeSystem.HomeDirectory, $"device-{DateTime.Now.Ticks}"); // Because after first try it shows 'Address already in use'
+            var diagnosticPort = Path.Combine(RuntimeSystem.HomeDirectory, "device-port.lock");
             var routerProcess = DSRouter.ServerToClient(diagnosticPort, $"127.0.0.1:{configuration.ProfilerPort}", forwardApple: true, this);
 
             MonoLaunch.InstallDev(configuration.Device.Serial, configuration.OutputAssembly, this);
@@ -52,13 +53,14 @@ public partial class DebugSession {
     
             disposables.Add(() => routerProcess.Terminate());
             disposables.Add(() => devProcess.Terminate());
+            disposables.Add(() => ServerExtensions.TryDeleteFile(diagnosticPort));
         }
     }
 
     private void ProfileMacCatalyst(LaunchConfiguration configuration) {
         var applicationName = Path.GetFileNameWithoutExtension(configuration.OutputAssembly);
         var resultFilePath = Path.Combine(configuration.TempDirectoryPath, $"{applicationName}.nettrace");
-        var diagnosticPort = Path.Combine(RuntimeSystem.HomeDirectory, $"desktop-{DateTime.Now.Ticks}"); // Because sometimes it fails with 'Address already in use'
+        var diagnosticPort = Path.Combine(RuntimeSystem.HomeDirectory, "desktop-port.lock");
 
         var tool = AppleSdk.OpenTool();
         var processRunner = new ProcessRunner(tool, new ProcessArgumentBuilder().AppendQuoted(configuration.OutputAssembly));
@@ -68,6 +70,7 @@ public partial class DebugSession {
         var appLaunchResult = processRunner.WaitForExit();
 
         disposables.Add(() => traceProcess.Terminate());
+        disposables.Add(() => ServerExtensions.TryDeleteFile(diagnosticPort));
 
         if (!appLaunchResult.Success)
             throw new Exception(string.Join(Environment.NewLine, appLaunchResult.StandardError));
