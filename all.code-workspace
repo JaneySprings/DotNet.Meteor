@@ -53,7 +53,7 @@
                 "name": ".NET Core Attach",
                 "type": "coreclr",
                 "request": "attach",
-                "processName": "DotNet.Meteor.Workspace"
+                "processName": "DotNet.Meteor.Debug"
             }
         ]
     },

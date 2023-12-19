@@ -70,6 +70,7 @@ public partial class DebugSession : Session {
         symbolServer = new SymbolServer(configuration.TempDirectoryPath);
         typeResolver = new ExternalTypeResolver(configuration.TempDirectoryPath, configuration.DebuggerSessionOptions);
 
+        disposables.Add(() => symbolServer.Dispose());
         disposables.Add(() => typeResolver.Dispose());
         session.TypeResolverHandler = typeResolver.Handle;
 

@@ -17,6 +17,9 @@ The extension provides you with a basic `XAML` syntax highlighting and shows sni
 - **XAML Hot Reload** </br>
 Meteor support XAML Hot Reload for any platform. See the instruction below to enable Hot Reload in your project.
 
+- **Profiling** </br>
+You can profile your application and see the report in the `Speedscope` format. See the instruction below to enable profiling in your project.
+
 - **MAUI Blazor Support** </br>
 The extension allows you to build and debug `MAUI Blazor` apps (including the `.razor` files).
 
@@ -114,12 +117,12 @@ Conversion complete
 
 &emsp;The following table lists supported .NET target platforms and their capabilities:
 
-| Application Type | Build and Run | Hot Reload | Debugging |
-|-|:-:|:-:|:-:|
-| **WinUI** | ✅ | ✅ | ❌ |
-| **Android** | ✅ | ✅ | ✅ |
-| **iOS** | ✅ | ✅ | ✅ |
-| **MacCatalyst** | ✅ | ✅ | ✅ |
+| Application Type | Build and Run | Hot Reload | Debugging | Profiling |
+|-|:-:|:-:|:-:|:-:|
+| **WinUI** | ✅ | ✅ | ❌ | ✅ |
+| **Android** | ✅ | ✅ | ✅ | ✅ |
+| **iOS** | ✅ | ✅ | ✅ | ✅ |
+| **MacCatalyst** | ✅ | ✅ | ✅ | ✅ |
 
 &emsp;*You can debug WinUI apps using the C# VSCode extension with attaching the .NET Core Debugger.*
 

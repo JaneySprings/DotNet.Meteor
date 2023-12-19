@@ -44,11 +44,14 @@ public class SymbolServer {
             File.WriteAllBytes(outputFilePath, data);
         } catch (Exception ) { /*Ignore*/ }
     }
-
     private void RegisterGithubHeader(string githubKeyPath) {
         var githubKey = File.ReadAllText(githubKeyPath);
         var credentials = string.Format(CultureInfo.InvariantCulture, "{0}:", githubKey);
         credentials = Convert.ToBase64String(Encoding.ASCII.GetBytes(credentials));
         this.httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentials);
+    }
+
+    public void Dispose() {
+        httpClient?.Dispose();
     }
 }
