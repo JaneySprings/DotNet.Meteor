@@ -1,7 +1,8 @@
-import { XamlContext, XamlScope, Context } from './types';
+import { XamlContext } from "./models/xamlContext";
+import { XamlScope } from "./models/xamlScope";
+import { Context } from "./models/context";
 
-
-export class ContextService {
+export class XamlSyntaxTree {
     public static getContext(content: string, offset: number): XamlContext | undefined {
         const context = new XamlContext();
         const documentPart = content.substring(0, offset);
@@ -22,12 +23,12 @@ export class ContextService {
         // Simple tag definition
         if (!documentSpan.includes(' ')) {
             const tagRawValue = documentSpan.substring(1);
-            context.tagContext = ContextService.getTagContext(tagRawValue, content, context);
+            context.tagContext = XamlSyntaxTree.getTagContext(tagRawValue, content, context);
             context.scope = XamlScope.Tag;
             if (context.tagContext.name?.includes('.')) {
                 const tokens = context.tagContext.name.split('.');
                 context.tagContext.name = tokens[0];
-                context.attributeContext = ContextService.getAttributeContext(tokens[1], content, context);
+                context.attributeContext = XamlSyntaxTree.getAttributeContext(tokens[1], content, context);
                 context.attributeContext.parent = context.tagContext;
                 context.scope = XamlScope.Multiline;
             }
@@ -39,8 +40,8 @@ export class ContextService {
             const equalIndex = attributeSpan.lastIndexOf('=');
             const attributeEndIndex = equalIndex === -1 ? undefined : equalIndex;
             const attributeRawValue = attributeSpan.substring(0, attributeEndIndex).trim();
-            context.tagContext = ContextService.getTagContext(tagRawValue, content, context);
-            context.attributeContext = ContextService.getAttributeContext(attributeRawValue, content, context);
+            context.tagContext = XamlSyntaxTree.getTagContext(tagRawValue, content, context);
+            context.attributeContext = XamlSyntaxTree.getAttributeContext(attributeRawValue, content, context);
             context.scope = XamlScope.Attribute;
             if (context.attributeContext.parent === undefined)
                 context.attributeContext.parent = context.tagContext;
@@ -54,7 +55,6 @@ export class ContextService {
 
         return context;
     }
-
     private static getTagContext(rawValue: string, content: string, xamlContext: XamlContext): Context {
         const context = new Context();
         context.name = rawValue;
@@ -67,7 +67,6 @@ export class ContextService {
         context.namespace = xamlContext.imports[context.prefix ?? ''];
         return context;
     }
-
     private static getAttributeContext(rawValue: string, content: string, xamlContext: XamlContext): Context {
         const context = new Context();
         context.name = rawValue;
@@ -80,7 +79,7 @@ export class ContextService {
         context.namespace = xamlContext.imports[context.prefix ?? ''];
         if (context.name.includes('.')) {
             const nameTokens = context.name.split('.');
-            context.parent = ContextService.getTagContext(nameTokens[0], content, xamlContext);
+            context.parent = XamlSyntaxTree.getTagContext(nameTokens[0], content, xamlContext);
             context.name = nameTokens[1];
         }
         

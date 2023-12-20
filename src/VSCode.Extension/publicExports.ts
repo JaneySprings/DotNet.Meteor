@@ -19,7 +19,6 @@ export class PublicExports {
     }
 }
 
-
 class EventHandler {
     private callbacks: Array<(data: any) => void>;
 

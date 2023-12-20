@@ -1,12 +1,12 @@
+import { ConfigurationController } from '../configurationController';
+import { StatusBarController } from '../statusbarController';
 import { WorkspaceFolder, DebugConfiguration } from 'vscode';
-import { ConfigurationController } from '../configuration';
-import { UIController } from '../controller';
-import { Target } from '../models';
-import * as res from '../resources';
+import { Target } from '../models/target';
+import * as res from '../resources/constants';
 import * as vscode from 'vscode';
 
 
-export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationProvider {
+export class MonoDebugConfigurationProvider implements vscode.DebugConfigurationProvider {
 	async resolveDebugConfiguration(folder: WorkspaceFolder | undefined, 
 									config: DebugConfiguration, 
 									token?: vscode.CancellationToken): Promise<DebugConfiguration | undefined> {
@@ -30,7 +30,7 @@ export class DotNetDebuggerConfiguration implements vscode.DebugConfigurationPro
 		const targetProject = { ...ConfigurationController.project };
 
 		if (config.device !== undefined) 
-			UIController.performSelectDevice(UIController.devices.find(d => d.name === config.device));
+			StatusBarController.performSelectDevice(StatusBarController.devices.find(d => d.name === config.device));
 		if (config.runtime !== undefined)
 			targetDevice!.runtime_id = config.runtime;
 

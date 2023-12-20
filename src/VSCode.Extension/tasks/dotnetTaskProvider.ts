@@ -1,6 +1,6 @@
-import { ConfigurationController } from '../configuration';
-import { ProcessArgumentBuilder } from '../bridge';
-import * as res from '../resources';
+import { ProcessArgumentBuilder } from '../processes/processArgumentBuilder';
+import { ConfigurationController } from '../configurationController';
+import * as res from '../resources/constants';
 import * as vscode from 'vscode';
 
 

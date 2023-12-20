@@ -1,11 +1,10 @@
-import { XamlCompletionItemProvider } from './completions';
-import { ConfigurationController } from "../configuration";
-import { CommandController } from './bridge';
-import * as res from '../resources';
+import { XamlCompletionItemProvider } from './features/xamlCompletionItemProvider';
+import { ConfigurationController } from "../configurationController";
+import { XamlCommandController } from './xamlCommandController';
+import * as res from '../resources/constants';
 import * as vscode from 'vscode';
 import * as path from "path";
 import * as fs from "fs";
-
 
 export const languageId = 'xml';
 
@@ -16,7 +15,7 @@ export class XamlController {
     public static activate(context: vscode.ExtensionContext) {
         const schemaSelector = { language: languageId, scheme: 'file' };
         XamlController.extensionVersion = context.extension.packageJSON.version;
-        CommandController.activate(context);
+        XamlCommandController.activate(context);
 
         context.subscriptions.push(vscode.languages.registerCompletionItemProvider(
             schemaSelector, new XamlCompletionItemProvider(), ':', '.', '<', ' ',
@@ -59,7 +58,7 @@ export class XamlController {
         if (projectPath === undefined)
             return;
 
-        await CommandController.xamlSchema(projectPath);
+        await XamlCommandController.xamlSchema(projectPath);
         const generatedPath = path.join(path.dirname(projectPath), '.meteor', 'generated');
         if (fs.existsSync(generatedPath) === false)
             return;

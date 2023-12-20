@@ -8,10 +8,12 @@ namespace DotNet.Meteor.Debug.Extensions;
 internal class ExternalTypeResolver {
     private readonly DebuggerSessionOptions sessionOptions;
     private readonly string resolvedConnectionInfoPath;
+    private readonly TcpClient client;
 
     public ExternalTypeResolver(string tempFolder, DebuggerSessionOptions options) {
         sessionOptions = options;
         resolvedConnectionInfoPath = Path.Combine(tempFolder, "resolve.drc");
+        client = new TcpClient();
        
         if (!Directory.Exists(tempFolder))
             Directory.CreateDirectory(tempFolder);
@@ -20,19 +22,10 @@ internal class ExternalTypeResolver {
     }
 
     public string Handle(string typeName, SourceLocation location) {
-        if (!sessionOptions.EvaluationOptions.UseExternalTypeResolver)
-            return typeName;
-        if (!File.Exists(resolvedConnectionInfoPath))
-            return typeName;
-
-        var port = 0;
-        var content = File.ReadAllText(resolvedConnectionInfoPath);
-        if (string.IsNullOrEmpty(content) || !int.TryParse(content, out port))
-            return typeName;
-        
         try {
-            using var client = new TcpClient("localhost", port);
-            using var stream = client.GetStream();
+            EnsureConnected();
+            // Not use using to avoid closing the stream
+            var stream = client.GetStream();
             var reader = new StreamReader(stream);
             var writer = new StreamWriter(stream) { AutoFlush = true };
 
@@ -41,14 +34,29 @@ internal class ExternalTypeResolver {
 
             var request = reader.ReadLineAsync();
             request.Wait(sessionOptions.EvaluationOptions.EvaluationTimeout);
-            return request.Result;
-        } catch (Exception) {
+            return request.IsCompleted ? request.Result : typeName;
+        } 
+        catch (Exception) {
             return typeName;
         }
     }
-
     public void Dispose() {
+        client?.Close();
         if (File.Exists(resolvedConnectionInfoPath))
             File.Delete(resolvedConnectionInfoPath);
+    }
+
+    private bool EnsureConnected() {
+        if (client.Connected)
+            return true;
+        if (!File.Exists(resolvedConnectionInfoPath))
+            return false;
+
+        var content = File.ReadAllText(resolvedConnectionInfoPath);
+        if (string.IsNullOrEmpty(content) || !int.TryParse(content, out var port))
+            return false;
+
+        client.Connect("localhost", port);
+        return client.Connected;
     }
 }

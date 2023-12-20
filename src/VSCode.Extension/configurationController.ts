@@ -1,15 +1,16 @@
 import { window, workspace, ExtensionContext } from 'vscode';
-import { IProject, IDevice, Target } from "./models";
-import { CommandController } from './bridge';
-import { UIController } from "./controller";
-import * as res from './resources';
-
+import { CommandController } from './commandController';
+import { StatusBarController } from "./statusbarController";
+import { Project } from './models/project';
+import { Device } from './models/device';
+import { Target } from './models/target';
+import * as res from './resources/constants';
 
 export class ConfigurationController {
     public static androidSdkDirectory: string | undefined;
     public static profiler: string | undefined;
-    public static project: IProject | undefined;
-    public static device: IDevice | undefined;
+    public static project: Project | undefined;
+    public static device: Device | undefined;
     public static target: Target | undefined;
 
     public static activate(context: ExtensionContext) {
@@ -31,7 +32,6 @@ export class ConfigurationController {
     public static getProfilerPort(): number {
         return ConfigurationController.getSetting<number>(res.configIdProfilerHostPort, res.configDefaultProfilerHostPort);
     }
-
     public static getUninstallAppOption(): boolean {
         return ConfigurationController.getSetting<boolean>(
             res.configIdUninstallApplicationBeforeInstalling, 
@@ -75,7 +75,7 @@ export class ConfigurationController {
             window.showErrorMessage(res.messageNoDeviceFound);
             return false;
         }
-        if (!UIController.devices.some(it => it.name === ConfigurationController.device?.name)) {
+        if (!StatusBarController.devices.some(it => it.name === ConfigurationController.device?.name)) {
             window.showErrorMessage(res.messageDeviceNotExists);
             return false;
         }
