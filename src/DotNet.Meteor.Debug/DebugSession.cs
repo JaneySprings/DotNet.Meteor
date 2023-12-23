@@ -49,6 +49,7 @@ public partial class DebugSession : Session {
 #region request: Initialize
     protected override InitializeResponse HandleInitializeRequest(InitializeArguments arguments) {
         return new InitializeResponse() {
+            SupportsTerminateRequest = true,
             SupportsEvaluateForHovers = true,
             SupportsExceptionInfoRequest = true,
             SupportsConditionalBreakpoints = true,
@@ -89,22 +90,24 @@ public partial class DebugSession : Session {
         return new LaunchResponse();
     }
 #endregion request: Launch
-#region request: Disconnect
-    protected override DisconnectResponse HandleDisconnectRequest(DisconnectArguments arguments) {
-        if (this.session?.IsRunning == true)
-            this.session.Stop();
-
+#region request: Terminate
+    protected override TerminateResponse HandleTerminateRequest(TerminateArguments arguments) {
+        if (!session.HasExited)
+            session.Exit();
+        
         foreach(var disposable in disposables)
             DoSafe(() => disposable.Invoke());
 
-        this.disposables.Clear();
-        if (this.session != null) {
-            if (!this.session.HasExited)
-                this.session.Exit();
+        disposables.Clear();
+        return new TerminateResponse();
+    }
+#endregion request: Terminate
+#region request: Disconnect
+    protected override DisconnectResponse HandleDisconnectRequest(DisconnectArguments arguments) {
+        if (session == null)
+            return new DisconnectResponse();
 
-            this.session.Dispose();
-        }
-
+        session.Dispose();
         return new DisconnectResponse();
     }
 #endregion request: Disconnect

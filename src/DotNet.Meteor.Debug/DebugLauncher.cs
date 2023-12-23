@@ -23,24 +23,20 @@ public partial class DebugSession {
         session.Run(new SoftDebuggerStartInfo(arguments), configuration.DebuggerSessionOptions);
         OnOutputDataReceived("Debugger is ready and listening...");
     }
-
     private void LaunchApplication(LaunchConfiguration configuration) {
         DoSafe(() => {
             if (configuration.Device.IsAndroid)
                 LaunchAndroid(configuration);
-
             if (configuration.Device.IsIPhone)
-                LaunchApple(configuration);
-
+                LaunchAppleMobile(configuration);
             if (configuration.Device.IsMacCatalyst)
                 LaunchMacCatalyst(configuration);
-
             if (configuration.Device.IsWindows)
                 LaunchWindows(configuration);
         });
     }
 
-    private void LaunchApple(LaunchConfiguration configuration) {
+    private void LaunchAppleMobile(LaunchConfiguration configuration) {
         // TODO: Implement Apple launching for Windows
         // if (RuntimeSystem.IsWindows) {
         //     IDeviceTool.Installer(configuration.Device.Serial, configuration.OutputAssembly, this);
@@ -62,7 +58,6 @@ public partial class DebugSession {
             disposables.Add(() => forwardingProcess.Terminate());
         }
     }
-
     private void LaunchMacCatalyst(LaunchConfiguration configuration) {
         var tool = AppleSdk.OpenTool();
         var processRunner = new ProcessRunner(tool, new ProcessArgumentBuilder().AppendQuoted(configuration.OutputAssembly));
@@ -73,15 +68,13 @@ public partial class DebugSession {
         if (!result.Success)
             throw new ProtocolException(string.Join(Environment.NewLine, result.StandardError));
     }
-
     private void LaunchWindows(LaunchConfiguration configuration) {
         var program = new FileInfo(configuration.OutputAssembly);
         var process = new ProcessRunner(program, new ProcessArgumentBuilder(), this).Start();
         disposables.Add(() => process.Terminate());
     }
-
     private void LaunchAndroid(LaunchConfiguration configuration) {
-        var applicationId = configuration.GetApplicationId();
+        var applicationId = configuration.GetApplicationName();
         if (configuration.Device.IsEmulator)
             configuration.Device.Serial = AndroidEmulator.Run(configuration.Device.Name).Serial;
 

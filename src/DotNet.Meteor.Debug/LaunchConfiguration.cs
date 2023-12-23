@@ -50,9 +50,9 @@ public class LaunchConfiguration {
         });
     }
 
-    public string GetApplicationId() {
+    public string GetApplicationName() {
         if (!Device.IsAndroid)
-            throw new ProtocolException("Application ID not implemented.");
+            return Path.GetFileNameWithoutExtension(OutputAssembly);
 
         var assemblyName = Path.GetFileNameWithoutExtension(OutputAssembly);
         return assemblyName.Replace("-Signed", "");
