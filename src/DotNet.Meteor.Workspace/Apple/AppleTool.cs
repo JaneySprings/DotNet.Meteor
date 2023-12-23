@@ -6,7 +6,7 @@ namespace DotNet.Meteor.Workspace.Apple;
 public static class AppleTool {
     public static List<DeviceData> VirtualDevices() {
         var devices = new List<DeviceData>();
-        var path = AppleUtilities.SimulatorsLocation();
+        var path = AppleSdk.SimulatorsLocation();
         var runtimeId = SystemProfiler.IsArch64()
             ? Runtimes.iOSSimulatorArm64
             : Runtimes.iOSSimulatorX64;

@@ -15,7 +15,7 @@ public static class AndroidEmulator {
         if (rSerial != null)
             return new StartResult(rSerial, null);
 
-        var emulator = AndroidUtilities.EmulatorTool();
+        var emulator = AndroidSdk.EmulatorTool();
         var runner = new ProcessRunner(emulator, new ProcessArgumentBuilder()
             .Append("-avd")
             .Append(name));
