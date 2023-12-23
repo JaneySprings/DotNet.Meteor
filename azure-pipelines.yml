@@ -110,26 +110,26 @@ stages:
 #//////////////////////////////////////////////////////////////////////
 #// Publish
 #//////////////////////////////////////////////////////////////////////
-      # - job: Publish
-      #   dependsOn: [Linux, MacOS, Windows]
-      #   condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')
-      #   pool:
-      #     vmImage: ubuntu-latest
-      #   timeoutInMinutes: 4 
-      #   steps:
-      #   - download: current
-      #     artifact: 'Linux Build'
-      #   - download: current
-      #     artifact: 'MacOS Build'
-      #   - download: current
-      #     artifact: 'Windows Build'
-      #   - task: GitHubRelease@1
-      #     inputs:
-      #       gitHubConnection: 'upstream'
-      #       repositoryName: '$(Build.Repository.Name)'
-      #       action: 'create'
-      #       tagSource: 'gitTag'
-      #       assets: '$(Pipeline.Workspace)/**/*.vsix'
+      - job: Publish
+        dependsOn: [Linux, MacOS, Windows]
+        condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')
+        pool:
+          vmImage: ubuntu-latest
+        timeoutInMinutes: 4 
+        steps:
+        - download: current
+          artifact: 'Linux Build'
+        - download: current
+          artifact: 'MacOS Build'
+        - download: current
+          artifact: 'Windows Build'
+        - task: GitHubRelease@1
+          inputs:
+            gitHubConnection: 'upstream'
+            repositoryName: '$(Build.Repository.Name)'
+            action: 'create'
+            tagSource: 'gitTag'
+            assets: '$(Pipeline.Workspace)/**/*.vsix'
 
 
 
