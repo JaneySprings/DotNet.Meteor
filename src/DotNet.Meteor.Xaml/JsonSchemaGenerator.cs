@@ -39,6 +39,8 @@ public class JsonSchemaGenerator {
 
                 schema.TimeStamp = DateTime.Now.ToString();
                 schema.Target = this.typeLoader.AssembliesDirectory;
+                if (schema == null)
+                    continue;
 
                 WriteSchema(schema, outputFile);
             } catch (Exception e) {
@@ -49,8 +51,8 @@ public class JsonSchemaGenerator {
         return true;
     }
 
-    private void WriteSchema(object schema, string outputFile) {
-        var json = JsonSerializer.Serialize(schema);
+    private void WriteSchema(SchemaInfo schema, string outputFile) {
+        var json = JsonSerializer.Serialize(schema, TrimmableContext.Default.SchemaInfo);
         using var stream = File.CreateText(outputFile);
         stream.WriteLine(json);
     }

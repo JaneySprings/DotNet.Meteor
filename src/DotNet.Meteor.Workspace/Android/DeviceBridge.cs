@@ -6,7 +6,7 @@ namespace DotNet.Meteor.Workspace.Android;
 
 public static class DeviceBridge {
     public static string Shell(string serial, params string[] args) {
-        var adb = AndroidUtilities.AdbTool();
+        var adb = AndroidSdk.AdbTool();
         var result = new ProcessRunner(adb, new ProcessArgumentBuilder()
             .Append("-s", serial)
             .Append("shell")
@@ -20,7 +20,7 @@ public static class DeviceBridge {
     }
 
     public static List<string> Devices() {
-        var adb = AndroidUtilities.AdbTool();
+        var adb = AndroidSdk.AdbTool();
         ProcessResult result = new ProcessRunner(adb, new ProcessArgumentBuilder()
             .Append("devices")
             .Append("-l"))
@@ -44,7 +44,7 @@ public static class DeviceBridge {
     }
 
     public static string EmuName(string serial) {
-        var adb = AndroidUtilities.AdbTool();
+        var adb = AndroidSdk.AdbTool();
         ProcessResult result = new ProcessRunner(adb, new ProcessArgumentBuilder()
             .Append("-s", serial)
             .Append("emu", "avd", "name"))

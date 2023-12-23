@@ -15,7 +15,7 @@ public class ClientConnectionProvider : SoftDebuggerStartArgs, ISoftDebuggerConn
     public ClientConnectionProvider(IPAddress host, int port, string appName) {
         this.appName = appName;
         this.endPoint = new IPEndPoint(host, port);
-        MaxConnectionAttempts = 100;
+        MaxConnectionAttempts = 20;
         TimeBetweenConnectionAttempts = 500;
     }
 

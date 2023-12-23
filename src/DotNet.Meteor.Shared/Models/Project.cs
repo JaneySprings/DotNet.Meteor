@@ -1,15 +1,12 @@
-using System;
-using System.Text;
-using System.IO;
 using System.Collections.Generic;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using SystemPath = System.IO.Path;
 
 namespace DotNet.Meteor.Shared {
     public class Project {
-        [JsonProperty("name")] public string Name { get; set; }
-        [JsonProperty("path")] public string Path { get; set; }
-        [JsonProperty("frameworks")] public List<string> Frameworks { get; set; }
+        [JsonPropertyName("name")] public string Name { get; set; }
+        [JsonPropertyName("path")] public string Path { get; set; }
+        [JsonPropertyName("frameworks")] public List<string> Frameworks { get; set; }
 
         public Project(string path) {
             Frameworks = new List<string>();

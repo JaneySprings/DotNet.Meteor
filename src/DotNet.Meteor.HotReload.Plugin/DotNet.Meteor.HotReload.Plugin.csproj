@@ -4,7 +4,7 @@
 	<PropertyGroup>
 		<TargetFrameworks>net6.0</TargetFrameworks>
 		<UseMaui>true</UseMaui>
-		<OutputPath>$(MSBuildThisFileDirectory)..\..\artifacts</OutputPath>
+		<PublishDir>$(MSBuildThisFileDirectory)..\..\artifacts</PublishDir>
 	</PropertyGroup>
 
 	<PropertyGroup>

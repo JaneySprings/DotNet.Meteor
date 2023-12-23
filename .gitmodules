@@ -1,3 +1,6 @@
 [submodule "src/Mono.Debugger"]
 	path = src/Mono.Debugger
 	url = https://github.com/JaneySprings/Mono.Debugger
+[submodule "src/DotNet.Diagnostics"]
+	path = src/DotNet.Diagnostics
+	url = https://github.com/JaneySprings/.NET-Diagnostics

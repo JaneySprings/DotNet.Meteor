@@ -4,12 +4,14 @@ using DotNet.Meteor.Processes;
 using Mono.Debugging.Client;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
+using DotNet.Meteor.Shared;
 
 namespace DotNet.Meteor.Debug;
 
 public abstract class Session: DebugAdapterBase, IProcessLogger {
 
     protected Session(Stream input, Stream output) {
+        LogConfig.InitializeLog();
         base.InitializeProtocolClient(input, output);
     }
 
@@ -26,14 +28,19 @@ public abstract class Session: DebugAdapterBase, IProcessLogger {
             Category = category
         });
     }
-    protected T DoSafe<T>(Func<T> func) {
+    protected T DoSafe<T>(Func<T> handler) {
         try {
-            return func.Invoke();
+            return handler.Invoke();
         } catch (Exception ex) {
-            if (ex is ProtocolException)
-                throw;
-            GetLogger().LogError($"[Handled] {ex.Message}", ex);
-            throw new ProtocolException(ex.Message);
+            LogException(ex);
+            return default;
+        }
+    }
+    protected void DoSafe(Action handler) {
+        try {
+            handler.Invoke();
+        } catch (Exception ex) {
+            LogException(ex);
         }
     }
 
@@ -49,5 +56,11 @@ public abstract class Session: DebugAdapterBase, IProcessLogger {
     }
     private void LogError(object sender, DispatcherErrorEventArgs args) {
         GetLogger().LogError($"[Fatal] {args.Exception.Message}", args.Exception);
+    }
+    private void LogException(Exception ex) {
+        if (ex is ProtocolException)
+            throw ex;
+        GetLogger().LogError($"[Handled] {ex.Message}", ex);
+        throw new ProtocolException(ex.Message);
     }
 }

@@ -12,18 +12,33 @@
 	"task.meteor.id": "dotnet-meteor.task",
 	"task.meteor.title": "dotnet-meteor: Build",
 	"task.meteor.description.target": "Specifies whether the project should be build or published.",
-	"task.meteor.description.args": "Sets or overrides msbuild properties (except for the '-c' and '-f' parameters).",
+	"task.meteor.description.args": "Sets or overrides msbuild properties.",
 	"task.meteor.problemMatcher": "dotnet-meteor.problemMatcher",
 
 	"debugger.meteor.id": "dotnet-meteor.debugger",
 	"debugger.meteor.title": ".NET Meteor Debugger",
 	"debugger.meteor.description": "A new configuration for launching .NET apps.",
-	"debugger.meteor.device.description": "Overrides a target device with the specified device.",
-	"debugger.meteor.runtime.description": "Overrides a device's runtime identifier with the specified identifier.",
+	"debugger.meteor.description.device": "Overrides a target device with the specified device.",
+	"debugger.meteor.description.runtime": "Overrides a device's runtime identifier with the specified identifier.",
+	"debugger.meteor.description.profilerMode": "Specifies the way profiling data is collected.",
 
-	"configuration.title": ".NET Meteor",
 	"configuration.description.monoSdbDebuggerPortAndroid": "Android's default port of the Mono SDB debugger.",
 	"configuration.description.monoSdbDebuggerPortApple": "iOS's default port of the Mono SDB debugger.",
 	"configuration.description.hotReloadHostPort": "The port of the Hot Reload server.",
-	"configuration.description.uninstallApplicationBeforeInstalling": "Uninstalls the application before installing it again."
+	"configuration.description.profilerHostPort": "Specifies the port number used by the profiler.",
+	"configuration.description.uninstallApplicationBeforeInstalling": "Uninstalls the application before installing it again.",
+
+	"configuration.description.debuggerOptions.evaluationTimeout": "Expression evaluation timeout in the debugging window.",
+	"configuration.description.debuggerOptions.memberEvaluationTimeout": "Member evaluation timeout in the debugging window.",
+	"configuration.description.debuggerOptions.allowTargetInvoke": "Allows invoking methods in the debugging window.",
+	"configuration.description.debuggerOptions.allowMethodEvaluation": "Allows evaluating methods in the debugging window.",
+	"configuration.description.debuggerOptions.allowToStringCalls": "Allows calling `ToString()` in the debugging window.",
+	"configuration.description.debuggerOptions.flattenHierarchy": "Controls whether the debugger should flatten the hierarchy of inherited members.",
+	"configuration.description.debuggerOptions.groupPrivateMembers": "Controls whether the debugger should group private members in the debugging window.",
+	"configuration.description.debuggerOptions.groupStaticMembers": "Controls whether the debugger should group static members in the debugging window.",
+	"configuration.description.debuggerOptions.useExternalTypeResolver": "Use an external type resolver to resolve types in the debugging window. Requires the [DotRush](https://marketplace.visualstudio.com/items?itemName=nromanov.dotrush) extension.",
+	"configuration.description.debuggerOptions.currentExceptionTag": "Specifies the display name of the current exception in the debugging window.",
+	"configuration.description.debuggerOptions.ellipsizeStrings": "Truncates strings in the debugging window.",
+	"configuration.description.debuggerOptions.ellipsizedLength": "The maximum length of a truncated string.",
+	"configuration.description.debuggerOptions.integerDisplayFormat": "Specifies the format of displayed integers in the debugging window."
 }

@@ -1,11 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <LangVersion>8.0</LangVersion>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputType>Library</OutputType>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <InternalsVisibleTo Include="DotNet.Meteor.Tests" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-  </ItemGroup>
+    <Import Project="$(MSBuildThisFileDirectory)..\Common.Build.props" />
+
+    <PropertyGroup>
+        <ImplicitUsings>disable</ImplicitUsings>
+        <Nullable>disable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="DotNet.Meteor.Tests" />
+        <PackageReference Include="System.Text.Json" Version="7.0.3" />
+        <PackageReference Include="NLog" Version="5.2.4" />
+    </ItemGroup>
 </Project>

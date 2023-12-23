@@ -5,7 +5,7 @@ namespace DotNet.Meteor.Workspace.Apple;
 
 public static class IDeviceTool {
     public static DeviceData Info() {
-        var tool = new FileInfo(Path.Combine(AppleUtilities.IDeviceLocation(), "ideviceinfo.exe"));
+        var tool = new FileInfo(Path.Combine(AppleSdk.IDeviceLocation(), "ideviceinfo.exe"));
         var result = new ProcessRunner(tool).WaitForExit();
 
         if (!result.Success)

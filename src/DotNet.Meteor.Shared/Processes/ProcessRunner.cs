@@ -9,63 +9,67 @@ namespace DotNet.Meteor.Processes {
         private readonly Process process;
 
         public ProcessRunner(FileInfo executable, ProcessArgumentBuilder builder = null, IProcessLogger logger = null) {
-            this.process = new Process();
-            this.process.StartInfo.Arguments = builder?.ToString();
-            this.process.StartInfo.FileName = executable.FullName;
-            this.process.StartInfo.WorkingDirectory = executable.DirectoryName;
+            process = new Process();
+            process.StartInfo.Arguments = builder?.ToString();
+            process.StartInfo.FileName = executable.FullName;
+            process.StartInfo.WorkingDirectory = executable.DirectoryName;
 
             SetupProcessLogging(logger);
         }
         public ProcessRunner(string command, ProcessArgumentBuilder builder = null) {
-            this.process = new Process();
-            this.process.StartInfo.Arguments = builder?.ToString();
-            this.process.StartInfo.FileName = command;
+            process = new Process();
+            process.StartInfo.Arguments = builder?.ToString();
+            process.StartInfo.FileName = command;
 
             SetupProcessLogging(null);
         }
 
         private void SetupProcessLogging(IProcessLogger logger = null) {
-            this.standardOutput = new List<string>();
-            this.standardError = new List<string>();
-            this.process.StartInfo.CreateNoWindow = true;
-            this.process.StartInfo.UseShellExecute = false;
-            this.process.StartInfo.RedirectStandardOutput = true;
-            this.process.StartInfo.RedirectStandardError = true;
-            this.process.StartInfo.RedirectStandardInput = true;
-            this.process.OutputDataReceived += (s, e) => {
+            standardOutput = new List<string>();
+            standardError = new List<string>();
+            process.StartInfo.CreateNoWindow = true;
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.RedirectStandardError = true;
+            process.StartInfo.RedirectStandardInput = true;
+            process.OutputDataReceived += (s, e) => {
                 if (e.Data != null) {
                     if (logger != null)
                         logger.OnOutputDataReceived(e.Data);
-                    else this.standardOutput.Add(e.Data);
+                    else standardOutput.Add(e.Data);
                 }
             };
-            this.process.ErrorDataReceived += (s, e) => {
+            process.ErrorDataReceived += (s, e) => {
                 if (e.Data != null) {
                     if (logger != null)
                         logger.OnErrorDataReceived(e.Data);
-                    else this.standardError.Add(e.Data);
+                    else standardError.Add(e.Data);
                 }
             };
         }
 
         public void SetEnvironmentVariable(string key, string value) {
-            this.process.StartInfo.EnvironmentVariables[key] = value;
+            process.StartInfo.EnvironmentVariables[key] = value;
         }
 
         public void Kill() {
-            this.process?.Kill();
+            process?.Kill();
         }
         public Process Start() {
-            this.process.Start();
-            this.process.BeginOutputReadLine();
-            this.process.BeginErrorReadLine();
-            return this.process;
+            process.Start();
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+            return process;
         }
 
         public ProcessResult WaitForExit() {
-            this.Start();
-            this.process.WaitForExit();
-            return new ProcessResult(this.standardOutput, this.standardError, this.process.ExitCode);
+            Start();
+            process.WaitForExit();
+
+            var exitCode = process.ExitCode;
+            process.Close();
+
+            return new ProcessResult(standardOutput, standardError, exitCode);
         }
     }
 }

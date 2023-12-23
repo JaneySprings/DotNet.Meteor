@@ -1,7 +1,7 @@
 {
   "name": "dotnet-meteor",
   "publisher": "nromanov",
-  "version": "23.2.0",
+  "version": "1.0.0",
   "description": "Run and Debug .NET Apps",
   "displayName": ".NET Meteor",
   "author": "Nikita Romanov",
@@ -24,38 +24,254 @@
     "MAUI",
     "dotnet"
   ],
-  "engines": {
-    "vscode": "^1.73.0"
-  },
   "activationEvents": [
     "onLanguage:csharp",
     "onLanguage:fsharp",
     "workspaceContains:**/*.{csproj,fsproj,sln,slnf,csx}"
   ],
-  "main": "./extension/extension.js",
-  "contributes": {
-    "include": "src/VSCode.Extension/manifest/commands.json",
-    "include": "src/VSCode.Extension/manifest/tasks.json",
-    "include": "src/VSCode.Extension/manifest/matchers.json",
-    "include": "src/VSCode.Extension/manifest/breakpoints.json",
-    "include": "src/VSCode.Extension/manifest/debuggers.json",
-    "include": "src/VSCode.Extension/manifest/configuration.json"
+  "engines": {
+    "vscode": "^1.73.0"
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
+    "compile": "webpack",
     "watch": "tsc -watch -p ./src/VSCode.Extension/tsconfig.json",
-    "package": "webpack --mode production --config ./src/VSCode.Extension/webpack.config.js"
+    "package": "webpack --mode production"
   },
   "devDependencies": {
     "@types/node": "16.x",
-    "@types/sax": "^1.2.4",
     "@types/vscode": "^1.73.0",
-    "typescript": "^4.8.4",
     "ts-loader": "^9.4.1",
+    "typescript": "^4.8.4",
     "webpack": "^5.74.0",
     "webpack-cli": "^4.10.0"
   },
-  "dependencies": {
-    "sax": "^1.2.4"
+  "main": "./extension/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "%command.id.selectActiveProject%",
+        "title": "%command.title.selectActiveProject%"
+      },
+      {
+        "command": "%command.id.selectActiveConfiguration%",
+        "title": "%command.title.selectActiveConfiguration%"
+      },
+      {
+        "command": "%command.id.selectActiveDevice%",
+        "title": "%command.title.selectActiveDevice%"
+      }
+    ],
+    "taskDefinitions": [
+      {
+        "type": "%task.meteor.id%",
+        "required": [],
+        "properties": {
+          "target": {
+            "type": "string",
+            "default": "build",
+            "enum": [ "build", "publish" ],
+            "description": "%task.meteor.description.target%"
+          },
+          "args": {
+            "type": "array",
+            "description": "%task.meteor.description.args%",
+            "default": [],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    ],
+    "problemMatchers": [
+      {
+        "name": "%task.meteor.problemMatcher%",
+        "source": "%extension.displayName%",
+        "fileLocation":"relative",
+        "owner": "%extension.displayName%",
+        "pattern": {
+          "regexp": "^(.*.xaml)\\((\\d+),(\\d+)\\):.*?(error|warning)\\s(.*?):\\s(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "code": 5,
+          "message": 6
+        }
+      }
+    ],
+    "breakpoints": [
+      { 
+        "language": "csharp" 
+      },
+      { 
+        "language": "fsharp" 
+      },
+      { 
+        "language": "razor" 
+      },
+      { 
+        "language": "aspnetcorerazor" 
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "%debugger.meteor.id%",
+        "label": "%debugger.meteor.title%",
+        "languages": [
+          "csharp",
+          "fsharp",
+          "razor",
+          "aspnetcorerazor",
+          "xaml",
+          "xml"
+        ],
+        "program": "./extension/bin/Debug/DotNet.Meteor.Debug",
+        "windows": {
+          "program": "./extension/bin/Debug/DotNet.Meteor.Debug.exe"
+        },
+        "initialConfigurations": [
+          {
+            "name": "%debugger.meteor.title%",
+            "type": "%debugger.meteor.id%",
+            "request": "launch",
+            "preLaunchTask": "%task.meteor.title%"
+          }
+        ],
+        "configurationSnippets": [
+          {
+            "label": "%debugger.meteor.title%",
+            "description": "%debugger.meteor.description%",
+            "body": {
+              "name": "%debugger.meteor.title%",
+              "type": "%debugger.meteor.id%",
+              "request": "launch",
+              "preLaunchTask": "%task.meteor.title%"
+            }
+          }
+        ],
+        "configurationAttributes": {
+          "launch": {
+            "properties": {
+              "device": {
+                "type": "string",
+                "description": "%debugger.meteor.description.device%"
+              },
+              "runtime": {
+                "type": "string",
+                "description": "%debugger.meteor.description.runtime%"
+              },
+              "profilerMode": {
+                "type": "string",
+                "enum": [ "trace" ],
+                "description": "%debugger.meteor.description.profilerMode%"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "configuration": {
+      "title": "%extension.displayName%",
+      "properties": {
+        "dotnetMeteor.monoSdbDebuggerPortAndroid": {
+          "type": "integer",
+          "default": 10000,
+          "description": "%configuration.description.monoSdbDebuggerPortAndroid%"
+        },
+        "dotnetMeteor.monoSdbDebuggerPortApple": {
+          "type": "integer",
+          "default": 55551,
+          "description": "%configuration.description.monoSdbDebuggerPortApple%"
+        },
+        "dotnetMeteor.hotReloadHostPort": {
+          "type": "integer",
+          "default": 9988,
+          "description": "%configuration.description.hotReloadHostPort%"
+        },
+        "dotnetMeteor.profilerHostPort": {
+          "type": "integer",
+          "default": 9000,
+          "description": "%configuration.description.profilerHostPort%"
+        },
+        "dotnetMeteor.uninstallApplicationBeforeInstalling": {
+          "type": "boolean",
+          "default": true,
+          "description": "%configuration.description.uninstallApplicationBeforeInstalling%"
+        },
+
+
+        "dotnetMeteor.debuggerOptions.evaluationTimeout": {
+          "type":"integer",
+          "default": 5000,
+          "description": "%configuration.description.debuggerOptions.evaluationTimeout%"
+        },
+        "dotnetMeteor.debuggerOptions.memberEvaluationTimeout": {
+          "type":"integer",
+          "default": 5000,
+          "description": "%configuration.description.debuggerOptions.memberEvaluationTimeout%"
+        },
+        "dotnetMeteor.debuggerOptions.allowTargetInvoke": {
+          "type": "boolean",
+          "default": true,
+          "description": "%configuration.description.debuggerOptions.allowTargetInvoke%"
+        },
+        "dotnetMeteor.debuggerOptions.allowMethodEvaluation": {
+          "type": "boolean",
+          "default": true,
+          "description": "%configuration.description.debuggerOptions.allowMethodEvaluation%"
+        },
+        "dotnetMeteor.debuggerOptions.allowToStringCalls": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "%configuration.description.debuggerOptions.allowToStringCalls%"
+        },
+        "dotnetMeteor.debuggerOptions.flattenHierarchy": {
+          "type": "boolean",
+          "default": false,
+          "description": "%configuration.description.debuggerOptions.flattenHierarchy%"
+        },
+        "dotnetMeteor.debuggerOptions.groupPrivateMembers": {
+          "type": "boolean",
+          "default": true,
+          "description": "%configuration.description.debuggerOptions.groupPrivateMembers%"
+        },
+        "dotnetMeteor.debuggerOptions.groupStaticMembers": {
+          "type": "boolean",
+          "default": true,
+          "description": "%configuration.description.debuggerOptions.groupStaticMembers%"
+        },
+        "dotnetMeteor.debuggerOptions.useExternalTypeResolver": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "%configuration.description.debuggerOptions.useExternalTypeResolver%"
+        },
+        "dotnetMeteor.debuggerOptions.currentExceptionTag": {
+          "type": "string",
+          "default": "$exception",
+          "description": "%configuration.description.debuggerOptions.currentExceptionTag%"
+        },
+        "dotnetMeteor.debuggerOptions.ellipsizeStrings": {
+          "type": "boolean",
+          "default": true,
+          "description": "%configuration.description.debuggerOptions.ellipsizeStrings%"
+        },
+        "dotnetMeteor.debuggerOptions.ellipsizedLength": {
+          "type": "integer",
+          "default": 260,
+          "description": "%configuration.description.debuggerOptions.ellipsizedLength%"
+        },
+        "dotnetMeteor.debuggerOptions.integerDisplayFormat": {
+          "type": "string",
+          "default": "Decimal",
+          "description": "%configuration.description.debuggerOptions.integerDisplayFormat%",
+          "enum": [
+            "Decimal",
+            "Hexadecimal"
+          ]
+        }
+      }
+    }
   }
 }

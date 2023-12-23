@@ -8,7 +8,7 @@ namespace DotNet.Meteor.Debug.Sdk;
 
 public static class IDeviceTool {
     public static void Installer(string serial, string bundlePath, IProcessLogger logger = null) {
-        var tool = new FileInfo(Path.Combine(AppleUtilities.IDeviceLocation(), "ideviceinstaller.exe"));
+        var tool = new FileInfo(Path.Combine(AppleSdk.IDeviceLocation(), "ideviceinstaller.exe"));
         var result = new ProcessRunner(tool, new ProcessArgumentBuilder()
             .Append("--udid").Append(serial)
             .Append("--install").AppendQuoted(bundlePath)
@@ -20,7 +20,7 @@ public static class IDeviceTool {
     }
 
     public static Process Debug(string serial, string bundleId, int port, IProcessLogger logger = null) {
-        var tool = new FileInfo(Path.Combine(AppleUtilities.IDeviceLocation(), "idevicedebug.exe"));
+        var tool = new FileInfo(Path.Combine(AppleSdk.IDeviceLocation(), "idevicedebug.exe"));
         return new ProcessRunner(tool, new ProcessArgumentBuilder()
             .Append("run").Append(bundleId)
             .Append("--udid").Append(serial)

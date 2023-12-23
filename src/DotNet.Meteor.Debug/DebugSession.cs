@@ -4,7 +4,7 @@ using System.IO;
 using System.Threading;
 using System.Linq;
 using Mono.Debugging.Soft;
-using DotNet.Meteor.Debug.Utilities;
+using DotNet.Meteor.Debug.Extensions;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 using MonoClient = Mono.Debugging.Client;
@@ -15,6 +15,7 @@ namespace DotNet.Meteor.Debug;
 public partial class DebugSession : Session {
     private MonoClient.ObjectValue exception;
     private MonoClient.ProcessInfo activeProcess;
+    private ExternalTypeResolver typeResolver;
     private SymbolServer symbolServer;
 
     private readonly List<Action> disposables = new List<Action>();
@@ -22,45 +23,25 @@ public partial class DebugSession : Session {
     private readonly Handles<MonoClient.StackFrame> frameHandles = new Handles<MonoClient.StackFrame>();
     private readonly Handles<MonoClient.ObjectValue[]> variableHandles = new Handles<MonoClient.ObjectValue[]>();
     private readonly Dictionary<int, DebugProtocol.Thread> seenThreads = new Dictionary<int, DebugProtocol.Thread>();
-    private readonly SoftDebuggerSession session = new SoftDebuggerSession {
-        Breakpoints = new MonoClient.BreakpointStore()
-    };
-    private readonly MonoClient.DebuggerSessionOptions sessionOptions = new MonoClient.DebuggerSessionOptions {
-        EvaluationOptions = new MonoClient.EvaluationOptions {
-            EvaluationTimeout = 5000,
-            MemberEvaluationTimeout = 5000,
-            UseExternalTypeResolver = false,
-            AllowMethodEvaluation = true,
-            GroupPrivateMembers = true,
-            GroupStaticMembers = true,
-            AllowToStringCalls = true,
-            AllowTargetInvoke = true,
-            ChunkRawStrings = false,
-            EllipsizeStrings = false,
-            CurrentExceptionTag = "$exception",
-            IntegerDisplayFormat = MonoClient.IntegerDisplayFormat.Decimal,
-            StackFrameFormat = new MonoClient.StackFrameFormat()
-        }
-    };
+    private readonly SoftDebuggerSession session = new SoftDebuggerSession();
 
     public DebugSession(Stream input, Stream output): base(input, output) {
         MonoClient.DebuggerLoggingService.CustomLogger = new MonoLogger();
 
-        this.session.LogWriter = OnSessionLog;
-        this.session.DebugWriter = OnDebugLog;
-        this.session.OutputWriter = OnLog;
+        session.LogWriter = OnSessionLog;
+        session.DebugWriter = OnDebugLog;
+        session.OutputWriter = OnLog;
+        session.ExceptionHandler = OnExceptionHandled;
 
-        this.session.ExceptionHandler = OnExceptionHandled;
-
-        this.session.TargetStopped += TargetStopped;
-        this.session.TargetHitBreakpoint += TargetHitBreakpoint;
-        this.session.TargetExceptionThrown += TargetExceptionThrown;
-        this.session.TargetUnhandledException += TargetExceptionThrown;
-        this.session.TargetReady += TargetReady;
-        this.session.TargetExited += TargetExited;
-        this.session.TargetInterrupted += TargetInterrupted;
-        this.session.TargetThreadStarted += TargetThreadStarted;
-        this.session.TargetThreadStopped += TargetThreadStopped;
+        session.TargetStopped += TargetStopped;
+        session.TargetHitBreakpoint += TargetHitBreakpoint;
+        session.TargetExceptionThrown += TargetExceptionThrown;
+        session.TargetUnhandledException += TargetExceptionThrown;
+        session.TargetReady += TargetReady;
+        session.TargetExited += TargetExited;
+        session.TargetInterrupted += TargetInterrupted;
+        session.TargetThreadStarted += TargetThreadStarted;
+        session.TargetThreadStopped += TargetThreadStopped;
     }
 
     protected override MonoClient.ICustomLogger GetLogger() => MonoClient.DebuggerLoggingService.CustomLogger;
@@ -68,6 +49,7 @@ public partial class DebugSession : Session {
 #region request: Initialize
     protected override InitializeResponse HandleInitializeRequest(InitializeArguments arguments) {
         return new InitializeResponse() {
+            SupportsTerminateRequest = true,
             SupportsEvaluateForHovers = true,
             SupportsExceptionInfoRequest = true,
             SupportsConditionalBreakpoints = true,
@@ -76,7 +58,7 @@ public partial class DebugSession : Session {
             SupportsExceptionOptions = true,
             SupportsExceptionFilterOptions = true,
             SupportsCompletionsRequest = true,
-            CompletionTriggerCharacters = new List<string> { ".", ",", " ", "(", "$", "<" },
+            CompletionTriggerCharacters = new List<string> { "." },
             ExceptionBreakpointFilters = new List<ExceptionBreakpointsFilter> {
                 ExceptionsFilter.AllExceptions
             }
@@ -86,34 +68,46 @@ public partial class DebugSession : Session {
 #region request: Launch
     protected override LaunchResponse HandleLaunchRequest(LaunchArguments arguments) {
         var configuration = new LaunchConfiguration(arguments.ConfigurationProperties);
-        symbolServer = new SymbolServer(configuration.Project.Path);
+        symbolServer = new SymbolServer(configuration.TempDirectoryPath);
+        typeResolver = new ExternalTypeResolver(configuration.TempDirectoryPath, configuration.DebuggerSessionOptions);
+
+        disposables.Add(() => symbolServer.Dispose());
+        disposables.Add(() => typeResolver.Dispose());
+        session.TypeResolverHandler = typeResolver.Handle;
 
         if (configuration.DebugPort == 0)
-            configuration.DebugPort = Extensions.FindFreePort();
+            configuration.DebugPort = ServerExtensions.FindFreePort();
         if (configuration.DebugPort < 1)
             throw new ProtocolException($"Invalid port '{configuration.DebugPort}'");
 
-        LaunchApplication(configuration, configuration.DebugPort);
-        Connect(configuration, configuration.DebugPort);
+        if (configuration.IsProfilingConfiguration) {
+            ProfileApplication(configuration);
+            return new LaunchResponse();
+        }
+
+        LaunchApplication(configuration);
+        Connect(configuration);
         return new LaunchResponse();
     }
 #endregion request: Launch
+#region request: Terminate
+    protected override TerminateResponse HandleTerminateRequest(TerminateArguments arguments) {
+        if (!session.HasExited)
+            session.Exit();
+        
+        foreach(var disposable in disposables)
+            DoSafe(() => disposable.Invoke());
+
+        disposables.Clear();
+        return new TerminateResponse();
+    }
+#endregion request: Terminate
 #region request: Disconnect
     protected override DisconnectResponse HandleDisconnectRequest(DisconnectArguments arguments) {
-        if (this.session?.IsRunning == true)
-            this.session.Stop();
+        if (session == null)
+            return new DisconnectResponse();
 
-        foreach(var disposable in disposables)
-            disposable.Invoke();
-
-        this.disposables.Clear();
-        if (this.session != null) {
-            if (!this.session.HasExited)
-                this.session.Exit();
-
-            this.session.Dispose();
-        }
-
+        session.Dispose();
         return new DisconnectResponse();
     }
 #endregion request: Disconnect
@@ -393,8 +387,8 @@ public partial class DebugSession : Session {
             if (!frame.ValidateExpression(arguments.Expression))
                 throw new ProtocolException("invalid expression");
 
-            var val = frame.GetExpressionValue(arguments.Expression, this.sessionOptions.EvaluationOptions);
-            val.WaitHandle.WaitOne(this.sessionOptions.EvaluationOptions.EvaluationTimeout);
+            var val = frame.GetExpressionValue(arguments.Expression, session.Options.EvaluationOptions);
+            val.WaitHandle.WaitOne(session.Options.EvaluationOptions.EvaluationTimeout);
 
             if (val.IsEvaluating)
                 throw new ProtocolException("evaluation timeout expected");
@@ -441,7 +435,16 @@ public partial class DebugSession : Session {
             if (frame == null)
                 throw new ProtocolException("no active stackframe");
 
-            var completionData = frame.GetExpressionCompletionData(arguments.Text);
+            string resolvedText = null;
+            if (session.Options.EvaluationOptions.UseExternalTypeResolver) {
+                var lastTriggerIndex = arguments.Text.LastIndexOf('.');
+                if (lastTriggerIndex > 0) {
+                    resolvedText = frame.ResolveExpression(arguments.Text.Substring(0, lastTriggerIndex));
+                    resolvedText += arguments.Text.Substring(lastTriggerIndex);
+                }
+            }
+
+            var completionData = frame.GetExpressionCompletionData(resolvedText ?? arguments.Text);
             if (completionData == null || completionData.Items == null)
                 return new CompletionsResponse();
 

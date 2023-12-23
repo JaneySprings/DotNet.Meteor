@@ -1,10 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net472</TargetFramework>
 		<OutputType>Exe</OutputType>
-		<LangVersion>latest</LangVersion>
+		<OutputPath>$(MSBuildThisFileDirectory)..\..\extension\bin\Debug</OutputPath>
 		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-		<OutputPath>$(MSBuildThisFileDirectory)..\..\extension\bin</OutputPath>
+	</PropertyGroup>
+
+	<Import Project="..\Common.Build.props" />
+
+	<PropertyGroup>
+		<Nullable>disable</Nullable>
+		<ImplicitUsings>disable</ImplicitUsings>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -12,15 +17,12 @@
 		<ProjectReference Include="..\Mono.Debugger\Mono.Debugger.Soft\Mono.Debugger.Soft.csproj" />
 		<ProjectReference Include="..\Mono.Debugger\Mono.Debugging.Soft\Mono.Debugging.Soft.csproj" />
 		<ProjectReference Include="..\DotNet.Meteor.Shared\DotNet.Meteor.Shared.csproj" />
-	</ItemGroup>
 
-	<ItemGroup>
-		<Reference Include="System.Net.Http" />
+		<ProjectReference Include="..\DotNet.Diagnostics\src\Tools\dotnet-trace\dotnet-trace.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Mono.Cecil" Version="0.11.4" />
 		<PackageReference Include="Mono.Options" Version="6.12.0.148" />
-		<PackageReference Include="NLog" Version="5.2.4" />
 	</ItemGroup>
 </Project>

@@ -5,7 +5,7 @@ using DotNet.Meteor.Shared;
 namespace DotNet.Meteor.Workspace.Apple {
     public static class XCRun {
         public static List<DeviceData> Simulators() {
-            FileInfo tool = AppleUtilities.XCRunTool();
+            FileInfo tool = AppleSdk.XCRunTool();
             ProcessResult result = new ProcessRunner(tool, new ProcessArgumentBuilder()
                 .Append("simctl")
                 .Append("list"))
@@ -47,7 +47,7 @@ namespace DotNet.Meteor.Workspace.Apple {
         }
 
         public static List<DeviceData> PhysicalDevices() {
-            FileInfo tool = AppleUtilities.XCRunTool();
+            FileInfo tool = AppleSdk.XCRunTool();
             ProcessResult result = new ProcessRunner(tool, new ProcessArgumentBuilder()
                 .Append("xctrace")
                 .Append("list")
@@ -84,7 +84,7 @@ namespace DotNet.Meteor.Workspace.Apple {
         }
 
         public static void ShutdownAll(IProcessLogger? logger = null) {
-            FileInfo tool = AppleUtilities.XCRunTool();
+            FileInfo tool = AppleSdk.XCRunTool();
             ProcessResult result = new ProcessRunner(tool, new ProcessArgumentBuilder()
                 .Append("simctl")
                 .Append("shutdown")
@@ -98,7 +98,7 @@ namespace DotNet.Meteor.Workspace.Apple {
         }
 
         public static void LaunchSimulator(string serial, IProcessLogger? logger = null) {
-            var tool = AppleUtilities.OpenTool();
+            var tool = AppleSdk.OpenTool();
             ProcessResult result = new ProcessRunner(tool, new ProcessArgumentBuilder()
                 .Append("-a", "Simulator")
                 .Append("--args", "-CurrentDeviceUDID", serial), logger)

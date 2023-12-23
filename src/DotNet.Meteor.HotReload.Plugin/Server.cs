@@ -20,10 +20,10 @@ internal class Server : IMauiInitializeService {
         }
 
         while (true) {
-            var client = await tcpListener.AcceptTcpClientAsync();
-            var stream = client.GetStream();
-            var reader = new StreamReader(stream);
-            var writer = new StreamWriter(stream) { AutoFlush = true };
+            using var client = await tcpListener.AcceptTcpClientAsync();
+            using var stream = client.GetStream();
+            using var reader = new StreamReader(stream);
+            using var writer = new StreamWriter(stream) { AutoFlush = true };
 
             // wait for empty message
             await reader.ReadLineAsync();

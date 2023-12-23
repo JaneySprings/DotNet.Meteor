@@ -10,7 +10,7 @@ namespace DotNet.Meteor.Debug.Sdk;
 
 public static class DeviceBridge {
     public static string Shell(string serial, params string[] args) {
-        var adb = AndroidUtilities.AdbTool();
+        var adb = AndroidSdk.AdbTool();
         var result = new ProcessRunner(adb, new ProcessArgumentBuilder()
             .Append("-s", serial)
             .Append("shell")
@@ -24,7 +24,7 @@ public static class DeviceBridge {
     }
 
     public static string Forward(string serial, int port) {
-        var adb = AndroidUtilities.AdbTool();
+        var adb = AndroidSdk.AdbTool();
         var result = new ProcessRunner(adb, new ProcessArgumentBuilder()
             .Append("-s", serial)
             .Append("forward")
@@ -32,14 +32,23 @@ public static class DeviceBridge {
             .Append($"tcp:{port}"))
             .WaitForExit();
 
-        if (!result.Success)
-            throw new Exception(string.Join(Environment.NewLine, result.StandardError));
+        return string.Join(Environment.NewLine, result.StandardOutput);
+    }
+
+    public static string Reverse(string serial, int target, int destination) {
+        var adb = AndroidSdk.AdbTool();
+        var result = new ProcessRunner(adb, new ProcessArgumentBuilder()
+            .Append("-s", serial)
+            .Append("reverse")
+            .Append($"tcp:{target}")
+            .Append($"tcp:{destination}"))
+            .WaitForExit();
 
         return string.Join(Environment.NewLine, result.StandardOutput);
     }
 
     public static string RemoveForward(string serial) {
-        var adb = AndroidUtilities.AdbTool();
+        var adb = AndroidSdk.AdbTool();
         var result = new ProcessRunner(adb, new ProcessArgumentBuilder()
             .Append("-s", serial)
             .Append("forward")
@@ -52,8 +61,22 @@ public static class DeviceBridge {
         return string.Join(Environment.NewLine, result.StandardOutput);
     }
 
+    public static string RemoveReverse(string serial) {
+        var adb = AndroidSdk.AdbTool();
+        var result = new ProcessRunner(adb, new ProcessArgumentBuilder()
+            .Append("-s", serial)
+            .Append("reverse")
+            .Append("--remove-all"))
+            .WaitForExit();
+
+        if (!result.Success)
+            throw new Exception(string.Join(Environment.NewLine, result.StandardError));
+
+        return string.Join(Environment.NewLine, result.StandardOutput);
+    }
+
     public static void Install(string serial, string apk, IProcessLogger logger = null) {
-        var adb = AndroidUtilities.AdbTool();
+        var adb = AndroidSdk.AdbTool();
         var arguments = new ProcessArgumentBuilder()
             .Append("-s", serial)
             .Append("install")
@@ -65,7 +88,7 @@ public static class DeviceBridge {
     }
 
     public static void Uninstall(string serial, string pkg, IProcessLogger logger = null) {
-        var adb = AndroidUtilities.AdbTool();
+        var adb = AndroidSdk.AdbTool();
         var argument = new ProcessArgumentBuilder()
             .Append("-s", serial)
             .Append("uninstall")
@@ -79,7 +102,7 @@ public static class DeviceBridge {
     }
 
     public static void Flush(string serial) {
-        var adb = AndroidUtilities.AdbTool();
+        var adb = AndroidSdk.AdbTool();
         new ProcessRunner(adb, new ProcessArgumentBuilder()
             .Append("-s", serial)
             .Append("logcat")
@@ -88,7 +111,7 @@ public static class DeviceBridge {
     }
 
     public static Process Logcat(string serial, string buffer, string filter, IProcessLogger logger) {
-        var adb = AndroidUtilities.AdbTool();
+        var adb = AndroidSdk.AdbTool();
         var arguments = new ProcessArgumentBuilder()
             .Append("-s", serial)
             .Append("logcat")
@@ -99,7 +122,7 @@ public static class DeviceBridge {
     }
 
     public static List<string> Devices() {
-        var adb = AndroidUtilities.AdbTool();
+        var adb = AndroidSdk.AdbTool();
         ProcessResult result = new ProcessRunner(adb, new ProcessArgumentBuilder()
             .Append("devices")
             .Append("-l"))
@@ -123,7 +146,7 @@ public static class DeviceBridge {
     }
 
     public static string EmuName(string serial) {
-        var adb = AndroidUtilities.AdbTool();
+        var adb = AndroidSdk.AdbTool();
         ProcessResult result = new ProcessRunner(adb, new ProcessArgumentBuilder()
             .Append("-s", serial)
             .Append("emu", "avd", "name"))
