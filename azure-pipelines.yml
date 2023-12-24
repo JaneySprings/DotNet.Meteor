@@ -115,6 +115,8 @@ stages:
         condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')
         pool:
           vmImage: ubuntu-latest
+        variables:
+        - group: secrets
         timeoutInMinutes: 4 
         steps:
         - download: current
@@ -130,6 +132,18 @@ stages:
             action: 'create'
             tagSource: 'gitTag'
             assets: '$(Pipeline.Workspace)/**/*.vsix'
+        - script: npm install -g vsce
+          displayName: 'Install VSCode builder'
+        - task: Bash@3
+          displayName: 'Publish VSIX'
+          env:
+            VS_TOKEN: $(VSMP_TOKEN)
+          inputs:
+            targetType: 'inline'
+            script: |
+              for filename in $(Pipeline.Workspace)/**/*.vsix; do
+                vsce publish --packagePath "$filename" -p $VS_TOKEN
+              done
 
 
 
