@@ -1,4 +1,4 @@
-import { XamlController, languageId  } from '../xamlController';
+import { XamlController  } from '../xamlController';
 import { XamlContext } from '../models/xamlContext';
 import { XamlSyntaxTree } from '../xamlSyntaxTree';
 import { XamlScope } from '../models/xamlScope';
@@ -12,7 +12,7 @@ export class XamlCompletionItemProvider implements vscode.CompletionItemProvider
         const documentContent = textDocument.getText();
         const offset = textDocument.offsetAt(position);
         const context = XamlSyntaxTree.getContext(documentContent, offset);
-        if (textDocument.languageId === languageId && textDocument.fileName.includes(".xaml") && context) {
+        if (context) {
             if (context.scope === XamlScope.Tag) 
                 return this.getClassCompletionItems(context);
 
