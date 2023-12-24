@@ -6,19 +6,16 @@ import * as vscode from 'vscode';
 import * as path from "path";
 import * as fs from "fs";
 
-export const languageId = 'xml';
-
 export class XamlController {
     private static xamlSchemaAliases: any[] = [];
     private static extensionVersion: string;
 
     public static activate(context: vscode.ExtensionContext) {
-        const schemaSelector = { language: languageId, scheme: 'file' };
         XamlController.extensionVersion = context.extension.packageJSON.version;
         XamlCommandController.activate(context);
 
         context.subscriptions.push(vscode.languages.registerCompletionItemProvider(
-            schemaSelector, new XamlCompletionItemProvider(), ':', '.', '<', ' ',
+            { pattern: '**/*.xaml' }, new XamlCompletionItemProvider(), ':', '.', '<', ' ',
         ));
         context.subscriptions.push(vscode.tasks.onDidEndTask(ev => {
             if (ev.execution.task.definition.type.includes(res.taskDefinitionId))
