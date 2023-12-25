@@ -1,5 +1,6 @@
 import { ProcessArgumentBuilder } from '../processes/processArgumentBuilder';
 import { ConfigurationController } from '../configurationController';
+import { Target } from '../models/target';
 import * as res from '../resources/constants';
 import * as vscode from 'vscode';
 
@@ -24,26 +25,26 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
         if (ConfigurationController.isActive()) {
             builder.appendQuoted(ConfigurationController.project!.path)
                 .append(`-p:Configuration=${ConfigurationController.target}`)
-                .append(`-p:TargetFramework=${ConfigurationController.getTargetFramework()}`);
+                .append(`-p:TargetFramework=${ConfigurationController.getTargetFramework()}`)
+                .conditional(`-p:RuntimeIdentifier=${ConfigurationController.device?.runtime_id}`, () => ConfigurationController.device?.runtime_id);
 
-            if (ConfigurationController.device!.runtime_id) {
-                builder.append(`-p:RuntimeIdentifier=${ConfigurationController.device!.runtime_id}`);
-            }
             if (ConfigurationController.isAndroid()) {
                 builder.append('-p:EmbedAssembliesIntoApk=true');
                 builder.appendFix(`-p:AndroidSdkDirectory="${ConfigurationController.androidSdkDirectory}"`);
+                builder.conditional('-p:AndroidEnableProfiler=true', () => ConfigurationController.profiler);
+            }
+            if (ConfigurationController.isAppleMobile()) {
+                builder.conditional('-p:MtouchDebug=true', () => ConfigurationController.target === Target.Debug);
+                builder.conditional('-p:MtouchProfiling=true', () => ConfigurationController.profiler);
+            }
+            if (ConfigurationController.isMacCatalyst()) {
+                builder.conditional('-p:Debug=true', () => ConfigurationController.target === Target.Debug);
+                builder.conditional('-p:Profiling=true', () => ConfigurationController.profiler);
             }
             if (ConfigurationController.isWindows()) {
                 builder.append('-p:WindowsPackageType=None');
                 builder.append('-p:WinUISDKReferences=false');
             }
-
-            if (ConfigurationController.isAndroid() && ConfigurationController.profiler)
-                builder.append('-p:AndroidEnableProfiler=true');
-            if (ConfigurationController.isAppleMobile() && ConfigurationController.profiler)
-                builder.append('-p:MtouchProfiling=true');
-            if (ConfigurationController.isMacCatalyst() && ConfigurationController.profiler)
-                builder.append('-p:Profiling=true');
         }
 
         definition.args?.forEach((arg: string) => builder.override(arg));

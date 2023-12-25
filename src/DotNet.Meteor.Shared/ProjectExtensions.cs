@@ -82,20 +82,16 @@ namespace DotNet.Meteor.Shared {
 
             if (!string.IsNullOrEmpty(device.RuntimeId)) {
                 var baseOutputDirectoryWithRuntimeId = Path.Combine(baseOutputDirectory, device.RuntimeId);
-                outputAssemblyPath = FindOutputApplicationWithDirectoryPath(baseOutputDirectoryWithRuntimeId, project, device);
+                outputAssemblyPath = FindOutputApplicationWithDirectoryPath(baseOutputDirectoryWithRuntimeId, project, device, errorHandler);
                 if (!string.IsNullOrEmpty(outputAssemblyPath))
                     return outputAssemblyPath;
             }
 
-            outputAssemblyPath = FindOutputApplicationWithDirectoryPath(baseOutputDirectory, project, device);
+            outputAssemblyPath = FindOutputApplicationWithDirectoryPath(baseOutputDirectory, project, device, errorHandler);
             if (string.IsNullOrEmpty(outputAssemblyPath))
                 return errorHandler?.Invoke($"Could not find output application in {baseOutputDirectory}");
 
             return outputAssemblyPath;
-        }
-
-        public static string FindOutputApplication(this Project project, string configuration, string framework, DeviceData device) {
-            return FindOutputApplication(project, configuration, framework, device, message => throw new ArgumentException(message));
         }
 
         private static string FindOutputApplicationWithDirectoryPath(string directoryPath, Project project, DeviceData device, Func<string, string> errorHandler = null) {
@@ -105,7 +101,7 @@ namespace DotNet.Meteor.Shared {
             if (device.IsAndroid) {
                 var files = Directory.GetFiles(directoryPath, "*-Signed.apk", SearchOption.TopDirectoryOnly);
                 if (files.Length > 1)
-                    return errorHandler?.Invoke($"Finded more than one \"*-Signed.apk\" in {directoryPath} and subdirectories");
+                    return errorHandler?.Invoke($"Found more than one \"*-Signed.apk\" in {directoryPath}");
                 return files.FirstOrDefault();
             }
 
@@ -113,14 +109,14 @@ namespace DotNet.Meteor.Shared {
                 var executableName = project.EvaluateProperty("AssemblyName", project.Name);
                 var files = Directory.GetFiles(directoryPath, $"{executableName}.exe", SearchOption.AllDirectories);
                 if (files.Length > 1)
-                    return errorHandler?.Invoke($"Finded more than one \"{executableName}.exe\" in {directoryPath} and subdirectories");
+                    return errorHandler?.Invoke($"Found more than one \"{executableName}.exe\" in {directoryPath} and subdirectories");
                 return files.FirstOrDefault();
             }
 
             if (device.IsIPhone || device.IsMacCatalyst) {
-                var bundle = Directory.GetDirectories(directoryPath, "*.app", SearchOption.TopDirectoryOnly);
+                var bundle = Directory.GetDirectories(directoryPath, "*.app", SearchOption.AllDirectories);
                 if (bundle.Length > 1)
-                    return errorHandler?.Invoke($"Finded more than one \"*.app\" in {directoryPath}");
+                    return errorHandler?.Invoke($"Found more than one \"*.app\" in {directoryPath} and subdirectories");
                 return bundle.FirstOrDefault();
             }
 

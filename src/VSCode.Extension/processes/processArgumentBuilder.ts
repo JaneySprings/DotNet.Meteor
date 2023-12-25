@@ -7,12 +7,17 @@ export class ProcessArgumentBuilder {
         this.arguments.push(command);
     }
 
-    public append(arg: string): ProcessArgumentBuilder {
-        this.arguments.push(arg);
+    public append(...args: string[]): ProcessArgumentBuilder {
+        args.forEach(a => this.arguments.push(a));
         return this;
     }
     public appendQuoted(...args: string[]): ProcessArgumentBuilder {
         args.forEach(a => this.arguments.push(`"${a}"`));
+        return this;
+    }
+    public conditional(arg: string, condition: () => any): ProcessArgumentBuilder {
+        if (condition())
+            this.arguments.push(arg);
         return this;
     }
     public override(arg: string): ProcessArgumentBuilder {

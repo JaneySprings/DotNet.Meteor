@@ -48,7 +48,7 @@ public class WorkspaceBundleLocatorTests: TestFixture {
         var expectedPath = device.IsIPhone || device.IsMacCatalyst
             ? CreateOutputBundle(configuration, framework, device.RuntimeId, bundleName)
             : CreateOutputAssembly(configuration, framework, device.RuntimeId, bundleName, includeWinX64Dir);
-        var actualPath = project.FindOutputApplication(configuration, framework, device);
+        var actualPath = project.FindOutputApplication(configuration, framework, device, message => throw new ArgumentException(message));
 
         Assert.Equal(expectedPath, actualPath);
         DeleteMockData();
@@ -76,7 +76,63 @@ public class WorkspaceBundleLocatorTests: TestFixture {
         var projectPath = CreateMockProject(SimpleProject);
         var project = WorkspaceAnalyzer.AnalyzeProject(projectPath);
 
-        Assert.Throws<ArgumentException>(() => project.FindOutputApplication(configuration, framework, device));
+        Assert.Throws<ArgumentException>(() => project.FindOutputApplication(configuration, framework, device, message => throw new ArgumentException(message)));
+        DeleteMockData();
+    }
+
+    [Fact]
+    public void MultipleAndroidOutputPathsTests() {
+        var projectPath = CreateMockProject(SimpleProject);
+        var project = WorkspaceAnalyzer.AnalyzeProject(projectPath);
+        var device = DeviceService.GetDevice(DeviceService.Android)!;
+        var configuration = "Debug";
+        var framework = "net8.0-android";
+        var throwMessage = string.Empty;
+    
+        CreateOutputAssembly(configuration, framework, device.RuntimeId, "com.debug-Signed.apk", false);
+        CreateOutputAssembly(configuration, framework, device.RuntimeId, "com.debug2-Signed.apk", false);
+    
+        Assert.Throws<ArgumentException>(() => project.FindOutputApplication(configuration, framework, device, message => {
+            throwMessage = message;
+            throw new ArgumentException(message);
+        }));
+        Assert.Contains("Found more than one", throwMessage);
+        DeleteMockData();
+    }
+
+    [Fact]
+    public void MultipleAppleOutputPathsTests() {
+        var projectPath = CreateMockProject(SimpleProject);
+        var project = WorkspaceAnalyzer.AnalyzeProject(projectPath);
+        var device = DeviceService.GetDevice(DeviceService.AppleSimulatorX64)!;
+        var configuration = "Debug";
+        var framework = "net8.0-ios";
+        var throwMessage = string.Empty;
+    
+        CreateOutputBundle(configuration, framework, device.RuntimeId, "com.companyname.debug.app");
+        CreateOutputBundle(configuration, framework, device.RuntimeId, "com.companyname.debug2.app");
+    
+        Assert.Throws<ArgumentException>(() => project.FindOutputApplication(configuration, framework, device, message => {
+            throwMessage = message;
+            throw new ArgumentException(message);
+        }));
+        Assert.Contains("Found more than one", throwMessage);
+        DeleteMockData();
+    }
+
+    [Fact]
+    public void MultipleArchOutputPathsTests() {
+        var projectPath = CreateMockProject(SimpleProject);
+        var project = WorkspaceAnalyzer.AnalyzeProject(projectPath);
+        var device1 = DeviceService.GetDevice(DeviceService.AppleSimulatorX64)!;
+        var device2 = DeviceService.GetDevice(DeviceService.AppleArm64)!;
+        var configuration = "Debug";
+        var framework = "net8.0-ios";
+    
+        CreateOutputBundle(configuration, framework, device1.RuntimeId, "com.companyname.debug.app");
+        CreateOutputBundle(configuration, framework, device2.RuntimeId, "com.companyname.debug.app");
+        project.FindOutputApplication(configuration, framework, device1, message => throw new ArgumentException(message));
+        project.FindOutputApplication(configuration, framework, device2, message => throw new ArgumentException(message));
         DeleteMockData();
     }
 }

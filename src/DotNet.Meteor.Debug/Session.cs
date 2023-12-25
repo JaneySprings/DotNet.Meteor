@@ -16,6 +16,7 @@ public abstract class Session: DebugAdapterBase, IProcessLogger {
     }
 
     protected abstract ICustomLogger GetLogger();
+    protected abstract void OnUnhandledException(Exception ex);
 
     public void Start() {
         Protocol.LogMessage += LogMessage;
@@ -56,6 +57,7 @@ public abstract class Session: DebugAdapterBase, IProcessLogger {
     }
     private void LogError(object sender, DispatcherErrorEventArgs args) {
         GetLogger().LogError($"[Fatal] {args.Exception.Message}", args.Exception);
+        OnUnhandledException(args.Exception);
     }
     private void LogException(Exception ex) {
         if (ex is ProtocolException)
