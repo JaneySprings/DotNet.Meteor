@@ -45,6 +45,7 @@ public partial class DebugSession : Session {
     }
 
     protected override MonoClient.ICustomLogger GetLogger() => MonoClient.DebuggerLoggingService.CustomLogger;
+    protected override void OnUnhandledException(Exception ex) => Dispose();
 
 #region request: Initialize
     protected override InitializeResponse HandleInitializeRequest(InitializeArguments arguments) {
@@ -95,19 +96,13 @@ public partial class DebugSession : Session {
         if (!session.HasExited)
             session.Exit();
         
-        foreach(var disposable in disposables)
-            DoSafe(() => disposable.Invoke());
-
-        disposables.Clear();
+        Dispose();
         return new TerminateResponse();
     }
 #endregion request: Terminate
 #region request: Disconnect
     protected override DisconnectResponse HandleDisconnectRequest(DisconnectArguments arguments) {
-        if (session == null)
-            return new DisconnectResponse();
-
-        session.Dispose();
+        session?.Dispose();
         return new DisconnectResponse();
     }
 #endregion request: Disconnect
@@ -531,14 +526,20 @@ public partial class DebugSession : Session {
 #endregion Event handlers 
 #region Helpers
     private void Reset() {
-        this.exception = null;
-        this.variableHandles.Reset();
-        this.frameHandles.Reset();
+        exception = null;
+        variableHandles.Reset();
+        frameHandles.Reset();
+    }
+    private void Dispose() {
+        foreach(var disposable in disposables)
+            DoSafe(() => disposable.Invoke());
+
+        disposables.Clear();
     }
 
     private MonoClient.ThreadInfo FindThread(int threadReference) {
-        if (this.activeProcess != null) {
-            foreach (var t in this.activeProcess.GetThreads()) {
+        if (activeProcess != null) {
+            foreach (var t in activeProcess.GetThreads()) {
                 if (t.Id == threadReference)
                     return t;
             }
@@ -555,7 +556,7 @@ public partial class DebugSession : Session {
 
         if (v.HasChildren) {
             var objectValues = v.GetAllChildren();
-            childrenReference = this.variableHandles.Create(objectValues);
+            childrenReference = variableHandles.Create(objectValues);
         }
 
         return new DebugProtocol.Variable(v.Name, dv, childrenReference) {
@@ -572,7 +573,7 @@ public partial class DebugSession : Session {
             var frame = thread.Backtrace.GetFrameSafe(i);
             var ex = frame?.GetException();
             if (ex != null) {
-                this.exception = ex.Instance;
+                exception = ex.Instance;
                 return ex;
             }
         }
