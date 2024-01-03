@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using DotNet.Meteor.Shared;
 using DotNet.Meteor.Debug.Extensions;
-using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Newtonsoft.Json.Linq;
 using Mono.Debugging.Client;
 
@@ -12,22 +10,17 @@ namespace DotNet.Meteor.Debug;
 
 public class LaunchConfiguration {
     public DebuggerSessionOptions DebuggerSessionOptions { get; init; }
+    public string OutputAssembly { get; init; }
     public DeviceData Device { get; init; }
     public Project Project { get; init; }
-
-    public string OutputAssembly { get; init; }
-    public string Framework { get; init; }
     public string Target { get; init; }
-    public bool UninstallApp { get; init; }
-
-    public int DebugPort { get; set; }
-    public int ReloadHostPort { get; init; }
-    public int ProfilerPort { get; init; }
     public string ProfilerMode { get; init; }
+    public bool UninstallApp { get; init; }
+    public bool SkipDebug { get; init; }
 
-    public bool IsProfilingConfiguration => !string.IsNullOrEmpty(ProfilerMode);
-    public bool IsTraceProfiling => ProfilerMode.Equals("trace", StringComparison.OrdinalIgnoreCase);
-    public bool IsGCDumpProfiling => ProfilerMode.Equals("gcdump", StringComparison.OrdinalIgnoreCase);
+    public int DebugPort { get; init; }
+    public int ProfilerPort { get; init; }
+    public int ReloadHostPort { get; init; }
 
     public string TempDirectoryPath => Path.Combine(Path.GetDirectoryName(Project.Path), ".meteor");
 
@@ -35,19 +28,25 @@ public class LaunchConfiguration {
         Project = configurationProperties["selectedProject"].ToObject<Project>(TrimmableContext.Default.Project);
         Device = configurationProperties["selectedDevice"].ToObject<DeviceData>(TrimmableContext.Default.DeviceData);
         Target = configurationProperties["selectedTarget"].ToObject<string>(TrimmableContext.Default.String);
+        UninstallApp = configurationProperties["uninstallApp"].ToObject<bool>(TrimmableContext.Default.Boolean);
+        SkipDebug = configurationProperties["skipDebug"].ToObject<bool>(TrimmableContext.Default.Boolean);
+
+        DebugPort = configurationProperties["debuggingPort"].ToObject<int>(TrimmableContext.Default.Int32);
         ReloadHostPort = configurationProperties["reloadHost"].ToObject<int>(TrimmableContext.Default.Int32);
         ProfilerPort = configurationProperties["profilerPort"].ToObject<int>(TrimmableContext.Default.Int32);
-        UninstallApp = configurationProperties["uninstallApp"].ToObject<bool>(TrimmableContext.Default.Boolean);
-        DebugPort = configurationProperties["debuggingPort"].ToObject<int>(TrimmableContext.Default.Int32);
+
+        DebuggerSessionOptions = GetDebuggerSessionOptions(configurationProperties["debuggerOptions"]);
+        OutputAssembly = Project.FindOutputApplication(Target, Device, message => {
+            ServerExtensions.ThrowException(message);
+            return string.Empty;
+        });
         
         if (configurationProperties.TryGetValue("profilerMode", out var profilerModeToken))
             ProfilerMode = profilerModeToken.ToObject<string>(TrimmableContext.Default.String);
-        
-        DebuggerSessionOptions = GetDebuggerSessionOptions(configurationProperties["debuggerOptions"]);
-        Framework = Project.Frameworks.First(it => it.ContainsInsensitive(Device.Platform));
-        OutputAssembly = Project.FindOutputApplication(Target, Framework, Device, message => {
-            throw new ProtocolException($"Failed to load launch configuration. {message}");
-        });
+
+        DebugPort = DebugPort == 0 ? ServerExtensions.FindFreePort() : DebugPort;
+        ReloadHostPort = ReloadHostPort == 0 ? ServerExtensions.FindFreePort() : ReloadHostPort;
+        ProfilerPort = ProfilerPort == 0 ? ServerExtensions.FindFreePort() : ProfilerPort;
     }
 
     public string GetApplicationName() {
@@ -56,6 +55,19 @@ public class LaunchConfiguration {
 
         var assemblyName = Path.GetFileNameWithoutExtension(OutputAssembly);
         return assemblyName.Replace("-Signed", "");
+    }
+    public BaseLaunchAgent GetLauchAgent() {
+        if (ProfilerMode.EqualsInsensitive("trace"))
+            return new TraceLaunchAgent();
+        if (ProfilerMode.EqualsInsensitive("gcdump"))
+            return new GCDumpLaunchAgent();
+
+        if (SkipDebug || Target.EqualsInsensitive("release"))
+            return new NoDebugLaunchAgent();
+        if (Target.EqualsInsensitive("debug"))
+            return new DebugLaunchAgent();
+ 
+        throw new NotSupportedException("Could not create launch agent for current configuration");
     }
 
     private DebuggerSessionOptions GetDebuggerSessionOptions(JToken debuggerJsonToken) {

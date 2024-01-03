@@ -12,17 +12,13 @@ using DebugProtocol = Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages
 
 namespace DotNet.Meteor.Debug;
 
-public partial class DebugSession : Session {
-    private MonoClient.ObjectValue exception;
-    private MonoClient.ProcessInfo activeProcess;
+public class DebugSession : Session {
     private ExternalTypeResolver typeResolver;
     private SymbolServer symbolServer;
+    private BaseLaunchAgent launchAgent;
 
-    private readonly List<Action> disposables = new List<Action>();
-    private readonly AutoResetEvent suspendEvent = new AutoResetEvent(false);
     private readonly Handles<MonoClient.StackFrame> frameHandles = new Handles<MonoClient.StackFrame>();
     private readonly Handles<MonoClient.ObjectValue[]> variableHandles = new Handles<MonoClient.ObjectValue[]>();
-    private readonly Dictionary<int, DebugProtocol.Thread> seenThreads = new Dictionary<int, DebugProtocol.Thread>();
     private readonly SoftDebuggerSession session = new SoftDebuggerSession();
 
     public DebugSession(Stream input, Stream output): base(input, output) {
@@ -39,13 +35,12 @@ public partial class DebugSession : Session {
         session.TargetUnhandledException += TargetExceptionThrown;
         session.TargetReady += TargetReady;
         session.TargetExited += TargetExited;
-        session.TargetInterrupted += TargetInterrupted;
         session.TargetThreadStarted += TargetThreadStarted;
         session.TargetThreadStopped += TargetThreadStopped;
     }
 
     protected override MonoClient.ICustomLogger GetLogger() => MonoClient.DebuggerLoggingService.CustomLogger;
-    protected override void OnUnhandledException(Exception ex) => Dispose();
+    protected override void OnUnhandledException(Exception ex) => launchAgent?.Dispose();
 
 #region request: Initialize
     protected override InitializeResponse HandleInitializeRequest(InitializeArguments arguments) {
@@ -68,49 +63,45 @@ public partial class DebugSession : Session {
 #endregion request: Initialize
 #region request: Launch
     protected override LaunchResponse HandleLaunchRequest(LaunchArguments arguments) {
-        var configuration = new LaunchConfiguration(arguments.ConfigurationProperties);
-        symbolServer = new SymbolServer(configuration.TempDirectoryPath);
-        typeResolver = new ExternalTypeResolver(configuration.TempDirectoryPath, configuration.DebuggerSessionOptions);
+        return DoSafe<LaunchResponse>(() => {
+            var configuration = new LaunchConfiguration(arguments.ConfigurationProperties);
+            launchAgent = configuration.GetLauchAgent();
 
-        disposables.Add(() => symbolServer.Dispose());
-        disposables.Add(() => typeResolver.Dispose());
-        session.TypeResolverHandler = typeResolver.Handle;
+            symbolServer = new SymbolServer(configuration.TempDirectoryPath);
+            typeResolver = new ExternalTypeResolver(configuration.TempDirectoryPath, configuration.DebuggerSessionOptions);
+            launchAgent.Disposables.Add(() => symbolServer.Dispose());
+            launchAgent.Disposables.Add(() => typeResolver.Dispose());
+            session.TypeResolverHandler = typeResolver.Handle;
 
-        if (configuration.DebugPort == 0)
-            configuration.DebugPort = ServerExtensions.FindFreePort();
-        if (configuration.DebugPort < 1)
-            throw new ProtocolException($"Invalid port '{configuration.DebugPort}'");
-
-        if (configuration.IsProfilingConfiguration) {
-            ProfileApplication(configuration);
+            launchAgent.Launch(configuration, this);
+            launchAgent.Connect(session, configuration);
             return new LaunchResponse();
-        }
-
-        LaunchApplication(configuration);
-        Connect(configuration);
-        return new LaunchResponse();
+        });
     }
 #endregion request: Launch
 #region request: Terminate
     protected override TerminateResponse HandleTerminateRequest(TerminateArguments arguments) {
         if (!session.HasExited)
             session.Exit();
-        
-        Dispose();
+
+        launchAgent?.Dispose();
+        if (launchAgent is not DebugLaunchAgent)
+            Protocol.SendEvent(new TerminatedEvent());
+
         return new TerminateResponse();
     }
 #endregion request: Terminate
 #region request: Disconnect
     protected override DisconnectResponse HandleDisconnectRequest(DisconnectArguments arguments) {
-        session?.Dispose();
+        session.Dispose();
         return new DisconnectResponse();
     }
 #endregion request: Disconnect
 #region request: Continue
     protected override ContinueResponse HandleContinueRequest(ContinueArguments arguments) {
         return DoSafe<ContinueResponse>(() => {
-            if (this.session?.IsRunning == false && !this.session.HasExited)
-                this.session.Continue();
+            if (!session.IsRunning && !session.HasExited)
+                session.Continue();
 
             return new ContinueResponse();
         });
@@ -119,8 +110,8 @@ public partial class DebugSession : Session {
 #region request: Next
     protected override NextResponse HandleNextRequest(NextArguments arguments) {
         return DoSafe<NextResponse>(() => {
-            if (this.session?.IsRunning == false && !this.session.HasExited)
-                this.session.NextLine();
+            if (!session.IsRunning && !session.HasExited)
+                session.NextLine();
 
             return new NextResponse();
         });
@@ -129,8 +120,8 @@ public partial class DebugSession : Session {
 #region request: StepIn
     protected override StepInResponse HandleStepInRequest(StepInArguments arguments) {
         return DoSafe<StepInResponse>(() => {
-            if (this.session?.IsRunning == false && !this.session.HasExited)
-                this.session.StepLine();
+            if (!session.IsRunning && !session.HasExited)
+                session.StepLine();
 
             return new StepInResponse();
         });
@@ -139,8 +130,8 @@ public partial class DebugSession : Session {
 #region request: StepOut
     protected override StepOutResponse HandleStepOutRequest(StepOutArguments arguments) {
         return DoSafe<StepOutResponse>(() => {
-            if (this.session?.IsRunning == false && !this.session.HasExited)
-                this.session.Finish();
+            if (!session.IsRunning && !session.HasExited)
+                session.Finish();
 
             return new StepOutResponse();
         });
@@ -149,8 +140,8 @@ public partial class DebugSession : Session {
 #region request: Pause
     protected override PauseResponse HandlePauseRequest(PauseArguments arguments) {
         return DoSafe<PauseResponse>(() => {
-            if (this.session?.IsRunning == true)
-                this.session.Stop();
+            if (session.IsRunning)
+                session.Stop();
 
             return new PauseResponse();
         });
@@ -158,7 +149,7 @@ public partial class DebugSession : Session {
 #endregion request: Pause
 #region request: SetExceptionBreakpoints
     protected override SetExceptionBreakpointsResponse HandleSetExceptionBreakpointsRequest(SetExceptionBreakpointsArguments arguments) {
-        this.session.Breakpoints.ClearCatchpoints();
+        session.Breakpoints.ClearCatchpoints();
         if (arguments.FilterOptions == null || arguments.FilterOptions.Count == 0)
             return new SetExceptionBreakpointsResponse();
 
@@ -170,7 +161,7 @@ public partial class DebugSession : Session {
                     exceptionFilter = option.Condition;
 
                 foreach(var exception in exceptionFilter.Split(','))
-                    this.session.Breakpoints.AddCatchpoint(exception);
+                    session.Breakpoints.AddCatchpoint(exception);
             }
         }
         return new SetExceptionBreakpointsResponse();
@@ -183,13 +174,13 @@ public partial class DebugSession : Session {
         var sourcePath = arguments.Source?.Path;
 
         // Remove all file breakpoints
-        var fileBreakpoints = this.session.Breakpoints.GetBreakpointsAtFile(sourcePath);
-        foreach(var fileBreakpoint in fileBreakpoints) {
-            this.session.Breakpoints.Remove(fileBreakpoint);
-        }
+        var fileBreakpoints = session.Breakpoints.GetBreakpointsAtFile(sourcePath);
+        foreach(var fileBreakpoint in fileBreakpoints)
+            session.Breakpoints.Remove(fileBreakpoint);
+
         // Add all new breakpoints
         foreach(var breakpointInfo in breakpointsInfos) {
-            MonoClient.Breakpoint breakpoint = this.session.Breakpoints.Add(sourcePath, breakpointInfo.Line, breakpointInfo.Column ?? 1);
+            MonoClient.Breakpoint breakpoint = session.Breakpoints.Add(sourcePath, breakpointInfo.Line, breakpointInfo.Column ?? 1);
             // Conditional breakpoint
             if (breakpoint != null && breakpointInfo.Condition != null)
                 breakpoint.ConditionExpression = breakpointInfo.Condition;
@@ -217,9 +208,9 @@ public partial class DebugSession : Session {
 #region request: StackTrace
     protected override StackTraceResponse HandleStackTraceRequest(StackTraceArguments arguments) {
         return DoSafe<StackTraceResponse>(() => {
-            var thread = this.session.ActiveThread;
+            var thread = session.ActiveThread;
             if (thread.Id != arguments.ThreadId) {
-                thread = FindThread(arguments.ThreadId);
+                thread = session.FindThread(arguments.ThreadId);
                 thread?.SetActive();
             }
 
@@ -280,7 +271,7 @@ public partial class DebugSession : Session {
                 }
 
                 stackFrames.Add(new DebugProtocol.StackFrame() {
-                    Id = this.frameHandles.Create(frame),
+                    Id = frameHandles.Create(frame),
                     Source = source,
                     PresentationHint = hint,
                     Name = frame.SourceLocation.MethodName,
@@ -299,22 +290,15 @@ public partial class DebugSession : Session {
     protected override ScopesResponse HandleScopesRequest(ScopesArguments arguments) {
         return DoSafe<ScopesResponse>(() => {
             int frameId = arguments.FrameId;
-            var frame = this.frameHandles.Get(frameId, null);
+            var frame = frameHandles.Get(frameId, null);
             var scopes = new List<DebugProtocol.Scope>();
 
             if (frame == null)
                 throw new ProtocolException("frame not found");
 
-            if (this.exception != null) {
-                scopes.Add(new DebugProtocol.Scope() {
-                    Name = "Exception",
-                    VariablesReference = this.variableHandles.Create(new MonoClient.ObjectValue[] { this.exception })
-                });
-            }
-
             scopes.Add(new DebugProtocol.Scope() {
-                Name = "Local",
-                VariablesReference = this.variableHandles.Create(frame.GetAllLocals())
+                Name = "Locals",
+                VariablesReference = variableHandles.Create(frame.GetAllLocals())
             });
 
             return new ScopesResponse(scopes);
@@ -324,13 +308,9 @@ public partial class DebugSession : Session {
 #region request: Variables
     protected override VariablesResponse HandleVariablesRequest(VariablesArguments arguments) {
         return DoSafe<VariablesResponse>(() => {
-            int reference = arguments.VariablesReference;
-            if (reference == -1)
-                throw new ProtocolException("variables: property 'variablesReference' is missing");
-
+            var reference = arguments.VariablesReference;
             var variables = new List<DebugProtocol.Variable>();
-
-            if (this.variableHandles.TryGet(reference, out MonoClient.ObjectValue[] children) && children?.Length > 0) {
+            if (variableHandles.TryGet(reference, out MonoClient.ObjectValue[] children) && children?.Length > 0) {
                 if (children.Length < 20) {
                     // Wait for all values at once.
                     WaitHandle.WaitAll(children.Select(x => x.WaitHandle).ToArray());
@@ -339,7 +319,7 @@ public partial class DebugSession : Session {
                     }
                 } else {
                     foreach (var v in children) {
-                        v.WaitHandle.WaitOne(this.session.EvaluationOptions.EvaluationTimeout);
+                        v.WaitHandle.WaitOne(session.EvaluationOptions.EvaluationTimeout);
                         variables.Add(CreateVariable(v));
                     }
                 }
@@ -352,20 +332,17 @@ public partial class DebugSession : Session {
 #region request: Threads
     protected override ThreadsResponse HandleThreadsRequest(ThreadsArguments arguments) {
         return DoSafe<ThreadsResponse>(() => {
-            var threads = new List<DebugProtocol.Thread>();
-            var process = this.activeProcess;
-            if (process != null) {
-                Dictionary<int, DebugProtocol.Thread> d;
-                lock (this.seenThreads) {
-                    d = new Dictionary<int, DebugProtocol.Thread>(this.seenThreads);
-                }
-                foreach (var t in process.GetThreads()) {
-                    int tid = (int)t.Id;
-                    d[tid] = new DebugProtocol.Thread(tid, t.Name.ToThreadName(tid));
-                }
-                threads = d.Values.ToList();
+            var threads = new Dictionary<int, DebugProtocol.Thread>();
+            var process = session.GetProcesses().FirstOrDefault();
+            if (process == null)
+                return new ThreadsResponse();
+
+            foreach (var thread in process.GetThreads()) {
+                int tid = (int)thread.Id;
+                threads[tid] = new DebugProtocol.Thread(tid, thread.Name.ToThreadName(tid));
             }
-            return new ThreadsResponse(threads);
+         
+            return new ThreadsResponse(threads.Values.ToList());
         });
     }
 #endregion request: Threads
@@ -375,30 +352,30 @@ public partial class DebugSession : Session {
             if (string.IsNullOrEmpty(arguments.Expression))
                 throw new ProtocolException("expression missing");
 
-            var frame = this.frameHandles.Get(arguments.FrameId ?? 0, null);
+            var frame = frameHandles.Get(arguments.FrameId ?? 0, null);
             if (frame == null)
                 throw new ProtocolException("no active stackframe");
 
             if (!frame.ValidateExpression(arguments.Expression))
                 throw new ProtocolException("invalid expression");
 
-            var val = frame.GetExpressionValue(arguments.Expression, session.Options.EvaluationOptions);
-            val.WaitHandle.WaitOne(session.Options.EvaluationOptions.EvaluationTimeout);
+            var value = frame.GetExpressionValue(arguments.Expression, session.Options.EvaluationOptions);
+            value.WaitHandle.WaitOne(session.Options.EvaluationOptions.EvaluationTimeout);
 
-            if (val.IsEvaluating)
+            if (value.IsEvaluating)
                 throw new ProtocolException("evaluation timeout expected");
-            if (val.Flags.HasFlag(MonoClient.ObjectValueFlags.Error) || val.Flags.HasFlag(MonoClient.ObjectValueFlags.NotSupported))
-                throw new ProtocolException(val.DisplayValue);
-            if (val.Flags.HasFlag(MonoClient.ObjectValueFlags.Unknown))
+            if (value.Flags.HasFlag(MonoClient.ObjectValueFlags.Error) || value.Flags.HasFlag(MonoClient.ObjectValueFlags.NotSupported))
+                throw new ProtocolException(value.DisplayValue);
+            if (value.Flags.HasFlag(MonoClient.ObjectValueFlags.Unknown))
                 throw new ProtocolException("invalid expression");
-            if (val.Flags.HasFlag(MonoClient.ObjectValueFlags.Object) && val.Flags.HasFlag(MonoClient.ObjectValueFlags.Namespace))
+            if (value.Flags.HasFlag(MonoClient.ObjectValueFlags.Object) && value.Flags.HasFlag(MonoClient.ObjectValueFlags.Namespace))
                 throw new ProtocolException("not available");
 
             int handle = 0;
-            if (val.HasChildren)
-                handle = this.variableHandles.Create(val.GetAllChildren());
+            if (value.HasChildren)
+                handle = variableHandles.Create(value.GetAllChildren());
 
-            return new EvaluateResponse(val.DisplayValue, handle);
+            return new EvaluateResponse(value.ToDisplayValue(), handle);
         });
     }
 #endregion request: Evaluate
@@ -410,7 +387,7 @@ public partial class DebugSession : Session {
 #region request: ExceptionInfo
     protected override ExceptionInfoResponse HandleExceptionInfoRequest(ExceptionInfoArguments arguments) {
         return DoSafe<ExceptionInfoResponse>(() => {
-            var ex = GetActiveException(arguments.ThreadId);
+            var ex = session.FindException(arguments.ThreadId);
             if (ex == null)
                 throw new ProtocolException("No exception available");
 
@@ -426,7 +403,7 @@ public partial class DebugSession : Session {
             if (string.IsNullOrEmpty(arguments.Text))
                 throw new ProtocolException("expression missing");
 
-            var frame = this.frameHandles.Get(arguments.FrameId ?? 0, null);
+            var frame = frameHandles.Get(arguments.FrameId ?? 0, null);
             if (frame == null)
                 throw new ProtocolException("no active stackframe");
 
@@ -448,67 +425,48 @@ public partial class DebugSession : Session {
     }
 #endregion request: Completions
 
-#region Event handlers 
-
     private void TargetStopped(object sender, MonoClient.TargetEventArgs e) {
-        Reset();
-        this.suspendEvent.Set();
+        ResetHandles();
         Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Pause) {
             ThreadId = (int)e.Thread.Id,
             AllThreadsStopped = true,
         });
     }
     private void TargetHitBreakpoint(object sender, MonoClient.TargetEventArgs e) {
-        Reset();
-        this.suspendEvent.Set();
+        ResetHandles();
         Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Breakpoint) {
             ThreadId = (int)e.Thread.Id,
             AllThreadsStopped = true,
         });
     }
     private void TargetExceptionThrown(object sender, MonoClient.TargetEventArgs e) {
-        Reset();
-        this.suspendEvent.Set();
-        var ex = GetActiveException((int)e.Thread.Id);
-        if (ex != null) {
-            Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Exception) {
-                Description = "Paused on exception",
-                ThreadId = (int)e.Thread.Id,
-                AllThreadsStopped = true,
-                Text = ex.Type
-            });
-        }
+        ResetHandles();
+        var ex = session.FindException(e.Thread.Id);
+        Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Exception) {
+            Description = "Paused on exception",
+            Text = ex.Type ?? "Exception",
+            ThreadId = (int)e.Thread.Id,
+            AllThreadsStopped = true,
+        });
     }
     private void TargetReady(object sender, MonoClient.TargetEventArgs e) {
-        this.activeProcess = this.session.GetProcesses().SingleOrDefault();
         Protocol.SendEvent(new InitializedEvent());
     }
     private void TargetExited(object sender, MonoClient.TargetEventArgs e) {
         Protocol.SendEvent(new TerminatedEvent());
     }
-    private void TargetInterrupted(object sender, MonoClient.TargetEventArgs e) {
-        this.suspendEvent.Set();
-    }
     private void TargetThreadStarted(object sender, MonoClient.TargetEventArgs e) {
         int tid = (int)e.Thread.Id;
-        lock (this.seenThreads) {
-            this.seenThreads[tid] = new DebugProtocol.Thread(tid, e.Thread.Name.ToThreadName(tid));
-        }
         Protocol.SendEvent(new ThreadEvent(ThreadEvent.ReasonValue.Started, tid));
     }
     private void TargetThreadStopped(object sender, MonoClient.TargetEventArgs e) {
         int tid = (int)e.Thread.Id;
-        lock (this.seenThreads) {
-            this.seenThreads.Remove(tid);
-        }
         Protocol.SendEvent(new ThreadEvent(ThreadEvent.ReasonValue.Exited, tid));
     }
-
     private bool OnExceptionHandled(Exception ex) {
         GetLogger().LogError($"[Handled] {ex.Message}", ex);
         return true;
     }
-
     private void OnSessionLog(bool isError, string message) {
         if (isError) GetLogger().LogError($"[Error] {message.Trim()}", null);
         else GetLogger().LogMessage($"[Info] {message.Trim()}");
@@ -523,61 +481,19 @@ public partial class DebugSession : Session {
         SendConsoleEvent(OutputEvent.CategoryValue.Console, message);
     }
 
-#endregion Event handlers 
-#region Helpers
-    private void Reset() {
-        exception = null;
+    private void ResetHandles() {
         variableHandles.Reset();
         frameHandles.Reset();
     }
-    private void Dispose() {
-        foreach(var disposable in disposables)
-            DoSafe(() => disposable.Invoke());
-
-        disposables.Clear();
-    }
-
-    private MonoClient.ThreadInfo FindThread(int threadReference) {
-        if (activeProcess != null) {
-            foreach (var t in activeProcess.GetThreads()) {
-                if (t.Id == threadReference)
-                    return t;
-            }
-        }
-
-        return null;
-    }
     private DebugProtocol.Variable CreateVariable(MonoClient.ObjectValue v) {
-        var dv = v.DisplayValue ?? "<error getting value>";
-        int childrenReference = 0;
-
-        if (dv.Length > 1 && dv[0] == '{' && dv[dv.Length - 1] == '}')
-            dv = dv.Substring(1, dv.Length - 2);
-
+        var dv = v.ToDisplayValue();
+        var childrenReference = 0;
         if (v.HasChildren) {
             var objectValues = v.GetAllChildren();
             childrenReference = variableHandles.Create(objectValues);
         }
-
         return new DebugProtocol.Variable(v.Name, dv, childrenReference) {
             VariablesReference = childrenReference
         };
     }
-
-    private MonoClient.ExceptionInfo GetActiveException(int threadId) {
-        var thread = FindThread(threadId);
-        if (thread == null)
-            return null;
-
-        for (int i = 0; i < thread.Backtrace.FrameCount; i++) {
-            var frame = thread.Backtrace.GetFrameSafe(i);
-            var ex = frame?.GetException();
-            if (ex != null) {
-                exception = ex.Instance;
-                return ex;
-            }
-        }
-        return null;
-    }
-#endregion Helpers
 }

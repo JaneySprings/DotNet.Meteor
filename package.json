@@ -70,7 +70,10 @@
           "target": {
             "type": "string",
             "default": "build",
-            "enum": [ "build", "publish" ],
+            "enum": [
+              "build",
+              "publish"
+            ],
             "description": "%task.meteor.description.target%"
           },
           "args": {
@@ -88,7 +91,7 @@
       {
         "name": "%task.meteor.problemMatcher%",
         "source": "%extension.displayName%",
-        "fileLocation":"relative",
+        "fileLocation": "relative",
         "owner": "%extension.displayName%",
         "pattern": {
           "regexp": "^(.*.xaml)\\((\\d+),(\\d+)\\):.*?(error|warning)\\s(.*?):\\s(.*)$",
@@ -102,17 +105,17 @@
       }
     ],
     "breakpoints": [
-      { 
-        "language": "csharp" 
+      {
+        "language": "csharp"
       },
-      { 
-        "language": "fsharp" 
+      {
+        "language": "fsharp"
       },
-      { 
-        "language": "razor" 
+      {
+        "language": "razor"
       },
-      { 
-        "language": "aspnetcorerazor" 
+      {
+        "language": "aspnetcorerazor"
       }
     ],
     "debuggers": [
@@ -154,17 +157,12 @@
         "configurationAttributes": {
           "launch": {
             "properties": {
-              "device": {
-                "type": "string",
-                "description": "%debugger.meteor.description.device%"
-              },
-              "runtime": {
-                "type": "string",
-                "description": "%debugger.meteor.description.runtime%"
-              },
               "profilerMode": {
                 "type": "string",
-                "enum": [ "trace" ],
+                "enum": [
+                  "trace",
+                  "gcdump"
+                ],
                 "description": "%debugger.meteor.description.profilerMode%"
               }
             }
@@ -178,21 +176,25 @@
         "dotnetMeteor.monoSdbDebuggerPortAndroid": {
           "type": "integer",
           "default": 10000,
+          "minimum": 0,
           "description": "%configuration.description.monoSdbDebuggerPortAndroid%"
         },
         "dotnetMeteor.monoSdbDebuggerPortApple": {
           "type": "integer",
           "default": 55551,
+          "minimum": 0,
           "description": "%configuration.description.monoSdbDebuggerPortApple%"
         },
         "dotnetMeteor.hotReloadHostPort": {
           "type": "integer",
           "default": 9988,
+          "minimum": 0,
           "description": "%configuration.description.hotReloadHostPort%"
         },
         "dotnetMeteor.profilerHostPort": {
           "type": "integer",
           "default": 9000,
+          "minimum": 0,
           "description": "%configuration.description.profilerHostPort%"
         },
         "dotnetMeteor.uninstallApplicationBeforeInstalling": {
@@ -200,15 +202,13 @@
           "default": true,
           "description": "%configuration.description.uninstallApplicationBeforeInstalling%"
         },
-
-
         "dotnetMeteor.debuggerOptions.evaluationTimeout": {
-          "type":"integer",
+          "type": "integer",
           "default": 5000,
           "description": "%configuration.description.debuggerOptions.evaluationTimeout%"
         },
         "dotnetMeteor.debuggerOptions.memberEvaluationTimeout": {
-          "type":"integer",
+          "type": "integer",
           "default": 5000,
           "description": "%configuration.description.debuggerOptions.memberEvaluationTimeout%"
         },
@@ -260,6 +260,7 @@
         "dotnetMeteor.debuggerOptions.ellipsizedLength": {
           "type": "integer",
           "default": 260,
+          "minimum": 0,
           "description": "%configuration.description.debuggerOptions.ellipsizedLength%"
         },
         "dotnetMeteor.debuggerOptions.integerDisplayFormat": {

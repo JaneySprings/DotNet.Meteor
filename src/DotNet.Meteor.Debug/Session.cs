@@ -5,6 +5,7 @@ using Mono.Debugging.Client;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 using DotNet.Meteor.Shared;
+using DotNet.Meteor.Debug.Extensions;
 
 namespace DotNet.Meteor.Debug;
 
@@ -63,6 +64,6 @@ public abstract class Session: DebugAdapterBase, IProcessLogger {
         if (ex is ProtocolException)
             throw ex;
         GetLogger().LogError($"[Handled] {ex.Message}", ex);
-        throw new ProtocolException(ex.Message);
+        ServerExtensions.ThrowException(ex.Message);
     }
 }

@@ -10,4 +10,5 @@ namespace DotNet.Meteor.Shared;
 [JsonSerializable(typeof(string))]
 [JsonSerializable(typeof(bool))]
 [JsonSerializable(typeof(int))]
+[JsonSerializable(typeof(int[]))]
 public partial class TrimmableContext : JsonSerializerContext {}

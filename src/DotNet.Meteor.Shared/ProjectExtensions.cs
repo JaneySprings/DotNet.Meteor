@@ -75,7 +75,11 @@ namespace DotNet.Meteor.Shared {
             return resultSequence.ToString();
         }
 
-        public static string FindOutputApplication(this Project project, string configuration, string framework, DeviceData device, Func<string, string> errorHandler = null) {
+        public static string FindOutputApplication(this Project project, string configuration, DeviceData device, Func<string, string> errorHandler = null) {
+            var framework = project.Frameworks.FirstOrDefault(it => it.ContainsInsensitive(device.Platform));
+            if (string.IsNullOrEmpty(framework))
+                return errorHandler?.Invoke($"Could not find targetFramework for platform {device.Platform}");
+
             var rootDirectory = Path.GetDirectoryName(project.Path);
             var baseOutputDirectory = Path.Combine(rootDirectory, "bin", configuration, framework);
             var outputAssemblyPath = string.Empty;
