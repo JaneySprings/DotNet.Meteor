@@ -3,7 +3,7 @@ using System.IO;
 using System.Net.Sockets;
 using Mono.Debugging.Client;
 
-namespace DotNet.Meteor.Debug.Extensions;
+namespace DotNet.Meteor.Debug;
 
 internal class ExternalTypeResolver {
     private readonly DebuggerSessionOptions sessionOptions;

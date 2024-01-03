@@ -1,4 +1,3 @@
-using System;
 using System.Net;
 using System.Net.Sockets;
 using Mono.Debugging.Client;
@@ -8,6 +7,8 @@ using Newtonsoft.Json.Linq;
 using NewtonConverter = Newtonsoft.Json.JsonConvert;
 using DebugProtocol =  Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 using System.IO;
+using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
+using DotNet.Meteor.Shared;
 
 namespace DotNet.Meteor.Debug.Extensions;
 
@@ -30,7 +31,6 @@ public static class ServerExtensions {
         },
     };
 
-
     public static int FindFreePort() {
         TcpListener listener = null;
         try {
@@ -46,22 +46,8 @@ public static class ServerExtensions {
             File.Delete(path);
         return !File.Exists(path);
     }
-
-    public static StackFrame GetFrameSafe(this Backtrace bt, int n) {
-		try {
-            return bt.GetFrame(n);
-        } catch (Exception) {
-            return null;
-        }
-	}
-
-
-    public static string ToThreadName(this string threadName, int threadId) {
-        if (!string.IsNullOrEmpty(threadName))
-            return threadName;
-        if (threadId == 1)
-            return "Main Thread";
-        return $"Thread #{threadId}";
+    public static void ThrowException(string message) {
+        throw new ProtocolException(message, 0, message, url: $"file://{LogConfig.DebugLogFile}");
     }
 
     public static T ToObject<T>(this JToken jtoken, JsonTypeInfo<T> type) {
@@ -82,7 +68,6 @@ public static class ServerExtensions {
             Label = item.Name,
         };
     }
-
     private static DebugProtocol.CompletionItemType ToCompletionItemType(this ObjectValueFlags flags) {
         if (flags.HasFlag(ObjectValueFlags.Method))
             return DebugProtocol.CompletionItemType.Method;

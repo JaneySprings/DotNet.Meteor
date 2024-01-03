@@ -39,7 +39,10 @@ namespace DotNet.Meteor.Shared {
         }
 
         public static bool ContainsInsensitive(this string source, string value) {
-            return source.IndexOf(value, StringComparison.OrdinalIgnoreCase) >= 0;
+            return source?.IndexOf(value, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+        public static bool EqualsInsensitive(this string source, string value) {
+            return source?.Equals(value, StringComparison.OrdinalIgnoreCase) == true;
         }
 
         public static string ToPlatformPath(this string path) {
