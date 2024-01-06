@@ -157,6 +157,10 @@
         "configurationAttributes": {
           "launch": {
             "properties": {
+              "runtime": {
+                "type": "string",
+                "description": "%debugger.meteor.description.runtime%"
+              },
               "profilerMode": {
                 "type": "string",
                 "enum": [

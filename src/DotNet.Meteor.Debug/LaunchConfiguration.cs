@@ -58,14 +58,14 @@ public class LaunchConfiguration {
     }
     public BaseLaunchAgent GetLauchAgent() {
         if (ProfilerMode.EqualsInsensitive("trace"))
-            return new TraceLaunchAgent();
+            return new TraceLaunchAgent(this);
         if (ProfilerMode.EqualsInsensitive("gcdump"))
-            return new GCDumpLaunchAgent();
+            return new GCDumpLaunchAgent(this);
 
         if (SkipDebug || Target.EqualsInsensitive("release"))
-            return new NoDebugLaunchAgent();
+            return new NoDebugLaunchAgent(this);
         if (Target.EqualsInsensitive("debug"))
-            return new DebugLaunchAgent();
+            return new DebugLaunchAgent(this);
  
         throw new NotSupportedException("Could not create launch agent for current configuration");
     }

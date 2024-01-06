@@ -46,12 +46,8 @@ export class StatusBarController {
             PublicExports.instance.invokeAll();
             return;
         }
-        if (ConfigurationController.project === undefined || ConfigurationController.device === undefined)
-            StateController.load();
-
-        ConfigurationController.project = StatusBarController.projects.find(it => it.name === ConfigurationController.project?.name);
-        ConfigurationController.device = StatusBarController.devices.find(it => it.name === ConfigurationController.device?.name);
-
+        
+        StateController.load();
         StatusBarController.performSelectProject(ConfigurationController.project);
         StatusBarController.performSelectTarget(ConfigurationController.target);
         StatusBarController.performSelectDevice(ConfigurationController.device);
