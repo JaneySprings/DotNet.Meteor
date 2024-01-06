@@ -73,8 +73,8 @@ public class DebugSession : Session {
             launchAgent.Disposables.Add(() => typeResolver.Dispose());
             session.TypeResolverHandler = typeResolver.Handle;
 
-            launchAgent.Launch(configuration, this);
-            launchAgent.Connect(session, configuration);
+            launchAgent.Launch(this);
+            launchAgent.Connect(session);
             return new LaunchResponse();
         });
     }

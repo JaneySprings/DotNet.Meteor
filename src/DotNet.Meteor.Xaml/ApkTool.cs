@@ -1,5 +1,7 @@
 using System.IO.Compression;
 
+namespace DotNet.Meteor.Xaml;
+
 public static class ApkTool {
     public static void ExtractMissingAndroidAssemblies(string assembliesDirectory, Action<string>? logger = null) {
         var apkFile = Directory.GetFiles(assembliesDirectory, "*-Signed.apk", SearchOption.TopDirectoryOnly).FirstOrDefault();

@@ -1,17 +1,13 @@
-using System;
-using System.IO;
-using DotNet.Meteor.Debug.Extensions;
-using DotNet.Meteor.Debug.Sdk;
-using DotNet.Meteor.Debug.Sdk.Profiling;
 using DotNet.Meteor.Processes;
-using DotNet.Meteor.Shared;
 using Mono.Debugging.Soft;
 
 namespace DotNet.Meteor.Debug;
 
 public class GCDumpLaunchAgent : BaseLaunchAgent {
-    public override void Connect(SoftDebuggerSession session, LaunchConfiguration configuration) {}
-    public override void Launch(LaunchConfiguration configuration, IProcessLogger logger) {
+    public GCDumpLaunchAgent(LaunchConfiguration configuration) : base(configuration) {}
+
+    public override void Connect(SoftDebuggerSession session) {}
+    public override void Launch(IProcessLogger logger) {
         // var nettracePath = Path.Combine(configuration.TempDirectoryPath, $"{configuration.GetApplicationName()}.nettrace");
         // var diagnosticPort = Path.Combine(RuntimeSystem.HomeDirectory, $"{configuration.Device.Platform}-port.lock");
         // ServerExtensions.TryDeleteFile(diagnosticPort);

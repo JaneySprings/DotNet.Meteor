@@ -6,14 +6,16 @@ using Mono.Debugging.Soft;
 namespace DotNet.Meteor.Debug;
 
 public abstract class BaseLaunchAgent {
-    public List<Action> Disposables { get; set; }
+    public List<Action> Disposables { get; init; }
+    protected LaunchConfiguration Configuration { get; init; }
 
-    protected BaseLaunchAgent() {
+    protected BaseLaunchAgent(LaunchConfiguration configuration) {
         Disposables = new List<Action>();
+        Configuration = configuration;
     }
 
-    public abstract void Connect(SoftDebuggerSession session, LaunchConfiguration configuration);
-    public abstract void Launch(LaunchConfiguration configuration, IProcessLogger logger);
+    public abstract void Connect(SoftDebuggerSession session);
+    public abstract void Launch(IProcessLogger logger);
 
     public virtual void Dispose() {
         foreach(var disposable in Disposables)
