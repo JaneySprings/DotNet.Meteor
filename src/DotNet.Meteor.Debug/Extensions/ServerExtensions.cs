@@ -9,6 +9,7 @@ using DebugProtocol =  Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Message
 using System.IO;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using DotNet.Meteor.Shared;
+using System.Collections.Generic;
 
 namespace DotNet.Meteor.Debug.Extensions;
 
@@ -48,6 +49,15 @@ public static class ServerExtensions {
     }
     public static void ThrowException(string message) {
         throw new ProtocolException(message, 0, message, url: $"file://{LogConfig.DebugLogFile}");
+    }
+    public static List<DebugProtocol.CompletionItem> GetCommandItems() {
+        return new List<DebugProtocol.CompletionItem>() {
+            new DebugProtocol.CompletionItem() {
+                Label = "dump",
+                SortText = "dump",
+                Type = DebugProtocol.CompletionItemType.Snippet
+            },
+        };
     }
 
     public static T ToObject<T>(this JToken jtoken, JsonTypeInfo<T> type) {
