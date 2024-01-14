@@ -403,7 +403,7 @@ public class DebugSession : Session {
     protected override CompletionsResponse HandleCompletionsRequest(CompletionsArguments arguments) {
         return DoSafe<CompletionsResponse>(() => {
             if (arguments.Text.StartsWith(BaseLaunchAgent.CommandPrefix))
-                return new CompletionsResponse(ServerExtensions.GetCommandItems());
+                return new CompletionsResponse(launchAgent?.GetCompletionItems());
 
             var frame = frameHandles.Get(arguments.FrameId ?? 0, null);
             if (frame == null)

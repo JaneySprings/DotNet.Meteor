@@ -25,10 +25,10 @@ public class GCDumpLaunchAgent : BaseLaunchAgent {
             LaunchAndroid(logger);
         if (Configuration.Device.IsIPhone)
             LaunchAppleMobile(logger);
-        // if (Configuration.Device.IsMacCatalyst)
-        //     LaunchMacCatalyst(logger);
-        // if (Configuration.Device.IsWindows)
-        //     LaunchWindows(logger);
+        if (Configuration.Device.IsMacCatalyst)
+            LaunchMacCatalyst(logger);
+        if (Configuration.Device.IsWindows)
+            LaunchWindows(logger);
 
         Disposables.Add(() => ServerExtensions.TryDeleteFile(diagnosticPort));
     }
@@ -38,11 +38,16 @@ public class GCDumpLaunchAgent : BaseLaunchAgent {
         if (string.IsNullOrEmpty(diagnosticPort) || string.IsNullOrEmpty(gcdumpPath))
             return;
 
-        var gcdumpProcess = routerPID == 0 
+        var gcdumpProcess = applicationPID == 0 
             ? GCDump.Collect($"{diagnosticPort},connect", gcdumpPath, logger)
-            : GCDump.Collect(routerPID, gcdumpPath, logger);
+            : GCDump.Collect(applicationPID, gcdumpPath, logger);
 
         Disposables.Insert(0, () => gcdumpProcess.Terminate());
+    }
+    public override List<CompletionItem> GetCompletionItems() {
+        return new List<CompletionItem>() {
+            new CompletionItem() { Label = "dump", Type = CompletionItemType.Snippet }
+        };
     }
 
     private void LaunchAppleMobile(IProcessLogger logger) {
@@ -72,7 +77,7 @@ public class GCDumpLaunchAgent : BaseLaunchAgent {
         DeviceBridge.Shell(Configuration.Device.Serial, "setprop", "debug.mono.profile", $"127.0.0.1:{Configuration.ProfilerPort},nosuspend,connect");
         
         var routerProcess = DSRouter.ServerToServer(Configuration.ProfilerPort+1, logger);
-        routerPID = routerProcess.Id;
+        applicationPID = routerProcess.Id;
 
         if (Configuration.UninstallApp)
             DeviceBridge.Uninstall(Configuration.Device.Serial, applicationId, logger);
@@ -84,5 +89,9 @@ public class GCDumpLaunchAgent : BaseLaunchAgent {
         Disposables.Add(() => DeviceBridge.RemoveReverse(Configuration.Device.Serial));
     }
     private void LaunchWindows(IProcessLogger logger) {
+        var exeProcess = new ProcessRunner(new FileInfo(Configuration.OutputAssembly), null, logger).Start();
+        applicationPID = exeProcess.Id;
+
+        Disposables.Add(() => exeProcess.Terminate());
     }
 }

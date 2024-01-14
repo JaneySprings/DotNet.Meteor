@@ -3,12 +3,16 @@ using DotNet.Meteor.Workspace.Android;
 using DotNet.Meteor.Workspace.Apple;
 using DotNet.Meteor.Workspace.Windows;
 using Xunit;
+
 namespace DotNet.Meteor.Tests;
 
 public class DeviceProvidingTests: TestFixture {
 
     [Fact]
     public void AndroidPhysicalDeviceTest() {
+        if (string.IsNullOrEmpty(AndroidSdk.SdkLocation()))
+            return; // Skip test if sdk is not found
+
         var result = AndroidTool.PhysicalDevices();
         Assert.NotNull(result);
     }
