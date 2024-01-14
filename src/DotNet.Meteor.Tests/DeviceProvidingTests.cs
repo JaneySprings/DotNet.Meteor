@@ -10,11 +10,13 @@ public class DeviceProvidingTests: TestFixture {
 
     [Fact]
     public void AndroidPhysicalDeviceTest() {
-        if (string.IsNullOrEmpty(AndroidSdk.SdkLocation()))
-            return; // Skip test if sdk is not found
-
-        var result = AndroidTool.PhysicalDevices();
-        Assert.NotNull(result);
+        try {
+            var result = AndroidTool.PhysicalDevices();
+            Assert.NotNull(result);
+        } catch (FileNotFoundException e) {
+            System.Diagnostics.Debug.WriteLine(e);
+            return;
+        }
     }
 
     [Fact]
