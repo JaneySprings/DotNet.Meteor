@@ -1,9 +1,12 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
 using DotNet.Meteor.Debug.Extensions;
 using DotNet.Meteor.Debug.Sdk;
 using DotNet.Meteor.Debug.Sdk.Profiling;
 using DotNet.Meteor.Processes;
 using DotNet.Meteor.Shared;
+using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 using Mono.Debugging.Soft;
 
 namespace DotNet.Meteor.Debug;
@@ -11,7 +14,7 @@ namespace DotNet.Meteor.Debug;
 public class GCDumpLaunchAgent : BaseLaunchAgent {
     private string diagnosticPort;
     private string gcdumpPath;
-    private int routerPID;
+    private int applicationPID;
 
     public GCDumpLaunchAgent(LaunchConfiguration configuration) : base(configuration) {}
 
@@ -67,6 +70,15 @@ public class GCDumpLaunchAgent : BaseLaunchAgent {
         }
     }
     private void LaunchMacCatalyst(IProcessLogger logger) {
+        var tool = AppleSdk.OpenTool();
+        var processRunner = new ProcessRunner(tool, new ProcessArgumentBuilder().AppendQuoted(Configuration.OutputAssembly));
+
+        diagnosticPort = $"127.0.0.1:{Configuration.ProfilerPort}";
+        processRunner.SetEnvironmentVariable("DOTNET_DiagnosticPorts", $"127.0.0.1:{Configuration.ProfilerPort},nosuspend,listen");
+
+        var appLaunchResult = processRunner.WaitForExit();
+        if (!appLaunchResult.Success)
+            throw new Exception(string.Join(Environment.NewLine, appLaunchResult.StandardError));
     }
     private void LaunchAndroid(IProcessLogger logger) {
         var applicationId = Configuration.GetApplicationName();
