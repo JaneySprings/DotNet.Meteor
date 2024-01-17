@@ -17,8 +17,8 @@ The extension provides you with a basic `XAML` syntax highlighting and shows sni
 - **XAML Hot Reload** </br>
 Meteor support XAML Hot Reload for any platform. See the instruction below to enable Hot Reload in your project.
 
-- **Profiling Support** </br>
-You can profile your application and see the report in the `speedscope` or `gcdump` formats. See the instruction below to enable profiling in your project.
+- **Performance and Memory Profiling** </br>
+You can profile your application to find performance bottlenecks and undisposed objects that persist in the memory.
 
 - **MAUI Blazor Support** </br>
 The extension allows you to build and debug `MAUI Blazor` apps (including the `.razor` files).
