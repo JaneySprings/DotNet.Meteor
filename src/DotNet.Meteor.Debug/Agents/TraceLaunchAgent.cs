@@ -33,8 +33,8 @@ public class TraceLaunchAgent : BaseLaunchAgent {
     private void LaunchAppleMobile(IProcessLogger logger, string diagnosticPort, string nettracePath) {
         if (Configuration.Device.IsEmulator) {
             var routerProcess = DSRouter.ClientToServer(diagnosticPort, $"127.0.0.1:{Configuration.ProfilerPort}", logger);
-            var simProcess = MonoLaunch.ProfileSim(Configuration.Device.Serial, Configuration.OutputAssembly, Configuration.ProfilerPort, new CatchStartLogger(logger, () => {
-                var traceProcess = Trace.Collect(diagnosticPort, nettracePath, Configuration.ProfilerMode, logger);
+            var simProcess = MonoLaunch.ProfileSim(Configuration.Device.Serial, Configuration.OutputAssembly, $"127.0.0.1:{Configuration.ProfilerPort},suspend", new CatchStartLogger(logger, () => {
+                var traceProcess = Trace.Collect(diagnosticPort, nettracePath, logger);
                 Disposables.Insert(0, () => traceProcess.Terminate());
             }));
            
@@ -43,8 +43,8 @@ public class TraceLaunchAgent : BaseLaunchAgent {
         } else {
             var routerProcess = DSRouter.ServerToClient(diagnosticPort, $"127.0.0.1:{Configuration.ProfilerPort}", forwardApple: true, logger);
             MonoLaunch.InstallDev(Configuration.Device.Serial, Configuration.OutputAssembly, logger);
-            var devProcess = MonoLaunch.ProfileDev(Configuration.Device.Serial, Configuration.OutputAssembly, Configuration.ProfilerPort, new CatchStartLogger(logger, () => {
-                var traceProcess = Trace.Collect($"{diagnosticPort},connect", nettracePath, Configuration.ProfilerMode, logger);
+            var devProcess = MonoLaunch.ProfileDev(Configuration.Device.Serial, Configuration.OutputAssembly, $"127.0.0.1:{Configuration.ProfilerPort},suspend,listen", new CatchStartLogger(logger, () => {
+                var traceProcess = Trace.Collect($"{diagnosticPort},connect", nettracePath, logger);
                 Disposables.Insert(0, () => traceProcess.Terminate());
             }));
     
@@ -57,7 +57,7 @@ public class TraceLaunchAgent : BaseLaunchAgent {
         var processRunner = new ProcessRunner(tool, new ProcessArgumentBuilder().AppendQuoted(Configuration.OutputAssembly));
         processRunner.SetEnvironmentVariable("DOTNET_DiagnosticPorts", $"{diagnosticPort},suspend");
         
-        var traceProcess = Trace.Collect(diagnosticPort, nettracePath, Configuration.ProfilerMode, logger);
+        var traceProcess = Trace.Collect(diagnosticPort, nettracePath, logger);
         var appLaunchResult = processRunner.WaitForExit();
 
         Disposables.Add(() => traceProcess.Terminate());
@@ -75,7 +75,7 @@ public class TraceLaunchAgent : BaseLaunchAgent {
         
         var routerProcess = DSRouter.ServerToServer(Configuration.ProfilerPort+1, logger);
         System.Threading.Thread.Sleep(1000); // wait for router to start
-        var traceProcess = Trace.Collect(routerProcess.Id, nettracePath, Configuration.ProfilerMode, logger);
+        var traceProcess = Trace.Collect(routerProcess.Id, nettracePath, logger);
         System.Threading.Thread.Sleep(1000); // wait for trace to start
 
         if (Configuration.UninstallApp)
@@ -90,7 +90,7 @@ public class TraceLaunchAgent : BaseLaunchAgent {
     }
     private void LaunchWindows(IProcessLogger logger, string diagnosticPort, string nettracePath) {
         var exeProcess = new ProcessRunner(new FileInfo(Configuration.OutputAssembly), null, logger).Start();
-        var traceProcess = Trace.Collect(exeProcess.Id, nettracePath, Configuration.ProfilerMode, logger);
+        var traceProcess = Trace.Collect(exeProcess.Id, nettracePath, logger);
 
         Disposables.Add(() => traceProcess.Terminate());
         Disposables.Add(() => exeProcess.Terminate());

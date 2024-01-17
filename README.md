@@ -17,8 +17,8 @@ The extension provides you with a basic `XAML` syntax highlighting and shows sni
 - **XAML Hot Reload** </br>
 Meteor support XAML Hot Reload for any platform. See the instruction below to enable Hot Reload in your project.
 
-- **Profiling Support** </br>
-You can profile your application and see the report in the `Speedscope` format. See the instruction below to enable profiling in your project.
+- **Performance and Memory Profiling** </br>
+You can profile your application to find performance bottlenecks and undisposed objects that persist in the memory.
 
 - **MAUI Blazor Support** </br>
 The extension allows you to build and debug `MAUI Blazor` apps (including the `.razor` files).
@@ -85,7 +85,7 @@ public static class MauiProgram
 1. Open the project folder.
 2. Open the `Run and Debug` VSCode tab and click the `create a launch.json file`.
 3. In the opened panel, select the `.NET Meteor Debugger`.
-4. Specify a profiler mode option in the generated configuration:
+4. Specify a profiler mode option (`trace` or `gcdump`) in the generated configuration. For example:
 ```json
 {
 	"name": ".NET Meteor Profiler",
@@ -97,17 +97,20 @@ public static class MauiProgram
 ```
 5. In the status bar, select a project (if your opened folder contains several projects) and a configuration (the debug is the default). Click the device name and select a target device/emulator from the opened panel.
 6. Press `ctrl + F5` to launch the application without debugging.
-7. When the application is launched, you will see the message:
+* If you use the `gcdump` mode, type a `/dump` command in the `Debug Console` to capture the report. You will see the message:
 ```
-Output File    : /Users/You/.../MauiProf/.meteor/com.companyname.mauiprof.nettrace
+Writing gcdump to '/Users/You/.../.meteor/MauiProf.gcdump'...
+command handled by DotNet.Meteor.Debug.GCDumpLaunchAgent
+Finished writing 2759872 bytes.
 ```
-8. To stop profiling, click `Stop Debugging` in the VSCode. **Don't close the application manually, because this may damage the report.** After completion, you will see the message:
+
+* If you use the `trace` mode, click `Stop Debugging` in the VSCode to stop the profiling. **Don't close the application manually, because this may damage the report.** After completion, you will see the message:
 ```
 Trace completed.
-Writing:	/Users/You/.../MauiProf/.meteor/com.companyname.mauiprof.speedscope.json
+Writing:	/Users/You/.../MauiProf/.meteor/MauiProf.speedscope.json
 Conversion complete
 ```
-9. You can see the `json` report in the `.meteor` folder of your project. You can use the [Speedscope in VSCode](https://marketplace.visualstudio.com/items?itemName=sransara.speedscope-in-vscode) extension to view it. Alternatively, you can upload it directly to the [speedscope](https://www.speedscope.app) site.
+7. You can see the `speedscope.json` report in the `.meteor` folder of your project. You can use the [Speedscope in VSCode](https://marketplace.visualstudio.com/items?itemName=sransara.speedscope-in-vscode) extension to view it. Alternatively, you can upload it directly to the [speedscope](https://www.speedscope.app) site. For the `gcdump` report, you can use the [dotnet-heapview](https://github.com/1hub/dotnet-heapview) or _Visual Studio for Windows_.
 
 ![image](https://github.com/JaneySprings/DotNet.Meteor/raw/main/img/demo_trace.gif)
 

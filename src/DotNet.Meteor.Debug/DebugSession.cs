@@ -349,8 +349,10 @@ public class DebugSession : Session {
 #region request: Evaluate
     protected override EvaluateResponse HandleEvaluateRequest(EvaluateArguments arguments) {
         return DoSafe<EvaluateResponse>(() => {
-            if (string.IsNullOrEmpty(arguments.Expression))
-                throw new ProtocolException("expression missing");
+            if (arguments.Expression.StartsWith(BaseLaunchAgent.CommandPrefix)) {
+                launchAgent?.HandleCommand(arguments.Expression, this);
+                throw new ProtocolException($"command handled by {launchAgent}");
+            }
 
             var frame = frameHandles.Get(arguments.FrameId ?? 0, null);
             if (frame == null)
@@ -400,8 +402,8 @@ public class DebugSession : Session {
 #region request: Completions
     protected override CompletionsResponse HandleCompletionsRequest(CompletionsArguments arguments) {
         return DoSafe<CompletionsResponse>(() => {
-            if (string.IsNullOrEmpty(arguments.Text))
-                throw new ProtocolException("expression missing");
+            if (arguments.Text.StartsWith(BaseLaunchAgent.CommandPrefix))
+                return new CompletionsResponse(launchAgent?.GetCompletionItems());
 
             var frame = frameHandles.Get(arguments.FrameId ?? 0, null);
             if (frame == null)

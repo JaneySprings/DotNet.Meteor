@@ -9,6 +9,7 @@ using DebugProtocol =  Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Message
 using System.IO;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using DotNet.Meteor.Shared;
+using System.Collections.Generic;
 
 namespace DotNet.Meteor.Debug.Extensions;
 

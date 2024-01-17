@@ -54,7 +54,7 @@ public static class MonoLaunch {
         return new ProcessRunner(tool, arguments, logger).Start();
     }
 
-    public static Process ProfileDev(string serial, string bundlePath, int port, IProcessLogger logger = null) {
+    public static Process ProfileDev(string serial, string bundlePath, string port, IProcessLogger logger = null) {
         var tool = AppleSdk.MLaunchTool();
         var arguments = new ProcessArgumentBuilder()
             .Append( "--launchdev").AppendQuoted(bundlePath) // '--setenv:DOTNET_DiagnosticPorts=127.0.0.1:9001,suspend,listen'
@@ -63,7 +63,7 @@ public static class MonoLaunch {
             .Append($"--argument={port}")
             .Append( "--argument=--connection-mode")
             .Append( "--argument=none")
-            .Append($"--setenv=DOTNET_DiagnosticPorts=127.0.0.1:{port},suspend,listen")
+            .Append($"--setenv=DOTNET_DiagnosticPorts={port}")
             .Append( "--wait-for-exit");
         return new ProcessRunner(tool, arguments, logger).Start();
     }
@@ -79,13 +79,13 @@ public static class MonoLaunch {
         return new ProcessRunner(tool, arguments, logger).Start();
     }
 
-    public static Process ProfileSim(string serial, string bundlePath, int port, IProcessLogger logger = null) {
+    public static Process ProfileSim(string serial, string bundlePath, string port, IProcessLogger logger = null) {
         var tool = AppleSdk.MLaunchTool();
         var arguments = new ProcessArgumentBuilder()
             .Append( "--launchsim").AppendQuoted(bundlePath)
             .Append("--argument", "--connection-mode")
             .Append("--argument", "none")
-            .Append($"--setenv:DOTNET_DiagnosticPorts=127.0.0.1:{port},suspend")
+            .Append($"--setenv:DOTNET_DiagnosticPorts={port}")
             .Append($"--device=:v2:udid={serial}");
         return new ProcessRunner(tool, arguments, logger).Start();
     }

@@ -48,7 +48,7 @@ namespace DotNet.Meteor.Shared {
             string path = Path.Combine(sdk, "platform-tools", "adb" + RuntimeSystem.ExecExtension);
 
             if (!File.Exists(path))
-                throw new Exception("Could not find adb tool");
+                throw new FileNotFoundException("Could not find adb tool");
 
             return new FileInfo(path);
         }
@@ -58,7 +58,7 @@ namespace DotNet.Meteor.Shared {
             string path = Path.Combine(sdk, "emulator", "emulator" + RuntimeSystem.ExecExtension);
 
             if (!File.Exists(path))
-                throw new Exception("Could not find emulator tool");
+                throw new FileNotFoundException("Could not find emulator tool");
 
             return new FileInfo(path);
         }
@@ -80,7 +80,7 @@ namespace DotNet.Meteor.Shared {
             }
 
             if (newestTool == null || !newestTool.Exists)
-                throw new Exception("Could not find avdmanager tool");
+                throw new FileNotFoundException("Could not find avdmanager tool");
 
             return newestTool;
         }

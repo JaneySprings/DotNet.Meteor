@@ -19,6 +19,7 @@
 		<ProjectReference Include="..\DotNet.Meteor.Shared\DotNet.Meteor.Shared.csproj" />
 
 		<ProjectReference Include="..\DotNet.Diagnostics\src\Tools\dotnet-trace\dotnet-trace.csproj" />
+		<ProjectReference Include="..\DotNet.Diagnostics\src\Tools\dotnet-gcdump\dotnet-gcdump.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
