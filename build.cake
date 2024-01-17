@@ -27,6 +27,8 @@ var configuration = Argument("configuration", "debug");
 Task("clean").Does(() => {
 	EnsureDirectoryExists(ArtifactsDirectory);
 	CleanDirectory(ExtensionStagingDirectory);
+	CleanDirectories(_Path.Combine(RootDirectory, "src", "**", "bin"));
+	CleanDirectories(_Path.Combine(RootDirectory, "src", "**", "obj"));
 });
 
 ///////////////////////////////////////////////////////////////////////////////
