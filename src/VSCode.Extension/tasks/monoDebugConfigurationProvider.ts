@@ -16,11 +16,11 @@ export class MonoDebugConfigurationProvider implements vscode.DebugConfiguration
 
 		ConfigurationController.profiler = config.profilerMode;
 		if (!config.noDebug && (ConfigurationController.target === Target.Release || ConfigurationController.profiler)) {
-			vscode.window.showErrorMessage(res.messageDebugNotSupported);
+			vscode.window.showErrorMessage(res.messageDebugNotSupported, { modal: true });
 			return undefined;
 		}
 		if (!config.noDebug && ConfigurationController.isWindows()) {
-			vscode.window.showErrorMessage(res.messageDebugNotSupportedWin);
+			vscode.window.showErrorMessage(res.messageDebugNotSupportedWin, { modal: true });
 			return undefined;
 		}
 
