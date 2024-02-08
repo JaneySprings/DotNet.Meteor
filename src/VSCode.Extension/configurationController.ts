@@ -68,19 +68,19 @@ export class ConfigurationController {
 
     public static isValid(): boolean {
         if (!ConfigurationController.project?.path) {
-            window.showErrorMessage(res.messageNoProjectFound);
+            window.showErrorMessage(res.messageNoProjectFound, { modal: true });
             return false;
         }
         if (!ConfigurationController.device?.platform) {
-            window.showErrorMessage(res.messageNoDeviceFound);
+            window.showErrorMessage(res.messageNoDeviceFound, { modal: true });
             return false;
         }
         if (!StatusBarController.devices.some(it => it.name === ConfigurationController.device?.name)) {
-            window.showErrorMessage(res.messageDeviceNotExists);
+            window.showErrorMessage(res.messageDeviceNotExists, { modal: true });
             return false;
         }
         if (!ConfigurationController.getTargetFramework()) {
-            window.showErrorMessage(res.messageNoFrameworkFound);
+            window.showErrorMessage(res.messageNoFrameworkFound, { modal: true });
             return false;
         }
 
