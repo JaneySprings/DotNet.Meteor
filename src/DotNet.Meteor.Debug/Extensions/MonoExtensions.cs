@@ -1,11 +1,14 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Mono.Debugging.Client;
 using Mono.Debugging.Soft;
 
 namespace DotNet.Meteor.Debug.Extensions;
 
 public static class MonoExtensions {
+    public const int TerminationTimeout = 3000;
+
     public static string ToThreadName(this string threadName, int threadId) {
         if (!string.IsNullOrEmpty(threadName))
             return threadName;
@@ -46,5 +49,11 @@ public static class MonoExtensions {
         }
 
         return null;
+    }
+    public static bool Exit(this SoftDebuggerSession session, int millisecondsTimeout) {
+        if (session == null)
+            return true;
+
+        return Task.Run(() => session.Exit()).Wait(millisecondsTimeout);
     }
 }

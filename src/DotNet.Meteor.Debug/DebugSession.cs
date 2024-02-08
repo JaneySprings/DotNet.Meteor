@@ -82,7 +82,7 @@ public class DebugSession : Session {
 #region request: Terminate
     protected override TerminateResponse HandleTerminateRequest(TerminateArguments arguments) {
         if (!session.HasExited)
-            session.Exit();
+            session.Exit(MonoExtensions.TerminationTimeout);
 
         launchAgent?.Dispose();
         if (launchAgent is not DebugLaunchAgent)
