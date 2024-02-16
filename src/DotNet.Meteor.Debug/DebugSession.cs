@@ -361,7 +361,8 @@ public class DebugSession : Session {
             if (!frame.ValidateExpression(arguments.Expression))
                 throw new ProtocolException("invalid expression");
 
-            var value = frame.GetExpressionValue(arguments.Expression, session.Options.EvaluationOptions);
+            var useExternalTypeResolver = arguments.Context != EvaluateArguments.ContextValue.Hover;
+            var value = frame.GetExpressionValue(arguments.Expression, session.Options.EvaluationOptions, useExternalTypeResolver);
             value.WaitHandle.WaitOne(session.Options.EvaluationOptions.EvaluationTimeout);
 
             if (value.IsEvaluating)

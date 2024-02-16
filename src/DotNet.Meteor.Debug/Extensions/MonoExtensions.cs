@@ -50,6 +50,11 @@ public static class MonoExtensions {
 
         return null;
     }
+    public static ObjectValue GetExpressionValue(this StackFrame frame, string expression, EvaluationOptions evaluationOptions, bool useExternalTypeResolver) {
+        var options = evaluationOptions.Clone();
+        options.UseExternalTypeResolver = useExternalTypeResolver;
+        return frame.GetExpressionValue(expression, options);
+    }
     public static bool Exit(this SoftDebuggerSession session, int millisecondsTimeout) {
         if (session == null)
             return true;
