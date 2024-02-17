@@ -37,6 +37,8 @@ public class DebugSession : Session {
         session.TargetExited += TargetExited;
         session.TargetThreadStarted += TargetThreadStarted;
         session.TargetThreadStopped += TargetThreadStopped;
+
+        session.Breakpoints.BreakpointStatusChanged += BreakpointStatusChanged;
     }
 
     protected override MonoClient.ICustomLogger GetLogger() => MonoClient.DebuggerLoggingService.CustomLogger;
@@ -196,9 +198,9 @@ public class DebugSession : Session {
                 breakpoint.TraceExpression = $"[LogPoint]: {breakpointInfo.LogMessage}";
             }
 
-            var verified = breakpoint.WaitForBound(session);
             breakpoints.Add(new DebugProtocol.Breakpoint() {
-                Verified = verified,
+                Id = breakpoint.GetHashCode(),
+                Verified = false, // updated by event
                 Line =  breakpoint.Line,
                 Column = breakpoint.Column
             });
@@ -501,6 +503,9 @@ public class DebugSession : Session {
     private bool OnExceptionHandled(Exception ex) {
         GetLogger().LogError($"[Handled] {ex.Message}", ex);
         return true;
+    }
+    private void BreakpointStatusChanged(object sender, MonoClient.BreakpointEventArgs e) {
+        Protocol.SendEvent(new BreakpointEvent(BreakpointEvent.ReasonValue.Changed, e.Breakpoint.ToBreakpoint(session)));
     }
     private void OnSessionLog(bool isError, string message) {
         if (isError) GetLogger().LogError($"[Error] {message.Trim()}", null);
