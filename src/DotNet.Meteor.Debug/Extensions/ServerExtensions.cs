@@ -5,11 +5,11 @@ using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using Newtonsoft.Json.Linq;
 using NewtonConverter = Newtonsoft.Json.JsonConvert;
-using DebugProtocol =  Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
+using DebugProtocol = Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 using System.IO;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using DotNet.Meteor.Shared;
-using System.Collections.Generic;
+using Mono.Debugging.Soft;
 
 namespace DotNet.Meteor.Debug.Extensions;
 
@@ -84,5 +84,15 @@ public static class ServerExtensions {
             return DebugProtocol.CompletionItemType.Variable;
 
         return DebugProtocol.CompletionItemType.Text;
+    }
+
+    public static DebugProtocol.Breakpoint ToBreakpoint(this Breakpoint breakpoint, SoftDebuggerSession session) {
+        return new DebugProtocol.Breakpoint() {
+            Id = breakpoint.GetHashCode(),
+            Verified = breakpoint.GetStatus(session) == BreakEventStatus.Bound,
+            Message = breakpoint.GetStatusMessage(session),
+            Line = breakpoint.Line,
+            Column = breakpoint.Column,
+        };
     }
 }
