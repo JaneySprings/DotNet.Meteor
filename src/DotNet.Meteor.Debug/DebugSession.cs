@@ -50,6 +50,7 @@ public class DebugSession : Session {
             SupportsExceptionInfoRequest = true,
             SupportsConditionalBreakpoints = true,
             SupportsHitConditionalBreakpoints = true,
+            SupportsFunctionBreakpoints = true,
             SupportsLogPoints = true,
             SupportsExceptionOptions = true,
             SupportsExceptionFilterOptions = true,
@@ -82,7 +83,7 @@ public class DebugSession : Session {
 #region request: Terminate
     protected override TerminateResponse HandleTerminateRequest(TerminateArguments arguments) {
         if (!session.HasExited)
-            session.Exit(MonoExtensions.TerminationTimeout);
+            session.Exit();
 
         launchAgent?.Dispose();
         if (launchAgent is not DebugLaunchAgent)
@@ -182,29 +183,60 @@ public class DebugSession : Session {
         foreach(var breakpointInfo in breakpointsInfos) {
             MonoClient.Breakpoint breakpoint = session.Breakpoints.Add(sourcePath, breakpointInfo.Line, breakpointInfo.Column ?? 1);
             // Conditional breakpoint
-            if (breakpoint != null && breakpointInfo.Condition != null)
+            if (!string.IsNullOrEmpty(breakpointInfo.Condition))
                 breakpoint.ConditionExpression = breakpointInfo.Condition;
             // Hit count breakpoint
-            if (breakpoint != null && !string.IsNullOrEmpty(breakpointInfo.HitCondition)) {
+            if (!string.IsNullOrEmpty(breakpointInfo.HitCondition)) {
                 breakpoint.HitCountMode = MonoClient.HitCountMode.EqualTo;
                 breakpoint.HitCount = int.TryParse(breakpointInfo.HitCondition, out int hitCount) ? hitCount : 1;
             }
             // Logpoint
-            if (breakpoint != null && breakpointInfo.LogMessage != null) {
+            if (!string.IsNullOrEmpty(breakpointInfo.LogMessage)) {
                 breakpoint.HitAction = MonoClient.HitAction.PrintExpression;
                 breakpoint.TraceExpression = $"[LogPoint]: {breakpointInfo.LogMessage}";
             }
 
+            var verified = breakpoint.WaitForBound(session);
             breakpoints.Add(new DebugProtocol.Breakpoint() {
-                Verified = breakpoint != null,
-                Line =  breakpoint?.Line ?? breakpointInfo.Line,
-                Column = breakpoint?.Column ?? breakpointInfo.Column
+                Verified = verified,
+                Line =  breakpoint.Line,
+                Column = breakpoint.Column
             });
         }
 
         return new SetBreakpointsResponse(breakpoints);
     }
 #endregion request: SetBreakpoints
+#region request: SetFunctionBreakpoints
+    protected override SetFunctionBreakpointsResponse HandleSetFunctionBreakpointsRequest(SetFunctionBreakpointsArguments arguments) {
+        // clear existing function breakpoints
+        var functionBreakpoints = session.Breakpoints.OfType<MonoClient.FunctionBreakpoint>();
+        foreach (var functionBreakpoint in functionBreakpoints)
+            session.Breakpoints.Remove(functionBreakpoint);
+
+        foreach (var breakpointInfo in arguments.Breakpoints) {
+            var languageName = "C#";
+            var functionName = breakpointInfo.Name;
+            var functionParts = breakpointInfo.Name.Split(BaseLaunchAgent.LanguageSeparator);
+            if (functionParts.Length == 2) {
+                languageName = functionParts[0];
+                functionName = functionParts[1];
+            }
+
+            var functionBreakpoint = new MonoClient.FunctionBreakpoint(functionName, languageName);
+            // Conditional breakpoint
+            if (!string.IsNullOrEmpty(breakpointInfo.Condition))
+                functionBreakpoint.ConditionExpression = breakpointInfo.Condition;
+            // Hit count breakpoint
+            if (!string.IsNullOrEmpty(breakpointInfo.HitCondition)) {
+                functionBreakpoint.HitCountMode = MonoClient.HitCountMode.EqualTo;
+                functionBreakpoint.HitCount = int.TryParse(breakpointInfo.HitCondition, out int hitCount) ? hitCount : 1;
+            }
+            session.Breakpoints.Add(functionBreakpoint);
+        }
+        return new SetFunctionBreakpointsResponse();
+    }
+#endregion request: SetFunctionBreakpoints
 #region request: StackTrace
     protected override StackTraceResponse HandleStackTraceRequest(StackTraceArguments arguments) {
         return DoSafe<StackTraceResponse>(() => {

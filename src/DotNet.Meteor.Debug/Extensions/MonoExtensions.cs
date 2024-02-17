@@ -7,8 +7,6 @@ using Mono.Debugging.Soft;
 namespace DotNet.Meteor.Debug.Extensions;
 
 public static class MonoExtensions {
-    public const int TerminationTimeout = 3000;
-
     public static string ToThreadName(this string threadName, int threadId) {
         if (!string.IsNullOrEmpty(threadName))
             return threadName;
@@ -55,10 +53,11 @@ public static class MonoExtensions {
         options.UseExternalTypeResolver = useExternalTypeResolver;
         return frame.GetExpressionValue(expression, options);
     }
-    public static bool Exit(this SoftDebuggerSession session, int millisecondsTimeout) {
-        if (session == null)
-            return true;
-
-        return Task.Run(() => session.Exit()).Wait(millisecondsTimeout);
+    public static bool WaitForBound(this BreakEvent breakEvent, SoftDebuggerSession session, int millisecondsTimeout = 150) {
+        return Task.Run(async() => {
+            while (breakEvent.GetStatus(session) == BreakEventStatus.NotBound)
+                await Task.Delay(millisecondsTimeout/3);
+            return breakEvent.GetStatus(session) == BreakEventStatus.Bound;
+        }).Wait(millisecondsTimeout);
     }
 }
