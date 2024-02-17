@@ -11,6 +11,7 @@ public abstract class BaseLaunchAgent {
     private readonly Logger sessionLogger = LogManager.GetCurrentClassLogger();
     
     public const string CommandPrefix = "/";
+    public const string LanguageSeparator = "!";
     public List<Action> Disposables { get; init; }
     protected LaunchConfiguration Configuration { get; init; }
 
