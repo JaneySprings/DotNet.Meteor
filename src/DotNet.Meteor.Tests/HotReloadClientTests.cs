@@ -1,5 +1,5 @@
 using System.Text;
-using DotNet.Meteor.HotReload;
+using DotNet.Meteor.HotReload.Extensions;
 using Xunit;
 
 namespace DotNet.Meteor.Tests;
@@ -39,11 +39,14 @@ public class HotReloadClientTests: TestFixture {
     </StackLayout>
 </ContentPage>
 ");
-        MarkupExtensions.ModifyReferenceNames(xamlContent);
+        var transformations = MarkupExtensions.TransformReferenceNames(xamlContent);
         var names = FindAllXNames(xamlContent);
         Assert.Single(names);
+        Assert.Single(transformations);
         Assert.DoesNotContain("element1", names);
+        Assert.Equal("element1", transformations.Single().Key);
         Assert.Contains("element1_", names.First());
+        Assert.Contains("element1_", transformations.Single().Value);
     }
 
     [Fact]
@@ -60,12 +63,19 @@ public class HotReloadClientTests: TestFixture {
     </StackLayout>
 </ContentPage>
 ");
-        MarkupExtensions.ModifyReferenceNames(xamlContent);
+        var transformations = MarkupExtensions.TransformReferenceNames(xamlContent);
         var names = FindAllXNames(xamlContent);
         Assert.Equal(3, names.Count);
+        Assert.Equal(3, transformations.Count);
         Assert.DoesNotContain("element1", names);
         Assert.DoesNotContain("element2", names);
         Assert.DoesNotContain("element3", names);
+        Assert.Contains("element1", transformations.Keys);
+        Assert.Contains("element2", transformations.Keys);
+        Assert.Contains("element3", transformations.Keys);
+        Assert.Contains("element1_", transformations["element1"]);
+        Assert.Contains("element2_", transformations["element2"]);
+        Assert.Contains("element3_", transformations["element3"]);
         Assert.NotNull(names.FirstOrDefault(it => it.StartsWith("element1_")));
         Assert.NotNull(names.FirstOrDefault(it => it.StartsWith("element2_")));
         Assert.NotNull(names.FirstOrDefault(it => it.StartsWith("element3_")));
@@ -85,7 +95,7 @@ public class HotReloadClientTests: TestFixture {
     </StackLayout>
 </ContentPage>
 ");
-        MarkupExtensions.ModifyReferenceNames(xamlContent);
+        MarkupExtensions.TransformReferenceNames(xamlContent);
         var names = FindAllXNames(xamlContent);
         Assert.Single(names);
         Assert.DoesNotContain("element1", names);
@@ -108,7 +118,7 @@ public class HotReloadClientTests: TestFixture {
     </StackLayout>
 </ContentPage>
 ");
-        MarkupExtensions.ModifyReferenceNames(xamlContent);
+        MarkupExtensions.TransformReferenceNames(xamlContent);
         var names = FindAllXNames(xamlContent);
         Assert.Equal(2, names.Count);
         Assert.DoesNotContain("element1", names);
