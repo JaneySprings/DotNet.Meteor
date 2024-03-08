@@ -1,17 +1,21 @@
 ﻿using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
+using System.Text.Json;
+using DotNet.Meteor.HotReload.Plugin.Models;
 
 namespace DotNet.Meteor.HotReload.Plugin;
 
 internal class Server : IMauiInitializeService {
-    public int IdePort { get; }
+    private const string Version = "1.0.0";
+    private int idePort;
 
     internal Server(int port) {
-        IdePort = port;
+        idePort = port;
     }
 
     public async void Initialize(IServiceProvider services) {
-        var tcpListener = new TcpListener(IPAddress.Loopback, IdePort);
+        var tcpListener = new TcpListener(IPAddress.Loopback, idePort);
         try {
             tcpListener.Start();
         } catch (Exception e) {
@@ -25,23 +29,21 @@ internal class Server : IMauiInitializeService {
             using var reader = new StreamReader(stream);
             using var writer = new StreamWriter(stream) { AutoFlush = true };
 
-            // wait for empty message
             await reader.ReadLineAsync();
-            // send handshake
-            await writer.WriteLineAsync("handshake");
+            await writer.WriteLineAsync($"handshake_{Version}");
 
-            var classDefinition = await reader.ReadLineAsync();
-            var xamlContent = await reader.ReadToEndAsync();
+            var response = await reader.ReadToEndAsync();
+            var transferObject = JsonSerializer.Deserialize<TransferObject>(response, TrimmableContext.Default.TransferObject);
             var mainPage = Application.Current?.MainPage;
             
-            if (mainPage == null || string.IsNullOrEmpty(classDefinition) || string.IsNullOrEmpty(xamlContent))
+            if (mainPage == null || transferObject == null)
                 continue;
 
             // Modal pages are on top of the navigation stack
             if (mainPage.Navigation.ModalStack.Count > 0) {
                 var modalPage = mainPage.Navigation.ModalStack.Last();
                 if (modalPage != null) {
-                    TraverseVisualTree(modalPage, classDefinition, xamlContent);
+                    TraverseVisualTree(modalPage, transferObject);
                     continue;
                 }
             }
@@ -49,39 +51,50 @@ internal class Server : IMauiInitializeService {
             if (mainPage.Navigation.NavigationStack.Count > 0) {
                 var page = mainPage.Navigation.NavigationStack.Last();
                 if (page != null) {
-                    TraverseVisualTree(page, classDefinition, xamlContent);
+                    TraverseVisualTree(page, transferObject);
                     continue;
                 }
             }
             // Fall back to the main page
-            TraverseVisualTree(mainPage, classDefinition, xamlContent);
+            TraverseVisualTree(mainPage, transferObject);
         }
     }
 
-    private void ReloadElement(Element element, string xamlContent) {
+    private void TraverseVisualTree(Element node, TransferObject transferObject) {
+#pragma warning disable CS0618 // Used by hot reload
+        foreach (Element child in node.LogicalChildren)
+            TraverseVisualTree(child, transferObject);
+#pragma warning restore CS0618
+
+        if (node.GetType().FullName == transferObject.Definition) {
+            ReloadElement(node, transferObject);
+            return;
+        }
+
+        return;
+    }
+    private void ReloadElement(Element element, TransferObject transferObject) {
         if (element is VisualElement visualElement)
             visualElement.Resources.Clear();
         if (element is Page page)
             page.ToolbarItems.Clear();
 
         try {
-            element.LoadFromXaml(xamlContent);
+            element.LoadFromXaml(transferObject.Content);
+            if (transferObject.Transformations == null)
+                return;
+
+            var fields = element.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
+            foreach (var transformation in transferObject.Transformations) {
+                var destination = fields.FirstOrDefault(f => f.Name == transformation.Key);
+                var newValue = element.FindByName(transformation.Value);
+                if (destination == null || newValue == null)
+                    continue;
+
+                destination.SetValue(element, newValue);
+            }
         } catch (Exception e) {
             Logger.LogError(e);
         }
     }
-
-#pragma warning disable CS0618 // Used by hot reload
-    private void TraverseVisualTree(Element node, string xClass, string xamlContent) {
-        foreach (Element child in node.LogicalChildren)
-            TraverseVisualTree(child, xClass, xamlContent);
-
-        if (node.GetType().FullName == xClass) {
-            ReloadElement(node, xamlContent);
-            return;
-        }
-
-        return;
-    }
-#pragma warning restore CS0618
 }
