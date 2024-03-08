@@ -21,7 +21,7 @@ public class HotReloadClientTests: TestFixture {
 </ContentPage>
 ");
         var actualClassDefinition = "DotNet.Meteor.MainPage";
-        var classDefinition = MarkupHelper.GetClassDefinition(xamlContent);
+        var classDefinition = MarkupExtensions.GetClassDefinition(xamlContent);
         Assert.Equal(actualClassDefinition, classDefinition);
     }
 
@@ -39,7 +39,7 @@ public class HotReloadClientTests: TestFixture {
     </StackLayout>
 </ContentPage>
 ");
-        MarkupHelper.ModifyReferenceNames(xamlContent);
+        MarkupExtensions.ModifyReferenceNames(xamlContent);
         var names = FindAllXNames(xamlContent);
         Assert.Single(names);
         Assert.DoesNotContain("element1", names);
@@ -60,7 +60,7 @@ public class HotReloadClientTests: TestFixture {
     </StackLayout>
 </ContentPage>
 ");
-        MarkupHelper.ModifyReferenceNames(xamlContent);
+        MarkupExtensions.ModifyReferenceNames(xamlContent);
         var names = FindAllXNames(xamlContent);
         Assert.Equal(3, names.Count);
         Assert.DoesNotContain("element1", names);
@@ -85,7 +85,7 @@ public class HotReloadClientTests: TestFixture {
     </StackLayout>
 </ContentPage>
 ");
-        MarkupHelper.ModifyReferenceNames(xamlContent);
+        MarkupExtensions.ModifyReferenceNames(xamlContent);
         var names = FindAllXNames(xamlContent);
         Assert.Single(names);
         Assert.DoesNotContain("element1", names);
@@ -108,7 +108,7 @@ public class HotReloadClientTests: TestFixture {
     </StackLayout>
 </ContentPage>
 ");
-        MarkupHelper.ModifyReferenceNames(xamlContent);
+        MarkupExtensions.ModifyReferenceNames(xamlContent);
         var names = FindAllXNames(xamlContent);
         Assert.Equal(2, names.Count);
         Assert.DoesNotContain("element1", names);

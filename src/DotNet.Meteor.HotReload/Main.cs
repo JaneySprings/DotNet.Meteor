@@ -7,6 +7,10 @@ namespace DotNet.Meteor.HotReload;
 
 public class Program {
     private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+    internal static string GetVersion() {
+        var version = Assembly.GetExecutingAssembly().GetName().Version;
+        return version?.ToString() ?? string.Empty;
+    }
 
     private static void Main(string[] args) {
         if (args.Length == 0) {
@@ -20,9 +24,8 @@ public class Program {
     }
 
     public static void Help(string[] args) {
-        var version = Assembly.GetExecutingAssembly().GetName().Version;
         var name = Assembly.GetExecutingAssembly().GetName().Name;
-        Console.WriteLine($"{name} version {version?.Major}.{version?.Minor}.{version?.Build} for Visual Studio Code");
+        Console.WriteLine($"{name} version {GetVersion()} for Visual Studio Code");
         Console.WriteLine("Copyright (C) Nikita Romanov. All rights reserved.");
     }
 }
