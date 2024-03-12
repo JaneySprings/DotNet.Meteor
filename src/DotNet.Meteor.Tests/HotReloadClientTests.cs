@@ -85,13 +85,13 @@ public class HotReloadClientTests: TestFixture {
     public void ElementNameChangingWithReferenceTest() {
         var xamlContent = new StringBuilder(@"
 <ContentPage
-    x:Class=""DotNet.Meteor.MainPage""
+    lg:Class=""DotNet.Meteor.MainPage""
     xmlns=""http://microsoft.com/schemas/2021/maui""
-    xmlns:x=""http://schemas.microsoft.com/winfx/2009/xaml"">
+    xmlns:lg=""http://schemas.microsoft.com/winfx/2009/xaml"">
 
-    <StackLayout Command=""{Binding Source={x:Reference element1}, Path=Commands.element1.Some}"">
+    <StackLayout Command=""{Binding Source={lg:Reference element1}, Path=Commands.element1.Some}"">
         <Label Text=""Welcome to .NET MAUI!"" />
-        <Label x:Name=""element1"" Style=""{StaticResource element1}"" />
+        <Label lg:Name=""element1"" Style=""{StaticResource element1}"" />
     </StackLayout>
 </ContentPage>
 ");
@@ -100,7 +100,7 @@ public class HotReloadClientTests: TestFixture {
         Assert.Single(names);
         Assert.DoesNotContain("element1", names);
         Assert.Contains("element1_", names.First());
-        Assert.Contains("x:Reference element1_", xamlContent.ToString());
+        Assert.Contains("lg:Reference element1_", xamlContent.ToString());
         Assert.Equal(2, xamlContent.ToString().Split(names.First()).Length - 1);
     }
 
@@ -129,5 +129,64 @@ public class HotReloadClientTests: TestFixture {
         Assert.Contains("x:Reference element2_", xamlContent.ToString());
         Assert.Equal(2, xamlContent.ToString().Split(names[0]).Length - 1);
         Assert.Equal(2, xamlContent.ToString().Split(names[1]).Length - 1);
+    }
+
+    [Fact]
+    public void ElementMultipleNamesWithSamePartTest() {
+        var xamlContent = new StringBuilder(@"
+<ContentPage
+    x:Class=""DotNet.Meteor.MainPage""
+    xmlns=""http://microsoft.com/schemas/2021/maui""
+    xmlns:x=""http://schemas.microsoft.com/winfx/2009/xaml"">
+
+    <StackLayout>
+        <Label x:Name=""element"" Text=""Welcome to .NET MAUI!"" />
+        <Label x:Name=""elementTwo"" Text=""This is a test"" />
+    </StackLayout>
+</ContentPage>
+");
+        var transformations = MarkupExtensions.TransformReferenceNames(xamlContent);
+        var names = FindAllXNames(xamlContent);
+        Assert.Equal(2, names.Count);
+        Assert.Equal(2, transformations.Count);
+        Assert.DoesNotContain("element", names);
+        Assert.DoesNotContain("elementTwo", names);
+        Assert.Contains("element", transformations.Keys);
+        Assert.Contains("elementTwo", transformations.Keys);
+        Assert.Contains("element_", transformations["element"]);
+        Assert.Contains("elementTwo_", transformations["elementTwo"]);
+        Assert.NotNull(names.FirstOrDefault(it => it.StartsWith("element")));
+        Assert.NotNull(names.FirstOrDefault(it => it.StartsWith("elementTwo")));
+    }
+
+    [Fact]
+    public void ElementNameWithSamePartWithReferenceTest() {
+        var xamlContent = new StringBuilder(@"
+<ContentPage
+    x:Class=""DotNet.Meteor.MainPage""
+    xmlns=""http://microsoft.com/schemas/2021/maui""
+    xmlns:x=""http://schemas.microsoft.com/winfx/2009/xaml"">
+
+    <StackLayout Command=""{Binding Source={x:Reference element}"">
+        <Label x:Name=""element"" />
+    </StackLayout>
+    <StackLayout Command=""{Binding Source={x:Reference elementTwo}"">
+        <Label x:Name=""elementTwo"" />
+    </StackLayout>
+</ContentPage>
+");
+        var transformations = MarkupExtensions.TransformReferenceNames(xamlContent);
+        var names = FindAllXNames(xamlContent);
+        Assert.Equal(2, names.Count);
+        Assert.DoesNotContain("element", names);
+        Assert.DoesNotContain("elementTwo", names);
+        Assert.Contains("element", transformations.Keys);
+        Assert.Contains("elementTwo", transformations.Keys);
+        Assert.Contains("element_", transformations["element"]);
+        Assert.Contains("elementTwo_", transformations["elementTwo"]);
+        Assert.NotNull(names.FirstOrDefault(it => it.StartsWith("element")));
+        Assert.NotNull(names.FirstOrDefault(it => it.StartsWith("elementTwo")));
+        foreach (var transformation in transformations) 
+            Assert.Contains($"x:Reference {transformation.Value}", xamlContent.ToString());
     }
 }
