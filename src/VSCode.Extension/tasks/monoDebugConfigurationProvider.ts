@@ -1,6 +1,5 @@
 import { ConfigurationController } from '../configurationController';
 import { WorkspaceFolder, DebugConfiguration } from 'vscode';
-import { Target } from '../models/target';
 import * as res from '../resources/constants';
 import * as vscode from 'vscode';
 
@@ -15,7 +14,7 @@ export class MonoDebugConfigurationProvider implements vscode.DebugConfiguration
 			return undefined;
 
 		ConfigurationController.profiler = config.profilerMode;
-		if (!config.noDebug && (ConfigurationController.target === Target.Release || ConfigurationController.profiler)) {
+		if (!config.noDebug && ConfigurationController.profiler) {
 			vscode.window.showErrorMessage(res.messageDebugNotSupported, { modal: true });
 			return undefined;
 		}
