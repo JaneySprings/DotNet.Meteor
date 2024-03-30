@@ -82,11 +82,9 @@ public class DebugLaunchAgent : BaseLaunchAgent {
         DeviceBridge.Launch(Configuration.Device.Serial, applicationId, logger);
         DeviceBridge.Flush(Configuration.Device.Serial);
 
-        var logcatFirstChannelProcess = DeviceBridge.Logcat(Configuration.Device.Serial, "system,crash", "*:I", logger);
-        var logcatSecondChannelProcess = DeviceBridge.Logcat(Configuration.Device.Serial, "main", "DOTNET:I", logger);
+        var logcatProcess = DeviceBridge.Logcat(Configuration.Device.Serial, logger);
 
-        Disposables.Add(() => logcatFirstChannelProcess.Terminate());
-        Disposables.Add(() => logcatSecondChannelProcess.Terminate());
+        Disposables.Add(() => logcatProcess.Terminate());
         Disposables.Add(() => DeviceBridge.RemoveForward(Configuration.Device.Serial));
     }
 }

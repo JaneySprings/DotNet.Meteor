@@ -61,13 +61,10 @@ public class LaunchConfiguration {
             return new TraceLaunchAgent(this);
         if (ProfilerMode.EqualsInsensitive("gcdump"))
             return new GCDumpLaunchAgent(this);
-
-        if (SkipDebug || Target.EqualsInsensitive("release"))
-            return new NoDebugLaunchAgent(this);
-        if (Target.EqualsInsensitive("debug"))
+        if (!SkipDebug)
             return new DebugLaunchAgent(this);
- 
-        throw new NotSupportedException("Could not create launch agent for current configuration");
+
+        return new NoDebugLaunchAgent(this);
     }
 
     private DebuggerSessionOptions GetDebuggerSessionOptions(JToken debuggerJsonToken) {
