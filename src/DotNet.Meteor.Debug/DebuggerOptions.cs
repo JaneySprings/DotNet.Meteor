@@ -44,6 +44,9 @@ public class DebuggerOptions {
     [JsonPropertyName("ellipsized_length")]
     public int EllipsizedLength { get; set; } = ServerExtensions.DefaultDebuggerOptions.EvaluationOptions.EllipsizedLength;
 
+    [JsonPropertyName("project_assemblies_only")]
+    public bool ProjectAssembliesOnly { get; set; } = ServerExtensions.DefaultDebuggerOptions.ProjectAssembliesOnly;
+
     internal static IntegerDisplayFormat GetIntegerDisplayFormat(string value) {
         if (value == Mono.Debugging.Client.IntegerDisplayFormat.Decimal.ToString())
             return Mono.Debugging.Client.IntegerDisplayFormat.Decimal;

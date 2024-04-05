@@ -267,6 +267,11 @@
           "minimum": 0,
           "description": "%configuration.description.debuggerOptions.ellipsizedLength%"
         },
+        "dotnetMeteor.debuggerOptions.projectAssembliesOnly": {
+          "type": "boolean",
+          "default": true,
+          "description": "%configuration.description.debuggerOptions.projectAssembliesOnly%"
+        },
         "dotnetMeteor.debuggerOptions.integerDisplayFormat": {
           "type": "string",
           "default": "Decimal",

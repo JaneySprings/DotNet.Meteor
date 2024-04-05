@@ -86,6 +86,7 @@ public class LaunchConfiguration {
         debuggerOptions.EvaluationOptions.EllipsizeStrings = options.EllipsizeStrings;
         debuggerOptions.EvaluationOptions.EllipsizedLength = options.EllipsizedLength;
         debuggerOptions.EvaluationOptions.IntegerDisplayFormat = DebuggerOptions.GetIntegerDisplayFormat(options.IntegerDisplayFormat);
+        debuggerOptions.ProjectAssembliesOnly = options.ProjectAssembliesOnly;
 
         return debuggerOptions;
     }

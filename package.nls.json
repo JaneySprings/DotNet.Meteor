@@ -40,5 +40,6 @@
 	"configuration.description.debuggerOptions.currentExceptionTag": "Specifies the display name of the current exception in the debugging window.",
 	"configuration.description.debuggerOptions.ellipsizeStrings": "Truncates strings in the debugging window.",
 	"configuration.description.debuggerOptions.ellipsizedLength": "The maximum length of a truncated string.",
+	"configuration.description.debuggerOptions.projectAssembliesOnly": "Specifies whether the debugger should consider only project assemblies as user code.",
 	"configuration.description.debuggerOptions.integerDisplayFormat": "Specifies the format of displayed integers in the debugging window."
 }

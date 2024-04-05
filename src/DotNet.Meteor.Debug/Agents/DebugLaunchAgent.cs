@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Net;
 using DotNet.Meteor.Debug.Extensions;
 using DotNet.Meteor.Debug.Sdb;
@@ -20,8 +21,12 @@ public class DebugLaunchAgent : BaseLaunchAgent {
         else if (Configuration.Device.IsIPhone || Configuration.Device.IsMacCatalyst)
             arguments = new ServerConnectionProvider(IPAddress.Loopback, Configuration.DebugPort, Configuration.Project.Name);
 
+        var debuggerStartInfo = new SoftDebuggerStartInfo(arguments);
+        if (Configuration.DebuggerSessionOptions.ProjectAssembliesOnly)
+            debuggerStartInfo.SetUserAssemblyNames(Path.GetDirectoryName(Configuration.OutputAssembly));
+
         ArgumentNullException.ThrowIfNull(arguments, "Debugger connection arguments not implemented.");
-        session.Run(new SoftDebuggerStartInfo(arguments), Configuration.DebuggerSessionOptions);
+        session.Run(debuggerStartInfo, Configuration.DebuggerSessionOptions);
     }
     public override void Launch(IProcessLogger logger) {
         if (Configuration.Device.IsAndroid)
