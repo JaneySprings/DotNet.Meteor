@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using DotNet.Meteor.Processes;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 using Mono.Debugging.Soft;
-using NLog;
+using DebuggerLoggingService = Mono.Debugging.Client.DebuggerLoggingService;
 
 namespace DotNet.Meteor.Debug;
 
 public abstract class BaseLaunchAgent {
-    private readonly Logger sessionLogger = LogManager.GetCurrentClassLogger();
-    
     public const string CommandPrefix = "/";
     public const string LanguageSeparator = "!";
     public List<Action> Disposables { get; init; }
@@ -28,7 +26,7 @@ public abstract class BaseLaunchAgent {
     public virtual void Dispose() {
         foreach(var disposable in Disposables) {
             disposable.Invoke();
-            sessionLogger.Debug($"Disposing {disposable.Method.Name}");
+            DebuggerLoggingService.CustomLogger.LogMessage($"Disposing {disposable.Method.Name}");
         }
 
         Disposables.Clear();

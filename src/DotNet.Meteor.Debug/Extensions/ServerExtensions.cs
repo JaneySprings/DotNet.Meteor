@@ -30,6 +30,7 @@ public static class ServerExtensions {
             IntegerDisplayFormat = IntegerDisplayFormat.Decimal,
             StackFrameFormat = new StackFrameFormat()
         },
+        ProjectAssembliesOnly = true
     };
 
     public static int FindFreePort() {

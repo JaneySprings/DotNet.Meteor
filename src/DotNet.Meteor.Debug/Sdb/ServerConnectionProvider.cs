@@ -4,6 +4,7 @@ using Mono.Debugging.Client;
 using Mono.Debugging.Soft;
 using System.Net;
 using System.Net.Sockets;
+using DotNet.Meteor.Debug.Extensions;
 
 namespace DotNet.Meteor.Debug.Sdb;
 
@@ -28,7 +29,7 @@ public class ServerConnectionProvider : SoftDebuggerStartArgs, ISoftDebuggerConn
         var socket = this.listener.EndAcceptSocket(result);
         var stream = new NetworkStream(socket);
 
-        Protocol.WriteCommand(stream, "start debugger: sdb");
+        MonoExtensions.WriteSdbCommand(stream, "start debugger: sdb");
 
         var transportConnection = new ServerConnection(this.listener, stream);
         vm = VirtualMachineManager.Connect(transportConnection, null, null);
