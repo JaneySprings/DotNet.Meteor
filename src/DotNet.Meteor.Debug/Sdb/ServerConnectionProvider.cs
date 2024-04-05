@@ -29,7 +29,7 @@ public class ServerConnectionProvider : SoftDebuggerStartArgs, ISoftDebuggerConn
         var socket = this.listener.EndAcceptSocket(result);
         var stream = new NetworkStream(socket);
 
-        MonoExtensions.WriteSdbCommand(stream, "start debugger: sdb");
+        this.WriteSdbCommand(stream, "start debugger: sdb");
 
         var transportConnection = new ServerConnection(this.listener, stream);
         vm = VirtualMachineManager.Connect(transportConnection, null, null);

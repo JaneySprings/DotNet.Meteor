@@ -88,7 +88,7 @@ public static class MonoExtensions {
         startInfo.AssemblyPathMap = pathMap;
     }
 
-    public static void WriteSdbCommand(Stream stream, string command) {
+    public static void WriteSdbCommand(this ISoftDebuggerConnectionProvider connectionProvider, Stream stream, string command) {
         byte[] commandBytes = new byte[command.Length + 1];
         commandBytes[0] = (byte)command.Length;
         for (int i = 0; i < command.Length; i++)
