@@ -27,7 +27,6 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
         if (ConfigurationController.isAndroid()) {
             builder.appendFix(`-p:AndroidSdkDirectory="${ConfigurationController.androidSdkDirectory}"`);
             builder.conditional('-p:EmbedAssembliesIntoApk=true', () => defaultTarget);
-            builder.conditional('-p:CopyLocalLockFileAssemblies=true', () => !ConfigurationController.profiler && defaultTarget);
             builder.conditional('-p:AndroidEnableProfiler=true', () => ConfigurationController.profiler && defaultTarget);
         }
         if (ConfigurationController.isAppleMobile()) {

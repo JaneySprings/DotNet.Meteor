@@ -4,7 +4,7 @@ using Mono.Debugging.Client;
 
 namespace DotNet.Meteor.Debug;
 
-public class DebuggerOptions {
+public class DebugOptions {
     [JsonPropertyName("evaluation_timeout")] 
     public int EvaluationTimeout { get; set; } = ServerExtensions.DefaultDebuggerOptions.EvaluationOptions.EvaluationTimeout;
 
@@ -57,5 +57,5 @@ public class DebuggerOptions {
     }
 }
 
-[JsonSerializable(typeof(DebuggerOptions))]
+[JsonSerializable(typeof(DebugOptions))]
 internal partial class DebuggerOptionsContext : JsonSerializerContext {}

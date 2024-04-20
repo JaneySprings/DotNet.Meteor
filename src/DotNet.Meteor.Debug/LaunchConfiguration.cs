@@ -25,24 +25,24 @@ public class LaunchConfiguration {
     public string TempDirectoryPath => Path.Combine(Path.GetDirectoryName(Project.Path), ".meteor");
 
     public LaunchConfiguration(Dictionary<string, JToken> configurationProperties) {
-        Project = configurationProperties["selectedProject"].ToObject<Project>(TrimmableContext.Default.Project);
-        Device = configurationProperties["selectedDevice"].ToObject<DeviceData>(TrimmableContext.Default.DeviceData);
-        Target = configurationProperties["selectedTarget"].ToObject<string>(TrimmableContext.Default.String);
-        UninstallApp = configurationProperties["uninstallApp"].ToObject<bool>(TrimmableContext.Default.Boolean);
-        SkipDebug = configurationProperties["skipDebug"].ToObject<bool>(TrimmableContext.Default.Boolean);
+        Project = configurationProperties["selectedProject"].ToObject(TrimmableContext.Default.Project);
+        Device = configurationProperties["selectedDevice"].ToObject(TrimmableContext.Default.DeviceData);
+        Target = configurationProperties["selectedTarget"].ToObject(TrimmableContext.Default.String);
+        UninstallApp = configurationProperties["uninstallApp"].ToObject(TrimmableContext.Default.Boolean);
+        SkipDebug = configurationProperties["skipDebug"].ToObject(TrimmableContext.Default.Boolean);
 
-        DebugPort = configurationProperties["debuggingPort"].ToObject<int>(TrimmableContext.Default.Int32);
-        ReloadHostPort = configurationProperties["reloadHost"].ToObject<int>(TrimmableContext.Default.Int32);
-        ProfilerPort = configurationProperties["profilerPort"].ToObject<int>(TrimmableContext.Default.Int32);
+        DebugPort = configurationProperties["debuggingPort"].ToObject(TrimmableContext.Default.Int32);
+        ReloadHostPort = configurationProperties["reloadHost"].ToObject(TrimmableContext.Default.Int32);
+        ProfilerPort = configurationProperties["profilerPort"].ToObject(TrimmableContext.Default.Int32);
 
         DebuggerSessionOptions = GetDebuggerSessionOptions(configurationProperties["debuggerOptions"]);
         OutputAssembly = Project.FindOutputApplication(Target, Device, message => {
             ServerExtensions.ThrowException(message);
             return string.Empty;
         });
-        
+
         if (configurationProperties.TryGetValue("profilerMode", out var profilerModeToken))
-            ProfilerMode = profilerModeToken.ToObject<string>(TrimmableContext.Default.String);
+            ProfilerMode = profilerModeToken.ToObject(TrimmableContext.Default.String);
 
         DebugPort = DebugPort == 0 ? ServerExtensions.FindFreePort() : DebugPort;
         ReloadHostPort = ReloadHostPort == 0 ? ServerExtensions.FindFreePort() : ReloadHostPort;
@@ -56,6 +56,16 @@ public class LaunchConfiguration {
         var assemblyName = Path.GetFileNameWithoutExtension(OutputAssembly);
         return assemblyName.Replace("-Signed", "");
     }
+    public string GetApplicationAssembliesDirectory() {
+        if (Device.IsMacCatalyst)
+            return Path.Combine(OutputAssembly, "Contents", "MonoBundle");
+        if (Device.IsIPhone)
+            return OutputAssembly;
+        if (Device.IsAndroid)
+            return ServerExtensions.ExtractAndroidAssemblies(OutputAssembly);
+
+        throw new NotSupportedException();
+    }
     public BaseLaunchAgent GetLauchAgent() {
         if (ProfilerMode.EqualsInsensitive("trace"))
             return new TraceLaunchAgent(this);
@@ -67,9 +77,9 @@ public class LaunchConfiguration {
         return new NoDebugLaunchAgent(this);
     }
 
-    private DebuggerSessionOptions GetDebuggerSessionOptions(JToken debuggerJsonToken) {
+    private static DebuggerSessionOptions GetDebuggerSessionOptions(JToken debuggerJsonToken) {
         var debuggerOptions = ServerExtensions.DefaultDebuggerOptions;
-        var options = debuggerJsonToken.ToObject<DebuggerOptions>(DebuggerOptionsContext.Default.DebuggerOptions);
+        var options = debuggerJsonToken.ToObject(DebuggerOptionsContext.Default.DebugOptions);
         if (options == null)
             return debuggerOptions;
 
@@ -85,7 +95,7 @@ public class LaunchConfiguration {
         debuggerOptions.EvaluationOptions.CurrentExceptionTag = options.CurrentExceptionTag;
         debuggerOptions.EvaluationOptions.EllipsizeStrings = options.EllipsizeStrings;
         debuggerOptions.EvaluationOptions.EllipsizedLength = options.EllipsizedLength;
-        debuggerOptions.EvaluationOptions.IntegerDisplayFormat = DebuggerOptions.GetIntegerDisplayFormat(options.IntegerDisplayFormat);
+        debuggerOptions.EvaluationOptions.IntegerDisplayFormat = DebugOptions.GetIntegerDisplayFormat(options.IntegerDisplayFormat);
         debuggerOptions.ProjectAssembliesOnly = options.ProjectAssembliesOnly;
 
         return debuggerOptions;
