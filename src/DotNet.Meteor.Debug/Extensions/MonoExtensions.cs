@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using Mono.Debugging.Client;
 using Mono.Debugging.Soft;
 
@@ -24,12 +23,12 @@ public static class MonoExtensions {
         return dv;
     }
     public static StackFrame GetFrameSafe(this Backtrace bt, int n) {
-		try {
+        try {
             return bt.GetFrame(n);
         } catch (Exception) {
             return null;
         }
-	}
+    }
     public static ThreadInfo FindThread(this SoftDebuggerSession session, long id) {
         var process = session.GetProcesses().FirstOrDefault();
         if (process == null)
@@ -61,10 +60,10 @@ public static class MonoExtensions {
         var files = assembliesPaths.Where(it => File.Exists(Path.ChangeExtension(it, ".pdb")));
         if (!files.Any())
             return;
-        
+
         var pathMap = new Dictionary<string, string>();
         var names = new List<AssemblyName>();
-        
+
         foreach (var file in files) {
             try {
                 using var asm = Mono.Cecil.AssemblyDefinition.ReadAssembly(file);

@@ -10,11 +10,14 @@ using System.IO;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using DotNet.Meteor.Shared;
 using Mono.Debugging.Soft;
+using System.IO.Compression;
+using System;
+using System.Linq;
 
 namespace DotNet.Meteor.Debug.Extensions;
 
 public static class ServerExtensions {
-    public static DebuggerSessionOptions DefaultDebuggerOptions = new DebuggerSessionOptions {
+    public static DebuggerSessionOptions DefaultDebuggerOptions { get; } = new DebuggerSessionOptions {
         EvaluationOptions = new EvaluationOptions {
             EvaluationTimeout = 5000,
             MemberEvaluationTimeout = 5000,
@@ -50,6 +53,30 @@ public static class ServerExtensions {
     }
     public static void ThrowException(string message) {
         throw new ProtocolException(message, 0, message, url: $"file://{LogConfig.DebugLogFile}");
+    }
+    public static string ExtractAndroidAssemblies(string assemblyPath) {
+        var targetDirectory = Path.GetDirectoryName(assemblyPath)!;
+        try {
+            using var archive = new ZipArchive(File.OpenRead(assemblyPath)); 
+            var assembliesEntry = archive.Entries.Where(entry => entry.FullName.StartsWith("assemblies", StringComparison.OrdinalIgnoreCase));
+            if (!assembliesEntry.Any())
+                return targetDirectory;
+
+            foreach (var entry in assembliesEntry) {
+                Console.WriteLine(entry.Name);
+                var targetPath = Path.Combine(targetDirectory, entry.Name);
+                if (File.Exists(targetPath))
+                    File.Delete(targetPath);
+     
+                using var fileStream = File.Create(targetPath);
+                using var stream = entry.Open();
+                stream.CopyTo(fileStream);
+            }
+            return targetDirectory;
+        } catch (Exception ex) {
+            DebuggerLoggingService.CustomLogger.LogError(ex.Message, ex);
+            return targetDirectory;
+        }
     }
 
     public static T ToObject<T>(this JToken jtoken, JsonTypeInfo<T> type) {

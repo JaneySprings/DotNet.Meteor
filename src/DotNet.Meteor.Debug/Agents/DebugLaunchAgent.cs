@@ -23,7 +23,7 @@ public class DebugLaunchAgent : BaseLaunchAgent {
 
         var debuggerStartInfo = new SoftDebuggerStartInfo(arguments);
         if (Configuration.DebuggerSessionOptions.ProjectAssembliesOnly)
-            debuggerStartInfo.SetUserAssemblyNames(Path.GetDirectoryName(Configuration.OutputAssembly));
+            debuggerStartInfo.SetUserAssemblyNames(Configuration.GetApplicationAssembliesDirectory());
 
         ArgumentNullException.ThrowIfNull(arguments, "Debugger connection arguments not implemented.");
         session.Run(debuggerStartInfo, Configuration.DebuggerSessionOptions);

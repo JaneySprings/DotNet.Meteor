@@ -9,6 +9,7 @@ using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 using MonoClient = Mono.Debugging.Client;
 using DebugProtocol = Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
+using DotNet.Meteor.Debug.Logging;
 
 namespace DotNet.Meteor.Debug;
 
@@ -21,7 +22,7 @@ public class DebugSession : Session {
     private readonly Handles<MonoClient.ObjectValue[]> variableHandles = new Handles<MonoClient.ObjectValue[]>();
     private readonly SoftDebuggerSession session = new SoftDebuggerSession();
 
-    public DebugSession(Stream input, Stream output): base(input, output) {
+    public DebugSession(Stream input, Stream output) : base(input, output) {
         MonoClient.DebuggerLoggingService.CustomLogger = new MonoLogger();
 
         session.LogWriter = OnSessionLog;
@@ -163,7 +164,7 @@ public class DebugSession : Session {
                 if (!string.IsNullOrEmpty(option.Condition))
                     exceptionFilter = option.Condition;
 
-                foreach(var exception in exceptionFilter.Split(','))
+                foreach (var exception in exceptionFilter.Split(','))
                     session.Breakpoints.AddCatchpoint(exception);
             }
         }
@@ -178,11 +179,11 @@ public class DebugSession : Session {
 
         // Remove all file breakpoints
         var fileBreakpoints = session.Breakpoints.GetBreakpointsAtFile(sourcePath);
-        foreach(var fileBreakpoint in fileBreakpoints)
+        foreach (var fileBreakpoint in fileBreakpoints)
             session.Breakpoints.Remove(fileBreakpoint);
 
         // Add all new breakpoints
-        foreach(var breakpointInfo in breakpointsInfos) {
+        foreach (var breakpointInfo in breakpointsInfos) {
             MonoClient.Breakpoint breakpoint = session.Breakpoints.Add(sourcePath, breakpointInfo.Line, breakpointInfo.Column ?? 1);
             // Conditional breakpoint
             if (!string.IsNullOrEmpty(breakpointInfo.Condition))
@@ -201,7 +202,7 @@ public class DebugSession : Session {
             breakpoints.Add(new DebugProtocol.Breakpoint() {
                 Id = breakpoint.GetHashCode(),
                 Verified = false, // updated by event
-                Line =  breakpoint.Line,
+                Line = breakpoint.Line,
                 Column = breakpoint.Column
             });
         }
@@ -375,7 +376,7 @@ public class DebugSession : Session {
                 int tid = (int)thread.Id;
                 threads[tid] = new DebugProtocol.Thread(tid, thread.Name.ToThreadName(tid));
             }
-         
+
             return new ThreadsResponse(threads.Values.ToList());
         });
     }

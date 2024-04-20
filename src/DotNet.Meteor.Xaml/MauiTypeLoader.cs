@@ -59,9 +59,6 @@ public class MauiTypeLoader {
     }
 
     private void FindAssembliesDirectory(string basePath, List<string> assembliesDirectories) {
-        if (basePath.Contains("-android", StringComparison.OrdinalIgnoreCase))
-            ApkTool.ExtractMissingAndroidAssemblies(basePath, this.logger);
-
         var assemblies = Directory.GetFiles(basePath, "*.dll", SearchOption.TopDirectoryOnly);
 
         if (assemblies.Any() && assemblies.Any(x => x.Contains(MAUI_CONTROLS_ASSEMBLY, StringComparison.OrdinalIgnoreCase)))
