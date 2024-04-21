@@ -39,7 +39,7 @@ public class NoDebugLaunchAgent : BaseLaunchAgent {
         var result = processRunner.WaitForExit();
 
         if (!result.Success)
-            ServerExtensions.ThrowException(string.Join(Environment.NewLine, result.StandardError));
+            throw ServerExtensions.GetProtocolException(string.Join(Environment.NewLine, result.StandardError));
     }
     private void LaunchWindows(IProcessLogger logger) {
         var program = new FileInfo(Configuration.OutputAssembly);

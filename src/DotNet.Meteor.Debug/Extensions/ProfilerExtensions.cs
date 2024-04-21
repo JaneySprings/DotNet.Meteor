@@ -5,11 +5,11 @@ using DotNet.Meteor.Processes;
 
 namespace DotNet.Meteor.Debug.Extensions;
 
-public class ProfilingTask {
+public class ProfilerTask {
     private readonly CancellationTokenSource cancellationTokenSource;
     private readonly Task profilingTask;
 
-    public ProfilingTask(Task profilingTask, CancellationTokenSource cancellationTokenSource) {
+    public ProfilerTask(Task profilingTask, CancellationTokenSource cancellationTokenSource) {
         this.cancellationTokenSource = cancellationTokenSource;
         this.profilingTask = profilingTask;
     }

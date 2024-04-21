@@ -69,7 +69,7 @@ public class DebugLaunchAgent : BaseLaunchAgent {
         var result = processRunner.WaitForExit();
 
         if (!result.Success)
-            ServerExtensions.ThrowException(string.Join(Environment.NewLine, result.StandardError));
+            throw ServerExtensions.GetProtocolException(string.Join(Environment.NewLine, result.StandardError));
     }
     private void LaunchAndroid(IProcessLogger logger) {
         var applicationId = Configuration.GetApplicationName();

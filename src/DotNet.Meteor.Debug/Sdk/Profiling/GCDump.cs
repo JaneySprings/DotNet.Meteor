@@ -8,14 +8,14 @@ namespace DotNet.Meteor.Debug.Sdk.Profiling;
 
 public static class GCDump {
 
-    public static ProfilingTask Collect(int pid, string outputFile, IProcessLogger logger) {
+    public static ProfilerTask Collect(int pid, string outputFile, IProcessLogger logger) {
         return CollectCore(pid, string.Empty, outputFile, logger);
     }
-    public static ProfilingTask Collect(string diagnosticPort, string outputFile, IProcessLogger logger) {
+    public static ProfilerTask Collect(string diagnosticPort, string outputFile, IProcessLogger logger) {
         return CollectCore(0, diagnosticPort, outputFile, logger);
     }
 
-    private static ProfilingTask CollectCore(int pid, string diagnosticPort, string outputFile, IProcessLogger logger) {
+    private static ProfilerTask CollectCore(int pid, string diagnosticPort, string outputFile, IProcessLogger logger) {
         var cancellationTokenSource = new CancellationTokenSource();
         var token = cancellationTokenSource.Token;
 
@@ -25,6 +25,6 @@ public static class GCDump {
             GCDumpCollectHandler.ProcessLogger.ErrorWriteLine = logger.OnErrorDataReceived;
 
         var task = Task.Run(async() => await GCDumpCollectHandler.Collect(token, pid, outputFile, diagnosticPort));
-        return new ProfilingTask(task, cancellationTokenSource);
+        return new ProfilerTask(task, cancellationTokenSource);
     }
 }

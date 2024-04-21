@@ -5,17 +5,16 @@ using System.Threading;
 using System.Linq;
 using Mono.Debugging.Soft;
 using DotNet.Meteor.Debug.Extensions;
+using DotNet.Meteor.Debug.Logging;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 using MonoClient = Mono.Debugging.Client;
 using DebugProtocol = Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
-using DotNet.Meteor.Debug.Logging;
 
 namespace DotNet.Meteor.Debug;
 
 public class DebugSession : Session {
     private ExternalTypeResolver typeResolver;
-    private SymbolServer symbolServer;
     private BaseLaunchAgent launchAgent;
 
     private readonly Handles<MonoClient.StackFrame> frameHandles = new Handles<MonoClient.StackFrame>();
@@ -42,10 +41,9 @@ public class DebugSession : Session {
         session.Breakpoints.BreakpointStatusChanged += BreakpointStatusChanged;
     }
 
-    protected override MonoClient.ICustomLogger GetLogger() => MonoClient.DebuggerLoggingService.CustomLogger;
     protected override void OnUnhandledException(Exception ex) => launchAgent?.Dispose();
 
-#region request: Initialize
+    #region Initialize
     protected override InitializeResponse HandleInitializeRequest(InitializeArguments arguments) {
         return new InitializeResponse() {
             SupportsTerminateRequest = true,
@@ -64,16 +62,15 @@ public class DebugSession : Session {
             }
         };
     }
-#endregion request: Initialize
-#region request: Launch
+    #endregion Initialize
+    #region Launch
     protected override LaunchResponse HandleLaunchRequest(LaunchArguments arguments) {
-        return DoSafe<LaunchResponse>(() => {
+        return ServerExtensions.DoSafe(() => {
             var configuration = new LaunchConfiguration(arguments.ConfigurationProperties);
             launchAgent = configuration.GetLauchAgent();
 
-            symbolServer = new SymbolServer(configuration.TempDirectoryPath);
+            SymbolServerExtensions.SetTempDirectory(configuration.TempDirectoryPath);
             typeResolver = new ExternalTypeResolver(configuration.TempDirectoryPath, configuration.DebuggerSessionOptions);
-            launchAgent.Disposables.Add(() => symbolServer.Dispose());
             launchAgent.Disposables.Add(() => typeResolver.Dispose());
             session.TypeResolverHandler = typeResolver.Handle;
 
@@ -82,8 +79,8 @@ public class DebugSession : Session {
             return new LaunchResponse();
         });
     }
-#endregion request: Launch
-#region request: Terminate
+    #endregion Launch
+    #region Terminate
     protected override TerminateResponse HandleTerminateRequest(TerminateArguments arguments) {
         if (!session.HasExited)
             session.Exit();
@@ -94,64 +91,64 @@ public class DebugSession : Session {
 
         return new TerminateResponse();
     }
-#endregion request: Terminate
-#region request: Disconnect
+    #endregion Terminate
+    #region Disconnect
     protected override DisconnectResponse HandleDisconnectRequest(DisconnectArguments arguments) {
         session.Dispose();
         return new DisconnectResponse();
     }
-#endregion request: Disconnect
-#region request: Continue
+    #endregion Disconnect
+    #region Continue
     protected override ContinueResponse HandleContinueRequest(ContinueArguments arguments) {
-        return DoSafe<ContinueResponse>(() => {
+        return ServerExtensions.DoSafe(() => {
             if (!session.IsRunning && !session.HasExited)
                 session.Continue();
 
             return new ContinueResponse();
         });
     }
-#endregion request: Continue
-#region request: Next
+    #endregion Continue
+    #region Next
     protected override NextResponse HandleNextRequest(NextArguments arguments) {
-        return DoSafe<NextResponse>(() => {
+        return ServerExtensions.DoSafe(() => {
             if (!session.IsRunning && !session.HasExited)
                 session.NextLine();
 
             return new NextResponse();
         });
     }
-#endregion request: Next
-#region request: StepIn
+    #endregion Next
+    #region StepIn
     protected override StepInResponse HandleStepInRequest(StepInArguments arguments) {
-        return DoSafe<StepInResponse>(() => {
+        return ServerExtensions.DoSafe(() => {
             if (!session.IsRunning && !session.HasExited)
                 session.StepLine();
 
             return new StepInResponse();
         });
     }
-#endregion request: StepIn
-#region request: StepOut
+    #endregion StepIn
+    #region StepOut
     protected override StepOutResponse HandleStepOutRequest(StepOutArguments arguments) {
-        return DoSafe<StepOutResponse>(() => {
+        return ServerExtensions.DoSafe(() => {
             if (!session.IsRunning && !session.HasExited)
                 session.Finish();
 
             return new StepOutResponse();
         });
     }
-#endregion request: StepOut
-#region request: Pause
+    #endregion StepOut
+    #region Pause
     protected override PauseResponse HandlePauseRequest(PauseArguments arguments) {
-        return DoSafe<PauseResponse>(() => {
+        return ServerExtensions.DoSafe(() => {
             if (session.IsRunning)
                 session.Stop();
 
             return new PauseResponse();
         });
     }
-#endregion request: Pause
-#region request: SetExceptionBreakpoints
+    #endregion Pause
+    #region SetExceptionBreakpoints
     protected override SetExceptionBreakpointsResponse HandleSetExceptionBreakpointsRequest(SetExceptionBreakpointsArguments arguments) {
         session.Breakpoints.ClearCatchpoints();
         if (arguments.FilterOptions == null || arguments.FilterOptions.Count == 0)
@@ -170,8 +167,8 @@ public class DebugSession : Session {
         }
         return new SetExceptionBreakpointsResponse();
     }
-#endregion request: SetExceptionBreakpoints
-#region request: SetBreakpoints
+    #endregion SetExceptionBreakpoints
+    #region SetBreakpoints
     protected override SetBreakpointsResponse HandleSetBreakpointsRequest(SetBreakpointsArguments arguments) {
         var breakpoints = new List<DebugProtocol.Breakpoint>();
         var breakpointsInfos = arguments.Breakpoints;
@@ -199,18 +196,13 @@ public class DebugSession : Session {
                 breakpoint.TraceExpression = $"[LogPoint]: {breakpointInfo.LogMessage}";
             }
 
-            breakpoints.Add(new DebugProtocol.Breakpoint() {
-                Id = breakpoint.GetHashCode(),
-                Verified = false, // updated by event
-                Line = breakpoint.Line,
-                Column = breakpoint.Column
-            });
+            breakpoints.Add(breakpoint.ToBreakpoint(session));
         }
 
         return new SetBreakpointsResponse(breakpoints);
     }
-#endregion request: SetBreakpoints
-#region request: SetFunctionBreakpoints
+    #endregion SetBreakpoints
+    #region SetFunctionBreakpoints
     protected override SetFunctionBreakpointsResponse HandleSetFunctionBreakpointsRequest(SetFunctionBreakpointsArguments arguments) {
         // clear existing function breakpoints
         var functionBreakpoints = session.Breakpoints.OfType<MonoClient.FunctionBreakpoint>();
@@ -239,10 +231,10 @@ public class DebugSession : Session {
         }
         return new SetFunctionBreakpointsResponse();
     }
-#endregion request: SetFunctionBreakpoints
-#region request: StackTrace
+    #endregion SetFunctionBreakpoints
+    #region StackTrace
     protected override StackTraceResponse HandleStackTraceRequest(StackTraceArguments arguments) {
-        return DoSafe<StackTraceResponse>(() => {
+        return ServerExtensions.DoSafe(() => {
             var thread = session.ActiveThread;
             if (thread.Id != arguments.ThreadId) {
                 thread = session.FindThread(arguments.ThreadId);
@@ -259,71 +251,62 @@ public class DebugSession : Session {
             int startFrame = arguments.StartFrame ?? 0;
             int levels = arguments.Levels ?? totalFrames;
             for (int i = startFrame; i < Math.Min(startFrame + levels, totalFrames); i++) {
-                DebugProtocol.Source source = null;
-                var hint = DebugProtocol.StackFrame.PresentationHintValue.Unknown;
                 var frame = bt.GetFrameSafe(i);
                 if (frame == null) {
                     stackFrames.Add(new DebugProtocol.StackFrame(0, "<unknown>", 0, 0));
                     continue;
                 }
 
-                var sourceLocation = frame.SourceLocation;
-                string sourceName = string.Empty;
-
-                if (!string.IsNullOrEmpty(sourceLocation.FileName)) {
-                    sourceName = Path.GetFileName(sourceLocation.FileName);
-                    if (File.Exists(sourceLocation.FileName)) {
-                        var path = sourceLocation.FileName;
-                        hint = DebugProtocol.StackFrame.PresentationHintValue.Normal;
-                        source = new DebugProtocol.Source() {
-                            PresentationHint = DebugProtocol.Source.PresentationHintValue.Normal,
-                            SourceReference = 0,
-                            Name = sourceName,
-                            Path = path
-                        };
-                    }
+                DebugProtocol.Source source = null;
+                if (!string.IsNullOrEmpty(frame.SourceLocation.FileName) && File.Exists(frame.SourceLocation.FileName)) {
+                    source = new DebugProtocol.Source() {
+                        Name = Path.GetFileName(frame.SourceLocation.FileName),
+                        PresentationHint = Source.PresentationHintValue.Normal,
+                        Path = frame.SourceLocation.FileName,
+                        SourceReference = 0
+                    };
                 }
-                if (sourceLocation.SourceLink != null && source == null) {
-                    sourceName = Path.GetFileName(sourceLocation.SourceLink.RelativeFilePath);
-                    string path = symbolServer.DownloadSourceFile(sourceLocation.SourceLink.Uri, sourceLocation.SourceLink.RelativeFilePath);
-                    if (!string.IsNullOrEmpty(path)) {
-                        hint = DebugProtocol.StackFrame.PresentationHintValue.Normal;
-                        source = new DebugProtocol.Source() {
-                            PresentationHint = DebugProtocol.Source.PresentationHintValue.Normal,
-                            SourceReference = 0,
-                            Name = sourceName,
-                            Path = path
-                        };
-                    }
+                if (source == null && frame.SourceLocation.SourceLink != null) {
+                    var path = SymbolServerExtensions.DownloadSourceFile(frame.SourceLocation.SourceLink);
+                    source = new DebugProtocol.Source() {
+                        Name = Path.GetFileName(path),
+                        PresentationHint = Source.PresentationHintValue.Normal,
+                        Path = path,
+                        SourceReference = 0,
+                    };
+                    frame.UpdateSourceFile(path);
                 }
                 if (source == null) {
-                    hint = DebugProtocol.StackFrame.PresentationHintValue.Subtle;
                     source = new DebugProtocol.Source() {
-                        PresentationHint = DebugProtocol.Source.PresentationHintValue.Deemphasize,
-                        SourceReference = 1000,
-                        Name = sourceName,
+                        PresentationHint = Source.PresentationHintValue.Deemphasize,
+                        Path = frame.SourceLocation.FileName,
+                        Name = string.IsNullOrEmpty(frame.SourceLocation.FileName)
+                            ? frame.SourceLocation.MethodName
+                            : Path.GetFileName(frame.SourceLocation.FileName)
                     };
                 }
 
                 stackFrames.Add(new DebugProtocol.StackFrame() {
                     Id = frameHandles.Create(frame),
                     Source = source,
-                    PresentationHint = hint,
                     Name = frame.SourceLocation.MethodName,
                     Line = frame.SourceLocation.Line,
                     Column = frame.SourceLocation.Column,
                     EndLine = frame.SourceLocation.EndLine,
-                    EndColumn = frame.SourceLocation.EndColumn
+                    EndColumn = frame.SourceLocation.EndColumn,
+                    PresentationHint = source.Path == null
+                        ? StackFrame.PresentationHintValue.Subtle
+                        : StackFrame.PresentationHintValue.Normal
                 });
             }
 
             return new StackTraceResponse(stackFrames);
         });
     }
-#endregion request: StackTrace
-#region request: Scopes
+    #endregion StackTrace
+    #region Scopes
     protected override ScopesResponse HandleScopesRequest(ScopesArguments arguments) {
-        return DoSafe<ScopesResponse>(() => {
+        return ServerExtensions.DoSafe(() => {
             int frameId = arguments.FrameId;
             var frame = frameHandles.Get(frameId, null);
             var scopes = new List<DebugProtocol.Scope>();
@@ -339,16 +322,16 @@ public class DebugSession : Session {
             return new ScopesResponse(scopes);
         });
     }
-#endregion request: Scopes
-#region request: Variables
+    #endregion Scopes
+    #region Variables
     protected override VariablesResponse HandleVariablesRequest(VariablesArguments arguments) {
-        return DoSafe<VariablesResponse>(() => {
+        return ServerExtensions.DoSafe(() => {
             var reference = arguments.VariablesReference;
             var variables = new List<DebugProtocol.Variable>();
             if (variableHandles.TryGet(reference, out MonoClient.ObjectValue[] children) && children?.Length > 0) {
                 if (children.Length < 20) {
                     // Wait for all values at once.
-                    WaitHandle.WaitAll(children.Select(x => x.WaitHandle).ToArray());
+                    WaitHandle.WaitAll(children.Select(x => x.WaitHandle).ToArray(), session.EvaluationOptions.EvaluationTimeout);
                     foreach (var v in children) {
                         variables.Add(CreateVariable(v));
                     }
@@ -363,27 +346,27 @@ public class DebugSession : Session {
             return new VariablesResponse(variables);
         });
     }
-#endregion request: Variables
-#region request: Threads
+    #endregion Variables
+    #region Threads
     protected override ThreadsResponse HandleThreadsRequest(ThreadsArguments arguments) {
-        return DoSafe<ThreadsResponse>(() => {
-            var threads = new Dictionary<int, DebugProtocol.Thread>();
+        return ServerExtensions.DoSafe(() => {
+            var threads = new List<DebugProtocol.Thread>();
             var process = session.GetProcesses().FirstOrDefault();
             if (process == null)
                 return new ThreadsResponse();
 
             foreach (var thread in process.GetThreads()) {
                 int tid = (int)thread.Id;
-                threads[tid] = new DebugProtocol.Thread(tid, thread.Name.ToThreadName(tid));
+                threads.Add(new DebugProtocol.Thread(tid, thread.Name.ToThreadName(tid)));
             }
 
-            return new ThreadsResponse(threads.Values.ToList());
+            return new ThreadsResponse(threads);
         });
     }
-#endregion request: Threads
-#region request: Evaluate
+    #endregion Threads
+    #region Evaluate
     protected override EvaluateResponse HandleEvaluateRequest(EvaluateArguments arguments) {
-        return DoSafe<EvaluateResponse>(() => {
+        return ServerExtensions.DoSafe(() => {
             if (arguments.Expression.StartsWith(BaseLaunchAgent.CommandPrefix)) {
                 launchAgent?.HandleCommand(arguments.Expression, this);
                 throw new ProtocolException($"command handled by {launchAgent}");
@@ -416,15 +399,15 @@ public class DebugSession : Session {
             return new EvaluateResponse(value.ToDisplayValue(), handle);
         });
     }
-#endregion request: Evaluate
-#region request: Source
+    #endregion Evaluate
+    #region Source
     protected override SourceResponse HandleSourceRequest(SourceArguments arguments) {
-        throw new ProtocolException("No source available");
+        throw ServerExtensions.GetProtocolException("No source available");
     }
-#endregion request: Source
-#region request: ExceptionInfo
+    #endregion Source
+    #region ExceptionInfo
     protected override ExceptionInfoResponse HandleExceptionInfoRequest(ExceptionInfoArguments arguments) {
-        return DoSafe<ExceptionInfoResponse>(() => {
+        return ServerExtensions.DoSafe(() => {
             var ex = session.FindException(arguments.ThreadId);
             if (ex == null)
                 throw new ProtocolException("No exception available");
@@ -434,10 +417,10 @@ public class DebugSession : Session {
             };
         });
     }
-#endregion request: ExceptionInfo
-#region request: Completions
+    #endregion ExceptionInfo
+    #region Completions
     protected override CompletionsResponse HandleCompletionsRequest(CompletionsArguments arguments) {
-        return DoSafe<CompletionsResponse>(() => {
+        return ServerExtensions.DoSafe(() => {
             if (arguments.Text.StartsWith(BaseLaunchAgent.CommandPrefix))
                 return new CompletionsResponse(launchAgent?.GetCompletionItems());
 
@@ -461,7 +444,7 @@ public class DebugSession : Session {
             return new CompletionsResponse(completionData.Items.Select(x => x.ToCompletionItem()).ToList());
         });
     }
-#endregion request: Completions
+    #endregion Completions
 
     private void TargetStopped(object sender, MonoClient.TargetEventArgs e) {
         ResetHandles();
@@ -502,24 +485,24 @@ public class DebugSession : Session {
         Protocol.SendEvent(new ThreadEvent(ThreadEvent.ReasonValue.Exited, tid));
     }
     private bool OnExceptionHandled(Exception ex) {
-        GetLogger().LogError($"[Handled] {ex.Message}", ex);
+        MonoClient.DebuggerLoggingService.CustomLogger.LogError($"[Handled] {ex.Message}", ex);
         return true;
     }
     private void BreakpointStatusChanged(object sender, MonoClient.BreakpointEventArgs e) {
         Protocol.SendEvent(new BreakpointEvent(BreakpointEvent.ReasonValue.Changed, e.Breakpoint.ToBreakpoint(session)));
     }
     private void OnSessionLog(bool isError, string message) {
-        if (isError) GetLogger().LogError($"[Error] {message.Trim()}", null);
-        else GetLogger().LogMessage($"[Info] {message.Trim()}");
+        if (isError) MonoClient.DebuggerLoggingService.CustomLogger.LogError($"[Error] {message.Trim()}", null);
+        else MonoClient.DebuggerLoggingService.CustomLogger.LogMessage($"[Info] {message.Trim()}");
 
-        SendConsoleEvent(OutputEvent.CategoryValue.Stdout, $"[Mono] {message.Trim()}");
+        OnOutputDataReceived($"[Mono] {message.Trim()}");
     }
     private void OnLog(bool isError, string message) {
         if (isError) OnErrorDataReceived(message);
         else OnOutputDataReceived(message);
     }
     private void OnDebugLog(int level, string category, string message) {
-        SendConsoleEvent(OutputEvent.CategoryValue.Console, message);
+        OnDebugDataReceived(message);
     }
 
     private void ResetHandles() {
