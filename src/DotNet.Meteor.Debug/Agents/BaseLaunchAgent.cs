@@ -20,11 +20,11 @@ public abstract class BaseLaunchAgent {
 
     public abstract void Connect(SoftDebuggerSession session);
     public abstract void Launch(IProcessLogger logger);
-    
+
     public virtual List<CompletionItem> GetCompletionItems() => new List<CompletionItem>();
-    public virtual void HandleCommand(string command, IProcessLogger logger) {}
+    public virtual void HandleCommand(string command, IProcessLogger logger) { }
     public virtual void Dispose() {
-        foreach(var disposable in Disposables) {
+        foreach (var disposable in Disposables) {
             disposable.Invoke();
             DebuggerLoggingService.CustomLogger.LogMessage($"Disposing {disposable.Method.Name}");
         }

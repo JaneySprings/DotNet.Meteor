@@ -19,7 +19,7 @@ namespace DotNet.Meteor.Debug.Extensions;
 public static class ServerExtensions {
     public static DebuggerSessionOptions DefaultDebuggerOptions { get; } = new DebuggerSessionOptions {
         EvaluationOptions = new EvaluationOptions {
-            EvaluationTimeout = 5000,
+            EvaluationTimeout = 1000,
             MemberEvaluationTimeout = 5000,
             UseExternalTypeResolver = true,
             AllowMethodEvaluation = true,
@@ -51,13 +51,13 @@ public static class ServerExtensions {
             File.Delete(path);
         return !File.Exists(path);
     }
-    public static void ThrowException(string message) {
-        throw new ProtocolException(message, 0, message, url: $"file://{LogConfig.DebugLogFile}");
+    public static ProtocolException GetProtocolException(string message) {
+        return new ProtocolException(message, 0, message, url: $"file://{LogConfig.DebugLogFile}");
     }
     public static string ExtractAndroidAssemblies(string assemblyPath) {
         var targetDirectory = Path.GetDirectoryName(assemblyPath)!;
         try {
-            using var archive = new ZipArchive(File.OpenRead(assemblyPath)); 
+            using var archive = new ZipArchive(File.OpenRead(assemblyPath));
             var assembliesEntry = archive.Entries.Where(entry => entry.FullName.StartsWith("assemblies", StringComparison.OrdinalIgnoreCase));
             if (!assembliesEntry.Any())
                 return targetDirectory;
@@ -67,7 +67,7 @@ public static class ServerExtensions {
                 var targetPath = Path.Combine(targetDirectory, entry.Name);
                 if (File.Exists(targetPath))
                     File.Delete(targetPath);
-     
+
                 using var fileStream = File.Create(targetPath);
                 using var stream = entry.Open();
                 stream.CopyTo(fileStream);
@@ -77,6 +77,21 @@ public static class ServerExtensions {
             DebuggerLoggingService.CustomLogger.LogError(ex.Message, ex);
             return targetDirectory;
         }
+    }
+
+    public static T DoSafe<T>(Func<T> handler) {
+        try {
+            return handler.Invoke();
+        } catch (Exception ex) {
+            LogException(ex);
+            return default;
+        }
+    }
+    private static void LogException(Exception ex) {
+        if (ex is ProtocolException)
+            throw ex;
+        DebuggerLoggingService.CustomLogger.LogError($"[Handled] {ex.Message}", ex);
+        throw GetProtocolException(ex.Message);
     }
 
     public static T ToObject<T>(this JToken jtoken, JsonTypeInfo<T> type) {
@@ -89,7 +104,6 @@ public static class ServerExtensions {
 
         return JsonSerializer.Deserialize(json, type);
     }
-
     public static DebugProtocol.CompletionItem ToCompletionItem(this CompletionItem item) {
         return new DebugProtocol.CompletionItem() {
             Type = item.Flags.ToCompletionItemType(),
@@ -113,7 +127,6 @@ public static class ServerExtensions {
 
         return DebugProtocol.CompletionItemType.Text;
     }
-
     public static DebugProtocol.Breakpoint ToBreakpoint(this Breakpoint breakpoint, SoftDebuggerSession session) {
         return new DebugProtocol.Breakpoint() {
             Id = breakpoint.GetHashCode(),

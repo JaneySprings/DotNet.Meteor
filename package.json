@@ -208,7 +208,7 @@
         },
         "dotnetMeteor.debuggerOptions.evaluationTimeout": {
           "type": "integer",
-          "default": 5000,
+          "default": 1000,
           "description": "%configuration.description.debuggerOptions.evaluationTimeout%"
         },
         "dotnetMeteor.debuggerOptions.memberEvaluationTimeout": {

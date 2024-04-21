@@ -36,10 +36,7 @@ public class LaunchConfiguration {
         ProfilerPort = configurationProperties["profilerPort"].ToObject(TrimmableContext.Default.Int32);
 
         DebuggerSessionOptions = GetDebuggerSessionOptions(configurationProperties["debuggerOptions"]);
-        OutputAssembly = Project.FindOutputApplication(Target, Device, message => {
-            ServerExtensions.ThrowException(message);
-            return string.Empty;
-        });
+        OutputAssembly = Project.FindOutputApplication(Target, Device, message => throw ServerExtensions.GetProtocolException(message));
 
         if (configurationProperties.TryGetValue("profilerMode", out var profilerModeToken))
             ProfilerMode = profilerModeToken.ToObject(TrimmableContext.Default.String);
