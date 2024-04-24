@@ -272,6 +272,16 @@
           "default": true,
           "description": "%configuration.description.debuggerOptions.projectAssembliesOnly%"
         },
+        "dotnetMeteor.debuggerOptions.stepOverPropertiesAndOperators": {
+          "type": "boolean",
+          "default": false,
+          "description": "%configuration.description.debuggerOptions.stepOverPropertiesAndOperators%"
+        },
+        "dotnetMeteor.debuggerOptions.searchMicrosoftSymbolServer": {
+          "type": "boolean",
+          "default": false,
+          "description": "%configuration.description.debuggerOptions.searchMicrosoftSymbolServer%"
+        },
         "dotnetMeteor.debuggerOptions.integerDisplayFormat": {
           "type": "string",
           "default": "Decimal",

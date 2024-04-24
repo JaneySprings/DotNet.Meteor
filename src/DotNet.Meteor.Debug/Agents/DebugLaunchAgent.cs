@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.Net;
 using DotNet.Meteor.Debug.Extensions;
 using DotNet.Meteor.Debug.Sdb;
@@ -11,22 +10,25 @@ using Mono.Debugging.Soft;
 namespace DotNet.Meteor.Debug;
 
 public class DebugLaunchAgent : BaseLaunchAgent {
-    public DebugLaunchAgent(LaunchConfiguration configuration) : base(configuration) {}
+    private readonly SoftDebuggerStartArgs startArguments;
+    private readonly SoftDebuggerStartInfo startInformation;
+
+    public DebugLaunchAgent(LaunchConfiguration configuration) : base(configuration) {
+        if (configuration.Device.IsAndroid || (configuration.Device.IsIPhone && !configuration.Device.IsEmulator))
+            startArguments = new ClientConnectionProvider(IPAddress.Loopback, configuration.DebugPort, configuration.Project.Name);
+        else if (configuration.Device.IsIPhone || configuration.Device.IsMacCatalyst)
+            startArguments = new ServerConnectionProvider(IPAddress.Loopback, configuration.DebugPort, configuration.Project.Name);
+
+        ArgumentNullException.ThrowIfNull(startArguments, "Debugger connection arguments not implemented.");
+
+        startInformation = new SoftDebuggerStartInfo(startArguments);
+        startInformation.SetAssemblySymbols(configuration.GetApplicationAssembliesDirectory(), configuration.DebuggerSessionOptions);
+        if (configuration.DebuggerSessionOptions.ProjectAssembliesOnly)
+            startInformation.SetUserAssemblyNames(configuration.GetApplicationAssembliesDirectory(), configuration.DebuggerSessionOptions);
+    }
 
     public override void Connect(SoftDebuggerSession session) {
-        SoftDebuggerStartArgs arguments = null;
-
-        if (Configuration.Device.IsAndroid || (Configuration.Device.IsIPhone && !Configuration.Device.IsEmulator))
-            arguments = new ClientConnectionProvider(IPAddress.Loopback, Configuration.DebugPort, Configuration.Project.Name);
-        else if (Configuration.Device.IsIPhone || Configuration.Device.IsMacCatalyst)
-            arguments = new ServerConnectionProvider(IPAddress.Loopback, Configuration.DebugPort, Configuration.Project.Name);
-
-        var debuggerStartInfo = new SoftDebuggerStartInfo(arguments);
-        if (Configuration.DebuggerSessionOptions.ProjectAssembliesOnly)
-            debuggerStartInfo.SetUserAssemblyNames(Configuration.GetApplicationAssembliesDirectory());
-
-        ArgumentNullException.ThrowIfNull(arguments, "Debugger connection arguments not implemented.");
-        session.Run(debuggerStartInfo, Configuration.DebuggerSessionOptions);
+        session.Run(startInformation, Configuration.DebuggerSessionOptions);
     }
     public override void Launch(IProcessLogger logger) {
         if (Configuration.Device.IsAndroid)
@@ -43,7 +45,7 @@ public class DebugLaunchAgent : BaseLaunchAgent {
         // TODO: Implement Apple launching for Windows
         // if (RuntimeSystem.IsWindows) {
         //     IDeviceTool.Installer(Configuration.Device.Serial, Configuration.OutputAssembly, this);
-            
+
         //     var debugProcess = IDeviceTool.Debug(Configuration.Device.Serial, Configuration.GetApplicationId(), Configuration.DebugPort, this);
         //     disposables.Add(() => debugProcess.Kill());
         //     return;
@@ -55,7 +57,7 @@ public class DebugLaunchAgent : BaseLaunchAgent {
         } else {
             var debugPortForwarding = MonoLaunch.TcpTunnel(Configuration.Device.Serial, Configuration.DebugPort, logger);
             MonoLaunch.InstallDev(Configuration.Device.Serial, Configuration.OutputAssembly, logger);
-            
+
             var debugProcess = MonoLaunch.DebugDev(Configuration.Device.Serial, Configuration.OutputAssembly, Configuration.DebugPort, logger);
             Disposables.Add(() => debugProcess.Terminate());
             Disposables.Add(() => debugPortForwarding.Terminate());

@@ -17,6 +17,7 @@ using System.Linq;
 namespace DotNet.Meteor.Debug.Extensions;
 
 public static class ServerExtensions {
+    private static bool isAndroidAssembliesExtracted;
     public static DebuggerSessionOptions DefaultDebuggerOptions { get; } = new DebuggerSessionOptions {
         EvaluationOptions = new EvaluationOptions {
             EvaluationTimeout = 1000,
@@ -56,6 +57,9 @@ public static class ServerExtensions {
     }
     public static string ExtractAndroidAssemblies(string assemblyPath) {
         var targetDirectory = Path.GetDirectoryName(assemblyPath)!;
+        if (isAndroidAssembliesExtracted)
+            return targetDirectory;
+
         try {
             using var archive = new ZipArchive(File.OpenRead(assemblyPath));
             var assembliesEntry = archive.Entries.Where(entry => entry.FullName.StartsWith("assemblies", StringComparison.OrdinalIgnoreCase));
@@ -72,6 +76,7 @@ public static class ServerExtensions {
                 using var stream = entry.Open();
                 stream.CopyTo(fileStream);
             }
+            isAndroidAssembliesExtracted = true;
             return targetDirectory;
         } catch (Exception ex) {
             DebuggerLoggingService.CustomLogger.LogError(ex.Message, ex);

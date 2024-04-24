@@ -94,6 +94,9 @@ public class LaunchConfiguration {
         debuggerOptions.EvaluationOptions.EllipsizedLength = options.EllipsizedLength;
         debuggerOptions.EvaluationOptions.IntegerDisplayFormat = DebugOptions.GetIntegerDisplayFormat(options.IntegerDisplayFormat);
         debuggerOptions.ProjectAssembliesOnly = options.ProjectAssembliesOnly;
+        debuggerOptions.StepOverPropertiesAndOperators = options.StepOverPropertiesAndOperators;
+        debuggerOptions.SearchMicrosoftSymbolServer = options.SearchMicrosoftSymbolServer;
+        debuggerOptions.SearchNuGetSymbolServer = options.SearchNuGetSymbolServer;
 
         return debuggerOptions;
     }

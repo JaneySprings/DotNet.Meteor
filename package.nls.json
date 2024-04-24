@@ -41,5 +41,8 @@
 	"configuration.description.debuggerOptions.ellipsizeStrings": "Truncates strings in the debugging window.",
 	"configuration.description.debuggerOptions.ellipsizedLength": "The maximum length of a truncated string.",
 	"configuration.description.debuggerOptions.projectAssembliesOnly": "Specifies whether the debugger should consider only project assemblies as user code.",
+	"configuration.description.debuggerOptions.stepOverPropertiesAndOperators": "Specifies whether the debugger should step over properties and operators.",
+	"configuration.description.debuggerOptions.searchMicrosoftSymbolServer": "Search for symbols on the Microsoft Symbol Server.",
+	"configuration.description.debuggerOptions.searchNuGetSymbolServer": "Search for symbols on the NuGet Symbol Server.",
 	"configuration.description.debuggerOptions.integerDisplayFormat": "Specifies the format of displayed integers in the debugging window."
 }
