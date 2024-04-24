@@ -26,7 +26,7 @@ stages:
       - job: Linux
         pool:
           vmImage: ubuntu-latest
-        timeoutInMinutes: 6
+        timeoutInMinutes: 10
         variables:
           - name: version
             value: $[ replace(variables['Build.SourceBranch'], 'refs/tags/', '') ] 
@@ -55,7 +55,7 @@ stages:
       - job: MacOS
         pool:
           vmImage: macos-latest
-        timeoutInMinutes: 6
+        timeoutInMinutes: 10
         variables:
           - name: version
             value: $[ replace(variables['Build.SourceBranch'], 'refs/tags/', '') ] 
