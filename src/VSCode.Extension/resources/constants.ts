@@ -66,3 +66,6 @@ export const configIdDebuggerOptionsCurrentExceptionTag = `${configIdDebuggerOpt
 export const configIdDebuggerOptionsEllipsizeStrings = `${configIdDebuggerOptions}.ellipsizeStrings`;
 export const configIdDebuggerOptionsEllipsizedLength = `${configIdDebuggerOptions}.ellipsizedLength`;
 export const configIdDebuggerOptionsProjectAssembliesOnly = `${configIdDebuggerOptions}.projectAssembliesOnly`;
+export const configIdDebuggerOptionsStepOverPropertiesAndOperators = `${configIdDebuggerOptions}.stepOverPropertiesAndOperators`;
+export const configIdDebuggerOptionsSearchMicrosoftSymbolServer = `${configIdDebuggerOptions}.searchMicrosoftSymbolServer`;
+export const configIdDebuggerOptionsSearchNuGetSymbolServer = `${configIdDebuggerOptions}.searchNugetSymbolServer`;

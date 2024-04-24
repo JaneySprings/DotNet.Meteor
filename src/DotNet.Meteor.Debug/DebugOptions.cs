@@ -5,13 +5,13 @@ using Mono.Debugging.Client;
 namespace DotNet.Meteor.Debug;
 
 public class DebugOptions {
-    [JsonPropertyName("evaluation_timeout")] 
+    [JsonPropertyName("evaluation_timeout")]
     public int EvaluationTimeout { get; set; } = ServerExtensions.DefaultDebuggerOptions.EvaluationOptions.EvaluationTimeout;
 
-    [JsonPropertyName("member_evaluation_timeout")] 
+    [JsonPropertyName("member_evaluation_timeout")]
     public int MemberEvaluationTimeout { get; set; } = ServerExtensions.DefaultDebuggerOptions.EvaluationOptions.MemberEvaluationTimeout;
 
-    [JsonPropertyName("allow_target_invoke")] 
+    [JsonPropertyName("allow_target_invoke")]
     public bool AllowTargetInvoke { get; set; } = ServerExtensions.DefaultDebuggerOptions.EvaluationOptions.AllowTargetInvoke;
 
     [JsonPropertyName("allow_method_evaluation")]
@@ -47,6 +47,15 @@ public class DebugOptions {
     [JsonPropertyName("project_assemblies_only")]
     public bool ProjectAssembliesOnly { get; set; } = ServerExtensions.DefaultDebuggerOptions.ProjectAssembliesOnly;
 
+    [JsonPropertyName("step_over_properties_and_operators")]
+    public bool StepOverPropertiesAndOperators { get; set; } = ServerExtensions.DefaultDebuggerOptions.StepOverPropertiesAndOperators;
+
+    [JsonPropertyName("search_microsoft_symbol_server")]
+    public bool SearchMicrosoftSymbolServer { get; set; } = ServerExtensions.DefaultDebuggerOptions.SearchMicrosoftSymbolServer;
+
+    [JsonPropertyName("search_nuget_symbol_server")]
+    public bool SearchNuGetSymbolServer { get; set; } = ServerExtensions.DefaultDebuggerOptions.SearchNuGetSymbolServer;
+
     internal static IntegerDisplayFormat GetIntegerDisplayFormat(string value) {
         if (value == Mono.Debugging.Client.IntegerDisplayFormat.Decimal.ToString())
             return Mono.Debugging.Client.IntegerDisplayFormat.Decimal;
@@ -58,4 +67,4 @@ public class DebugOptions {
 }
 
 [JsonSerializable(typeof(DebugOptions))]
-internal partial class DebuggerOptionsContext : JsonSerializerContext {}
+internal partial class DebuggerOptionsContext : JsonSerializerContext { }

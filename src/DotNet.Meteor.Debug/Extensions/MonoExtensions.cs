@@ -22,6 +22,7 @@ public static class MonoExtensions {
             dv = dv.Substring(1, dv.Length - 2).Replace(Environment.NewLine, " ");
         return dv;
     }
+
     public static StackFrame GetFrameSafe(this Backtrace bt, int n) {
         try {
             return bt.GetFrame(n);
@@ -55,9 +56,11 @@ public static class MonoExtensions {
         options.UseExternalTypeResolver = useExternalTypeResolver;
         return frame.GetExpressionValue(expression, options);
     }
-    public static void SetUserAssemblyNames(this SoftDebuggerStartInfo startInfo, string assembliesDirectory) {
+
+    public static void SetUserAssemblyNames(this SoftDebuggerStartInfo startInfo, string assembliesDirectory, DebuggerSessionOptions options) {
+        var includeSymbolServers = options.SearchMicrosoftSymbolServer || options.SearchNuGetSymbolServer;
         var assembliesPaths = Directory.EnumerateFiles(assembliesDirectory, "*.dll");
-        var files = assembliesPaths.Where(it => File.Exists(Path.ChangeExtension(it, ".pdb")));
+        var files = assembliesPaths.Where(it => SymbolServerExtensions.HasDebugSymbols(it, includeSymbolServers));
         if (!files.Any())
             return;
 
@@ -85,6 +88,41 @@ public static class MonoExtensions {
 
         startInfo.UserAssemblyNames = names;
         startInfo.AssemblyPathMap = pathMap;
+    }
+    public static void SetAssemblySymbols(this SoftDebuggerStartInfo startInfo, string assembliesDirectory, DebuggerSessionOptions options) {
+        var useMicrosoftServer = options.SearchMicrosoftSymbolServer;
+        var useNuGetServer = options.SearchNuGetSymbolServer;
+        startInfo.SetAssemblySymbols(assembliesDirectory, useMicrosoftServer, useNuGetServer);
+    }
+    public static void SetAssemblySymbols(this SoftDebuggerStartInfo startInfo, string assembliesDirectory, bool useMicrosoftServer, bool useNuGetServer) {
+        var assemblyPaths = Directory.EnumerateFiles(assembliesDirectory, "*.dll");
+        var targetAssemblyPaths = assemblyPaths.Where(it => !File.Exists(Path.ChangeExtension(it, ".pdb")));
+        if (!targetAssemblyPaths.Any() || (!useMicrosoftServer && !useNuGetServer))
+            return;
+
+        var symbolPathMap = new Dictionary<string, string>();
+        foreach (var assemblyPath in targetAssemblyPaths) {
+            string symbolsFilePath = null;
+            string assemblyName = null;
+
+            if (string.IsNullOrEmpty(symbolsFilePath) && useMicrosoftServer)
+                symbolsFilePath = SymbolServerExtensions.DownloadSourceSymbols(assemblyPath, SymbolServerExtensions.MicrosoftSymbolServerAddress);
+            if (string.IsNullOrEmpty(symbolsFilePath) && useNuGetServer)
+                symbolsFilePath = SymbolServerExtensions.DownloadSourceSymbols(assemblyPath, SymbolServerExtensions.NuGetSymbolServerAddress);
+
+            if (string.IsNullOrEmpty(symbolsFilePath)) {
+                DebuggerLoggingService.CustomLogger.LogMessage($"No symbols found for '{assemblyPath}'");
+                continue;
+            }
+
+            using var asm = Mono.Cecil.AssemblyDefinition.ReadAssembly(assemblyPath);
+            assemblyName = asm.Name.FullName;
+
+            if (!string.IsNullOrEmpty(assemblyName) && !string.IsNullOrEmpty(symbolsFilePath))
+                symbolPathMap.Add(assemblyName, symbolsFilePath);
+        }
+
+        startInfo.SymbolPathMap = symbolPathMap;
     }
 
     public static void WriteSdbCommand(this ISoftDebuggerConnectionProvider connectionProvider, Stream stream, string command) {

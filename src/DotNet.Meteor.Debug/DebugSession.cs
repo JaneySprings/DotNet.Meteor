@@ -67,9 +67,10 @@ public class DebugSession : Session {
     protected override LaunchResponse HandleLaunchRequest(LaunchArguments arguments) {
         return ServerExtensions.DoSafe(() => {
             var configuration = new LaunchConfiguration(arguments.ConfigurationProperties);
-            launchAgent = configuration.GetLauchAgent();
-
             SymbolServerExtensions.SetTempDirectory(configuration.TempDirectoryPath);
+            SymbolServerExtensions.SetEventLogger(OnDebugDataReceived);
+
+            launchAgent = configuration.GetLauchAgent();
             typeResolver = new ExternalTypeResolver(configuration.TempDirectoryPath, configuration.DebuggerSessionOptions);
             launchAgent.Disposables.Add(() => typeResolver.Dispose());
             session.TypeResolverHandler = typeResolver.Handle;
