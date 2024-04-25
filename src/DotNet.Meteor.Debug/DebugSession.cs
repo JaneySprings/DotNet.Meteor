@@ -269,7 +269,7 @@ public class DebugSession : Session {
                     };
                 }
                 if (source == null && frame.SourceLocation.SourceLink != null) {
-                    var path = SymbolServerExtensions.DownloadSourceFile(frame.SourceLocation.SourceLink);
+                    var path = SymbolServerExtensions.DownloadSourceFile(frame.SourceLocation.SourceLink.Uri);
                     source = new DebugProtocol.Source() {
                         Name = Path.GetFileName(path),
                         PresentationHint = Source.PresentationHintValue.Normal,
