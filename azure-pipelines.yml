@@ -86,7 +86,7 @@ stages:
       - job: Windows
         pool:
           vmImage: windows-latest
-        timeoutInMinutes: 10
+        timeoutInMinutes: 15
         variables:
           - name: version
             value: $[ replace(variables['Build.SourceBranch'], 'refs/tags/', '') ] 
@@ -206,7 +206,7 @@ stages:
       - job: Windows
         pool:
           vmImage: windows-latest
-        timeoutInMinutes: 10
+        timeoutInMinutes: 15
         steps:
         - task: UseDotNet@2
           inputs:

@@ -27,10 +27,10 @@ public static class SymbolServerExtensions {
     public static void SetEventLogger(Action<string> logger) {
         eventLogger = logger;
     }
-    public static string DownloadSourceFile(SourceLink link) {
+    public static string DownloadSourceFile(string uri) {
         var sourcesDirectory = Path.Combine(tempDirectory, "sources");
-        if (!Uri.TryCreate(link.Uri, UriKind.Absolute, out var sourceLinkUri)) {
-            DebuggerLoggingService.CustomLogger.LogMessage($"Invalid source link '{link.Uri}'");
+        if (!Uri.TryCreate(uri, UriKind.Absolute, out var sourceLinkUri)) {
+            DebuggerLoggingService.CustomLogger.LogMessage($"Invalid source link '{uri}'");
             return null;
         }
 
@@ -38,7 +38,7 @@ public static class SymbolServerExtensions {
         if (File.Exists(outputFilePath))
             return outputFilePath;
 
-        _ = DownloadFileAsync(link.Uri, outputFilePath, writeErrorInTarget: true);
+        _ = DownloadFileAsync(uri, outputFilePath, writeErrorInTarget: true);
         return outputFilePath;
     }
     public static string DownloadSourceSymbols(string assemblyPath, string serverAddress) {
