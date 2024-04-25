@@ -290,6 +290,13 @@
             "Decimal",
             "Hexadecimal"
           ]
+        },
+        "dotnetMeteor.debuggerOptions.sourceCodeMappings": {
+          "type": "object",
+          "description": "%configuration.description.debuggerOptions.sourceCodeMappings%",
+          "additionalProperties": {
+            "type": "string"
+          }
         }
       }
     }

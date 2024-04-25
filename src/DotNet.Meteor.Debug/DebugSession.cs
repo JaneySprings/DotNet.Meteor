@@ -259,11 +259,12 @@ public class DebugSession : Session {
                 }
 
                 DebugProtocol.Source source = null;
-                if (!string.IsNullOrEmpty(frame.SourceLocation.FileName) && File.Exists(frame.SourceLocation.FileName)) {
+                string remappedSourcePath = session.RemapSourceLocation(frame.SourceLocation);
+                if (!string.IsNullOrEmpty(remappedSourcePath) && File.Exists(remappedSourcePath)) {
                     source = new DebugProtocol.Source() {
-                        Name = Path.GetFileName(frame.SourceLocation.FileName),
+                        Name = Path.GetFileName(remappedSourcePath),
                         PresentationHint = Source.PresentationHintValue.Normal,
-                        Path = frame.SourceLocation.FileName,
+                        Path = remappedSourcePath,
                         SourceReference = 0
                     };
                 }
