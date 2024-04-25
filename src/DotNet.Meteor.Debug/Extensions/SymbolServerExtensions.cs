@@ -29,7 +29,12 @@ public static class SymbolServerExtensions {
     }
     public static string DownloadSourceFile(SourceLink link) {
         var sourcesDirectory = Path.Combine(tempDirectory, "sources");
-        var outputFilePath = Path.Combine(sourcesDirectory, link.RelativeFilePath);
+        if (!Uri.TryCreate(link.Uri, UriKind.Absolute, out var sourceLinkUri)) {
+            DebuggerLoggingService.CustomLogger.LogMessage($"Invalid source link '{link.Uri}'");
+            return null;
+        }
+
+        var outputFilePath = Path.Combine(sourcesDirectory, sourceLinkUri.LocalPath.TrimStart('/'));
         if (File.Exists(outputFilePath))
             return outputFilePath;
 

@@ -33,7 +33,7 @@ stages:
         steps:
         - task: UseDotNet@2
           inputs:
-            version: '8.x'
+            version: '9.x'
         - script: dotnet tool restore
           displayName: 'Restore .NET tools'
         - script: npm install
@@ -62,7 +62,7 @@ stages:
         steps:
         - task: UseDotNet@2
           inputs:
-            version: '8.x'
+            version: '9.x'
         - script: dotnet tool restore
           displayName: 'Restore .NET tools'
         - script: npm install
@@ -91,7 +91,7 @@ stages:
         steps:
         - task: UseDotNet@2
           inputs:
-            version: '8.x'
+            version: '9.x'
         - script: dotnet tool restore
           displayName: 'Restore .NET tools'
         - script: npm install
@@ -161,7 +161,7 @@ stages:
         steps:
         - task: UseDotNet@2
           inputs:
-            version: '8.x'
+            version: '9.x'
         - script: dotnet tool restore
           displayName: 'Restore .NET tools'
         - script: dotnet cake --target=test --configuration=release
@@ -183,7 +183,7 @@ stages:
         steps:
         - task: UseDotNet@2
           inputs:
-            version: '8.x'
+            version: '9.x'
         - script: dotnet tool restore
           displayName: 'Restore .NET tools'
         - script: dotnet cake --target=test --configuration=release
@@ -205,7 +205,7 @@ stages:
         steps:
         - task: UseDotNet@2
           inputs:
-            version: '8.x'
+            version: '9.x'
         - script: dotnet tool restore
           displayName: 'Restore .NET tools'
         - script: dotnet cake --target=test --configuration=release

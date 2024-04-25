@@ -56,6 +56,17 @@ public static class MonoExtensions {
         options.UseExternalTypeResolver = useExternalTypeResolver;
         return frame.GetExpressionValue(expression, options);
     }
+    public static string RemapSourceLocation(this SoftDebuggerSession session, SourceLocation location) {
+        if (location == null || string.IsNullOrEmpty(location.FileName))
+            return null;
+
+        foreach (var remap in session.Options.SourceCodeMappings) {
+            if (location.FileName.Contains(remap.Key))
+                return location.FileName.Replace(remap.Key, remap.Value);
+        }
+
+        return location.FileName;
+    }
 
     public static void SetUserAssemblyNames(this SoftDebuggerStartInfo startInfo, string assembliesDirectory, DebuggerSessionOptions options) {
         var includeSymbolServers = options.SearchMicrosoftSymbolServer || options.SearchNuGetSymbolServer;

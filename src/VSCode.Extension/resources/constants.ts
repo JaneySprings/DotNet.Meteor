@@ -69,3 +69,4 @@ export const configIdDebuggerOptionsProjectAssembliesOnly = `${configIdDebuggerO
 export const configIdDebuggerOptionsStepOverPropertiesAndOperators = `${configIdDebuggerOptions}.stepOverPropertiesAndOperators`;
 export const configIdDebuggerOptionsSearchMicrosoftSymbolServer = `${configIdDebuggerOptions}.searchMicrosoftSymbolServer`;
 export const configIdDebuggerOptionsSearchNuGetSymbolServer = `${configIdDebuggerOptions}.searchNugetSymbolServer`;
+export const configIdDebuggerOptionsSourceCodeMappings = `${configIdDebuggerOptions}.sourceCodeMappings`;

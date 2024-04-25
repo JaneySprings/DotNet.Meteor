@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Text.Json.Serialization;
 using DotNet.Meteor.Debug.Extensions;
 using Mono.Debugging.Client;
@@ -55,6 +56,9 @@ public class DebugOptions {
 
     [JsonPropertyName("search_nuget_symbol_server")]
     public bool SearchNuGetSymbolServer { get; set; } = ServerExtensions.DefaultDebuggerOptions.SearchNuGetSymbolServer;
+
+    [JsonPropertyName("source_code_mappings")]
+    public ImmutableDictionary<string, string> SourceCodeMappings { get; set; } = ServerExtensions.DefaultDebuggerOptions.SourceCodeMappings;
 
     internal static IntegerDisplayFormat GetIntegerDisplayFormat(string value) {
         if (value == Mono.Debugging.Client.IntegerDisplayFormat.Decimal.ToString())
