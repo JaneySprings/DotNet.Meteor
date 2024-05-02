@@ -116,6 +116,19 @@ Conversion complete
 
 &emsp;*The profiler can capture and analyze functions executed within the Mono runtime. To profile native code, you can leverage platform-specific tools, such as Android Studio and Xcode.*
 
+### Troubleshooting
+
+**.NET Meteor** uses the `.NET Diagnostics` tools to profile applications. The process of profiling consists of two stages:
+
+1) `dsrouter` creates a connection between the application and the profiler.
+2) `dotnet-trace` or `dotnet-gcdump` captures the data.
+
+If you encounter any issues, please check the following:
+
+- VSCode **Debug Console** tab should display a message about the successful connection. If you see the `Router stopped` message or something similar, the connection is not established. You can try to change the **profiler port** in the **.NET Meteor** settings.
+
+- When profiling is started, the **Debug Console** tab should display the `Output File:` message. If you don't see this message after running the app and displaying the first view (after the splash screen), try deleting the `bin` and `obj` folders and rerunning the project. *Sometimes the issue occurs when you frequently switch between the profiling and debugging modes.*
+
 ---
 
 ## Compatibility
