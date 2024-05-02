@@ -37,7 +37,7 @@ public class Program {
     }
 
     public static void AllDevices(string[] args) {
-        var devices = DeviceProvider.GetDevices(logger.Error);
+        var devices = DeviceProvider.GetDevices(logger.Error, logger.Debug);
         Console.WriteLine(JsonSerializer.Serialize(devices, TrimmableContext.Default.ListDeviceData));
     }
 
