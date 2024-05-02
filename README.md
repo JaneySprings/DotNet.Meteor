@@ -125,9 +125,9 @@ Conversion complete
 
 If you encounter any issues, please check the following:
 
-- VSCode **Debug Console** tab should display a message about the successful connection. If you see the `Router stopped.` message or something similar, the connection is not established. You can try to change the **profiler port** in the **.NET Meteor** settings.
+- VSCode **Debug Console** tab should display a message about the successful connection. If you see the `Router stopped` message or something similar, the connection is not established. You can try to change the **profiler port** in the **.NET Meteor** settings.
 
-- When profiling is started, the **Debug Console** tab should display the `Output File:` message. If you don't see this message and your application is not stopped at the splash screen, the profiler is not included in the application. You can try to **delete** the `bin` and `obj` folders in your project and try again *(often, its occurs due to the frequently changing between the profiling and debugging modes)*.
+- When profiling is started, the **Debug Console** tab should display the `Output File:` message. If you don't see this message after running the app and displaying the first view (after the splash screen), try deleting the `bin` and `obj` folders and rerunning the project. *Sometimes the issue occurs when you frequently switch between the profiling and debugging modes.*
 
 ---
 
