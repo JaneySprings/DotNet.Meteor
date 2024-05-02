@@ -6,7 +6,7 @@ using Xunit;
 
 namespace DotNet.Meteor.Tests;
 
-public class DeviceProvidingTests : TestFixture {
+public class DeviceProvidingTests: TestFixture {
 
     [Fact]
     public void AndroidPhysicalDeviceTest() {
@@ -46,12 +46,11 @@ public class DeviceProvidingTests : TestFixture {
         else Assert.Single(result);
     }
 
-    // TODO: Hangs on Azure DevOps
-    // [Fact]
-    // public void WindowsDeviceTest() {
-    //     if (!RuntimeSystem.IsWindows)
-    //         return;
-    //     var result = WindowsTool.WindowsDevice();
-    //     Assert.NotNull(result);
-    // }
+    [Fact]
+    public void WindowsDeviceTest() {
+        if (!RuntimeSystem.IsWindows)
+            return;
+        var result = WindowsTool.WindowsDevice();
+        Assert.NotNull(result);
+    }
 }
