@@ -36,7 +36,7 @@
 	"configuration.description.debuggerOptions.flattenHierarchy": "Controls whether the debugger should flatten the hierarchy of inherited members.",
 	"configuration.description.debuggerOptions.groupPrivateMembers": "Controls whether the debugger should group private members in the debugging window.",
 	"configuration.description.debuggerOptions.groupStaticMembers": "Controls whether the debugger should group static members in the debugging window.",
-	"configuration.description.debuggerOptions.useExternalTypeResolver": "Use an external type resolver to resolve types in the debugging window. Requires the [DotRush](https://marketplace.visualstudio.com/items?itemName=nromanov.dotrush) extension.",
+	"configuration.description.debuggerOptions.useExternalTypeResolver": "Search for unknown types in the project's assemblies for the evaluation expressions.",
 	"configuration.description.debuggerOptions.currentExceptionTag": "Specifies the display name of the current exception in the debugging window.",
 	"configuration.description.debuggerOptions.ellipsizeStrings": "Truncates strings in the debugging window.",
 	"configuration.description.debuggerOptions.ellipsizedLength": "The maximum length of a truncated string.",
@@ -45,5 +45,6 @@
 	"configuration.description.debuggerOptions.searchMicrosoftSymbolServer": "Search for symbols on the Microsoft Symbol Server.",
 	"configuration.description.debuggerOptions.searchNuGetSymbolServer": "Search for symbols on the NuGet Symbol Server.",
 	"configuration.description.debuggerOptions.integerDisplayFormat": "Specifies the format of displayed integers in the debugging window.",
-	"configuration.description.debuggerOptions.sourceCodeMappings": "Modifies locations for the debugged source code by replacing values on the left with values on the right."
+	"configuration.description.debuggerOptions.sourceCodeMappings": "Modifies locations for the debugged source code by replacing values on the left with values on the right.",
+	"configuration.description.debuggerOptions.automaticSourcelinkDownload": "Automatically downloads source files from the SourceLink."
 }

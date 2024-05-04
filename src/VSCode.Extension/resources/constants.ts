@@ -70,3 +70,4 @@ export const configIdDebuggerOptionsStepOverPropertiesAndOperators = `${configId
 export const configIdDebuggerOptionsSearchMicrosoftSymbolServer = `${configIdDebuggerOptions}.searchMicrosoftSymbolServer`;
 export const configIdDebuggerOptionsSearchNuGetSymbolServer = `${configIdDebuggerOptions}.searchNugetSymbolServer`;
 export const configIdDebuggerOptionsSourceCodeMappings = `${configIdDebuggerOptions}.sourceCodeMappings`;
+export const configIdDebuggerOptionsAutomaticSourcelinkDownload = `${configIdDebuggerOptions}.automaticSourcelinkDownload`;

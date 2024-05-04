@@ -264,7 +264,7 @@ public class DebugSession : Session {
                         SourceReference = 0
                     };
                 }
-                if (source == null && frame.SourceLocation.SourceLink != null) {
+                if (source == null && frame.SourceLocation.SourceLink != null && session.Options.AutomaticSourceLinkDownload) {
                     var path = SymbolServerExtensions.DownloadSourceFile(frame.SourceLocation.SourceLink.Uri);
                     source = new DebugProtocol.Source() {
                         Name = Path.GetFileName(path),

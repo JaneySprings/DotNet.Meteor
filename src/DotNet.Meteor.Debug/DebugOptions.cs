@@ -60,6 +60,9 @@ public class DebugOptions {
     [JsonPropertyName("source_code_mappings")]
     public ImmutableDictionary<string, string> SourceCodeMappings { get; set; } = ServerExtensions.DefaultDebuggerOptions.SourceCodeMappings;
 
+    [JsonPropertyName("automatic_sourcelink_download")]
+    public bool AutomaticSourceLinkDownload { get; set; } = ServerExtensions.DefaultDebuggerOptions.AutomaticSourceLinkDownload;
+
     internal static IntegerDisplayFormat GetIntegerDisplayFormat(string value) {
         if (value == Mono.Debugging.Client.IntegerDisplayFormat.Decimal.ToString())
             return Mono.Debugging.Client.IntegerDisplayFormat.Decimal;
