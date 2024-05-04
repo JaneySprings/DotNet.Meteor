@@ -249,7 +249,7 @@
         "dotnetMeteor.debuggerOptions.useExternalTypeResolver": {
           "type": "boolean",
           "default": true,
-          "markdownDescription": "%configuration.description.debuggerOptions.useExternalTypeResolver%"
+          "description": "%configuration.description.debuggerOptions.useExternalTypeResolver%"
         },
         "dotnetMeteor.debuggerOptions.currentExceptionTag": {
           "type": "string",
@@ -281,6 +281,11 @@
           "type": "boolean",
           "default": false,
           "description": "%configuration.description.debuggerOptions.searchMicrosoftSymbolServer%"
+        },
+        "dotnetMeteor.debuggerOptions.automaticSourcelinkDownload": {
+          "type": "boolean",
+          "default": true,
+          "description": "%configuration.description.debuggerOptions.automaticSourcelinkDownload%"
         },
         "dotnetMeteor.debuggerOptions.integerDisplayFormat": {
           "type": "string",

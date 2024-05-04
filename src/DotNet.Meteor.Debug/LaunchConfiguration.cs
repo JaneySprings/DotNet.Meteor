@@ -98,6 +98,7 @@ public class LaunchConfiguration {
         debuggerOptions.SearchMicrosoftSymbolServer = options.SearchMicrosoftSymbolServer;
         debuggerOptions.SearchNuGetSymbolServer = options.SearchNuGetSymbolServer;
         debuggerOptions.SourceCodeMappings = options.SourceCodeMappings;
+        debuggerOptions.AutomaticSourceLinkDownload = options.AutomaticSourceLinkDownload;
 
         return debuggerOptions;
     }
