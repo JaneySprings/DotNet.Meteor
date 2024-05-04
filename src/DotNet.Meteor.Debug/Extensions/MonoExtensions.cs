@@ -51,11 +51,6 @@ public static class MonoExtensions {
 
         return null;
     }
-    public static ObjectValue GetExpressionValue(this StackFrame frame, string expression, EvaluationOptions evaluationOptions, bool useExternalTypeResolver) {
-        var options = evaluationOptions.Clone();
-        options.UseExternalTypeResolver = useExternalTypeResolver;
-        return frame.GetExpressionValue(expression, options);
-    }
     public static string RemapSourceLocation(this SoftDebuggerSession session, SourceLocation location) {
         if (location == null || string.IsNullOrEmpty(location.FileName))
             return null;
@@ -68,72 +63,51 @@ public static class MonoExtensions {
         return location.FileName;
     }
 
-    public static void SetUserAssemblyNames(this SoftDebuggerStartInfo startInfo, string assembliesDirectory, DebuggerSessionOptions options) {
-        var includeSymbolServers = options.SearchMicrosoftSymbolServer || options.SearchNuGetSymbolServer;
-        var assembliesPaths = Directory.EnumerateFiles(assembliesDirectory, "*.dll");
-        var files = assembliesPaths.Where(it => SymbolServerExtensions.HasDebugSymbols(it, includeSymbolServers));
-        if (!files.Any())
-            return;
+    public static void SetAssemblies(this SoftDebuggerStartInfo startInfo, string assembliesDirectory, DebuggerSessionOptions options) {
+        var useSymbolServers = options.SearchMicrosoftSymbolServer || options.SearchNuGetSymbolServer;
+        var assemblyPaths = Directory.EnumerateFiles(assembliesDirectory, "*.dll");
+        var assemblyPathMap = new Dictionary<string, string>();
+        var assemblySymbolPathMap = new Dictionary<string, string>();
+        var assemblyNames = new List<AssemblyName>();
 
-        var pathMap = new Dictionary<string, string>();
-        var names = new List<AssemblyName>();
-
-        foreach (var file in files) {
+        foreach (var assemblyPath in assemblyPaths) {
             try {
-                using var asm = Mono.Cecil.AssemblyDefinition.ReadAssembly(file);
-                if (string.IsNullOrEmpty(asm.Name.Name)) {
-                    DebuggerLoggingService.CustomLogger.LogMessage($"Assembly '{file}' has no name");
+                string assemblySymbolsFilePath = null;
+                if (!File.Exists(Path.ChangeExtension(assemblyPath, ".pdb"))) {
+                    if (string.IsNullOrEmpty(assemblySymbolsFilePath) && options.SearchMicrosoftSymbolServer)
+                        assemblySymbolsFilePath = SymbolServerExtensions.DownloadSourceSymbols(assemblyPath, SymbolServerExtensions.MicrosoftSymbolServerAddress);
+                    if (string.IsNullOrEmpty(assemblySymbolsFilePath) && options.SearchNuGetSymbolServer)
+                        assemblySymbolsFilePath = SymbolServerExtensions.DownloadSourceSymbols(assemblyPath, SymbolServerExtensions.NuGetSymbolServerAddress);
+                    if (string.IsNullOrEmpty(assemblySymbolsFilePath))
+                        DebuggerLoggingService.CustomLogger.LogMessage($"No symbols found for '{assemblyPath}'");
+                }
+
+                using var assemblyDefinition = Mono.Cecil.AssemblyDefinition.ReadAssembly(assemblyPath);
+                if (string.IsNullOrEmpty(assemblyDefinition.Name.FullName)) {
+                    DebuggerLoggingService.CustomLogger.LogMessage($"Assembly '{assemblyPath}' has no name");
                     continue;
                 }
 
-                AssemblyName name = new AssemblyName(asm.Name.FullName);
-                if (!pathMap.ContainsKey(asm.Name.FullName))
-                    pathMap.Add(asm.Name.FullName, file);
+                if (options.EvaluationOptions.UseExternalTypeResolver)
+                    TypeResolverExtensions.RegisterTypes(assemblyDefinition.MainModule.Types);
 
-                names.Add(name);
-                DebuggerLoggingService.CustomLogger.LogMessage($"User assembly '{name.Name}' added");
+                if (!string.IsNullOrEmpty(assemblySymbolsFilePath))
+                    assemblySymbolPathMap.Add(assemblyDefinition.Name.FullName, assemblySymbolsFilePath);
+
+                if (options.ProjectAssembliesOnly && SymbolServerExtensions.HasDebugSymbols(assemblyPath, useSymbolServers)) {
+                    var assemblyName = new AssemblyName(assemblyDefinition.Name.FullName);
+                    assemblyPathMap.TryAdd(assemblyDefinition.Name.FullName, assemblyPath);
+                    assemblyNames.Add(assemblyName);
+                    DebuggerLoggingService.CustomLogger.LogMessage($"User assembly '{assemblyName.Name}' added");
+                }
             } catch (Exception e) {
-                DebuggerLoggingService.CustomLogger.LogError($"Error reading assembly '{file}'", e);
+                DebuggerLoggingService.CustomLogger.LogError($"Error while processing assembly '{assemblyPath}'", e);
             }
         }
 
-        startInfo.UserAssemblyNames = names;
-        startInfo.AssemblyPathMap = pathMap;
-    }
-    public static void SetAssemblySymbols(this SoftDebuggerStartInfo startInfo, string assembliesDirectory, DebuggerSessionOptions options) {
-        var useMicrosoftServer = options.SearchMicrosoftSymbolServer;
-        var useNuGetServer = options.SearchNuGetSymbolServer;
-        startInfo.SetAssemblySymbols(assembliesDirectory, useMicrosoftServer, useNuGetServer);
-    }
-    public static void SetAssemblySymbols(this SoftDebuggerStartInfo startInfo, string assembliesDirectory, bool useMicrosoftServer, bool useNuGetServer) {
-        var assemblyPaths = Directory.EnumerateFiles(assembliesDirectory, "*.dll");
-        var targetAssemblyPaths = assemblyPaths.Where(it => !File.Exists(Path.ChangeExtension(it, ".pdb")));
-        if (!targetAssemblyPaths.Any() || (!useMicrosoftServer && !useNuGetServer))
-            return;
-
-        var symbolPathMap = new Dictionary<string, string>();
-        foreach (var assemblyPath in targetAssemblyPaths) {
-            string symbolsFilePath = null;
-            string assemblyName = null;
-
-            if (string.IsNullOrEmpty(symbolsFilePath) && useMicrosoftServer)
-                symbolsFilePath = SymbolServerExtensions.DownloadSourceSymbols(assemblyPath, SymbolServerExtensions.MicrosoftSymbolServerAddress);
-            if (string.IsNullOrEmpty(symbolsFilePath) && useNuGetServer)
-                symbolsFilePath = SymbolServerExtensions.DownloadSourceSymbols(assemblyPath, SymbolServerExtensions.NuGetSymbolServerAddress);
-
-            if (string.IsNullOrEmpty(symbolsFilePath)) {
-                DebuggerLoggingService.CustomLogger.LogMessage($"No symbols found for '{assemblyPath}'");
-                continue;
-            }
-
-            using var asm = Mono.Cecil.AssemblyDefinition.ReadAssembly(assemblyPath);
-            assemblyName = asm.Name.FullName;
-
-            if (!string.IsNullOrEmpty(assemblyName) && !string.IsNullOrEmpty(symbolsFilePath))
-                symbolPathMap.Add(assemblyName, symbolsFilePath);
-        }
-
-        startInfo.SymbolPathMap = symbolPathMap;
+        startInfo.SymbolPathMap = assemblySymbolPathMap;
+        startInfo.AssemblyPathMap = assemblyPathMap;
+        startInfo.UserAssemblyNames = assemblyNames;
     }
 
     public static void WriteSdbCommand(this ISoftDebuggerConnectionProvider connectionProvider, Stream stream, string command) {

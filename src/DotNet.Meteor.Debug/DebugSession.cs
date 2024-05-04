@@ -14,7 +14,6 @@ using DebugProtocol = Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages
 namespace DotNet.Meteor.Debug;
 
 public class DebugSession : Session {
-    private ExternalTypeResolver typeResolver;
     private BaseLaunchAgent launchAgent;
 
     private readonly Handles<MonoClient.StackFrame> frameHandles = new Handles<MonoClient.StackFrame>();
@@ -28,6 +27,7 @@ public class DebugSession : Session {
         session.DebugWriter = OnDebugLog;
         session.OutputWriter = OnLog;
         session.ExceptionHandler = OnExceptionHandled;
+        session.TypeResolverHandler = TypeResolverExtensions.ResolveType;
 
         session.TargetStopped += TargetStopped;
         session.TargetHitBreakpoint += TargetHitBreakpoint;
@@ -71,10 +71,6 @@ public class DebugSession : Session {
             SymbolServerExtensions.SetEventLogger(OnDebugDataReceived);
 
             launchAgent = configuration.GetLauchAgent();
-            typeResolver = new ExternalTypeResolver(configuration.TempDirectoryPath, configuration.DebuggerSessionOptions);
-            launchAgent.Disposables.Add(() => typeResolver.Dispose());
-            session.TypeResolverHandler = typeResolver.Handle;
-
             launchAgent.Launch(this);
             launchAgent.Connect(session);
             return new LaunchResponse();
@@ -381,8 +377,7 @@ public class DebugSession : Session {
             if (!frame.ValidateExpression(arguments.Expression))
                 throw new ProtocolException("invalid expression");
 
-            var useExternalTypeResolver = arguments.Context != EvaluateArguments.ContextValue.Hover;
-            var value = frame.GetExpressionValue(arguments.Expression, session.Options.EvaluationOptions, useExternalTypeResolver);
+            var value = frame.GetExpressionValue(arguments.Expression, session.Options.EvaluationOptions);
             value.WaitHandle.WaitOne(session.Options.EvaluationOptions.EvaluationTimeout);
 
             if (value.IsEvaluating)

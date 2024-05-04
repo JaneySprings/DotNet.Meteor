@@ -22,9 +22,7 @@ public class DebugLaunchAgent : BaseLaunchAgent {
         ArgumentNullException.ThrowIfNull(startArguments, "Debugger connection arguments not implemented.");
 
         startInformation = new SoftDebuggerStartInfo(startArguments);
-        startInformation.SetAssemblySymbols(configuration.GetApplicationAssembliesDirectory(), configuration.DebuggerSessionOptions);
-        if (configuration.DebuggerSessionOptions.ProjectAssembliesOnly)
-            startInformation.SetUserAssemblyNames(configuration.GetApplicationAssembliesDirectory(), configuration.DebuggerSessionOptions);
+        startInformation.SetAssemblies(configuration.GetApplicationAssembliesDirectory(), configuration.DebuggerSessionOptions);
     }
 
     public override void Connect(SoftDebuggerSession session) {
