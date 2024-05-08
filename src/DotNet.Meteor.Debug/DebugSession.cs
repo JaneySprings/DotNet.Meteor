@@ -370,14 +370,13 @@ public class DebugSession : Session {
                 throw new ProtocolException($"command handled by {launchAgent}");
             }
 
+            var expression = arguments.Expression.TrimEnd(';');
             var frame = frameHandles.Get(arguments.FrameId ?? 0, null);
             if (frame == null)
                 throw new ProtocolException("no active stackframe");
 
-            if (!frame.ValidateExpression(arguments.Expression))
-                throw new ProtocolException("invalid expression");
-
-            var value = frame.GetExpressionValue(arguments.Expression, session.Options.EvaluationOptions);
+            TypeResolverExtensions.SetContext(frame, session.Options.EvaluationOptions);
+            var value = frame.GetExpressionValue(expression, session.Options.EvaluationOptions);
             value.WaitHandle.WaitOne(session.Options.EvaluationOptions.EvaluationTimeout);
 
             if (value.IsEvaluating)
