@@ -27,7 +27,7 @@ public class DebugSession : Session {
         session.DebugWriter = OnDebugLog;
         session.OutputWriter = OnLog;
         session.ExceptionHandler = OnExceptionHandled;
-        session.TypeResolverHandler = TypeResolverExtensions.ResolveType;
+        session.TypeResolverHandler = TypeResolverExtensions.ResolveIdentifier;
 
         session.TargetStopped += TargetStopped;
         session.TargetHitBreakpoint += TargetHitBreakpoint;

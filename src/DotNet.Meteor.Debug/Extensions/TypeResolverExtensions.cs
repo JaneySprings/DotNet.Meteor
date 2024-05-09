@@ -22,17 +22,20 @@ public static class TypeResolverExtensions {
         context = frame;
     }
 
-    public static string ResolveType(string type, SourceLocation _) {
+    public static string ResolveIdentifier(string identifierName, SourceLocation _, bool typesOnly) {
         if (context == null || evaluationOptions == null)
-            return type;
+            return identifierName;
+
+        if (typesOnly)
+            return typesCache.TryGetValue(identifierName, out var resolvedType) ? resolvedType : identifierName;
 
         var options = evaluationOptions.Clone();
         options.UseExternalTypeResolver = false;
 
-        var value = context.GetExpressionValue(type, options);
+        var value = context.GetExpressionValue(identifierName, options);
         if (value.Flags.HasFlag(ObjectValueFlags.Object) && value.Flags.HasFlag(ObjectValueFlags.Namespace))
-            return typesCache.TryGetValue(type, out var resolvedType) ? resolvedType : type;
+            return typesCache.TryGetValue(identifierName, out var resolvedType) ? resolvedType : identifierName;
 
-        return type;
+        return identifierName;
     }
 }
