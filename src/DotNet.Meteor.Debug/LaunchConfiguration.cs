@@ -44,6 +44,9 @@ public class LaunchConfiguration {
         DebugPort = DebugPort == 0 ? ServerExtensions.FindFreePort() : DebugPort;
         ReloadHostPort = ReloadHostPort == 0 ? ServerExtensions.FindFreePort() : ReloadHostPort;
         ProfilerPort = ProfilerPort == 0 ? ServerExtensions.FindFreePort() : ProfilerPort;
+
+        if (!Directory.Exists(TempDirectoryPath))
+            Directory.CreateDirectory(TempDirectoryPath);
     }
 
     public string GetApplicationName() {

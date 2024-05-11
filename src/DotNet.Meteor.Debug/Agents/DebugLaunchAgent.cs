@@ -84,6 +84,7 @@ public class DebugLaunchAgent : BaseLaunchAgent {
 
         DeviceBridge.Install(Configuration.Device.Serial, Configuration.OutputAssembly, logger);
         DeviceBridge.Shell(Configuration.Device.Serial, "setprop", "debug.mono.connect", $"port={Configuration.DebugPort}");
+        DeviceBridge.Shell(Configuration.Device.Serial, "am", "set-debug-app", applicationId);
         DeviceBridge.Launch(Configuration.Device.Serial, applicationId, logger);
         DeviceBridge.Flush(Configuration.Device.Serial);
 
