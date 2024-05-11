@@ -92,7 +92,9 @@ public static class DeviceBridge {
         new ProcessRunner(adb, argument, logger).WaitForExit();
     }
     public static void Launch(string serial, string pkg, IProcessLogger logger = null) {
-        string result = Shell(serial, "monkey", "--pct-syskeys", "0", "-p", pkg, "1");
+        // This is a legacy method that is no longer used (device auto-rotation issue).
+        // string result = Shell(serial, "monkey", "--pct-syskeys", "0", "-p", pkg, "1");
+        string result = Shell(serial, "am", "start", $"{pkg}/$(cmd package resolve-activity -c android.intent.category.LAUNCHER {pkg} | sed -n '/name=/s/^.*name=//p')");
         logger?.OnOutputDataReceived(result);
     }
 
