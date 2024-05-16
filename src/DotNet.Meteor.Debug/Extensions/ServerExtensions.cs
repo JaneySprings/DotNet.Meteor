@@ -63,12 +63,22 @@ public static class ServerExtensions {
         try {
             using var archive = new ZipArchive(File.OpenRead(assemblyPath));
             var assembliesEntry = archive.Entries.Where(entry => entry.FullName.StartsWith("assemblies", StringComparison.OrdinalIgnoreCase));
+            if (!assembliesEntry.Any()) {
+                // For net9+ the assemblies are not in the assemblies folder
+                assembliesEntry = archive.Entries.Where(entry =>
+                    entry.FullName.EndsWith(".dll.so", StringComparison.OrdinalIgnoreCase) ||
+                    entry.FullName.EndsWith(".pdb.so", StringComparison.OrdinalIgnoreCase)
+                );
+            }
             if (!assembliesEntry.Any())
                 return targetDirectory;
 
             foreach (var entry in assembliesEntry) {
-                Console.WriteLine(entry.Name);
-                var targetPath = Path.Combine(targetDirectory, entry.Name);
+                var assemblyFileName = entry.Name;
+                if (assemblyFileName.EndsWith(".so", StringComparison.OrdinalIgnoreCase))
+                    assemblyFileName = Path.GetFileNameWithoutExtension(assemblyFileName);
+
+                var targetPath = Path.Combine(targetDirectory, assemblyFileName);
                 if (File.Exists(targetPath))
                     File.Delete(targetPath);
 

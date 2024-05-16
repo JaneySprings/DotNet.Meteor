@@ -41,20 +41,19 @@ public static class SymbolServerExtensions {
         _ = DownloadFileAsync(uri, outputFilePath, writeErrorInTarget: true);
         return outputFilePath;
     }
-    public static string DownloadSourceSymbols(string assemblyPath, string serverAddress) {
+    public static string DownloadSourceSymbols(string assemblyPath, string assemblyName, string serverAddress) {
         var pdbData = GetPdbData(assemblyPath);
         if (pdbData == null)
             return null;
 
-        var targetName = Path.ChangeExtension(Path.GetFileName(assemblyPath), ".pdb");
-        var outputFilePath = Path.Combine(tempDirectory, "symbols", pdbData.Id, targetName);
+        var outputFilePath = Path.Combine(tempDirectory, "symbols", pdbData.Id + ".pdb");
         if (File.Exists(outputFilePath))
             return outputFilePath;
 
-        var request = $"{serverAddress}/{targetName}/{pdbData.Id}FFFFFFFF/{targetName}";
+        var request = $"{serverAddress}/{assemblyName}.pdb/{pdbData.Id}FFFFFFFF/{assemblyName}.pdb";
         // var header = $"SymbolChecksum: {pdbData.Hash}";
         if (DownloadFileAsync(request, outputFilePath).Result) {
-            eventLogger?.Invoke($"Loaded symbols for '{Path.GetFileName(assemblyPath)}'");
+            eventLogger?.Invoke($"Loaded symbols for '{assemblyName}'");
             return outputFilePath;
         }
 
@@ -71,8 +70,7 @@ public static class SymbolServerExtensions {
         if (pdbData == null)
             return false;
 
-        var targetName = Path.ChangeExtension(Path.GetFileName(assemblyPath), ".pdb");
-        pdbPath = Path.Combine(tempDirectory, "symbols", pdbData.Id, targetName);
+        pdbPath = Path.Combine(tempDirectory, "symbols", pdbData.Id + ".pdb");
         return File.Exists(pdbPath);
     }
 
