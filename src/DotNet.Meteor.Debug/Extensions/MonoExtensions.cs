@@ -72,20 +72,20 @@ public static class MonoExtensions {
 
         foreach (var assemblyPath in assemblyPaths) {
             try {
-                string assemblySymbolsFilePath = null;
-                if (!File.Exists(Path.ChangeExtension(assemblyPath, ".pdb"))) {
-                    if (string.IsNullOrEmpty(assemblySymbolsFilePath) && options.SearchMicrosoftSymbolServer)
-                        assemblySymbolsFilePath = SymbolServerExtensions.DownloadSourceSymbols(assemblyPath, SymbolServerExtensions.MicrosoftSymbolServerAddress);
-                    if (string.IsNullOrEmpty(assemblySymbolsFilePath) && options.SearchNuGetSymbolServer)
-                        assemblySymbolsFilePath = SymbolServerExtensions.DownloadSourceSymbols(assemblyPath, SymbolServerExtensions.NuGetSymbolServerAddress);
-                    if (string.IsNullOrEmpty(assemblySymbolsFilePath))
-                        DebuggerLoggingService.CustomLogger.LogMessage($"No symbols found for '{assemblyPath}'");
-                }
-
                 using var assemblyDefinition = Mono.Cecil.AssemblyDefinition.ReadAssembly(assemblyPath);
                 if (string.IsNullOrEmpty(assemblyDefinition.Name.FullName)) {
                     DebuggerLoggingService.CustomLogger.LogMessage($"Assembly '{assemblyPath}' has no name");
                     continue;
+                }
+
+                string assemblySymbolsFilePath = null;
+                if (!File.Exists(Path.ChangeExtension(assemblyPath, ".pdb"))) {
+                    if (string.IsNullOrEmpty(assemblySymbolsFilePath) && options.SearchMicrosoftSymbolServer)
+                        assemblySymbolsFilePath = SymbolServerExtensions.DownloadSourceSymbols(assemblyPath, assemblyDefinition.Name.Name, SymbolServerExtensions.MicrosoftSymbolServerAddress);
+                    if (string.IsNullOrEmpty(assemblySymbolsFilePath) && options.SearchNuGetSymbolServer)
+                        assemblySymbolsFilePath = SymbolServerExtensions.DownloadSourceSymbols(assemblyPath, assemblyDefinition.Name.Name, SymbolServerExtensions.NuGetSymbolServerAddress);
+                    if (string.IsNullOrEmpty(assemblySymbolsFilePath))
+                        DebuggerLoggingService.CustomLogger.LogMessage($"No symbols found for '{assemblyPath}'");
                 }
 
                 if (options.EvaluationOptions.UseExternalTypeResolver)
