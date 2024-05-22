@@ -9,9 +9,7 @@ using Mono.Debugging.Soft;
 namespace DotNet.Meteor.Debug;
 
 public class NoDebugLaunchAgent : BaseLaunchAgent {
-    public NoDebugLaunchAgent(LaunchConfiguration configuration) : base(configuration) {}
-
-    public override void Connect(SoftDebuggerSession session) {}
+    public NoDebugLaunchAgent(LaunchConfiguration configuration) : base(configuration) { }
     public override void Launch(IProcessLogger logger) {
         if (Configuration.Device.IsAndroid)
             LaunchAndroid(logger);
@@ -21,6 +19,9 @@ public class NoDebugLaunchAgent : BaseLaunchAgent {
             LaunchMacCatalyst(logger);
         if (Configuration.Device.IsWindows)
             LaunchWindows(logger);
+    }
+    public override void Connect(SoftDebuggerSession session) {
+        ConnectHotReload(Configuration.ReloadHostPort);
     }
 
     private void LaunchAppleMobile(IProcessLogger logger) {

@@ -10,9 +10,8 @@ using Mono.Debugging.Soft;
 namespace DotNet.Meteor.Debug;
 
 public class TraceLaunchAgent : BaseLaunchAgent {
-    public TraceLaunchAgent(LaunchConfiguration configuration) : base(configuration) {}
-
-    public override void Connect(SoftDebuggerSession session) {}
+    public TraceLaunchAgent(LaunchConfiguration configuration) : base(configuration) { }
+    public override void Connect(SoftDebuggerSession session) { }
     public override void Launch(IProcessLogger logger) {
         var nettracePath = Path.Combine(Configuration.TempDirectoryPath, $"{Configuration.GetApplicationName()}.nettrace");
         var diagnosticPort = Path.Combine(RuntimeSystem.HomeDirectory, $"{Configuration.Device.Platform}-port.lock");
@@ -37,7 +36,7 @@ public class TraceLaunchAgent : BaseLaunchAgent {
                 var traceProcess = Trace.Collect(diagnosticPort, nettracePath, logger);
                 Disposables.Insert(0, () => traceProcess.Terminate());
             }));
-           
+
             Disposables.Add(() => routerProcess.Terminate());
             Disposables.Add(() => simProcess.Terminate());
         } else {
@@ -47,7 +46,7 @@ public class TraceLaunchAgent : BaseLaunchAgent {
                 var traceProcess = Trace.Collect($"{diagnosticPort},connect", nettracePath, logger);
                 Disposables.Insert(0, () => traceProcess.Terminate());
             }));
-    
+
             Disposables.Add(() => routerProcess.Terminate());
             Disposables.Add(() => devProcess.Terminate());
         }
@@ -56,7 +55,7 @@ public class TraceLaunchAgent : BaseLaunchAgent {
         var tool = AppleSdk.OpenTool();
         var processRunner = new ProcessRunner(tool, new ProcessArgumentBuilder().AppendQuoted(Configuration.OutputAssembly));
         processRunner.SetEnvironmentVariable("DOTNET_DiagnosticPorts", $"{diagnosticPort},suspend");
-        
+
         var traceProcess = Trace.Collect(diagnosticPort, nettracePath, logger);
         var appLaunchResult = processRunner.WaitForExit();
 
@@ -70,10 +69,10 @@ public class TraceLaunchAgent : BaseLaunchAgent {
         if (Configuration.Device.IsEmulator)
             Configuration.Device.Serial = AndroidEmulator.Run(Configuration.Device.Name).Serial;
 
-        DeviceBridge.Reverse(Configuration.Device.Serial, Configuration.ProfilerPort, Configuration.ProfilerPort+1);
+        DeviceBridge.Reverse(Configuration.Device.Serial, Configuration.ProfilerPort, Configuration.ProfilerPort + 1);
         DeviceBridge.Shell(Configuration.Device.Serial, "setprop", "debug.mono.profile", $"127.0.0.1:{Configuration.ProfilerPort},suspend");
-        
-        var routerProcess = DSRouter.ServerToServer(Configuration.ProfilerPort+1, logger);
+
+        var routerProcess = DSRouter.ServerToServer(Configuration.ProfilerPort + 1, logger);
         System.Threading.Thread.Sleep(1000); // wait for router to start
         var traceProcess = Trace.Collect(routerProcess.Id, nettracePath, logger);
         System.Threading.Thread.Sleep(1000); // wait for trace to start

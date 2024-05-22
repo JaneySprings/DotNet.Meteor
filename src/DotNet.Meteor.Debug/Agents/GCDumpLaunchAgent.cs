@@ -17,7 +17,6 @@ public class GCDumpLaunchAgent : BaseLaunchAgent {
     private int applicationPID;
 
     public GCDumpLaunchAgent(LaunchConfiguration configuration) : base(configuration) { }
-
     public override void Connect(SoftDebuggerSession session) { }
     public override void Launch(IProcessLogger logger) {
         gcdumpPath = Path.Combine(Configuration.TempDirectoryPath, $"{Configuration.GetApplicationName()}.gcdump");

@@ -440,7 +440,13 @@ public class DebugSession : Session {
             return new CompletionsResponse(completionData.Items.Select(x => x.ToCompletionItem()).ToList());
         });
     }
-    #endregion Completions
+    #endregion Completions 
+    #region HotReload
+    protected override void HandleHotReloadRequest(IRequestResponder<HotReloadArguments> responder) {
+        launchAgent?.SendHotReloadNotification(responder.Arguments.FilePath, this);
+        responder.SetResponse(new HotReloadResponse());
+    }
+    #endregion
 
     private void TargetStopped(object sender, MonoClient.TargetEventArgs e) {
         ResetHandles();

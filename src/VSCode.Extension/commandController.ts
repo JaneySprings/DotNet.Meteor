@@ -30,9 +30,4 @@ export class CommandController {
             .append("--analyze-workspace")
             .appendQuoted(...folders));
     }
-    public static async xamlReload(port: number, path: string): Promise<boolean>  {
-        return await ProcessRunner.runAsync<boolean>(new ProcessArgumentBuilder(CommandController.reloadToolPath)
-            .append(port.toString())
-            .appendQuoted(path));
-    }
 }

@@ -152,3 +152,11 @@ public static class ServerExtensions {
         };
     }
 }
+
+public class HotReloadRequest : DebugProtocol.DebugRequest<HotReloadArguments> {
+    public HotReloadRequest() : base("hotReload") {}
+}
+public class HotReloadResponse : DebugProtocol.ResponseBody {}
+public class HotReloadArguments {
+    public string FilePath { get; set; }
+}
