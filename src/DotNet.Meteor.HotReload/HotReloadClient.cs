@@ -39,18 +39,18 @@ public class HotReloadClient {
     }
     public void SendNotification(string filePath, IProcessLogger? logger = null) {
         if (!File.Exists(filePath)) {
-            logger?.OnErrorDataReceived($"XAML file not found: {filePath}");
+            logger?.OnErrorDataReceived($"[HotReload]: XAML file not found: {filePath}");
             return;
         }
         if (transportReader == null || transportWriter == null) {
-            logger?.OnErrorDataReceived($"Connection not established");
+            logger?.OnErrorDataReceived($"[HotReload]: Connection not established");
             return;
         }
 
         var xamlContent = new StringBuilder(File.ReadAllText(filePath));
         var classDefinition = MarkupExtensions.GetClassDefinition(xamlContent);
         if (string.IsNullOrEmpty(classDefinition)) {
-            logger?.OnErrorDataReceived($"Class definition not found in XAML file: {filePath}");
+            logger?.OnErrorDataReceived($"[HotReload]: Class definition not found in XAML file: {filePath}");
             return;
         }
 
@@ -68,11 +68,11 @@ public class HotReloadClient {
         protocol.CheckServerCapabilities(transportReader.ReadLine());
 
         if (!protocol.IsConnectionSuccessful) {
-            logger?.OnErrorDataReceived($"Server responded with unexpected message");
+            logger?.OnErrorDataReceived("[HotReload]: Server responded with unexpected message");
             return;
         }
         if (protocol.IsLegacyProtocolFormat) {
-            logger?.OnErrorDataReceived($"Server used legacy protocol format");
+            logger?.OnErrorDataReceived("[HotReload]: Server used legacy protocol format");
             return;
         }
 

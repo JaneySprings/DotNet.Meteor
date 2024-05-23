@@ -29,9 +29,11 @@ public class NoDebugLaunchAgent : BaseLaunchAgent {
             var appProcess = MonoLaunch.DebugSim(Configuration.Device.Serial, Configuration.OutputAssembly, Configuration.DebugPort, logger);
             Disposables.Add(() => appProcess.Terminate());
         } else {
+            var hotReloadPortForwarding = MonoLaunch.TcpTunnel(Configuration.Device.Serial, Configuration.ReloadHostPort, logger);
             MonoLaunch.InstallDev(Configuration.Device.Serial, Configuration.OutputAssembly, logger);
             var appProcess = MonoLaunch.DebugDev(Configuration.Device.Serial, Configuration.OutputAssembly, Configuration.DebugPort, logger);
             Disposables.Add(() => appProcess.Terminate());
+            Disposables.Add(() => hotReloadPortForwarding.Terminate());
         }
     }
     private void LaunchMacCatalyst(IProcessLogger logger) {

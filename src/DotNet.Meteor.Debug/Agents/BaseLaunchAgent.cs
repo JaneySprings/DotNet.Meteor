@@ -12,7 +12,7 @@ public abstract class BaseLaunchAgent {
     public const string CommandPrefix = "/";
     public const string LanguageSeparator = "!";
 
-    public List<Action> Disposables { get; init; }
+    protected List<Action> Disposables { get; init; }
     protected LaunchConfiguration Configuration { get; init; }
     protected HotReloadClient HotReloadClient { get; init; }
 
@@ -27,11 +27,11 @@ public abstract class BaseLaunchAgent {
 
     public virtual List<CompletionItem> GetCompletionItems() => new List<CompletionItem>();
     public virtual void HandleCommand(string command, IProcessLogger logger) { }
-    public void ConnectHotReload(int port) {
+    public virtual void ConnectHotReload(int port) {
         Disposables.Add(() => HotReloadClient.Close());
         _ = HotReloadClient.TryConnectAsync(port);
     }
-    public void SendHotReloadNotification(string filePath, IProcessLogger logger = null) {
+    public virtual void SendHotReloadNotification(string filePath, IProcessLogger logger = null) {
         if (HotReloadClient.IsSupported && !HotReloadClient.IsRunning) {
             logger.OnErrorDataReceived("Hot reload client not connected");
             return;
