@@ -92,6 +92,7 @@ public class DebugSession : Session {
     #region Disconnect
     protected override DisconnectResponse HandleDisconnectRequest(DisconnectArguments arguments) {
         session.Dispose();
+        launchAgent?.Dispose();
         return new DisconnectResponse();
     }
     #endregion Disconnect

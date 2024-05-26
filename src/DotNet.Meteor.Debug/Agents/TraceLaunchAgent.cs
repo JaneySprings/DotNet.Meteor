@@ -77,15 +77,16 @@ public class TraceLaunchAgent : BaseLaunchAgent {
         var traceProcess = Trace.Collect(routerProcess.Id, nettracePath, logger);
         System.Threading.Thread.Sleep(1000); // wait for trace to start
 
+        Disposables.Add(() => traceProcess.Terminate());
+        Disposables.Add(() => routerProcess.Terminate());
+        Disposables.Add(() => DeviceBridge.RemoveReverse(Configuration.Device.Serial));
+
         if (Configuration.UninstallApp)
             DeviceBridge.Uninstall(Configuration.Device.Serial, applicationId, logger);
         DeviceBridge.Install(Configuration.Device.Serial, Configuration.OutputAssembly, logger);
         DeviceBridge.Launch(Configuration.Device.Serial, applicationId, logger);
 
-        Disposables.Add(() => traceProcess.Terminate());
-        Disposables.Add(() => routerProcess.Terminate());
         Disposables.Add(() => DeviceBridge.Shell(Configuration.Device.Serial, "am", "force-stop", applicationId));
-        Disposables.Add(() => DeviceBridge.RemoveReverse(Configuration.Device.Serial));
     }
     private void LaunchWindows(IProcessLogger logger, string diagnosticPort, string nettracePath) {
         var exeProcess = new ProcessRunner(new FileInfo(Configuration.OutputAssembly), null, logger).Start();
