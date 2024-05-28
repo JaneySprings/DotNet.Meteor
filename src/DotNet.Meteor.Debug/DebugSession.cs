@@ -67,7 +67,7 @@ public class DebugSession : Session {
     protected override LaunchResponse HandleLaunchRequest(LaunchArguments arguments) {
         return ServerExtensions.DoSafe(() => {
             var configuration = new LaunchConfiguration(arguments.ConfigurationProperties);
-            SymbolServerExtensions.SetTempDirectory(configuration.TempDirectoryPath);
+            SymbolServerExtensions.SetSourcesDirectory(configuration.TempDirectoryPath);
             SymbolServerExtensions.SetEventLogger(OnDebugDataReceived);
 
             launchAgent = configuration.GetLauchAgent();
@@ -92,6 +92,7 @@ public class DebugSession : Session {
     #region Disconnect
     protected override DisconnectResponse HandleDisconnectRequest(DisconnectArguments arguments) {
         session.Dispose();
+        launchAgent?.Dispose();
         return new DisconnectResponse();
     }
     #endregion Disconnect
@@ -440,7 +441,13 @@ public class DebugSession : Session {
             return new CompletionsResponse(completionData.Items.Select(x => x.ToCompletionItem()).ToList());
         });
     }
-    #endregion Completions
+    #endregion Completions 
+    #region HotReload
+    protected override void HandleHotReloadRequest(IRequestResponder<HotReloadArguments> responder) {
+        launchAgent?.SendHotReloadNotification(responder.Arguments.FilePath, this);
+        responder.SetResponse(new HotReloadResponse());
+    }
+    #endregion
 
     private void TargetStopped(object sender, MonoClient.TargetEventArgs e) {
         ResetHandles();

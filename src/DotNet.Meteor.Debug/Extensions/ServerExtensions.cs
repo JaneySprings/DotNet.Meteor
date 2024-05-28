@@ -94,19 +94,16 @@ public static class ServerExtensions {
         }
     }
 
-    public static T DoSafe<T>(Func<T> handler) {
+    public static T DoSafe<T>(Func<T> handler, Action finalizer = null) {
         try {
             return handler.Invoke();
         } catch (Exception ex) {
-            LogException(ex);
-            return default;
+            finalizer?.Invoke();
+            if (ex is ProtocolException)
+                throw;
+            DebuggerLoggingService.CustomLogger.LogError($"[Handled] {ex.Message}", ex);
+            throw GetProtocolException(ex.Message);
         }
-    }
-    private static void LogException(Exception ex) {
-        if (ex is ProtocolException)
-            throw ex;
-        DebuggerLoggingService.CustomLogger.LogError($"[Handled] {ex.Message}", ex);
-        throw GetProtocolException(ex.Message);
     }
 
     public static T ToObject<T>(this JToken jtoken, JsonTypeInfo<T> type) {
@@ -151,4 +148,12 @@ public static class ServerExtensions {
             Column = breakpoint.Column,
         };
     }
+}
+
+public class HotReloadRequest : DebugProtocol.DebugRequest<HotReloadArguments> {
+    public HotReloadRequest() : base("hotReload") {}
+}
+public class HotReloadResponse : DebugProtocol.ResponseBody {}
+public class HotReloadArguments {
+    public string FilePath { get; set; }
 }

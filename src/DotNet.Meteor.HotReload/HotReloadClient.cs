@@ -1,61 +1,92 @@
 ﻿using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using DotNet.Meteor.HotReload.Extensions;
 using DotNet.Meteor.HotReload.Models;
+using DotNet.Meteor.Processes;
 
 namespace DotNet.Meteor.HotReload;
 
-public static class HotReloadClient {
-    public static bool SendNotification(int port, string xamlFilePath, Action<string>? logger = null) {
-        if (!File.Exists(xamlFilePath)) {
-            logger?.Invoke($"XAML file not found: {xamlFilePath}");
-            return false;
+public class HotReloadClient {
+    private StreamReader? transportReader;
+    private StreamWriter? transportWriter;
+    private readonly int maxConnectionAttempts;
+    private readonly int timeBetweenConnectionAttempts;
+    
+    public bool IsRunning => transportReader != null && transportWriter != null;
+    public bool IsSupported { get; private set; }
+
+    public HotReloadClient(int maxConnectionAttempts = 60, int timeBetweenConnectionAttempts = 1000) {
+        this.maxConnectionAttempts = maxConnectionAttempts;
+        this.timeBetweenConnectionAttempts = timeBetweenConnectionAttempts;
+    }
+
+    public async Task<bool> TryConnectAsync(int port) {
+        IsSupported = true;
+        for (var i = 0; i < maxConnectionAttempts; i++) {
+            try {
+                var client = new TcpClient("localhost", port);
+                var stream = client.GetStream();
+                transportReader = new StreamReader(stream);
+                transportWriter = new StreamWriter(stream) { AutoFlush = true };
+                return true;
+            } catch {
+                await Task.Delay(timeBetweenConnectionAttempts);
+            }
+        }
+        return false;
+    }
+    public void SendNotification(string filePath, IProcessLogger? logger = null) {
+        if (!File.Exists(filePath)) {
+            logger?.OnErrorDataReceived($"[HotReload]: XAML file not found: {filePath}");
+            return;
+        }
+        if (transportReader == null || transportWriter == null) {
+            logger?.OnErrorDataReceived($"[HotReload]: Connection not established");
+            return;
         }
 
-        var xamlContent = new StringBuilder(File.ReadAllText(xamlFilePath));
+        var xamlContent = new StringBuilder(File.ReadAllText(filePath));
         var classDefinition = MarkupExtensions.GetClassDefinition(xamlContent);
         if (string.IsNullOrEmpty(classDefinition)) {
-            logger?.Invoke($"Class definition not found in XAML file: {xamlFilePath}");
-            return false;
+            logger?.OnErrorDataReceived($"[HotReload]: Class definition not found in XAML file: {filePath}");
+            return;
         }
 
         var transformations = MarkupExtensions.TransformReferenceNames(xamlContent);
         var transferObject = new TransferObject {
-            Version = Program.GetVersion(),
+            Version = GetVersion(),
             Content = xamlContent.ToString(),
             Definition = classDefinition,
             Transformations = transformations
         };
 
-        try {
-            using var client = new TcpClient("localhost", port);
-            using var stream = client.GetStream();
-            using var writer = new StreamWriter(stream) { AutoFlush = true };
-            using var reader = new StreamReader(stream);
+        transportWriter.WriteLine(HotReloadProtocol.HandShakeKey);
 
-            writer.WriteLine(HotReloadProtocol.HandShakeKey);
-            
-            var protocol = new HotReloadProtocol();
-            protocol.CheckServerCapabilities(reader.ReadLine());
+        var protocol = new HotReloadProtocol();
+        protocol.CheckServerCapabilities(transportReader.ReadLine());
 
-            if (!protocol.IsConnectionSuccessful) {
-                logger?.Invoke($"Server responded with unexpected message");
-                return false;
-            }
-
-            if (!protocol.IsLegacyProtocolFormat) {
-                writer.Write(JsonSerializer.Serialize(transferObject, TrimmableContext.Default.TransferObject));  
-            } else {
-                logger?.Invoke($"Server is using legacy protocol format");
-                writer.WriteLine(transferObject.Definition);
-                writer.Write(transferObject.Content);
-            }
-        } catch (Exception ex) {
-            logger?.Invoke($"Error sending notification to Hot Reload server: {ex.Message}");
-            return false;
+        if (!protocol.IsConnectionSuccessful) {
+            logger?.OnErrorDataReceived("[HotReload]: Server responded with unexpected message");
+            return;
+        }
+        if (protocol.IsLegacyProtocolFormat) {
+            logger?.OnErrorDataReceived("[HotReload]: Server used legacy protocol format");
+            return;
         }
 
-        return true;
+        transportWriter.WriteLine(JsonSerializer.Serialize(transferObject, TrimmableContext.Default.TransferObject));
+    }
+    public void Close() {
+        transportReader?.Close();
+        transportWriter?.Close();
+        transportReader = null;
+        transportWriter = null;
+    }
+
+    private static string GetVersion() {
+        var version = Assembly.GetExecutingAssembly().GetName().Version;
+        return version?.ToString() ?? "1.0.0";
     }
 }

@@ -17,7 +17,6 @@ public class GCDumpLaunchAgent : BaseLaunchAgent {
     private int applicationPID;
 
     public GCDumpLaunchAgent(LaunchConfiguration configuration) : base(configuration) { }
-
     public override void Connect(SoftDebuggerSession session) { }
     public override void Launch(IProcessLogger logger) {
         gcdumpPath = Path.Combine(Configuration.TempDirectoryPath, $"{Configuration.GetApplicationName()}.gcdump");
@@ -91,14 +90,15 @@ public class GCDumpLaunchAgent : BaseLaunchAgent {
         var routerProcess = DSRouter.ServerToServer(Configuration.ProfilerPort + 1, logger);
         applicationPID = routerProcess.Id;
 
+        Disposables.Add(() => routerProcess.Terminate());
+        Disposables.Add(() => DeviceBridge.RemoveReverse(Configuration.Device.Serial));
+
         if (Configuration.UninstallApp)
             DeviceBridge.Uninstall(Configuration.Device.Serial, applicationId, logger);
         DeviceBridge.Install(Configuration.Device.Serial, Configuration.OutputAssembly, logger);
         DeviceBridge.Launch(Configuration.Device.Serial, applicationId, logger);
 
-        Disposables.Add(() => routerProcess.Terminate());
         Disposables.Add(() => DeviceBridge.Shell(Configuration.Device.Serial, "am", "force-stop", applicationId));
-        Disposables.Add(() => DeviceBridge.RemoveReverse(Configuration.Device.Serial));
     }
     private void LaunchWindows(IProcessLogger logger) {
         var exeProcess = new ProcessRunner(new FileInfo(Configuration.OutputAssembly), null, logger).Start();
