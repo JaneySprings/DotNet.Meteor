@@ -36,7 +36,7 @@ public class DebugLaunchAgent : BaseLaunchAgent {
     }
     public override void Connect(SoftDebuggerSession session) {
         session.Run(startInformation, Configuration.DebuggerSessionOptions);
-        ConnectHotReload(Configuration.ReloadHostPort);
+        ConnectHotReload();
     }
 
     private void LaunchAppleMobile(IProcessLogger logger) {
