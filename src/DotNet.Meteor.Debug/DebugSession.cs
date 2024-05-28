@@ -67,7 +67,7 @@ public class DebugSession : Session {
     protected override LaunchResponse HandleLaunchRequest(LaunchArguments arguments) {
         return ServerExtensions.DoSafe(() => {
             var configuration = new LaunchConfiguration(arguments.ConfigurationProperties);
-            SymbolServerExtensions.SetTempDirectory(configuration.TempDirectoryPath);
+            SymbolServerExtensions.SetSourcesDirectory(configuration.TempDirectoryPath);
             SymbolServerExtensions.SetEventLogger(OnDebugDataReceived);
 
             launchAgent = configuration.GetLauchAgent();

@@ -14,21 +14,25 @@ public static class SymbolServerExtensions {
 
     private static readonly HttpClient httpClient;
     private static Action<string> eventLogger;
-    private static string tempDirectory;
+    private static string symbolsDirectory;
+    private static string sourcesDirectory;
 
     static SymbolServerExtensions() {
         httpClient = new HttpClient();
-        tempDirectory = AppDomain.CurrentDomain.BaseDirectory;
+        SetSourcesDirectory(AppDomain.CurrentDomain.BaseDirectory);
+        SetSymbolsDirectory(AppDomain.CurrentDomain.BaseDirectory);
     }
 
-    public static void SetTempDirectory(string directory) {
-        tempDirectory = directory;
+    public static void SetSourcesDirectory(string directory) {
+        sourcesDirectory = Path.Combine(directory, "sources");
+    }
+    public static void SetSymbolsDirectory(string directory) {
+        symbolsDirectory = Path.Combine(directory, "symbols");
     }
     public static void SetEventLogger(Action<string> logger) {
         eventLogger = logger;
     }
     public static string DownloadSourceFile(string uri) {
-        var sourcesDirectory = Path.Combine(tempDirectory, "sources");
         if (!Uri.TryCreate(uri, UriKind.Absolute, out var sourceLinkUri)) {
             DebuggerLoggingService.CustomLogger.LogMessage($"Invalid source link '{uri}'");
             return null;
@@ -46,7 +50,7 @@ public static class SymbolServerExtensions {
         if (pdbData == null)
             return null;
 
-        var outputFilePath = Path.Combine(tempDirectory, "symbols", pdbData.Id + ".pdb");
+        var outputFilePath = Path.Combine(symbolsDirectory, pdbData.Id + ".pdb");
         if (File.Exists(outputFilePath))
             return outputFilePath;
 
@@ -70,7 +74,7 @@ public static class SymbolServerExtensions {
         if (pdbData == null)
             return false;
 
-        pdbPath = Path.Combine(tempDirectory, "symbols", pdbData.Id + ".pdb");
+        pdbPath = Path.Combine(symbolsDirectory, pdbData.Id + ".pdb");
         return File.Exists(pdbPath);
     }
 

@@ -9,12 +9,13 @@
         "src/DotNet.Meteor.HotReload.Plugin/DotNet.Meteor.HotReload.Plugin.csproj"
     ],
     "files.exclude": {
-        "**/bin": true,
-        "**/obj": true,
+        "src/**/bin": true,
+        "src/**/obj": true,
         "node_modules": true,
+        "artifacts": true,
         "tools":true,
-        ".config": true,
         "package-lock.json": true,
+        ".config": true,
         ".gitignore": true,
         ".gitmodules": true
     }
