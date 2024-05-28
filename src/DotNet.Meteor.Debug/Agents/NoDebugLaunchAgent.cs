@@ -21,7 +21,7 @@ public class NoDebugLaunchAgent : BaseLaunchAgent {
             LaunchWindows(logger);
     }
     public override void Connect(SoftDebuggerSession session) {
-        ConnectHotReload(Configuration.ReloadHostPort);
+        ConnectHotReload();
     }
 
     private void LaunchAppleMobile(IProcessLogger logger) {
