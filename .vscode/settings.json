@@ -1,0 +1,22 @@
+{
+    "dotrush.roslyn.workspaceProperties": [
+        "NuGetVersionRoslyn=4.5.0"
+    ],
+    "dotrush.roslyn.projectFiles": [
+        "src/DotNet.Meteor.Debug/DotNet.Meteor.Debug.csproj",
+        "src/DotNet.Meteor.Tests/DotNet.Meteor.Tests.csproj",
+        "src/DotNet.Meteor.Xaml/DotNet.Meteor.Xaml.csproj",
+        "src/DotNet.Meteor.HotReload.Plugin/DotNet.Meteor.HotReload.Plugin.csproj"
+    ],
+    "files.exclude": {
+        "src/**/bin": true,
+        "src/**/obj": true,
+        "node_modules": true,
+        "artifacts": true,
+        "tools":true,
+        "package-lock.json": true,
+        ".config": true,
+        ".gitignore": true,
+        ".gitmodules": true
+    }
+}

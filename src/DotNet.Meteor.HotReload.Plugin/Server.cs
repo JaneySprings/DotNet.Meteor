@@ -23,19 +23,19 @@ internal class Server : IMauiInitializeService {
             return;
         }
 
-        while (true) {
-            using var client = await tcpListener.AcceptTcpClientAsync();
-            using var stream = client.GetStream();
-            using var reader = new StreamReader(stream);
-            using var writer = new StreamWriter(stream) { AutoFlush = true };
+        using var client = await tcpListener.AcceptTcpClientAsync();
+        using var stream = client.GetStream();
+        using var reader = new StreamReader(stream);
+        using var writer = new StreamWriter(stream) { AutoFlush = true };
 
+        while (true) {
             await reader.ReadLineAsync();
             await writer.WriteLineAsync($"handshake_{Version}");
 
-            var response = await reader.ReadToEndAsync();
+            var response = await reader.ReadLineAsync();
             var transferObject = JsonSerializer.Deserialize<TransferObject>(response, TrimmableContext.Default.TransferObject);
             var mainPage = Application.Current?.MainPage;
-            
+
             if (mainPage == null || transferObject == null)
                 continue;
 

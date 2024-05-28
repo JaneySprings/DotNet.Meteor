@@ -1,0 +1,34 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "tsc: watch",
+            "command": "tsc",
+            "args": [
+                "-w",
+                "-p",
+                "${workspaceFolder}/src/VSCode.Extension"
+            ],
+            "isBackground": true,
+            "problemMatcher": [
+                "$tsc-watch"
+            ]
+        },
+        {
+            "label": "vsix",
+            "command": "dotnet",
+            "type": "process",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "args": [
+                "cake",
+                "--target=vsix",
+                "--arch=osx-arm64",
+                "--configuration=release",
+                "--release-version=5.0.0"
+            ],
+            "problemMatcher": []
+        }
+    ]
+}

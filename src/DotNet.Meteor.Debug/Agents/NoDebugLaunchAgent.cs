@@ -9,9 +9,7 @@ using Mono.Debugging.Soft;
 namespace DotNet.Meteor.Debug;
 
 public class NoDebugLaunchAgent : BaseLaunchAgent {
-    public NoDebugLaunchAgent(LaunchConfiguration configuration) : base(configuration) {}
-
-    public override void Connect(SoftDebuggerSession session) {}
+    public NoDebugLaunchAgent(LaunchConfiguration configuration) : base(configuration) { }
     public override void Launch(IProcessLogger logger) {
         if (Configuration.Device.IsAndroid)
             LaunchAndroid(logger);
@@ -22,15 +20,20 @@ public class NoDebugLaunchAgent : BaseLaunchAgent {
         if (Configuration.Device.IsWindows)
             LaunchWindows(logger);
     }
+    public override void Connect(SoftDebuggerSession session) {
+        ConnectHotReload(Configuration.ReloadHostPort);
+    }
 
     private void LaunchAppleMobile(IProcessLogger logger) {
         if (Configuration.Device.IsEmulator) {
             var appProcess = MonoLaunch.DebugSim(Configuration.Device.Serial, Configuration.OutputAssembly, Configuration.DebugPort, logger);
             Disposables.Add(() => appProcess.Terminate());
         } else {
+            var hotReloadPortForwarding = MonoLaunch.TcpTunnel(Configuration.Device.Serial, Configuration.ReloadHostPort, logger);
             MonoLaunch.InstallDev(Configuration.Device.Serial, Configuration.OutputAssembly, logger);
             var appProcess = MonoLaunch.DebugDev(Configuration.Device.Serial, Configuration.OutputAssembly, Configuration.DebugPort, logger);
             Disposables.Add(() => appProcess.Terminate());
+            Disposables.Add(() => hotReloadPortForwarding.Terminate());
         }
     }
     private void LaunchMacCatalyst(IProcessLogger logger) {
@@ -52,6 +55,7 @@ public class NoDebugLaunchAgent : BaseLaunchAgent {
             Configuration.Device.Serial = AndroidEmulator.Run(Configuration.Device.Name).Serial;
 
         DeviceBridge.Forward(Configuration.Device.Serial, Configuration.ReloadHostPort);
+        Disposables.Add(() => DeviceBridge.RemoveForward(Configuration.Device.Serial));
 
         if (Configuration.UninstallApp)
             DeviceBridge.Uninstall(Configuration.Device.Serial, applicationId, logger);
@@ -61,8 +65,6 @@ public class NoDebugLaunchAgent : BaseLaunchAgent {
         DeviceBridge.Flush(Configuration.Device.Serial);
 
         var logcatProcess = DeviceBridge.Logcat(Configuration.Device.Serial, logger);
-
         Disposables.Add(() => logcatProcess.Terminate());
-        Disposables.Add(() => DeviceBridge.RemoveForward(Configuration.Device.Serial));
     }
 }

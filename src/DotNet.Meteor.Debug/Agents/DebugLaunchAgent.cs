@@ -24,10 +24,6 @@ public class DebugLaunchAgent : BaseLaunchAgent {
         startInformation = new SoftDebuggerStartInfo(startArguments);
         startInformation.SetAssemblies(configuration.GetApplicationAssembliesDirectory(), configuration.DebuggerSessionOptions);
     }
-
-    public override void Connect(SoftDebuggerSession session) {
-        session.Run(startInformation, Configuration.DebuggerSessionOptions);
-    }
     public override void Launch(IProcessLogger logger) {
         if (Configuration.Device.IsAndroid)
             LaunchAndroid(logger);
@@ -37,6 +33,10 @@ public class DebugLaunchAgent : BaseLaunchAgent {
             LaunchMacCatalyst(logger);
         if (Configuration.Device.IsWindows)
             throw new NotSupportedException();
+    }
+    public override void Connect(SoftDebuggerSession session) {
+        session.Run(startInformation, Configuration.DebuggerSessionOptions);
+        ConnectHotReload(Configuration.ReloadHostPort);
     }
 
     private void LaunchAppleMobile(IProcessLogger logger) {
@@ -54,11 +54,13 @@ public class DebugLaunchAgent : BaseLaunchAgent {
             Disposables.Add(() => debugProcess.Terminate());
         } else {
             var debugPortForwarding = MonoLaunch.TcpTunnel(Configuration.Device.Serial, Configuration.DebugPort, logger);
+            var hotReloadPortForwarding = MonoLaunch.TcpTunnel(Configuration.Device.Serial, Configuration.ReloadHostPort, logger);
             MonoLaunch.InstallDev(Configuration.Device.Serial, Configuration.OutputAssembly, logger);
 
             var debugProcess = MonoLaunch.DebugDev(Configuration.Device.Serial, Configuration.OutputAssembly, Configuration.DebugPort, logger);
             Disposables.Add(() => debugProcess.Terminate());
             Disposables.Add(() => debugPortForwarding.Terminate());
+            Disposables.Add(() => hotReloadPortForwarding.Terminate());
         }
     }
     private void LaunchMacCatalyst(IProcessLogger logger) {

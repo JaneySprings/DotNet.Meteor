@@ -38,7 +38,7 @@ export function activate(context: vscode.ExtensionContext): PublicExports | unde
 	/* Events */
 	context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(ev => {
 		if (ev.fileName.endsWith('.xaml') && vscode.debug.activeDebugSession?.configuration.type === res.debuggerMeteorId && !ConfigurationController.profiler)
-			CommandController.xamlReload(ConfigurationController.getReloadHostPort(), ev.fileName);
+			vscode.debug.activeDebugSession.customRequest('hotReload', { filePath: ev.fileName });
 	}));
 	context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(StatusBarController.update));
 	context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(ev => {

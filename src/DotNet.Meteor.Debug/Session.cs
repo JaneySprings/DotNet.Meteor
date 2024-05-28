@@ -5,6 +5,7 @@ using Mono.Debugging.Client;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 using DotNet.Meteor.Shared;
+using DotNet.Meteor.Debug.Extensions;
 
 namespace DotNet.Meteor.Debug;
 
@@ -16,10 +17,12 @@ public abstract class Session : DebugAdapterBase, IProcessLogger {
     }
 
     protected abstract void OnUnhandledException(Exception ex);
+    protected abstract void HandleHotReloadRequest(IRequestResponder<HotReloadArguments> responder);
 
     public void Start() {
         Protocol.LogMessage += LogMessage;
         Protocol.DispatcherError += LogError;
+        Protocol.RegisterRequestType<HotReloadRequest, HotReloadArguments>(HandleHotReloadRequest);
         Protocol.Run();
     }
     public void OnOutputDataReceived(string stdout) {

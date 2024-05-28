@@ -8,7 +8,6 @@ public string ExtensionStagingDirectory => _Path.Combine(RootDirectory, "extensi
 public string ExtensionBinariesDirectory => _Path.Combine(ExtensionStagingDirectory, "bin");
 
 public string MeteorWorkspaceProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Workspace", "DotNet.Meteor.Workspace.csproj");
-public string MeteorHotReloadProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.HotReload", "DotNet.Meteor.HotReload.csproj");
 public string MeteorXamlProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Xaml", "DotNet.Meteor.Xaml.csproj");
 public string MeteorDebugProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Debug", "DotNet.Meteor.Debug.csproj");
 public string MeteorTestsProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Tests", "DotNet.Meteor.Tests.csproj");
@@ -36,12 +35,6 @@ Task("clean").Does(() => {
 ///////////////////////////////////////////////////////////////////////////////
 
 Task("workspace").Does(() => DotNetPublish(MeteorWorkspaceProjectPath, new DotNetPublishSettings {
-	MSBuildSettings = new DotNetMSBuildSettings { AssemblyVersion = version },
-	Configuration = configuration,
-	Runtime = runtime,
-}));
-
-Task("hotreload").Does(() => DotNetPublish(MeteorHotReloadProjectPath, new DotNetPublishSettings {
 	MSBuildSettings = new DotNetMSBuildSettings { AssemblyVersion = version },
 	Configuration = configuration,
 	Runtime = runtime,
@@ -83,7 +76,6 @@ Task("test").Does(() => DotNetTest(MeteorTestsProjectPath, new DotNetTestSetting
 	Loggers = new[] { "trx" }
 }));
 
-
 ///////////////////////////////////////////////////////////////////////////////
 // TYPESCRIPT
 ///////////////////////////////////////////////////////////////////////////////
@@ -91,7 +83,6 @@ Task("test").Does(() => DotNetTest(MeteorTestsProjectPath, new DotNetTestSetting
 Task("vsix")
 	.IsDependentOn("clean")
 	.IsDependentOn("workspace")
-	.IsDependentOn("hotreload")
 	.IsDependentOn("xaml")
 	.IsDependentOn("debugger")
 	.IsDependentOn("dsrouter")
@@ -119,7 +110,7 @@ void ExecuteCommand(string command, string arguments) {
 		command = "cmd";
 	}
 	if (StartProcess(command, arguments) != 0)
-		throw new Exception("Command exited with non-zero exit code.");
+		throw new Exception($"{command} exited with non-zero exit code.");
 }
 
 RunTarget(target);
