@@ -93,6 +93,9 @@ public static class ServerExtensions {
             return targetDirectory;
         }
     }
+    public static string TrimExpression(this DebugProtocol.EvaluateArguments args) {
+        return args.Expression?.TrimEnd(';')?.Replace("?.", ".");
+    }
 
     public static T DoSafe<T>(Func<T> handler, Action finalizer = null) {
         try {
