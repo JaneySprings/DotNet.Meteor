@@ -371,7 +371,7 @@ public class DebugSession : Session {
                 throw new ProtocolException($"command handled by {launchAgent}");
             }
 
-            var expression = arguments.Expression.TrimEnd(';');
+            var expression = arguments.TrimExpression();
             var frame = frameHandles.Get(arguments.FrameId ?? 0, null);
             if (frame == null)
                 throw new ProtocolException("no active stackframe");
