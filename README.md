@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://github.com/JaneySprings/DotNet.Meteor/raw/main/img/header.jpg" width="1180px" alt=".NET Meteor" />
+<img src="https://github.com/JaneySprings/DotNet.Meteor/raw/main/assets/header.jpg" width="1180px" alt=".NET Meteor" />
 <a href="https://dev.to/nromanov/boost-net-maui-development-productivity-6-powerful-features-of-net-meteor-for-vs-code-in-windows-mac-linux-d0b">Features</a> | <a href="https://github.com/JaneySprings/DotNet.Meteor/wiki">Documentation</a> | <a href="https://github.com/JaneySprings/DotNet.Meteor/issues">Support</a>
 
 ---
@@ -41,7 +41,7 @@ Your can build and debug projects, written in the `F#` language.
 6. Press `F5` to debug the application or `ctrl + F5` to launch the application without debugging.
 7. Enjoy!
 
-![image](https://github.com/JaneySprings/DotNet.Meteor/raw/main/img/demo_dbg.gif)
+![image](https://github.com/JaneySprings/DotNet.Meteor/raw/main/assets/demo_dbg.gif)
 
 ---
 
@@ -76,7 +76,7 @@ public static class MauiProgram
 ```
 3. Now you can run your project, update XAML and see updates in real-time!
 
-![image](https://github.com/JaneySprings/DotNet.Meteor/raw/main/img/demo_hr.gif)
+![image](https://github.com/JaneySprings/DotNet.Meteor/raw/main/assets/demo_hr.gif)
 
 ---
 
@@ -112,7 +112,7 @@ Conversion complete
 ```
 7. You can see the `speedscope.json` report in the `.meteor` folder of your project. You can use the [Speedscope in VSCode](https://marketplace.visualstudio.com/items?itemName=sransara.speedscope-in-vscode) extension to view it. Alternatively, you can upload it directly to the [speedscope](https://www.speedscope.app) site. For the `gcdump` report, you can use the [dotnet-heapview](https://github.com/1hub/dotnet-heapview) or _Visual Studio for Windows_.
 
-![image](https://github.com/JaneySprings/DotNet.Meteor/raw/main/img/demo_trace.gif)
+![image](https://github.com/JaneySprings/DotNet.Meteor/raw/main/assets/demo_trace.gif)
 
 &emsp;*The profiler can capture and analyze functions executed within the Mono runtime. To profile native code, you can leverage platform-specific tools, such as Android Studio and Xcode.*
 
