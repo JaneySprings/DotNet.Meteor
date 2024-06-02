@@ -33,6 +33,12 @@ export class StatusBarController {
         context.subscriptions.push(StatusBarController.projectStatusItem);
         context.subscriptions.push(StatusBarController.targetStatusItem);
         context.subscriptions.push(StatusBarController.deviceStatusItem);
+
+        context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(StatusBarController.update));
+        context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(ev => {
+            if (ev.fileName.endsWith('proj') || ev.fileName.endsWith('.props'))
+                StatusBarController.update();
+        }));
     }
     public static async update() {
         const folders = vscode.workspace.workspaceFolders!.map(it => it.uri.fsPath);

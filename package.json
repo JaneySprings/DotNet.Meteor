@@ -6,7 +6,7 @@
   "displayName": ".NET Meteor",
   "author": "Nikita Romanov",
   "license": "MIT",
-  "icon": "img/logo.png",
+  "icon": "assets/logo.png",
   "preview": false,
   "bugs": {
     "url": "https://github.com/JaneySprings/DotNet.Meteor/issues"
@@ -50,21 +50,33 @@
   "contributes": {
     "commands": [
       {
-        "command": "%command.id.selectActiveProject%",
+        "command": "dotnet-meteor.selectActiveProject",
+        "category": "%extension.displayName%",
         "title": "%command.title.selectActiveProject%"
       },
       {
-        "command": "%command.id.selectActiveConfiguration%",
+        "command": "dotnet-meteor.selectActiveConfiguration",
+        "category": "%extension.displayName%",
         "title": "%command.title.selectActiveConfiguration%"
       },
       {
-        "command": "%command.id.selectActiveDevice%",
+        "command": "dotnet-meteor.selectActiveDevice",
+        "category": "%extension.displayName%",
         "title": "%command.title.selectActiveDevice%"
+      },
+      {
+        "command": "dotnet-meteor.triggerHotReload",
+        "category": "%extension.displayName%",
+        "title": "%command.title.triggerHotReload%",
+        "icon": {
+          "light": "assets/hotreload_light.svg",
+          "dark": "assets/hotreload_dark.svg"
+        }
       }
     ],
     "taskDefinitions": [
       {
-        "type": "%task.meteor.id%",
+        "type": "dotnet-meteor.task",
         "required": [],
         "properties": {
           "target": {
@@ -89,7 +101,7 @@
     ],
     "problemMatchers": [
       {
-        "name": "%task.meteor.problemMatcher%",
+        "name": "dotnet-meteor.problemMatcher",
         "source": "%extension.displayName%",
         "fileLocation": "relative",
         "owner": "%extension.displayName%",
@@ -120,7 +132,7 @@
     ],
     "debuggers": [
       {
-        "type": "%debugger.meteor.id%",
+        "type": "dotnet-meteor.debugger",
         "label": "%debugger.meteor.title%",
         "languages": [
           "csharp",
@@ -137,9 +149,9 @@
         "initialConfigurations": [
           {
             "name": "%debugger.meteor.title%",
-            "type": "%debugger.meteor.id%",
+            "type": "dotnet-meteor.debugger",
             "request": "launch",
-            "preLaunchTask": "%task.meteor.title%"
+            "preLaunchTask": "dotnet-meteor: Build"
           }
         ],
         "configurationSnippets": [
@@ -148,9 +160,9 @@
             "description": "%debugger.meteor.description%",
             "body": {
               "name": "%debugger.meteor.title%",
-              "type": "%debugger.meteor.id%",
+              "type": "dotnet-meteor.debugger",
               "request": "launch",
-              "preLaunchTask": "%task.meteor.title%"
+              "preLaunchTask": "dotnet-meteor: Build"
             }
           }
         ],
@@ -174,6 +186,15 @@
         }
       }
     ],
+    "menus": {
+      "debug/toolBar": [
+				{
+					"command": "dotnet-meteor.triggerHotReload",
+					"group": "navigation2",
+					"when": "debugType == dotnet-meteor.debugger"
+				}
+			]
+    },
     "configuration": {
       "title": "%extension.displayName%",
       "properties": {
@@ -205,6 +226,11 @@
           "type": "boolean",
           "default": true,
           "description": "%configuration.description.uninstallApplicationBeforeInstalling%"
+        },
+        "dotnetMeteor.applyHotReloadChangesOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "%configuration.description.applyHotReloadChangesOnSave%"
         },
         "dotnetMeteor.debuggerOptions.evaluationTimeout": {
           "type": "integer",

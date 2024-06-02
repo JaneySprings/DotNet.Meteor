@@ -33,10 +33,7 @@ export class ConfigurationController {
         return ConfigurationController.getSetting<number>(res.configIdProfilerHostPort, res.configDefaultProfilerHostPort);
     }
     public static getUninstallAppOption(): boolean {
-        return ConfigurationController.getSetting<boolean>(
-            res.configIdUninstallApplicationBeforeInstalling, 
-            res.configDefaultUninstallApplicationBeforeInstalling
-        );
+        return ConfigurationController.getSetting<boolean>(res.configIdUninstallApplicationBeforeInstalling, true);
     }
     public static getTargetFramework(): string | undefined {
         return ConfigurationController.project?.frameworks.find(it => {
@@ -95,10 +92,10 @@ export class ConfigurationController {
         return ConfigurationController.project !== undefined && ConfigurationController.device !== undefined;
     }
 
-    private static getSetting<TResult>(id: string, fallback: TResult): TResult {
+    public static getSetting<TResult>(id: string, fallback: TResult): TResult {
         return workspace.getConfiguration(res.configId).get(id) ?? fallback;
     }
-    private static getSettingOrDefault<TResult>(id: string): TResult | undefined {
+    public static getSettingOrDefault<TResult>(id: string): TResult | undefined {
         return workspace.getConfiguration(res.configId).get(id);
     }
 } 

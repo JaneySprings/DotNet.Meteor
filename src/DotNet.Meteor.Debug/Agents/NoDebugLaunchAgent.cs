@@ -20,9 +20,7 @@ public class NoDebugLaunchAgent : BaseLaunchAgent {
         if (Configuration.Device.IsWindows)
             LaunchWindows(logger);
     }
-    public override void Connect(SoftDebuggerSession session) {
-        ConnectHotReload();
-    }
+    public override void Connect(SoftDebuggerSession session) {}
 
     private void LaunchAppleMobile(IProcessLogger logger) {
         if (Configuration.Device.IsEmulator) {

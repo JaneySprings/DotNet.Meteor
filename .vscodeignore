@@ -4,7 +4,8 @@
 **/.DS_Store
 
 # Include
-!img/logo.png
+!assets/*.png
+!assets/*.svg
 !extension
 !package.json
 !package.nls*.json
