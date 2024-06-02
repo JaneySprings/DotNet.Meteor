@@ -17,9 +17,11 @@ public abstract class BaseLaunchAgent {
     protected HotReloadClient HotReloadClient { get; init; }
 
     protected BaseLaunchAgent(LaunchConfiguration configuration) {
-        HotReloadClient = new HotReloadClient(configuration.ReloadHostPort, configuration.Device.IsAndroid);
         Disposables = new List<Action>();
         Configuration = configuration;
+
+        HotReloadClient = new HotReloadClient(configuration.ReloadHostPort);
+        Disposables.Add(() => HotReloadClient.Close());
     }
 
     public abstract void Connect(SoftDebuggerSession session);
@@ -27,10 +29,6 @@ public abstract class BaseLaunchAgent {
 
     public virtual List<CompletionItem> GetCompletionItems() => new List<CompletionItem>();
     public virtual void HandleCommand(string command, IProcessLogger logger) { }
-    public virtual void ConnectHotReload() {
-        Disposables.Add(() => HotReloadClient.Close());
-        _ = HotReloadClient.TryConnectAsync();
-    }
     public virtual void SendHotReloadNotification(string filePath, IProcessLogger logger = null) {
         try {
             HotReloadClient.SendNotification(filePath, logger);

@@ -1,10 +1,18 @@
-import * as vscode from 'vscode';
 
 export class ProcessArgumentBuilder {
-    private arguments: string[] = [];
+    private command: string;
+    private arguments: string[];
 
     public constructor(command: string) {
-        this.arguments.push(command);
+        this.command = command;
+        this.arguments = [];
+    }
+
+    public getCommand(): string {
+        return this.command;
+    }
+    public getArguments(): string[] {
+        return this.arguments;
     }
 
     public append(...args: string[]): ProcessArgumentBuilder {
@@ -29,15 +37,6 @@ export class ProcessArgumentBuilder {
         return this;
     }
     public build(): string {
-        return this.arguments.join(" ");
-    }
-
-    // TODO: Remove when this bug is fixed:
-    // https://github.com/microsoft/vscode/issues/173719
-    public appendFix(arg: string): ProcessArgumentBuilder {
-        if (vscode.env.shell.includes("powershell"))
-            arg = arg.replace('Program Files (x86)', '\'Program Files (x86)\'');
-        this.arguments.push(arg);
-        return this;
+        return `${this.command} ${this.arguments.join(" ")}`;
     }
 }

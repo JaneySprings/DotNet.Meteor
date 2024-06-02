@@ -9,32 +9,22 @@ using DotNet.Meteor.Processes;
 namespace DotNet.Meteor.HotReload;
 
 public class HotReloadClient {
-    private const int MaxConnectionAttempts = 60;
-    private const int TimeBetweenConnectionAttempts = 1000;
+    private const int MaxConnectionAttempts = 3;
+    private const int TimeBetweenConnectionAttempts = 500;
 
     private StreamReader? transportReader;
     private StreamWriter? transportWriter;
-    private readonly bool lastConnectionAttemptAllowed; // only for f**king android
     private readonly int port;
 
     public bool IsRunning => transportReader != null && transportWriter != null;
 
-    public HotReloadClient(int port, bool lastConnectionAttemptAllowed = false) {
-        this.lastConnectionAttemptAllowed = lastConnectionAttemptAllowed;
+    public HotReloadClient(int port) {
         this.port = port;
     }
 
-    public async Task<bool> TryConnectAsync() {
-        if (IsRunning)
-            return true;
-        if (lastConnectionAttemptAllowed)
-            return false;
-
-        return await TryConnectCoreAsync();
-    }
     public void SendNotification(string filePath, IProcessLogger? logger = null) {
-        if (lastConnectionAttemptAllowed && !IsRunning)
-            TryConnectCoreAsync().Wait();
+        if (!IsRunning)
+            TryConnectAsync().Wait();
 
         if (!File.Exists(filePath)) {
             logger?.OnErrorDataReceived($"[HotReload]: XAML file not found: {filePath}");
@@ -83,11 +73,8 @@ public class HotReloadClient {
         transportWriter = null;
     }
 
-    private async Task<bool> TryConnectCoreAsync() {
-        var maxConnectionAttempts = lastConnectionAttemptAllowed ? 1 : MaxConnectionAttempts;
-        var timeBetweenConnectionAttempts = lastConnectionAttemptAllowed ? 1 : TimeBetweenConnectionAttempts;
-
-        for (var i = 0; i < maxConnectionAttempts; i++) {
+    private async Task<bool> TryConnectAsync() {
+        for (var i = 0; i < MaxConnectionAttempts; i++) {
             try {
                 var client = new TcpClient("localhost", port);
                 var stream = client.GetStream();
@@ -95,7 +82,7 @@ public class HotReloadClient {
                 transportWriter = new StreamWriter(stream) { AutoFlush = true };
                 return true;
             } catch {
-                await Task.Delay(timeBetweenConnectionAttempts);
+                await Task.Delay(TimeBetweenConnectionAttempts);
             }
         }
         return false;

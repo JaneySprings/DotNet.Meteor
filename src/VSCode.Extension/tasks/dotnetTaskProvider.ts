@@ -19,13 +19,13 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
         const defaultTarget = definition.target === res.taskDefinitionDefaultTarget;
         const builder = new ProcessArgumentBuilder('dotnet')
             .append(definition.target.toLowerCase())
-            .appendQuoted(ConfigurationController.project!.path)
+            .append(ConfigurationController.project!.path)
             .append(`-p:Configuration=${ConfigurationController.target}`)
             .append(`-p:TargetFramework=${ConfigurationController.getTargetFramework()}`)
             .conditional(`-p:RuntimeIdentifier=${ConfigurationController.device?.runtime_id}`, () => ConfigurationController.device?.runtime_id);
 
         if (ConfigurationController.isAndroid()) {
-            builder.appendFix(`-p:AndroidSdkDirectory="${ConfigurationController.androidSdkDirectory}"`);
+            builder.append(`-p:AndroidSdkDirectory=${ConfigurationController.androidSdkDirectory}`);
             builder.conditional('-p:EmbedAssembliesIntoApk=true', () => defaultTarget);
             builder.conditional('-p:AndroidEnableProfiler=true', () => ConfigurationController.profiler && defaultTarget);
         }
@@ -51,7 +51,7 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
             * but it's a huge breaking change for users */
             definition.target.charAt(0).toUpperCase() + definition.target.slice(1),
             res.extensionId,
-            new vscode.ShellExecution(builder.build()),
+            new vscode.ShellExecution(builder.getCommand(), builder.getArguments()),
             `$${res.taskProblemMatcherId}`
         );
     }

@@ -4,19 +4,20 @@ export const extensionPublisher = "nromanov";
 export const extensionDisplayName = ".NET Meteor";
 
 export const commandIdSelectActiveProject = "dotnet-meteor.selectActiveProject";
-export const commandTitleSelectActiveProject = ".NET Meteor: Select workspace project";
+export const commandTitleSelectActiveProject = "Select workspace project";
 
 export const commandIdSelectActiveConfiguration = "dotnet-meteor.selectActiveConfiguration";
-export const commandTitleSelectActiveConfiguration = ".NET Meteor: Select project configuration";
+export const commandTitleSelectActiveConfiguration = "Select project configuration";
 
 export const commandIdSelectActiveDevice = "dotnet-meteor.selectActiveDevice";
-export const commandTitleSelectActiveDevice = ".NET Meteor: Select device";
+export const commandTitleSelectActiveDevice = "Select device";
 
 export const commandIdActiveProjectPath = "dotnet-meteor.activeProjectPath";
 export const commandIdActiveConfiguration = "dotnet-meteor.activeConfiguration";
 export const commandIdActiveTargetFramework = "dotnet-meteor.activeTargetFramework";
 export const commandIdActiveDeviceName = "dotnet-meteor.activeDeviceName";
 export const commandIdActiveDeviceSerial = "dotnet-meteor.activeDeviceSerial";
+export const commandIdTriggerHotReload = "dotnet-meteor.triggerHotReload";
 
 export const taskDefinitionId = "dotnet-meteor.task";
 export const taskDefinitionDefaultTarget = "build";
@@ -49,7 +50,7 @@ export const configIdProfilerHostPort = "profilerHostPort";
 export const configDefaultProfilerHostPort = 9000;
 
 export const configIdUninstallApplicationBeforeInstalling = "uninstallApplicationBeforeInstalling";
-export const configDefaultUninstallApplicationBeforeInstalling = true;
+export const configIdApplyHotReloadChangesOnSave = "applyHotReloadChangesOnSave";
 
 export const configIdDebuggerOptions = "debuggerOptions";
 export const configIdDebuggerOptionsEvaluationTimeout = `${configIdDebuggerOptions}.evaluationTimeout`;

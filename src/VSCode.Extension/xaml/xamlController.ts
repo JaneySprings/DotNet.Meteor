@@ -11,16 +11,31 @@ export class XamlController {
     private static extensionVersion: string;
 
     public static activate(context: vscode.ExtensionContext) {
-        XamlController.extensionVersion = context.extension.packageJSON.version;
-        XamlCommandController.activate(context);
-
-        context.subscriptions.push(vscode.languages.registerCompletionItemProvider(
-            { pattern: '**/*.xaml' }, new XamlCompletionItemProvider(), ':', '.', '<', ' ',
-        ));
+        /* Hot Reload */
+        context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(ev => {
+            if (ConfigurationController.getSetting<boolean>(res.configIdApplyHotReloadChangesOnSave, true))
+                XamlController.reloadDocumentChanges(ev.fileName);
+        }));
+        context.subscriptions.push(vscode.commands.registerCommand(res.commandIdTriggerHotReload, async () => {
+            if (vscode.window.activeTextEditor !== undefined) {
+                await vscode.window.activeTextEditor.document.save();
+                XamlController.reloadDocumentChanges(vscode.window.activeTextEditor.document.fileName);
+            }
+        }));
+        /* Xaml IntelliSense */
+        context.subscriptions.push(vscode.languages.registerCompletionItemProvider({ pattern: '**/*.xaml' }, new XamlCompletionItemProvider(), ':', '.', '<', ' ',));
         context.subscriptions.push(vscode.tasks.onDidEndTask(ev => {
             if (ev.execution.task.definition.type.includes(res.taskDefinitionId))
                 XamlController.regenerate();
         }));
+
+        XamlController.extensionVersion = context.extension.packageJSON.version;
+        XamlCommandController.activate(context);
+    }
+
+    public static reloadDocumentChanges(filePath: string) {
+        if (filePath.endsWith('.xaml') && vscode.debug.activeDebugSession?.configuration.type === res.debuggerMeteorId)
+            vscode.debug.activeDebugSession.customRequest('hotReload', { filePath: filePath });
     }
 
     public static getTypes(definition: string | undefined): any[] { 
