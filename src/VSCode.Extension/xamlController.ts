@@ -3,7 +3,6 @@ import { ConfigurationController } from "./configurationController";
 import * as res from './resources/constants';
 import * as vscode from 'vscode';
 import * as path from "path";
-import * as fs from "fs";
 
 export class XamlController {
     private static client: LanguageClient;

@@ -1,6 +1,7 @@
 {
     "dotrush.roslyn.workspaceProperties": [
-        "NuGetVersionRoslyn=4.5.0"
+        "NuGetVersionRoslyn=4.5.0",
+        "TargetFramework=net6.0"
     ],
     "dotrush.roslyn.projectFiles": [
         "src/DotNet.Meteor.Debug/DotNet.Meteor.Debug.csproj",
