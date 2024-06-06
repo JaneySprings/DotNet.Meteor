@@ -8,7 +8,7 @@ public string ExtensionStagingDirectory => _Path.Combine(RootDirectory, "extensi
 public string ExtensionBinariesDirectory => _Path.Combine(ExtensionStagingDirectory, "bin");
 
 public string MeteorWorkspaceProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Workspace", "DotNet.Meteor.Workspace.csproj");
-public string MeteorXamlProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Xaml", "DotNet.Meteor.Xaml.csproj");
+public string MeteorXamlProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Xaml", "DotNet.Meteor.Xaml.LanguageServer", "DotNet.Meteor.Xaml.LanguageServer.csproj");
 public string MeteorDebugProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Debug", "DotNet.Meteor.Debug.csproj");
 public string MeteorTestsProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Tests", "DotNet.Meteor.Tests.csproj");
 public string MeteorPluginProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.HotReload.Plugin", "DotNet.Meteor.HotReload.Plugin.csproj");
@@ -40,8 +40,9 @@ Task("workspace").Does(() => DotNetPublish(MeteorWorkspaceProjectPath, new DotNe
 	Runtime = runtime,
 }));
 
-Task("xaml").Does(() => DotNetBuild(MeteorXamlProjectPath, new DotNetBuildSettings {
+Task("xaml").Does(() => DotNetPublish(MeteorXamlProjectPath, new DotNetPublishSettings {
 	MSBuildSettings = new DotNetMSBuildSettings { AssemblyVersion = version },
+	OutputDirectory = _Path.Combine(ExtensionBinariesDirectory, "Xaml"),
 	Configuration = configuration,
 	Runtime = runtime,
 }));
