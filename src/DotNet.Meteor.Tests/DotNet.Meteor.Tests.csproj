@@ -13,6 +13,5 @@
 	<ItemGroup>
 		<ProjectReference Include="..\DotNet.Meteor.Workspace\DotNet.Meteor.Workspace.csproj" />
 		<ProjectReference Include="..\DotNet.Meteor.HotReload\DotNet.Meteor.HotReload.csproj" />
-		<ProjectReference Include="..\DotNet.Meteor.Xaml\DotNet.Meteor.Xaml.csproj" />
 	</ItemGroup>
 </Project>
