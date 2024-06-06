@@ -5,8 +5,8 @@
     "dotrush.roslyn.projectFiles": [
         "src/DotNet.Meteor.Debug/DotNet.Meteor.Debug.csproj",
         "src/DotNet.Meteor.Tests/DotNet.Meteor.Tests.csproj",
-        "src/DotNet.Meteor.Xaml/DotNet.Meteor.Xaml.csproj",
-        "src/DotNet.Meteor.HotReload.Plugin/DotNet.Meteor.HotReload.Plugin.csproj"
+        "src/DotNet.Meteor.HotReload.Plugin/DotNet.Meteor.HotReload.Plugin.csproj",
+        "src/DotNet.Meteor.Xaml/DotNet.Meteor.Xaml.LanguageServer/DotNet.Meteor.Xaml.LanguageServer.csproj"
     ],
     "files.exclude": {
         "src/**/bin": true,
