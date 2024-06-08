@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using System.Collections.Generic;
 
-namespace DotNet.Meteor.Shared;
+namespace DotNet.Meteor.Common;
 
 [JsonSerializable(typeof(List<DeviceData>))]
 [JsonSerializable(typeof(List<Project>))]

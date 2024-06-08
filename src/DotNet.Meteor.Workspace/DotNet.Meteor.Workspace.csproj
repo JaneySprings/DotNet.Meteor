@@ -7,6 +7,6 @@
 	<Import Project="..\Common.Build.props" />
 
 	<ItemGroup>
-		<ProjectReference Include="..\DotNet.Meteor.Shared\DotNet.Meteor.Shared.csproj" />
+		<ProjectReference Include="..\DotNet.Meteor.Common\DotNet.Meteor.Common.csproj" />
 	</ItemGroup>
 </Project>

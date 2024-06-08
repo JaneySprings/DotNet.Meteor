@@ -1,4 +1,4 @@
-using DotNet.Meteor.Shared;
+using DotNet.Meteor.Common;
 using DotNet.Meteor.Workspace.Apple;
 using DotNet.Meteor.Workspace.Android;
 using DotNet.Meteor.Workspace.Windows;

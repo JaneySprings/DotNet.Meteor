@@ -1,6 +1,6 @@
 using System;
 
-namespace DotNet.Meteor.Shared.Extensions;
+namespace DotNet.Meteor.Common.Extensions;
 
 public static class StringExtensions {
     public static string TrimStart(this string target, string trimString) {
