@@ -9,7 +9,6 @@ export class XamlController {
     private static command: string;
 
     public static activate(context: vscode.ExtensionContext) {
-        /* Hot Reload */
         context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(ev => {
             if (ConfigurationController.getSetting<boolean>(res.configIdApplyHotReloadChangesOnSave, true))
                 XamlController.reloadDocumentChanges(ev.fileName);
@@ -20,8 +19,11 @@ export class XamlController {
                 XamlController.reloadDocumentChanges(vscode.window.activeTextEditor.document.fileName);
             }
         }));
-        
-        /* Xaml IntelliSense */
+        context.subscriptions.push(vscode.tasks.onDidEndTask(ev => {
+            if (ev.execution.task.definition.type.includes(res.taskDefinitionId))
+                XamlController.restart();
+        }));
+    
         const extensionPath = context.extensionPath;
         const serverExecutable = path.join(extensionPath, "extension", "bin", "Xaml", "DotNet.Meteor.Xaml.LanguageServer");
         const serverExtension = process.platform === 'win32' ? '.exe' : '';
