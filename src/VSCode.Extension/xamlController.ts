@@ -34,7 +34,7 @@ export class XamlController {
     private static initialize() {
         const serverOptions: ServerOptions = { command: XamlController.command };
         XamlController.client = new LanguageClient(res.extensionId, res.extensionId, serverOptions, { 
-            diagnosticCollectionName: "Xaml",
+            diagnosticCollectionName: res.extensionDisplayName,
             synchronize: { 
                 configurationSection: res.extensionId,
             },
