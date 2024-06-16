@@ -23,10 +23,7 @@ public static class TypeResolverExtensions {
     }
 
     public static string ResolveIdentifier(string identifierName, SourceLocation _, bool typesOnly) {
-        if (context == null || evaluationOptions == null)
-            return identifierName;
-
-        if (typesOnly)
+        if (context == null || evaluationOptions == null || typesOnly)
             return typesCache.TryGetValue(identifierName, out var resolvedType) ? resolvedType : identifierName;
 
         var options = evaluationOptions.Clone();
