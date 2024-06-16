@@ -73,11 +73,6 @@ public class TraceLaunchAgent : BaseLaunchAgent {
         DeviceBridge.Shell(Configuration.Device.Serial, "setprop", "debug.mono.profile", $"127.0.0.1:{Configuration.ProfilerPort},suspend");
 
         var routerProcess = DSRouter.ServerToServer(Configuration.ProfilerPort + 1, logger);
-        System.Threading.Thread.Sleep(1000); // wait for router to start
-        var traceProcess = Trace.Collect(routerProcess.Id, nettracePath, logger);
-        System.Threading.Thread.Sleep(1000); // wait for trace to start
-
-        Disposables.Add(() => traceProcess.Terminate());
         Disposables.Add(() => routerProcess.Terminate());
         Disposables.Add(() => DeviceBridge.RemoveReverse(Configuration.Device.Serial));
 
@@ -86,6 +81,8 @@ public class TraceLaunchAgent : BaseLaunchAgent {
         DeviceBridge.Install(Configuration.Device.Serial, Configuration.OutputAssembly, logger);
         DeviceBridge.Launch(Configuration.Device.Serial, applicationId, logger);
 
+        var traceProcess = Trace.Collect(routerProcess.Id, nettracePath, logger);
+        Disposables.Insert(0, () => traceProcess.Terminate());
         Disposables.Add(() => DeviceBridge.Shell(Configuration.Device.Serial, "am", "force-stop", applicationId));
     }
     private void LaunchWindows(IProcessLogger logger, string diagnosticPort, string nettracePath) {

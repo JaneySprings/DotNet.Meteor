@@ -36,10 +36,14 @@ public abstract class BaseLaunchAgent {
             logger.OnErrorDataReceived($"[HotReload]: {ex.Message}");
         }
     }
-    public virtual void Dispose() {
+    public virtual void Dispose() { 
         foreach (var disposable in Disposables) {
-            disposable.Invoke();
-            DebuggerLoggingService.CustomLogger.LogMessage($"Disposing {disposable.Method.Name}");
+            try {
+                disposable.Invoke();
+                DebuggerLoggingService.CustomLogger.LogMessage($"Disposing {disposable.Method.Name}");
+            } catch (Exception ex) {
+                DebuggerLoggingService.CustomLogger.LogMessage($"Error while disposing {disposable.Method.Name}: {ex.Message}");
+            }
         }
 
         Disposables.Clear();
