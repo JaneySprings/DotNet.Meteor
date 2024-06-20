@@ -340,6 +340,9 @@
       "explorer.fileNesting.patterns": {
         "*.xaml": "${capture}.xaml.cs",
         "*.axaml": "${capture}.axaml.cs"
+      },
+      "editor.quickSuggestions": {
+        "strings": "on"
       }
     }
   }

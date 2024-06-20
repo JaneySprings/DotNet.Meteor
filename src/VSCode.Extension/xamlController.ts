@@ -8,7 +8,7 @@ export class XamlController {
     private static client: LanguageClient;
     private static command: string;
 
-    public static activate(context: vscode.ExtensionContext) {
+    public static async activate(context: vscode.ExtensionContext) {
         context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(ev => {
             if (ConfigurationController.getSetting<boolean>(res.configIdApplyHotReloadChangesOnSave, true))
                 XamlController.reloadDocumentChanges(ev.fileName);
@@ -19,16 +19,22 @@ export class XamlController {
                 XamlController.reloadDocumentChanges(vscode.window.activeTextEditor.document.fileName);
             }
         }));
-        context.subscriptions.push(vscode.tasks.onDidEndTask(ev => {
-            if (ev.execution.task.definition.type.includes(res.taskDefinitionId))
-                XamlController.restart();
-        }));
-    
+        
+        if ((await vscode.workspace.findFiles('**/*.xaml')).length > 0)
+            XamlController.activateServer(context);
+    }
+    private static activateServer(context: vscode.ExtensionContext) {
         const extensionPath = context.extensionPath;
         const serverExecutable = path.join(extensionPath, "extension", "bin", "Xaml", "DotNet.Meteor.Xaml.LanguageServer");
         const serverExtension = process.platform === 'win32' ? '.exe' : '';
         XamlController.command = serverExecutable + serverExtension;
         XamlController.start();
+        
+        context.subscriptions.push(XamlController.client);
+        context.subscriptions.push(vscode.tasks.onDidEndTask(ev => {
+            if (ev.execution.task.definition.type.includes(res.taskDefinitionId))
+                XamlController.restart();
+        }));
     }
 
     private static initialize() {
