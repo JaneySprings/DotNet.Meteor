@@ -1,5 +1,5 @@
 
-namespace DotNet.Meteor.Shared {
+namespace DotNet.Meteor.Common {
     public static class Details {
         public const string AndroidEmulator = "Android Emulators";
         public const string AndroidDevice = "Android Devices";

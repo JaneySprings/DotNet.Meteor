@@ -1,5 +1,5 @@
 
-namespace DotNet.Meteor.Shared {
+namespace DotNet.Meteor.Common {
     public static class Runtimes {
         public const string MacArm64 = "maccatalyst-arm64";
         public const string MacX64 = "maccatalyst-x64";

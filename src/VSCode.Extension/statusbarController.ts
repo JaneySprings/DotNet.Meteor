@@ -1,7 +1,7 @@
 import { ConfigurationController } from './configurationController';
 import { CommandController } from "./commandController";
 import { StateController } from './stateController';
-import { XamlController } from './xaml/xamlController';
+import { XamlController } from './xamlController';
 import { PublicExports } from './publicExports';
 import { Project } from './models/project';
 import { ProjectItem } from './models/projectItem';
@@ -69,7 +69,6 @@ export class StatusBarController {
         ConfigurationController.project = item ?? StatusBarController.projects[0];
         StatusBarController.projectStatusItem.text = `${Icons.project} ${ConfigurationController.project?.name}`;
         PublicExports.instance.projectChangedEventHandler.invoke(ConfigurationController.project);
-        XamlController.regenerate();
         StateController.saveProject();
     }
     public static performSelectTarget(item: Target | undefined = undefined) {

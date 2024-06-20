@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace DotNet.Meteor.Shared {
+namespace DotNet.Meteor.Common {
 
     public static class ProcessExtensions {
         private const int ExitTimeout = 5000;

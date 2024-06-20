@@ -1,5 +1,5 @@
 
-namespace DotNet.Meteor.Shared {
+namespace DotNet.Meteor.Common {
     public static class Platforms {
         public const string Android = "android";
         public const string iOS = "ios";

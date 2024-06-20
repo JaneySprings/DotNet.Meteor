@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using SystemPath = System.IO.Path;
 
-namespace DotNet.Meteor.Shared {
+namespace DotNet.Meteor.Common {
     public class Project {
         [JsonPropertyName("name")] public string Name { get; set; }
         [JsonPropertyName("path")] public string Path { get; set; }
