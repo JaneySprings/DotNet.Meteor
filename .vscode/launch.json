@@ -14,10 +14,16 @@
             "preLaunchTask": "tsc: watch"
         },
         {
-            "name": ".NET Core Attach",
+            "name": ".NET Attach to Debugger",
             "type": "coreclr",
             "request": "attach",
             "processName": "DotNet.Meteor.Debug"
+        },
+        {
+            "name": ".NET Attach to LSP",
+            "type": "coreclr",
+            "request": "attach",
+            "processName": "DotNet.Meteor.Xaml.LanguageServer"
         }
     ]
 }

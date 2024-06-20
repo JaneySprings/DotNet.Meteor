@@ -1,4 +1,4 @@
-﻿using DotNet.Meteor.Shared;
+﻿using DotNet.Meteor.Common;
 using NLog;
 using System.Reflection;
 using System.Text.Json;

@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace DotNet.Meteor.Shared {
+namespace DotNet.Meteor.Common {
     public class DeviceData {
         [JsonPropertyName("name")] public string Name { get; set; }
         [JsonPropertyName("detail")] public string Detail { get; set; }

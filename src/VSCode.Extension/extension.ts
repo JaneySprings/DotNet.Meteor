@@ -4,7 +4,7 @@ import { ConfigurationController } from './configurationController';
 import { StatusBarController } from './statusbarController';
 import { CommandController } from './commandController';
 import { StateController } from './stateController';
-import { XamlController } from './xaml/xamlController';
+import { XamlController } from './xamlController';
 import { PublicExports } from './publicExports';
 import * as res from './resources/constants';
 import * as vscode from 'vscode';

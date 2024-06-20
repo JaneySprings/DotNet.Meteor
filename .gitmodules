@@ -4,3 +4,6 @@
 [submodule "src/DotNet.Diagnostics"]
 	path = src/DotNet.Diagnostics
 	url = https://github.com/JaneySprings/.NET-Diagnostics
+[submodule "src/DotNet.Meteor.Xaml"]
+	path = src/DotNet.Meteor.Xaml
+	url = https://github.com/JaneySprings/DotNet.Meteor.Xaml.LanguageServer.git

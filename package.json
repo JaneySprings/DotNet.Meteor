@@ -38,6 +38,9 @@
     "watch": "tsc -watch -p ./src/VSCode.Extension/tsconfig.json",
     "package": "webpack --mode production"
   },
+  "dependencies": {
+    "vscode-languageclient": "^8.1.0"
+  },
   "devDependencies": {
     "@types/node": "16.x",
     "@types/vscode": "^1.73.0",
@@ -329,6 +332,17 @@
             "type": "string"
           }
         }
+      }
+    },
+    "configurationDefaults": {
+      "explorer.fileNesting.expand": false,
+      "explorer.fileNesting.enabled": true,
+      "explorer.fileNesting.patterns": {
+        "*.xaml": "${capture}.xaml.cs",
+        "*.axaml": "${capture}.axaml.cs"
+      },
+      "editor.quickSuggestions": {
+        "strings": "on"
       }
     }
   }

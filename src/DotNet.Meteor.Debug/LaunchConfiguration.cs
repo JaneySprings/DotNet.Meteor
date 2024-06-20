@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using DotNet.Meteor.Shared;
+using DotNet.Meteor.Common;
 using DotNet.Meteor.Debug.Extensions;
 using Newtonsoft.Json.Linq;
 using Mono.Debugging.Client;

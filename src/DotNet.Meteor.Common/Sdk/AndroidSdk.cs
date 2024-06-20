@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace DotNet.Meteor.Shared {
+namespace DotNet.Meteor.Common {
     public static class AndroidSdk {
         public static string SdkLocation() {
             string path = Environment.GetEnvironmentVariable("ANDROID_SDK_ROOT");

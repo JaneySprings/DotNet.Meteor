@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Diagnostics;
 using DotNet.Meteor.Processes;
-using DotNet.Meteor.Shared;
+using DotNet.Meteor.Common;
 
 namespace DotNet.Meteor.Debug.Sdk;
 

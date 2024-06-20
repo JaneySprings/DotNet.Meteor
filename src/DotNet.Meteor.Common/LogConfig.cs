@@ -5,7 +5,7 @@ using NLog.Config;
 using NLog.Targets;
 using NLog.Targets.Wrappers;
 
-namespace DotNet.Meteor.Shared;
+namespace DotNet.Meteor.Common;
 
 public static class LogConfig {
     private static readonly string _logDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");

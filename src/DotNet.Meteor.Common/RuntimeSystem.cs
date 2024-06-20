@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace DotNet.Meteor.Shared {
+namespace DotNet.Meteor.Common {
     public static class RuntimeSystem {
         public static bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         public static bool IsMacOS => RuntimeInformation.IsOSPlatform(OSPlatform.OSX);

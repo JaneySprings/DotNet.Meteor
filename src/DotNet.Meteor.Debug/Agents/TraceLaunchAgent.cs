@@ -4,7 +4,7 @@ using DotNet.Meteor.Debug.Extensions;
 using DotNet.Meteor.Debug.Sdk;
 using DotNet.Meteor.Debug.Sdk.Profiling;
 using DotNet.Meteor.Processes;
-using DotNet.Meteor.Shared;
+using DotNet.Meteor.Common;
 using Mono.Debugging.Soft;
 
 namespace DotNet.Meteor.Debug;

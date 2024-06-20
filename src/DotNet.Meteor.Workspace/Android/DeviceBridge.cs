@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 using DotNet.Meteor.Processes;
-using DotNet.Meteor.Shared;
+using DotNet.Meteor.Common;
 
 namespace DotNet.Meteor.Workspace.Android;
 

@@ -17,7 +17,7 @@
 		<ProjectReference Include="..\Mono.Debugger\Mono.Debugger.Soft\Mono.Debugger.Soft.csproj" />
 		<ProjectReference Include="..\Mono.Debugger\Mono.Debugging.Soft\Mono.Debugging.Soft.csproj" />
 		<ProjectReference Include="..\DotNet.Meteor.HotReload\DotNet.Meteor.HotReload.csproj" />
-		<ProjectReference Include="..\DotNet.Meteor.Shared\DotNet.Meteor.Shared.csproj" />
+		<ProjectReference Include="..\DotNet.Meteor.Common\DotNet.Meteor.Common.csproj" />
 
 		<ProjectReference Include="..\DotNet.Diagnostics\src\Tools\dotnet-trace\dotnet-trace.csproj" />
 		<ProjectReference Include="..\DotNet.Diagnostics\src\Tools\dotnet-gcdump\dotnet-gcdump.csproj" />

@@ -22,7 +22,7 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
             .append(ConfigurationController.project!.path)
             .append(`-p:Configuration=${ConfigurationController.target}`)
             .append(`-p:TargetFramework=${ConfigurationController.getTargetFramework()}`)
-            .conditional(`-p:RuntimeIdentifier=${ConfigurationController.device?.runtime_id}`, () => ConfigurationController.device?.runtime_id);
+            .conditional(`-p:RuntimeIdentifier=${ConfigurationController.device?.runtime_id}`, () => ConfigurationController.device?.runtime_id)
 
         if (ConfigurationController.isAndroid()) {
             builder.append(`-p:AndroidSdkDirectory=${ConfigurationController.androidSdkDirectory}`);

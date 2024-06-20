@@ -8,7 +8,8 @@ using NewtonConverter = Newtonsoft.Json.JsonConvert;
 using DebugProtocol = Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 using System.IO;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
-using DotNet.Meteor.Shared;
+using DotNet.Meteor.Common;
+using DotNet.Meteor.Common.Extensions;
 using Mono.Debugging.Soft;
 using System.IO.Compression;
 using System;
@@ -74,10 +75,7 @@ public static class ServerExtensions {
                 return targetDirectory;
 
             foreach (var entry in assembliesEntry) {
-                var assemblyFileName = entry.Name;
-                if (assemblyFileName.EndsWith(".so", StringComparison.OrdinalIgnoreCase))
-                    assemblyFileName = Path.GetFileNameWithoutExtension(assemblyFileName);
-
+                var assemblyFileName = entry.Name.TrimStart("lib_").TrimEnd(".so");
                 var targetPath = Path.Combine(targetDirectory, assemblyFileName);
                 if (File.Exists(targetPath))
                     File.Delete(targetPath);

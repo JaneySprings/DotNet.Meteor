@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace DotNet.Meteor.Shared {
+namespace DotNet.Meteor.Common {
     public static class ProjectExtensions {
         public static string EvaluateProperty(this Project project, string name, string defaultValue = null) {
             var propertyMatches = project.GetPropertyMatches(project.Path, name);

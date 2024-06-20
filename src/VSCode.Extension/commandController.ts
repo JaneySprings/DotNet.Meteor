@@ -9,13 +9,11 @@ import * as path from 'path';
 
 export class CommandController {
     private static workspaceToolPath: string;
-    private static reloadToolPath: string;
 
     public static activate(context: vscode.ExtensionContext) {
         const extensionPath = vscode.extensions.getExtension(`${res.extensionPublisher}.${res.extensionId}`)?.extensionPath ?? '';
         const executableExtension = process.platform === 'win32' ? '.exe' : '';
         CommandController.workspaceToolPath = path.join(extensionPath, "extension", "bin", "Workspace", "DotNet.Meteor.Workspace" + executableExtension);
-        CommandController.reloadToolPath = path.join(extensionPath, "extension", "bin", "HotReload", "DotNet.Meteor.HotReload" + executableExtension);
     }
 
     public static androidSdk(): string | undefined {
