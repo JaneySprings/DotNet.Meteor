@@ -26,7 +26,7 @@
                 "--target=vsix",
                 "--arch=osx-arm64",
                 "--configuration=release",
-                "--release-version=5.0.0"
+                "--release-version=6.0.0"
             ],
             "problemMatcher": []
         }
