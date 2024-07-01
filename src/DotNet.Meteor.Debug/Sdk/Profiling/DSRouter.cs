@@ -12,7 +12,7 @@ public static class DSRouter {
         string path = Path.Combine(assembliesDirectory, "dotnet-dsrouter" + RuntimeSystem.ExecExtension);
 
         if (!File.Exists(path))
-            throw new FileNotFoundException("Could not find dsrouter tool.");
+            throw new FileNotFoundException($"Could not find {nameof(DSRouter)} tool.");
 
         return new FileInfo(path);
     }
