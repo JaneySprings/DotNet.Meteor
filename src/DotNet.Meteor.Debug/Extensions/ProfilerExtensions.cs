@@ -64,21 +64,14 @@ public class ConsoleLogger : IConsole {
 
     private class StringWriter : TextWriter {
         private readonly Action<string> handler;
-        private readonly StringBuilder buffer;
 
         public StringWriter(Action<string> handler) {
             this.handler = handler;
-            buffer = new StringBuilder();
         }
 
         public override Encoding Encoding => Encoding.UTF8;
-        public override void Write(char value) {
-            if (value == '\n') {
-                handler.Invoke(buffer.ToString());
-                buffer.Clear();
-            } else {
-                buffer.Append(value);
-            }
+        public override void Write(string value) {
+            handler.Invoke(value);
         }
     }
 }
