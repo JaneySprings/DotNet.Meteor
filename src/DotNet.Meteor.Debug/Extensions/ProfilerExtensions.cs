@@ -37,13 +37,13 @@ public class CatchStartLogger : IProcessLogger {
 
     void IProcessLogger.OnErrorDataReceived(string stderr) {
         innerLogger.OnErrorDataReceived(stderr);
-        if (stderr.Contains(CatchTarget))
+        if (stderr.Contains(CatchTarget, StringComparison.OrdinalIgnoreCase))
             onCatchStart();
     }
 
     void IProcessLogger.OnOutputDataReceived(string stdout) {
         innerLogger.OnOutputDataReceived(stdout);
-        if (stdout.Contains(CatchTarget))
+        if (stdout.Contains(CatchTarget, StringComparison.OrdinalIgnoreCase))
             onCatchStart();
     }
 }

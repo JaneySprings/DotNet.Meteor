@@ -35,7 +35,7 @@ public class GCDumpLaunchAgent : BaseLaunchAgent {
         Disposables.Add(() => ServerExtensions.TryDeleteFile(diagnosticPort));
     }
     public override void HandleCommand(string command, IProcessLogger logger) {
-        if (!command.Equals($"{CommandPrefix}dump", System.StringComparison.OrdinalIgnoreCase))
+        if (!command.Equals($"{CommandPrefix}dump", StringComparison.OrdinalIgnoreCase))
             return;
         if (string.IsNullOrEmpty(diagnosticPort) || string.IsNullOrEmpty(gcdumpPath))
             return;
