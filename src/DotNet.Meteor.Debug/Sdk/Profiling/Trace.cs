@@ -19,7 +19,7 @@ public static class Trace {
     private static ProfilerTask CollectCore(int pid, string diagnosticPort, string outputFile, IProcessLogger logger) {
         var cancellationTokenSource = new CancellationTokenSource();
         var token = cancellationTokenSource.Token;
-        var task = Task.Run(async () => await TraceCollectHandler.Collect(
+        var task = TraceCollectHandler.Collect(
             ct: token,
             console: new ConsoleLogger(logger),
             processId: pid,
@@ -39,7 +39,7 @@ public static class Trace {
             stoppingEventEventName: null,
             stoppingEventPayloadFilter: null,
             rundown: null
-        ));
+        );
 
         return new ProfilerTask(task, cancellationTokenSource);
     }
