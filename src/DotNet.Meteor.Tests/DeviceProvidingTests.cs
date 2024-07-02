@@ -19,38 +19,38 @@ public class DeviceProvidingTests: TestFixture {
     //     }
     // }
 
-    // [Fact]
-    // public void AppleVirtualDeviceTest() {
-    //     if (!RuntimeSystem.IsMacOS)
-    //         return;
-    //     var result = AppleTool.VirtualDevices();
-    //     Assert.NotNull(result);
-    //     Assert.NotEmpty(result);
-    // }
+    [Fact]
+    public void AppleVirtualDeviceTest() {
+        if (!RuntimeSystem.IsMacOS)
+            return;
+        var result = AppleTool.VirtualDevices();
+        Assert.NotNull(result);
+        Assert.NotEmpty(result);
+    }
 
-    // [Fact]
-    // public void ApplePhysicalDeviceTest() {
-    //     if (!RuntimeSystem.IsMacOS)
-    //         return;
-    //     var result = AppleTool.PhysicalDevices();
-    //     Assert.NotNull(result);
-    // }
+    [Fact]
+    public void ApplePhysicalDeviceTest() {
+        if (!RuntimeSystem.IsMacOS)
+            return;
+        var result = AppleTool.PhysicalDevices();
+        Assert.NotNull(result);
+    }
 
-    // [Fact]
-    // public void AppleMacDeviceTest() {
-    //     if (!RuntimeSystem.IsMacOS)
-    //         return;
-    //     var result = AppleTool.MacintoshDevices();
+    [Fact]
+    public void AppleMacDeviceTest() {
+        if (!RuntimeSystem.IsMacOS)
+            return;
+        var result = AppleTool.MacintoshDevices();
 
-    //     if (SystemProfiler.IsArch64()) Assert.Equal(2, result.Count);
-    //     else Assert.Single(result);
-    // }
+        if (SystemProfiler.IsArch64()) Assert.Equal(2, result.Count);
+        else Assert.Single(result);
+    }
 
-    // [Fact]
-    // public void WindowsDeviceTest() {
-    //     if (!RuntimeSystem.IsWindows)
-    //         return;
-    //     var result = WindowsTool.WindowsDevice();
-    //     Assert.NotNull(result);
-    // }
+    [Fact]
+    public void WindowsDeviceTest() {
+        if (!RuntimeSystem.IsWindows)
+            return;
+        var result = WindowsTool.WindowsDevice();
+        Assert.NotNull(result);
+    }
 }
