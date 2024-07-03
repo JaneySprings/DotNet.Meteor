@@ -1,4 +1,8 @@
 using System;
+using System.CommandLine;
+using System.CommandLine.IO;
+using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNet.Meteor.Processes;
@@ -33,13 +37,41 @@ public class CatchStartLogger : IProcessLogger {
 
     void IProcessLogger.OnErrorDataReceived(string stderr) {
         innerLogger.OnErrorDataReceived(stderr);
-        if (stderr.Contains(CatchTarget))
+        if (stderr.Contains(CatchTarget, StringComparison.OrdinalIgnoreCase))
             onCatchStart();
     }
 
     void IProcessLogger.OnOutputDataReceived(string stdout) {
         innerLogger.OnOutputDataReceived(stdout);
-        if (stdout.Contains(CatchTarget))
+        if (stdout.Contains(CatchTarget, StringComparison.OrdinalIgnoreCase))
             onCatchStart();
+    }
+}
+
+public class ConsoleLogger : IConsole {
+    private readonly IProcessLogger processLogger;
+
+    public ConsoleLogger(IProcessLogger processLogger) {
+        this.processLogger = processLogger;
+    }
+
+    public IStandardStreamWriter Out => StandardStreamWriter.Create(new StringWriter(processLogger.OnOutputDataReceived));
+    public IStandardStreamWriter Error => StandardStreamWriter.Create(new StringWriter(processLogger.OnErrorDataReceived));
+
+    public bool IsOutputRedirected => false;
+    public bool IsErrorRedirected => false;
+    public bool IsInputRedirected => false;
+
+    private class StringWriter : TextWriter {
+        private readonly Action<string> handler;
+
+        public StringWriter(Action<string> handler) {
+            this.handler = handler;
+        }
+
+        public override Encoding Encoding => Encoding.UTF8;
+        public override void Write(string value) {
+            handler.Invoke(value);
+        }
     }
 }

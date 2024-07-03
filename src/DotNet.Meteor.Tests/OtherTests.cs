@@ -3,7 +3,7 @@ using DotNet.Meteor.Common;
 
 namespace DotNet.Meteor.Tests;
 
-public class OtherTests: TestFixture {
+public class OtherTests : TestFixture {
 
     [Fact]
     public void AndroidSdkDirectoryTests() {
@@ -27,8 +27,34 @@ public class OtherTests: TestFixture {
     public void ProgramFilesDirectoryValidationTest() {
         if (!RuntimeSystem.IsWindows)
             return;
-        
+
         var homeDirectory = RuntimeSystem.ProgramX86Directory;
         Assert.StartsWith("C:\\Program", homeDirectory);
+    }
+
+    [Fact]
+    public void DiagnosticToolsHasSameTargetFrameworkVersionTest() {
+        var cwd = AppDomain.CurrentDomain.BaseDirectory;
+        var dotnetTraceProjectPath = Path.Combine(cwd, "..", "..", "..", "DotNet.Diagnostics", "src", "Tools", "dotnet-trace", "dotnet-trace.csproj");
+        var dotnetGCDumpProjectPath = Path.Combine(cwd, "..", "..", "..", "DotNet.Diagnostics", "src", "Tools", "dotnet-gcdump", "dotnet-gcdump.csproj");
+        var dotnetDSRouterProjectPath = Path.Combine(cwd, "..", "..", "..", "DotNet.Diagnostics", "src", "Tools", "dotnet-dsrouter", "dotnet-dsrouter.csproj");
+        var meteorPropsPath = Path.Combine(cwd, "..", "..", "..", "Common.Build.props");
+
+        Assert.True(File.Exists(dotnetTraceProjectPath), $"File not found: {Path.GetFullPath(dotnetTraceProjectPath)}");
+        Assert.True(File.Exists(dotnetGCDumpProjectPath), $"File not found: {Path.GetFullPath(dotnetGCDumpProjectPath)}");
+        Assert.True(File.Exists(dotnetDSRouterProjectPath), $"File not found: {Path.GetFullPath(dotnetDSRouterProjectPath)}");
+        Assert.True(File.Exists(meteorPropsPath), $"File not found: {Path.GetFullPath(meteorPropsPath)}");
+
+        var dotnetTraceProject = new Project(dotnetTraceProjectPath);
+        var dotnetGCDumpProject = new Project(dotnetGCDumpProjectPath);
+        var dotnetDSRouterProject = new Project(dotnetDSRouterProjectPath);
+        var meteorProject = new Project(meteorPropsPath);
+        var expectedTargetFramework = meteorProject.EvaluateProperty("TargetFramework", "error1");
+
+        Assert.Multiple(() => {
+            Assert.Equal(expectedTargetFramework, dotnetTraceProject.EvaluateProperty("TargetFramework", "error2"));
+            Assert.Equal(expectedTargetFramework, dotnetGCDumpProject.EvaluateProperty("TargetFramework", "error3"));
+            Assert.Equal(expectedTargetFramework, dotnetDSRouterProject.EvaluateProperty("TargetFramework", "error4"));
+        });
     }
 }
