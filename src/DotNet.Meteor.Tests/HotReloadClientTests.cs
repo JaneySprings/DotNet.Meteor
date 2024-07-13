@@ -189,4 +189,27 @@ public class HotReloadClientTests: TestFixture {
         foreach (var transformation in transformations) 
             Assert.Contains($"x:Reference {transformation.Value}", xamlContent.ToString());
     }
+
+    [Fact]
+    public void ElementNameWithFullQualifiedReferenceTest() {
+        var xamlContent = new StringBuilder(@"
+<ContentPage
+    x:Class=""DotNet.Meteor.MainPage""
+    xmlns=""http://microsoft.com/schemas/2021/maui""
+    xmlns:x=""http://schemas.microsoft.com/winfx/2009/xaml"">
+
+    <StackLayout Command=""{Binding Source={x:Reference Name=element}"">
+        <Label x:Name=""element"" />
+    </StackLayout>
+</ContentPage>
+");
+        var transformations = MarkupExtensions.TransformReferenceNames(xamlContent);
+        var names = FindAllXNames(xamlContent);
+        Assert.Single(names);
+        Assert.DoesNotContain("element", names);
+        Assert.Contains("element", transformations.Keys);
+        Assert.Contains("element_", transformations["element"]);
+        foreach (var transformation in transformations) 
+            Assert.Contains($"x:Reference Name={transformation.Value}", xamlContent.ToString());
+    }
 }
