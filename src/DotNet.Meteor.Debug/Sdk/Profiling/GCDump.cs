@@ -1,30 +1,44 @@
-using System.Threading;
-using System.Threading.Tasks;
-using DotNet.Meteor.Debug.Extensions;
+using System;
+using System.Diagnostics;
+using System.IO;
+using DotNet.Meteor.Common;
 using DotNet.Meteor.Processes;
-using GCDumpCollectHandler = Microsoft.Diagnostics.Tools.GCDump.CollectCommandHandler;
 
 namespace DotNet.Meteor.Debug.Sdk.Profiling;
 
 public static class GCDump {
+    public static FileInfo GCDumpTool() {
+        string assembliesDirectory = AppDomain.CurrentDomain.BaseDirectory;
+        string path = Path.Combine(assembliesDirectory, "dotnet-gcdump" + RuntimeSystem.ExecExtension);
 
-    public static ProfilerTask Collect(int pid, string outputFile, IProcessLogger logger) {
-        return CollectCore(pid, string.Empty, outputFile, logger);
+        if (!File.Exists(path))
+            throw new FileNotFoundException($"Could not find {nameof(GCDump)} tool.");
+
+        return new FileInfo(path);
     }
-    public static ProfilerTask Collect(string diagnosticPort, string outputFile, IProcessLogger logger) {
-        return CollectCore(0, diagnosticPort, outputFile, logger);
+
+    public static Process Collect(int pid, string outputFile, string additionalArgs, IProcessLogger logger) {
+        var gcdump = GCDump.GCDumpTool();
+        var arguments = new ProcessArgumentBuilder()
+            .Append("collect")
+            .Append("-p", pid.ToString())
+            .Append("-o").AppendQuoted(outputFile);
+
+        if (!string.IsNullOrEmpty(additionalArgs))
+            arguments.Append(additionalArgs);
+
+        return new ProcessRunner(gcdump, arguments, logger).Start();
     }
+    public static Process Collect(string diagnosticPort, string outputFile, string additionalArgs, IProcessLogger logger) {
+        var gcdump = GCDump.GCDumpTool();
+        var arguments = new ProcessArgumentBuilder()
+            .Append("collect")
+            .Append("--dport", diagnosticPort)
+            .Append("-o").AppendQuoted(outputFile);
 
-    private static ProfilerTask CollectCore(int pid, string diagnosticPort, string outputFile, IProcessLogger logger) {
-        var cancellationTokenSource = new CancellationTokenSource();
-        var token = cancellationTokenSource.Token;
+        if (!string.IsNullOrEmpty(additionalArgs))
+            arguments.Append(additionalArgs);
 
-        if (GCDumpCollectHandler.ProcessLogger.WriteLine == null)
-            GCDumpCollectHandler.ProcessLogger.WriteLine = logger.OnOutputDataReceived;
-        if (GCDumpCollectHandler.ProcessLogger.ErrorWriteLine == null)
-            GCDumpCollectHandler.ProcessLogger.ErrorWriteLine = logger.OnErrorDataReceived;
-
-        var task = Task.Run(async() => await GCDumpCollectHandler.Collect(token, pid, outputFile, diagnosticPort));
-        return new ProfilerTask(task, cancellationTokenSource);
+        return new ProcessRunner(gcdump, arguments, logger).Start();
     }
 }

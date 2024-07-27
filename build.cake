@@ -13,6 +13,7 @@ public string MeteorDebugProjectPath => _Path.Combine(RootDirectory, "src", "Dot
 public string MeteorTestsProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Tests", "DotNet.Meteor.Tests.csproj");
 public string MeteorPluginProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.HotReload.Plugin", "DotNet.Meteor.HotReload.Plugin.csproj");
 public string DotNetDSRouterProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Diagnostics", "src", "Tools", "dotnet-dsrouter", "dotnet-dsrouter.csproj");
+public string DotNetGCDumpProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Diagnostics", "src", "Tools", "dotnet-gcdump", "dotnet-gcdump.csproj");
 
 var target = Argument("target", "vsix");
 var runtime = Argument("arch", "osx-arm64");
@@ -62,6 +63,12 @@ Task("dsrouter").Does(() => DotNetPublish(DotNetDSRouterProjectPath, new DotNetP
 	Runtime = runtime,
 }));
 
+Task("gcdump").Does(() => DotNetPublish(DotNetGCDumpProjectPath, new DotNetPublishSettings {
+	OutputDirectory = _Path.Combine(ExtensionBinariesDirectory, "Debug"),
+	Configuration = configuration,
+	Runtime = runtime,
+}));
+
 Task("plugin").Does(() => DotNetPack(MeteorPluginProjectPath, new DotNetPackSettings {
 	Configuration = configuration,
 	MSBuildSettings = new DotNetMSBuildSettings { 
@@ -87,6 +94,7 @@ Task("vsix")
 	.IsDependentOn("xaml")
 	.IsDependentOn("debugger")
 	.IsDependentOn("dsrouter")
+	.IsDependentOn("gcdump")
 	.Does(() => {
 		var package = _Path.Combine(RootDirectory, "package.json");
 		var regex = @"^\s\s(""version"":\s+)("".+"")(,)";

@@ -1,9 +1,7 @@
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using DotNet.Meteor.Debug.Extensions;
 using DotNet.Meteor.Processes;
-using TraceFileFormat = Microsoft.Diagnostics.Tools.Trace.TraceFileFormat;
 using TraceCollectHandler = Microsoft.Diagnostics.Tools.Trace.CollectCommandHandler;
 
 namespace DotNet.Meteor.Debug.Sdk.Profiling;
@@ -20,15 +18,28 @@ public static class Trace {
     private static ProfilerTask CollectCore(int pid, string diagnosticPort, string outputFile, IProcessLogger logger) {
         var cancellationTokenSource = new CancellationTokenSource();
         var token = cancellationTokenSource.Token;
-        var fileFormat = TraceFileFormat.Speedscope;
-        var providers = string.Empty;
+        var task = TraceCollectHandler.Collect(
+            ct: token,
+            console: new ConsoleLogger(logger),
+            processId: pid,
+            output: new FileInfo(outputFile),
+            buffersize: TraceCollectHandler.DefaultCircularBufferSizeInMB(),
+            providers: string.Empty,
+            profile: string.Empty,
+            format: Microsoft.Diagnostics.Tools.Trace.TraceFileFormat.Speedscope,
+            duration: default,
+            clrevents: string.Empty,
+            clreventlevel: string.Empty,
+            name: null,
+            diagnosticPort: diagnosticPort,
+            showchildio: false,
+            resumeRuntime: true,
+            stoppingEventProviderName: null,
+            stoppingEventEventName: null,
+            stoppingEventPayloadFilter: null,
+            rundown: null
+        );
 
-        if (TraceCollectHandler.ProcessLogger.WriteLine == null)
-            TraceCollectHandler.ProcessLogger.WriteLine = logger.OnOutputDataReceived;
-        if (TraceCollectHandler.ProcessLogger.ErrorWriteLine == null)
-            TraceCollectHandler.ProcessLogger.ErrorWriteLine = logger.OnErrorDataReceived;
-
-        var task = Task.Run(async() => await TraceCollectHandler.Collect(token, pid, new FileInfo(outputFile), fileFormat, diagnosticPort, providers));
         return new ProfilerTask(task, cancellationTokenSource);
     }
 }
