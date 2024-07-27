@@ -57,7 +57,7 @@ public static class MonoLaunch {
     public static Process ProfileDev(string serial, string bundlePath, string port, IProcessLogger logger = null) {
         var tool = AppleSdk.MLaunchTool();
         var arguments = new ProcessArgumentBuilder()
-            .Append( "--launchdev").AppendQuoted(bundlePath) // '--setenv:DOTNET_DiagnosticPorts=127.0.0.1:9001,suspend,listen'
+            .Append( "--launchdev").AppendQuoted(bundlePath)
             .Append($"--devname={serial}")
             .Append( "--argument=-monodevelop-port")
             .Append($"--argument={port}")

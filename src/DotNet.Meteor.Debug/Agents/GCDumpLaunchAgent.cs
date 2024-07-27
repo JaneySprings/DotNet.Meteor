@@ -1,12 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using DotNet.Meteor.Debug.Extensions;
 using DotNet.Meteor.Debug.Sdk;
 using DotNet.Meteor.Debug.Sdk.Profiling;
 using DotNet.Meteor.Processes;
 using DotNet.Meteor.Common;
-using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 using Mono.Debugging.Soft;
 
 namespace DotNet.Meteor.Debug;
@@ -15,6 +13,8 @@ public class GCDumpLaunchAgent : BaseLaunchAgent {
     private string diagnosticPort;
     private string gcdumpPath;
     private int applicationPID;
+
+    protected override string ProcessedCommand => "dump";
 
     public GCDumpLaunchAgent(LaunchConfiguration configuration) : base(configuration) { }
     public override void Connect(SoftDebuggerSession session) { }
@@ -34,22 +34,15 @@ public class GCDumpLaunchAgent : BaseLaunchAgent {
 
         Disposables.Add(() => ServerExtensions.TryDeleteFile(diagnosticPort));
     }
-    public override void HandleCommand(string command, IProcessLogger logger) {
-        if (!command.Equals($"{CommandPrefix}dump", System.StringComparison.OrdinalIgnoreCase))
-            return;
+    public override void HandleCommand(string command, string args, IProcessLogger logger) {
         if (string.IsNullOrEmpty(diagnosticPort) || string.IsNullOrEmpty(gcdumpPath))
             return;
 
         var gcdumpProcess = applicationPID == 0
-            ? GCDump.Collect($"{diagnosticPort},connect", gcdumpPath, logger)
-            : GCDump.Collect(applicationPID, gcdumpPath, logger);
+            ? GCDump.Collect($"{diagnosticPort},connect", gcdumpPath, args, logger)
+            : GCDump.Collect(applicationPID, gcdumpPath, args, logger);
 
         Disposables.Insert(0, () => gcdumpProcess.Terminate());
-    }
-    public override List<CompletionItem> GetCompletionItems() {
-        return new List<CompletionItem>() {
-            new CompletionItem() { Label = "dump", Type = CompletionItemType.Snippet }
-        };
     }
 
     private void LaunchAppleMobile(IProcessLogger logger) {
