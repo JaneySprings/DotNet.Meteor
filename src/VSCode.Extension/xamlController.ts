@@ -19,23 +19,21 @@ export class XamlController {
                 XamlController.reloadDocumentChanges(vscode.window.activeTextEditor.document.fileName);
             }
         }));
-        context.subscriptions.push(vscode.commands.registerCommand("dotnet-meteor.xaml.replaceCode", async (edit) => {
-            var newEdit = new vscode.WorkspaceEdit();
-            var uri = vscode.Uri.parse(edit.TextDocument.Uri);
+        context.subscriptions.push(vscode.commands.registerCommand(res.commandIdXamlReplaceCode, async (edit) => {
+            const newEdit = new vscode.WorkspaceEdit();
+            const uri = vscode.Uri.parse(edit.TextDocument.Uri);
             for (let i = 0; i < edit.Edits.length; i++) {
-                var start = new vscode.Position(edit.Edits[i].range.Start.Line, edit.Edits[i].range.Start.Character);
-                var end = new vscode.Position(edit.Edits[i].range.End.Line, edit.Edits[i].range.End.Character);
-                var range = new vscode.Range(start, end);
+                const start = new vscode.Position(edit.Edits[i].range.Start.Line, edit.Edits[i].range.Start.Character);
+                const end = new vscode.Position(edit.Edits[i].range.End.Line, edit.Edits[i].range.End.Character);
+                const range = new vscode.Range(start, end);
                 newEdit.replace(uri, range, edit.Edits[i].newText);
             }
             await vscode.workspace.applyEdit(newEdit);
             vscode.workspace.textDocuments.forEach(async doc => {
-                if (doc.uri.toString() === uri.toString()) {
+                if (doc.uri.fsPath === uri.fsPath)
                     await doc.save();
-                }
             });
-        }
-        ))
+        }));
 
         if ((await vscode.workspace.findFiles('**/*.xaml')).length > 0)
             XamlController.activateServer(context);
