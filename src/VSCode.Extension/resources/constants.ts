@@ -18,6 +18,7 @@ export const commandIdActiveTargetFramework = "dotnet-meteor.activeTargetFramewo
 export const commandIdActiveDeviceName = "dotnet-meteor.activeDeviceName";
 export const commandIdActiveDeviceSerial = "dotnet-meteor.activeDeviceSerial";
 export const commandIdTriggerHotReload = "dotnet-meteor.triggerHotReload";
+export const commandIdXamlReplaceCode = "dotnet-meteor.xaml.replaceCode";
 
 export const taskDefinitionId = "dotnet-meteor.task";
 export const taskDefinitionDefaultTarget = "build";

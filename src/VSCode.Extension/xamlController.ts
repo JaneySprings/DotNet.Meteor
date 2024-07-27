@@ -19,7 +19,22 @@ export class XamlController {
                 XamlController.reloadDocumentChanges(vscode.window.activeTextEditor.document.fileName);
             }
         }));
-        
+        context.subscriptions.push(vscode.commands.registerCommand(res.commandIdXamlReplaceCode, async (edit) => {
+            const newEdit = new vscode.WorkspaceEdit();
+            const uri = vscode.Uri.parse(edit.TextDocument.Uri);
+            for (let i = 0; i < edit.Edits.length; i++) {
+                const start = new vscode.Position(edit.Edits[i].range.Start.Line, edit.Edits[i].range.Start.Character);
+                const end = new vscode.Position(edit.Edits[i].range.End.Line, edit.Edits[i].range.End.Character);
+                const range = new vscode.Range(start, end);
+                newEdit.replace(uri, range, edit.Edits[i].newText);
+            }
+            await vscode.workspace.applyEdit(newEdit);
+            vscode.workspace.textDocuments.forEach(async doc => {
+                if (doc.uri.fsPath === uri.fsPath)
+                    await doc.save();
+            });
+        }));
+
         if ((await vscode.workspace.findFiles('**/*.xaml')).length > 0)
             XamlController.activateServer(context);
     }
@@ -29,7 +44,7 @@ export class XamlController {
         const serverExtension = process.platform === 'win32' ? '.exe' : '';
         XamlController.command = serverExecutable + serverExtension;
         XamlController.start();
-        
+
         context.subscriptions.push(XamlController.client);
         context.subscriptions.push(vscode.tasks.onDidEndTask(ev => {
             if (ev.execution.task.definition.type.includes(res.taskDefinitionId))
@@ -39,9 +54,9 @@ export class XamlController {
 
     private static initialize() {
         const serverOptions: ServerOptions = { command: XamlController.command };
-        XamlController.client = new LanguageClient(res.extensionId, res.extensionId, serverOptions, { 
+        XamlController.client = new LanguageClient(res.extensionId, res.extensionId, serverOptions, {
             diagnosticCollectionName: res.extensionDisplayName,
-            synchronize: { 
+            synchronize: {
                 configurationSection: res.extensionId,
             },
             connectionOptions: {
