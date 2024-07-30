@@ -40,7 +40,7 @@ export class StatusBarController {
                 StatusBarController.update();
         }));
     }
-    public static async update() {
+    public static async update() : Promise<void> {
         const folders = vscode.workspace.workspaceFolders!.map(it => it.uri.fsPath);
         StatusBarController.projects = await CommandController.getProjects(folders);
         StatusBarController.devices = await CommandController.getDevices();

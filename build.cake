@@ -1,5 +1,3 @@
-#addin nuget:?package=Cake.FileHelpers&version=7.0.0
-
 using _Path = System.IO.Path;
 
 public string RootDirectory => MakeAbsolute(Directory("./")).ToString();
@@ -96,12 +94,6 @@ Task("vsix")
 	.IsDependentOn("dsrouter")
 	.IsDependentOn("gcdump")
 	.Does(() => {
-		var package = _Path.Combine(RootDirectory, "package.json");
-		var regex = @"^\s\s(""version"":\s+)("".+"")(,)";
-		var options = System.Text.RegularExpressions.RegexOptions.Multiline;
-		ReplaceRegexInFiles(package, regex, $"  $1\"{version}\"$3", options);
-	})
-	.Does(() => {
 		switch (runtime) {
 			case "win-x64": runtime = "win32-x64"; break;
 			case "win-arm64": runtime = "win32-arm64"; break;
@@ -109,7 +101,8 @@ Task("vsix")
 			case "osx-arm64": runtime = "darwin-arm64"; break;
 		}
 		var output = _Path.Combine(ArtifactsDirectory, $"DotNet.Meteor.v{version}_{runtime}.vsix");
-		ExecuteCommand("vsce", $"package --target {runtime} --out {output}");
+		ExecuteCommand("npm", "install");
+		ExecuteCommand("vsce", $"package --target {runtime} --out {output} --no-git-tag-version {version}");
 	});
 
 
