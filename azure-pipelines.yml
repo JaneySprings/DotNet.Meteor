@@ -37,8 +37,6 @@ stages:
             includePreviewVersions: true
         - script: dotnet tool restore
           displayName: 'Restore .NET tools'
-        - script: npm install
-          displayName: 'Restore Node.js modules'
         - script: npm install -g vsce webpack webpack-cli
           displayName: 'Install Node tools'
 
@@ -67,8 +65,6 @@ stages:
             includePreviewVersions: true
         - script: dotnet tool restore
           displayName: 'Restore .NET tools'
-        - script: npm install
-          displayName: 'Restore Node.js modules'
         - script: npm install -g vsce webpack webpack-cli
           displayName: 'Install Node tools'
 
@@ -97,8 +93,6 @@ stages:
             includePreviewVersions: true
         - script: dotnet tool restore
           displayName: 'Restore .NET tools'
-        - script: npm install
-          displayName: 'Restore Node.js modules'
         - script: npm install -g vsce webpack webpack-cli
           displayName: 'Install Node tools'
 

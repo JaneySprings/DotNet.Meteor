@@ -19,10 +19,11 @@ export function activate(context: vscode.ExtensionContext): PublicExports | unde
 	CommandController.activate(context);
 	ConfigurationController.activate(context);
 	StateController.activate(context);
-	XamlController.activate(context);
 	StatusBarController.activate(context);
-	StatusBarController.update();
-
+	StatusBarController.update().then(() => {
+		XamlController.activate(context);
+	});
+	
 	context.subscriptions.push(vscode.commands.registerCommand(res.commandIdSelectActiveProject, StatusBarController.showQuickPickProject));
 	context.subscriptions.push(vscode.commands.registerCommand(res.commandIdSelectActiveConfiguration, StatusBarController.showQuickPickTarget));
 	context.subscriptions.push(vscode.commands.registerCommand(res.commandIdSelectActiveDevice, StatusBarController.showQuickPickDevice));

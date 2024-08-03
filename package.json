@@ -191,12 +191,12 @@
     ],
     "menus": {
       "debug/toolBar": [
-				{
-					"command": "dotnet-meteor.triggerHotReload",
-					"group": "navigation2",
-					"when": "debugType == dotnet-meteor.debugger"
-				}
-			]
+        {
+          "command": "dotnet-meteor.triggerHotReload",
+          "group": "navigation2",
+          "when": "debugType == dotnet-meteor.debugger"
+        }
+      ]
     },
     "configuration": {
       "title": "%extension.displayName%",
