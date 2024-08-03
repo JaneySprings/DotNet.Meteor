@@ -513,13 +513,15 @@ public class DebugSession : Session {
         frameHandles.Reset();
     }
     private DebugProtocol.Variable CreateVariable(MonoClient.ObjectValue v) {
-        var dv = v.ToDisplayValue();
         var childrenReference = 0;
         if (v.HasChildren) {
             var objectValues = v.GetAllChildren();
             childrenReference = variableHandles.Create(objectValues);
         }
-        return new DebugProtocol.Variable(v.Name, dv, childrenReference) {
+        return new DebugProtocol.Variable {
+            Name = v.Name,
+            Type = v.TypeName,
+            Value = v.ToDisplayValue(),
             VariablesReference = childrenReference
         };
     }
