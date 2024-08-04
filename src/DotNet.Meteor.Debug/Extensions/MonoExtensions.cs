@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using Mono.Debugging.Client;
 using Mono.Debugging.Soft;
 
@@ -29,6 +30,14 @@ public static class MonoExtensions {
         } catch (Exception) {
             return null;
         }
+    }
+    public static string GetAssemblyCode(this StackFrame frame) {
+        var assemblyLines = frame.Disassemble(-1, -1);
+        var sb = new StringBuilder();
+        foreach (var line in assemblyLines)
+            sb.AppendLine($"({line.SourceLine}) IL_{line.Address:0000}: {line.Code}");
+        
+        return sb.ToString();
     }
     public static ThreadInfo FindThread(this SoftDebuggerSession session, long id) {
         var process = session.GetProcesses().FirstOrDefault();
