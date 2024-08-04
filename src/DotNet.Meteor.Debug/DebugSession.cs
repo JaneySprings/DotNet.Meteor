@@ -256,7 +256,8 @@ public class DebugSession : Session {
                 }
 
                 DebugProtocol.Source source = null;
-                string remappedSourcePath = session.RemapSourceLocation(frame.SourceLocation);
+                var frameId = frameHandles.Create(frame);
+                var remappedSourcePath = session.RemapSourceLocation(frame.SourceLocation);
                 if (!string.IsNullOrEmpty(remappedSourcePath) && File.Exists(remappedSourcePath)) {
                     source = new DebugProtocol.Source() {
                         Name = Path.GetFileName(remappedSourcePath),
@@ -277,6 +278,7 @@ public class DebugSession : Session {
                 }
                 if (source == null) {
                     source = new DebugProtocol.Source() {
+                        SourceReference = frameId,
                         PresentationHint = Source.PresentationHintValue.Deemphasize,
                         Path = frame.SourceLocation.FileName,
                         Name = string.IsNullOrEmpty(frame.SourceLocation.FileName)
@@ -286,7 +288,7 @@ public class DebugSession : Session {
                 }
 
                 stackFrames.Add(new DebugProtocol.StackFrame() {
-                    Id = frameHandles.Create(frame),
+                    Id = frameId,
                     Source = source,
                     Name = frame.SourceLocation.MethodName,
                     Line = frame.SourceLocation.Line,
@@ -399,8 +401,17 @@ public class DebugSession : Session {
     #endregion Evaluate
     #region Source
     protected override SourceResponse HandleSourceRequest(SourceArguments arguments) {
-        throw ServerExtensions.GetProtocolException("No source available");
-    }
+        return ServerExtensions.DoSafe(() => {
+            if (session.IsRunning)
+                throw ServerExtensions.GetProtocolException("Cannot get source while running");
+            
+            var frame = frameHandles.Get(arguments.SourceReference, null);
+            if (frame == null)
+                throw ServerExtensions.GetProtocolException("No source available");
+
+            return new SourceResponse(frame.GetAssemblyCode());
+        });
+    } 
     #endregion Source
     #region ExceptionInfo
     protected override ExceptionInfoResponse HandleExceptionInfoRequest(ExceptionInfoArguments arguments) {
