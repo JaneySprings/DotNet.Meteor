@@ -46,8 +46,8 @@ export class XamlController {
         XamlController.start();
 
         context.subscriptions.push(XamlController.client);
-        context.subscriptions.push(vscode.tasks.onDidEndTask(ev => {
-            if (ev.execution.task.definition.type.includes(res.taskDefinitionId))
+        context.subscriptions.push(vscode.tasks.onDidEndTaskProcess(ev => {
+            if (ev.execution.task.definition.type.includes(res.taskDefinitionId) && ev.exitCode === 0)
                 XamlController.restart();
         }));
     }
