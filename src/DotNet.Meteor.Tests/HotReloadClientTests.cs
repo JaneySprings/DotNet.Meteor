@@ -212,4 +212,28 @@ public class HotReloadClientTests: TestFixture {
         foreach (var transformation in transformations) 
             Assert.Contains($"x:Reference Name={transformation.Value}", xamlContent.ToString());
     }
+
+    [Fact]
+    public void TransformOnlyPortableXamlTypesTest() {
+        var xamlContent = new StringBuilder(@"
+<ContentPage
+    x:Class=""DotNet.Meteor.MainPage""
+    xmlns=""http://microsoft.com/schemas/2021/maui""
+    xmlns:x=""http://schemas.microsoft.com/winfx/2009/xaml"">
+
+    <StackLayout>
+        <Label x:Name=""element"" />
+        <Label Name=""element2"" />
+    </StackLayout>
+</ContentPage>
+");
+        var transformations = MarkupExtensions.TransformReferenceNames(xamlContent);
+        var names = FindAllXNames(xamlContent);
+        
+        Assert.Single(names);
+        Assert.Contains("element", transformations.Keys);
+        Assert.Contains("element_", transformations["element"]);
+        Assert.DoesNotContain("element2", transformations.Keys);
+        Assert.DoesNotContain("element2_", transformations.Values);
+    }
 }

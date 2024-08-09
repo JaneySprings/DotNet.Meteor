@@ -18,7 +18,7 @@ public static class MarkupExtensions {
         var xaml = XDocument.Parse(xamlContent.ToString());
         var xElements = xaml.Descendants().ToList();
         foreach (var xElement in xElements) {
-            var xNameAttribute = xElement.Attributes().FirstOrDefault(a => a.Name.LocalName == "Name");
+            var xNameAttribute = xElement.Attributes().FirstOrDefault(a => a.Name.LocalName == "Name" && a.IsPortableXamlType());
             if (xNameAttribute != null) {
                 var oldName = xNameAttribute.Value;
                 var newName = oldName + $"_{DateTime.UtcNow.Ticks.ToString("X")}";
@@ -54,5 +54,8 @@ public static class MarkupExtensions {
             return text;
 
         return text.Substring(0, pos) + newValue + text.Substring(pos + oldValue.Length);
+    }
+    private static bool IsPortableXamlType(this XAttribute xAttribute) {
+        return xAttribute.Name.NamespaceName == "http://schemas.microsoft.com/winfx/2009/xaml";
     }
 }
