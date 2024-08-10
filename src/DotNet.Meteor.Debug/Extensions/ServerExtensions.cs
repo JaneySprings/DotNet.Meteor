@@ -149,6 +149,21 @@ public static class ServerExtensions {
             Column = breakpoint.Column,
         };
     }
+    public static DebugProtocol.Module ToModule(this Assembly assembly) {
+        return new DebugProtocol.Module {
+	        Id = assembly.GetHashCode(),
+	        Name = assembly.Name,
+            Path = assembly.Path,
+            IsOptimized = assembly.Optimized,
+            IsUserCode = assembly.UserCode,
+            Version = assembly.Version,
+            SymbolFilePath = assembly.SymbolFile,
+            DateTimeStamp = assembly.TimeStamp,
+            AddressRange = assembly.Address,
+            SymbolStatus = assembly.SymbolStatus,
+            VsAppDomain = assembly.AppDomain,
+        };
+    }
 }
 
 public class HotReloadRequest : DebugProtocol.DebugRequest<HotReloadArguments> {

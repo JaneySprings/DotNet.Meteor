@@ -198,6 +198,15 @@
         }
       ]
     },
+    "views": {
+      "debug": [
+        {
+          "id": "dotnet-meteor.modulesView",
+          "name": "Modules",
+          "when": "debugType == dotnet-meteor.debugger"
+        }
+      ]
+    },
     "configuration": {
       "title": "%extension.displayName%",
       "properties": {
