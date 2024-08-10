@@ -87,15 +87,16 @@ public static class MonoExtensions {
                     continue;
                 }
 
-                string assemblySymbolsFilePath = null;
-                if (!File.Exists(Path.ChangeExtension(assemblyPath, ".pdb"))) {
-                    if (string.IsNullOrEmpty(assemblySymbolsFilePath) && options.SearchMicrosoftSymbolServer)
-                        assemblySymbolsFilePath = SymbolServerExtensions.DownloadSourceSymbols(assemblyPath, assemblyDefinition.Name.Name, SymbolServerExtensions.MicrosoftSymbolServerAddress);
-                    if (string.IsNullOrEmpty(assemblySymbolsFilePath) && options.SearchNuGetSymbolServer)
-                        assemblySymbolsFilePath = SymbolServerExtensions.DownloadSourceSymbols(assemblyPath, assemblyDefinition.Name.Name, SymbolServerExtensions.NuGetSymbolServerAddress);
-                    if (string.IsNullOrEmpty(assemblySymbolsFilePath))
-                        DebuggerLoggingService.CustomLogger.LogMessage($"No symbols found for '{assemblyPath}'");
-                }
+                string assemblySymbolsFilePath = Path.ChangeExtension(assemblyPath, ".pdb");
+                if (!File.Exists(assemblySymbolsFilePath))
+                    assemblySymbolsFilePath = null; 
+                if (string.IsNullOrEmpty(assemblySymbolsFilePath) && options.SearchMicrosoftSymbolServer)
+                    assemblySymbolsFilePath = SymbolServerExtensions.DownloadSourceSymbols(assemblyPath, assemblyDefinition.Name.Name, SymbolServerExtensions.MicrosoftSymbolServerAddress);
+                if (string.IsNullOrEmpty(assemblySymbolsFilePath) && options.SearchNuGetSymbolServer)
+                    assemblySymbolsFilePath = SymbolServerExtensions.DownloadSourceSymbols(assemblyPath, assemblyDefinition.Name.Name, SymbolServerExtensions.NuGetSymbolServerAddress);
+                if (string.IsNullOrEmpty(assemblySymbolsFilePath))
+                    DebuggerLoggingService.CustomLogger.LogMessage($"No symbols found for '{assemblyPath}'");
+                
 
                 if (options.EvaluationOptions.UseExternalTypeResolver)
                     TypeResolverExtensions.RegisterTypes(assemblyDefinition.MainModule.Types);
