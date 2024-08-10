@@ -6,6 +6,7 @@ import { CommandController } from './commandController';
 import { StateController } from './stateController';
 import { XamlController } from './xamlController';
 import { PublicExports } from './publicExports';
+import { ModulesView } from './extensions/modulesView';
 import * as res from './resources/constants';
 import * as vscode from 'vscode';
 
@@ -35,6 +36,8 @@ export function activate(context: vscode.ExtensionContext): PublicExports | unde
 
 	context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider(res.debuggerMeteorId, new MonoDebugConfigurationProvider()));
 	context.subscriptions.push(vscode.tasks.registerTaskProvider(res.taskDefinitionId, new DotNetTaskProvider()));
+
+	context.subscriptions.push(vscode.window.registerTreeDataProvider(res.extendedViewIdModules, new ModulesView(context)));
 
 	return exports;
 }

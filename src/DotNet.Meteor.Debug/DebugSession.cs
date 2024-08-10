@@ -37,6 +37,7 @@ public class DebugSession : Session {
         session.TargetExited += TargetExited;
         session.TargetThreadStarted += TargetThreadStarted;
         session.TargetThreadStopped += TargetThreadStopped;
+        session.AssemblyLoaded += AssemblyLoaded;
 
         session.Breakpoints.BreakpointStatusChanged += BreakpointStatusChanged;
     }
@@ -497,6 +498,9 @@ public class DebugSession : Session {
     private void TargetThreadStopped(object sender, MonoClient.TargetEventArgs e) {
         int tid = (int)e.Thread.Id;
         Protocol.SendEvent(new ThreadEvent(ThreadEvent.ReasonValue.Exited, tid));
+    }
+    private void AssemblyLoaded(object sender, MonoClient.AssemblyEventArgs e) {
+        Protocol.SendEvent(new ModuleEvent(ModuleEvent.ReasonValue.New, e.Assembly.ToModule()));
     }
     private bool OnExceptionHandled(Exception ex) {
         MonoClient.DebuggerLoggingService.CustomLogger.LogError($"[Handled] {ex.Message}", ex);
