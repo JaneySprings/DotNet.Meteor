@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -76,6 +77,20 @@ public static class SymbolServerExtensions {
 
         pdbPath = Path.Combine(symbolsDirectory, pdbData.Id + ".pdb");
         return File.Exists(pdbPath);
+    }
+    public static string SearchSymbols(IEnumerable<string> searchPaths, string assemblyPath) {
+        var pdbPath = Path.ChangeExtension(assemblyPath, ".pdb");
+        if (File.Exists(pdbPath))
+            return pdbPath;
+
+        var pdbName = Path.GetFileName(pdbPath);
+        foreach (var path in searchPaths) {
+            pdbPath = Path.Combine(path, pdbName);
+            if (File.Exists(pdbPath))
+                return pdbPath;
+        }
+
+        return null;
     }
 
     private static async Task<bool> DownloadFileAsync(string url, string outputFilePath, bool writeErrorInTarget = false) {

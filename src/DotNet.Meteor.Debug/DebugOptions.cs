@@ -63,6 +63,9 @@ public class DebugOptions {
     [JsonPropertyName("automatic_sourcelink_download")]
     public bool AutomaticSourceLinkDownload { get; set; } = ServerExtensions.DefaultDebuggerOptions.AutomaticSourceLinkDownload;
 
+    [JsonPropertyName("symbol_search_paths")]
+    public ImmutableArray<string> SymbolSearchPaths { get; set; } = ServerExtensions.DefaultDebuggerOptions.SymbolSearchPaths;
+
     internal static IntegerDisplayFormat GetIntegerDisplayFormat(string value) {
         if (value == Mono.Debugging.Client.IntegerDisplayFormat.Decimal.ToString())
             return Mono.Debugging.Client.IntegerDisplayFormat.Decimal;

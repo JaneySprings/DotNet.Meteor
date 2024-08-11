@@ -87,9 +87,7 @@ public static class MonoExtensions {
                     continue;
                 }
 
-                string assemblySymbolsFilePath = Path.ChangeExtension(assemblyPath, ".pdb");
-                if (!File.Exists(assemblySymbolsFilePath))
-                    assemblySymbolsFilePath = null; 
+                string assemblySymbolsFilePath = SymbolServerExtensions.SearchSymbols(options.SymbolSearchPaths, assemblyPath);
                 if (string.IsNullOrEmpty(assemblySymbolsFilePath) && options.SearchMicrosoftSymbolServer)
                     assemblySymbolsFilePath = SymbolServerExtensions.DownloadSourceSymbols(assemblyPath, assemblyDefinition.Name.Name, SymbolServerExtensions.MicrosoftSymbolServerAddress);
                 if (string.IsNullOrEmpty(assemblySymbolsFilePath) && options.SearchNuGetSymbolServer)

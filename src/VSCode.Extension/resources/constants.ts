@@ -75,3 +75,4 @@ export const configIdDebuggerOptionsSearchMicrosoftSymbolServer = `${configIdDeb
 export const configIdDebuggerOptionsSearchNuGetSymbolServer = `${configIdDebuggerOptions}.searchNugetSymbolServer`;
 export const configIdDebuggerOptionsSourceCodeMappings = `${configIdDebuggerOptions}.sourceCodeMappings`;
 export const configIdDebuggerOptionsAutomaticSourcelinkDownload = `${configIdDebuggerOptions}.automaticSourcelinkDownload`;
+export const configIdDebuggerOptionsSymbolSearchPaths = `${configIdDebuggerOptions}.symbolSearchPaths`;
