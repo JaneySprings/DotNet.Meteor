@@ -40,5 +40,6 @@
 	"configuration.description.debuggerOptions.searchNuGetSymbolServer": "Search for symbols on the NuGet Symbol Server.",
 	"configuration.description.debuggerOptions.integerDisplayFormat": "Specifies the format of displayed integers in the debugging window.",
 	"configuration.description.debuggerOptions.sourceCodeMappings": "Modifies locations for the debugged source code by replacing values on the left with values on the right.",
-	"configuration.description.debuggerOptions.automaticSourcelinkDownload": "Automatically downloads source files from the SourceLink."
+	"configuration.description.debuggerOptions.automaticSourcelinkDownload": "Automatically downloads source files from the SourceLink.",
+	"configuration.description.debuggerOptions.symbolSearchPaths": "Specifies the paths to search for symbols."
 }

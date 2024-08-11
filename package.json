@@ -340,6 +340,13 @@
           "additionalProperties": {
             "type": "string"
           }
+        },
+        "dotnetMeteor.debuggerOptions.symbolSearchPaths": {
+          "type": "array",
+          "description": "%configuration.description.debuggerOptions.symbolSearchPaths%",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
