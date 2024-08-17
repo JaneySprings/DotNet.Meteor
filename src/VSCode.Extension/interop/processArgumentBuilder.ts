@@ -29,11 +29,16 @@ export class ProcessArgumentBuilder {
         return this;
     }
     public override(arg: string): ProcessArgumentBuilder {
-        const argName = arg.split("=")[0];
-        const index = this.arguments.findIndex(a => a.startsWith(argName));
+        const argPair = arg.split("=");
+        if (argPair.length < 2) {
+            this.arguments.push(arg);
+            return this;
+        }
+        const index = this.arguments.findIndex(a => a.startsWith(argPair[0]));
         if (index > -1) 
             this.arguments.splice(index, 1);
-        this.arguments.push(arg);
+        if (argPair[1])
+            this.arguments.push(arg);
         return this;
     }
     public build(): string {

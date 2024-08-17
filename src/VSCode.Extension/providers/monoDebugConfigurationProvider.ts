@@ -23,10 +23,6 @@ export class MonoDebugConfigurationProvider implements vscode.DebugConfiguration
 			return undefined;
 		}
 
-		const targetDevice = { ...ConfigurationController.device };
-		if (config.runtime !== undefined)
-			targetDevice!.runtime_id = config.runtime;
-
 		if (!config.type && !config.request && !config.name) {
 			config.preLaunchTask = `${res.extensionId}: ${res.taskDefinitionDefaultTargetCapitalized}`
 			config.name = res.debuggerMeteorTitle;
@@ -34,10 +30,14 @@ export class MonoDebugConfigurationProvider implements vscode.DebugConfiguration
 			config.request = 'launch';
 		}
 		
+		if (config.project == undefined)
+			config.project = ConfigurationController.project;
+		if (config.configuration == undefined)
+			config.configuration = ConfigurationController.target;
+		if (config.device == undefined)
+        	config.device = ConfigurationController.device;
+
 		config.skipDebug = config.noDebug ?? false;
-        config.selectedDevice = targetDevice;
-		config.selectedProject = ConfigurationController.project;
-		config.selectedTarget = ConfigurationController.target;
 		config.debuggingPort = ConfigurationController.getDebuggingPort();
 		config.uninstallApp = ConfigurationController.getUninstallAppOption();
 		config.reloadHost = ConfigurationController.getReloadHostPort();

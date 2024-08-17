@@ -1,5 +1,5 @@
 import { ConfigurationController } from './configurationController';
-import { CommandController } from "./commandController";
+import { InteropController } from "./interop/interopController";
 import { StateController } from './stateController';
 import { XamlController } from './xamlController';
 import { PublicExports } from './publicExports';
@@ -42,8 +42,8 @@ export class StatusBarController {
     }
     public static async update() : Promise<void> {
         const folders = vscode.workspace.workspaceFolders!.map(it => it.uri.fsPath);
-        StatusBarController.projects = await CommandController.getProjects(folders);
-        StatusBarController.devices = await CommandController.getDevices();
+        StatusBarController.projects = await InteropController.getProjects(folders);
+        StatusBarController.devices = await InteropController.getDevices();
 
         if (StatusBarController.projects.length === 0 || StatusBarController.devices.length === 0) {
             StatusBarController.projectStatusItem.hide();
@@ -114,7 +114,7 @@ export class StatusBarController {
             picker.hide();
         });
 
-        StatusBarController.devices = await CommandController.getDevices();
+        StatusBarController.devices = await InteropController.getDevices();
 
         const items: vscode.QuickPickItem[] = [];
         for (let i of StatusBarController.devices.keys()) {

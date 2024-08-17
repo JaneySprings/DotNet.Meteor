@@ -13,7 +13,7 @@ public class LaunchConfiguration {
     public string OutputAssembly { get; init; }
     public DeviceData Device { get; init; }
     public Project Project { get; init; }
-    public string Target { get; init; }
+    public string Configuration { get; init; }
     public string ProfilerMode { get; init; }
     public bool UninstallApp { get; init; }
     public bool SkipDebug { get; init; }
@@ -25,21 +25,21 @@ public class LaunchConfiguration {
     public string TempDirectoryPath => Path.Combine(Path.GetDirectoryName(Project.Path), ".meteor");
 
     public LaunchConfiguration(Dictionary<string, JToken> configurationProperties) {
-        Project = configurationProperties["selectedProject"].ToObject(TrimmableContext.Default.Project);
-        Device = configurationProperties["selectedDevice"].ToObject(TrimmableContext.Default.DeviceData);
-        Target = configurationProperties["selectedTarget"].ToObject(TrimmableContext.Default.String);
-        UninstallApp = configurationProperties["uninstallApp"].ToObject(TrimmableContext.Default.Boolean);
-        SkipDebug = configurationProperties["skipDebug"].ToObject(TrimmableContext.Default.Boolean);
+        Project = configurationProperties.TryGetValue("project").ToObject(TrimmableContext.Default.Project);
+        Device = configurationProperties.TryGetValue("device").ToObject(TrimmableContext.Default.DeviceData);
+        Configuration = configurationProperties.TryGetValue("configuration").ToObject(TrimmableContext.Default.String);
+        UninstallApp = configurationProperties.TryGetValue("uninstallApp").ToObject(TrimmableContext.Default.Boolean);
+        SkipDebug = configurationProperties.TryGetValue("skipDebug").ToObject(TrimmableContext.Default.Boolean);
+        OutputAssembly = configurationProperties.TryGetValue("program").ToObject(TrimmableContext.Default.String);
+        ProfilerMode = configurationProperties.TryGetValue("profilerMode").ToObject(TrimmableContext.Default.String);
 
-        DebugPort = configurationProperties["debuggingPort"].ToObject(TrimmableContext.Default.Int32);
-        ReloadHostPort = configurationProperties["reloadHost"].ToObject(TrimmableContext.Default.Int32);
-        ProfilerPort = configurationProperties["profilerPort"].ToObject(TrimmableContext.Default.Int32);
+        DebugPort = configurationProperties.TryGetValue("debuggingPort").ToObject(TrimmableContext.Default.Int32);
+        ReloadHostPort = configurationProperties.TryGetValue("reloadHost").ToObject(TrimmableContext.Default.Int32);
+        ProfilerPort = configurationProperties.TryGetValue("profilerPort").ToObject(TrimmableContext.Default.Int32);
+        DebuggerSessionOptions = GetDebuggerSessionOptions(configurationProperties.TryGetValue("debuggerOptions"));
 
-        DebuggerSessionOptions = GetDebuggerSessionOptions(configurationProperties["debuggerOptions"]);
-        OutputAssembly = Project.FindOutputApplication(Target, Device, message => throw ServerExtensions.GetProtocolException(message));
-
-        if (configurationProperties.TryGetValue("profilerMode", out var profilerModeToken))
-            ProfilerMode = profilerModeToken.ToObject(TrimmableContext.Default.String);
+        if (string.IsNullOrEmpty(OutputAssembly))
+            OutputAssembly = Project.FindOutputApplication(Configuration, Device, message => throw ServerExtensions.GetProtocolException(message));
 
         DebugPort = DebugPort == 0 ? ServerExtensions.FindFreePort() : DebugPort;
         ReloadHostPort = ReloadHostPort == 0 ? ServerExtensions.FindFreePort() : ReloadHostPort;
