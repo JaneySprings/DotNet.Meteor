@@ -1,12 +1,12 @@
-import { MonoDebugConfigurationProvider } from './tasks/monoDebugConfigurationProvider';
-import { DotNetTaskProvider } from './tasks/dotnetTaskProvider';
+import { MonoDebugConfigurationProvider } from './providers/monoDebugConfigurationProvider';
+import { DotNetTaskProvider } from './providers/dotnetTaskProvider';
 import { ConfigurationController } from './configurationController';
 import { StatusBarController } from './statusbarController';
-import { CommandController } from './commandController';
+import { InteropController } from './interop/interopController';
 import { StateController } from './stateController';
 import { XamlController } from './xamlController';
 import { PublicExports } from './publicExports';
-import { ModulesView } from './extensions/modulesView';
+import { ModulesView } from './features/modulesView';
 import * as res from './resources/constants';
 import * as vscode from 'vscode';
 
@@ -17,13 +17,15 @@ export function activate(context: vscode.ExtensionContext): PublicExports | unde
 
 	const exports = new PublicExports();
 	
-	CommandController.activate(context);
+	InteropController.activate(context);
 	ConfigurationController.activate(context);
 	StateController.activate(context);
 	StatusBarController.activate(context);
 	StatusBarController.update().then(() => {
 		XamlController.activate(context);
 	});
+
+	ModulesView.feature.activate(context);
 	
 	context.subscriptions.push(vscode.commands.registerCommand(res.commandIdSelectActiveProject, StatusBarController.showQuickPickProject));
 	context.subscriptions.push(vscode.commands.registerCommand(res.commandIdSelectActiveConfiguration, StatusBarController.showQuickPickTarget));
@@ -36,8 +38,6 @@ export function activate(context: vscode.ExtensionContext): PublicExports | unde
 
 	context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider(res.debuggerMeteorId, new MonoDebugConfigurationProvider()));
 	context.subscriptions.push(vscode.tasks.registerTaskProvider(res.taskDefinitionId, new DotNetTaskProvider()));
-
-	context.subscriptions.push(vscode.window.registerTreeDataProvider(res.extendedViewIdModules, new ModulesView(context)));
 
 	return exports;
 }

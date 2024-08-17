@@ -1,5 +1,5 @@
 import { window, workspace, ExtensionContext } from 'vscode';
-import { CommandController } from './commandController';
+import { InteropController } from './interop/interopController';
 import { StatusBarController } from "./statusbarController";
 import { Project } from './models/project';
 import { Device } from './models/device';
@@ -14,7 +14,7 @@ export class ConfigurationController {
     public static target: Target | undefined;
 
     public static activate(context: ExtensionContext) {
-        ConfigurationController.androidSdkDirectory = CommandController.androidSdk();
+        ConfigurationController.androidSdkDirectory = InteropController.androidSdk();
     }
 
     public static getDebuggingPort(): number {

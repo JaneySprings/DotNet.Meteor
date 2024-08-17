@@ -16,8 +16,6 @@ public class ServerConnectionProvider : SoftDebuggerStartArgs, ISoftDebuggerConn
         this.appName = appName;
         this.listener = new TcpListener(new IPEndPoint(host, port));
         this.listener.Start();
-        MaxConnectionAttempts = 20;
-        TimeBetweenConnectionAttempts = 500;
     }
 
     public override ISoftDebuggerConnectionProvider ConnectionProvider => this;

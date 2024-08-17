@@ -172,9 +172,17 @@
         "configurationAttributes": {
           "launch": {
             "properties": {
-              "runtime": {
-                "type": "string",
-                "description": "%debugger.meteor.description.runtime%"
+              "program": {
+                "type": "string"
+              },
+              "project": {
+                "type": "object"
+              },
+              "configuration": {
+                "type": "string"
+              },
+              "device": {
+                "type": "object"
               },
               "profilerMode": {
                 "type": "string",

@@ -4,15 +4,16 @@ import * as res from '../resources/constants';
 import * as vscode from 'vscode';
 
 export class ModulesView implements TreeDataProvider<any>, DebugAdapterTrackerFactory {
-    private loadedModules : any[];
-
+    public static feature : ModulesView = new ModulesView();
+    
+    private loadedModules : any[] = [];
     private treeViewDataChangedEmitter = new vscode.EventEmitter();
     public readonly onDidChangeTreeData = this.treeViewDataChangedEmitter.event;
 
-    constructor(context: vscode.ExtensionContext) {
+    public activate(context: vscode.ExtensionContext) {
+        context.subscriptions.push(vscode.window.registerTreeDataProvider(res.extendedViewIdModules, this));
         context.subscriptions.push(vscode.debug.registerDebugAdapterTrackerFactory(res.debuggerMeteorId, this));
         context.subscriptions.push(vscode.debug.onDidStartDebugSession(() => this.treeViewDataChangedEmitter.fire(null), this));
-        this.loadedModules = [];
     }
 
     public getChildren(element?: any): vscode.ProviderResult<any[]> {

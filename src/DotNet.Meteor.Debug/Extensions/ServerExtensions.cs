@@ -14,6 +14,7 @@ using Mono.Debugging.Soft;
 using System.IO.Compression;
 using System;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace DotNet.Meteor.Debug.Extensions;
 
@@ -107,6 +108,11 @@ public static class ServerExtensions {
         }
     }
 
+    public static JToken TryGetValue(this Dictionary<string, JToken> dictionary, string key) {
+        if (dictionary.TryGetValue(key, out var value))
+            return value;
+        return null;
+    }
     public static T ToObject<T>(this JToken jtoken, JsonTypeInfo<T> type) {
         if (jtoken == null)
             return default;
