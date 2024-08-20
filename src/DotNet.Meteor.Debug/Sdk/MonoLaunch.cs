@@ -17,6 +17,7 @@ public static class MonoLaunch {
 
     public static void InstallDev(string serial, string bundlePath, IProcessLogger logger = null) {
         var tool = AppleSdk.MLaunchTool();
+        logger?.OnOutputDataReceived(tool.FullName);
         new ProcessRunner(tool, new ProcessArgumentBuilder()
             .Append( "--installdev").AppendQuoted(bundlePath)
             .Append($"--devname={serial}"), logger)
@@ -31,7 +32,7 @@ public static class MonoLaunch {
         var result = new ProcessRunner(tool, arguments, logger).WaitForExit();
 
         if (!result.Success)
-            throw new Exception(string.Join(Environment.NewLine, result.StandardError));
+            throw new InvalidOperationException(string.Join(Environment.NewLine, result.StandardError));
     }
 
     public static Process LaunchSim(string serial, string bundlePath, IProcessLogger logger = null) {
@@ -70,6 +71,7 @@ public static class MonoLaunch {
 
     public static Process DebugSim(string serial, string bundlePath, int port, IProcessLogger logger = null) {
         var tool = AppleSdk.MLaunchTool();
+        logger?.OnOutputDataReceived(tool.FullName);
         var arguments = new ProcessArgumentBuilder()
             .Append( "--launchsim").AppendQuoted(bundlePath)
             .Append( "--argument=-monodevelop-port")
