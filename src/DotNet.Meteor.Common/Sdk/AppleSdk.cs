@@ -40,15 +40,27 @@ namespace DotNet.Meteor.Common {
         }
 
         public static FileInfo MLaunchTool() {
-            string dotnetPath = Common.MicrosoftSdk.DotNetRootLocation();
-            string sdkPath = Path.Combine(dotnetPath, "packs", "Microsoft.iOS.Sdk");
+            var mlaunchToolPath = Environment.GetEnvironmentVariable("MLAUNCH_PATH");
+            if (File.Exists(mlaunchToolPath))
+                return new FileInfo(mlaunchToolPath);
+
+            var dotnetPath = Common.MicrosoftSdk.DotNetRootLocation();
+            var sdkPath = Path.Combine(dotnetPath, "packs", "Microsoft.iOS.Sdk");
+            if (!Directory.Exists(sdkPath)) {
+                var sdkPaths = Directory.GetDirectories(Path.Combine(dotnetPath, "packs"), "Microsoft.iOS.Sdk.net*");
+                if (sdkPaths.Length == 0)
+                    throw new FileNotFoundException("Could not find mlaunch tool");
+
+                sdkPath = sdkPaths.OrderByDescending(x => Path.GetFileName(x)).First();
+            }
+
             var toolLocations = Directory.GetDirectories(sdkPath);
             if (toolLocations.Length == 0)
-                throw new Exception("Could not find mlaunch tool");
+                throw new FileNotFoundException("Could not find mlaunch tool");
 
             var latestToolDirectory = toolLocations.OrderByDescending(x => Path.GetFileName(x)).First();
-            var latestToolPath = Path.Combine(latestToolDirectory, "tools", "bin", "mlaunch");
-            return new FileInfo(latestToolPath);
+            mlaunchToolPath = Path.Combine(latestToolDirectory, "tools", "bin", "mlaunch");
+            return new FileInfo(mlaunchToolPath);
         }
 
         public static string IDeviceLocation() {
