@@ -4,6 +4,7 @@
         {
             "label": "tsc: watch",
             "command": "tsc",
+            "type": "shell",
             "args": [
                 "-w",
                 "-p",
@@ -24,7 +25,6 @@
             "args": [
                 "cake",
                 "--target=vsix",
-                "--arch=osx-arm64",
                 "--configuration=release",
                 "--release-version=6.0.0"
             ],

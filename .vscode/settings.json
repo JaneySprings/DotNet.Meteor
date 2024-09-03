@@ -13,7 +13,6 @@
         "src/**/bin": true,
         "src/**/obj": true,
         "node_modules": true,
-        "artifacts": true,
         "tools":true,
         "package-lock.json": true,
         ".config": true,

@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<OutputPath>$(MSBuildThisFileDirectory)..\..\extension\bin\Workspace</OutputPath>
 	</PropertyGroup>
 
 	<Import Project="..\Common.Build.props" />
