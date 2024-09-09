@@ -1,6 +1,3 @@
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 using DotNet.Meteor.Debug.Extensions;
 using DotNet.Meteor.Processes;
 using TraceCollectHandler = Microsoft.Diagnostics.Tools.Trace.CollectCommandHandler;

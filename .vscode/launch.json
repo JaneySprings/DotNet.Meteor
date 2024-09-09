@@ -8,6 +8,9 @@
             "args": [
                 "--extensionDevelopmentPath=${workspaceFolder}"
             ],
+            "env": {
+                // "METEOR_DEBUG_WAIT": "true"
+            },
             "outFiles": [
                 "${workspaceFolder}/extension/**/*.js"
             ],
@@ -17,13 +20,13 @@
             "name": ".NET Attach to Debugger",
             "type": "coreclr",
             "request": "attach",
-            "processName": "DotNet.Meteor.Debug"
+            "processId": "${command:dotrush-essentials.pickProcess}"
         },
         {
             "name": ".NET Attach to LSP",
             "type": "coreclr",
             "request": "attach",
-            "processName": "DotNet.Meteor.Xaml.LanguageServer"
+            "processId": "${command:dotrush-essentials.pickProcess}"
         }
     ]
 }

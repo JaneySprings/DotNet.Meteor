@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading;
-using System.Linq;
-using Mono.Debugging.Soft;
+﻿using Mono.Debugging.Soft;
 using DotNet.Meteor.Debug.Extensions;
 using DotNet.Meteor.Debug.Logging;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
@@ -14,7 +9,7 @@ using DebugProtocol = Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages
 namespace DotNet.Meteor.Debug;
 
 public class DebugSession : Session {
-    private BaseLaunchAgent launchAgent;
+    private BaseLaunchAgent launchAgent = null!;
 
     private readonly Handles<MonoClient.StackFrame> frameHandles = new Handles<MonoClient.StackFrame>();
     private readonly Handles<MonoClient.ObjectValue[]> variableHandles = new Handles<MonoClient.ObjectValue[]>();
@@ -68,10 +63,9 @@ public class DebugSession : Session {
     protected override LaunchResponse HandleLaunchRequest(LaunchArguments arguments) {
         return ServerExtensions.DoSafe(() => {
             var configuration = new LaunchConfiguration(arguments.ConfigurationProperties);
-            SymbolServerExtensions.SetSourcesDirectory(configuration.TempDirectoryPath);
             SymbolServerExtensions.SetEventLogger(OnDebugDataReceived);
 
-            launchAgent = configuration.GetLauchAgent();
+            launchAgent = configuration.GetLaunchAgent();
             launchAgent.Launch(this);
             launchAgent.Connect(session);
             return new LaunchResponse();
@@ -171,7 +165,10 @@ public class DebugSession : Session {
     protected override SetBreakpointsResponse HandleSetBreakpointsRequest(SetBreakpointsArguments arguments) {
         var breakpoints = new List<DebugProtocol.Breakpoint>();
         var breakpointsInfos = arguments.Breakpoints;
-        var sourcePath = arguments.Source?.Path;
+        var sourcePath = arguments.Source.Path;
+
+        if (string.IsNullOrEmpty(sourcePath))
+            throw new ProtocolException("No source available for the breakpoint");
 
         // Remove all file breakpoints
         var fileBreakpoints = session.Breakpoints.GetBreakpointsAtFile(sourcePath);
@@ -241,9 +238,9 @@ public class DebugSession : Session {
             }
 
             var stackFrames = new List<DebugProtocol.StackFrame>();
-            var bt = thread.Backtrace;
+            var bt = thread?.Backtrace;
 
-            if (bt?.FrameCount < 0)
+            if (bt == null || bt.FrameCount < 0)
                 throw new ProtocolException("No stack trace available");
 
             int totalFrames = bt.FrameCount;
@@ -256,34 +253,23 @@ public class DebugSession : Session {
                     continue;
                 }
 
-                DebugProtocol.Source source = null;
+                DebugProtocol.Source? source = null;
                 var frameId = frameHandles.Create(frame);
                 var remappedSourcePath = session.RemapSourceLocation(frame.SourceLocation);
                 if (!string.IsNullOrEmpty(remappedSourcePath) && File.Exists(remappedSourcePath)) {
                     source = new DebugProtocol.Source() {
                         Name = Path.GetFileName(remappedSourcePath),
-                        PresentationHint = Source.PresentationHintValue.Normal,
                         Path = remappedSourcePath,
-                        SourceReference = 0
                     };
-                }
-                if (source == null && frame.SourceLocation.SourceLink != null && session.Options.AutomaticSourceLinkDownload) {
-                    var path = SymbolServerExtensions.DownloadSourceFile(frame.SourceLocation.SourceLink.Uri);
-                    source = new DebugProtocol.Source() {
-                        Name = Path.GetFileName(path),
-                        PresentationHint = Source.PresentationHintValue.Normal,
-                        Path = path,
-                        SourceReference = 0,
-                    };
-                    frame.UpdateSourceFile(path);
                 }
                 if (source == null) {
                     source = new DebugProtocol.Source() {
-                        SourceReference = frameId,
-                        PresentationHint = Source.PresentationHintValue.Deemphasize,
                         Path = frame.SourceLocation.FileName,
+                        SourceReference = frame.GetSourceReference(),
+                        AlternateSourceReference = frameId,
+                        VsSourceLinkInfo = frame.SourceLocation.SourceLink.ToSourceLinkInfo(),
                         Name = string.IsNullOrEmpty(frame.SourceLocation.FileName)
-                            ? frame.SourceLocation.MethodName
+                            ? frame.FullModuleName
                             : Path.GetFileName(frame.SourceLocation.FileName)
                     };
                 }
@@ -296,9 +282,9 @@ public class DebugSession : Session {
                     Column = frame.SourceLocation.Column,
                     EndLine = frame.SourceLocation.EndLine,
                     EndColumn = frame.SourceLocation.EndColumn,
-                    PresentationHint = source.Path == null
-                        ? StackFrame.PresentationHintValue.Subtle
-                        : StackFrame.PresentationHintValue.Normal
+                    PresentationHint = File.Exists(source.Path)
+                        ? StackFrame.PresentationHintValue.Normal
+                        : StackFrame.PresentationHintValue.Subtle
                 });
             }
 
@@ -330,7 +316,7 @@ public class DebugSession : Session {
         return ServerExtensions.DoSafe(() => {
             var reference = arguments.VariablesReference;
             var variables = new List<DebugProtocol.Variable>();
-            if (variableHandles.TryGet(reference, out MonoClient.ObjectValue[] children) && children?.Length > 0) {
+            if (variableHandles.TryGet(reference, out MonoClient.ObjectValue[]? children) && children?.Length > 0) {
                 if (children.Length < 20) {
                     // Wait for all values at once.
                     WaitHandle.WaitAll(children.Select(x => x.WaitHandle).ToArray(), session.EvaluationOptions.EvaluationTimeout);
@@ -403,10 +389,11 @@ public class DebugSession : Session {
     #region Source
     protected override SourceResponse HandleSourceRequest(SourceArguments arguments) {
         return ServerExtensions.DoSafe(() => {
-            if (session.IsRunning)
-                throw ServerExtensions.GetProtocolException("Cannot get source while running");
-            
-            var frame = frameHandles.Get(arguments.SourceReference, null);
+            var sourceLinkUri = arguments.Source.VsSourceLinkInfo?.Url;
+            if (!string.IsNullOrEmpty(sourceLinkUri) && session.Options.AutomaticSourceLinkDownload)
+                return new SourceResponse(SymbolServerExtensions.DownloadSourceFile(sourceLinkUri));
+
+            var frame = frameHandles.Get(arguments.Source.AlternateSourceReference ?? -1, null);
             if (frame == null)
                 throw ServerExtensions.GetProtocolException("No source available");
 
@@ -437,7 +424,7 @@ public class DebugSession : Session {
             if (frame == null)
                 throw new ProtocolException("no active stackframe");
 
-            string resolvedText = null;
+            string? resolvedText = null;
             if (session.Options.EvaluationOptions.UseExternalTypeResolver) {
                 var lastTriggerIndex = arguments.Text.LastIndexOf('.');
                 if (lastTriggerIndex > 0) {
@@ -461,53 +448,54 @@ public class DebugSession : Session {
     }
     #endregion
 
-    private void TargetStopped(object sender, MonoClient.TargetEventArgs e) {
+    private void TargetStopped(object? sender, MonoClient.TargetEventArgs e) {
         ResetHandles();
         Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Pause) {
             ThreadId = (int)e.Thread.Id,
             AllThreadsStopped = true,
         });
     }
-    private void TargetHitBreakpoint(object sender, MonoClient.TargetEventArgs e) {
+    private void TargetHitBreakpoint(object? sender, MonoClient.TargetEventArgs e) {
         ResetHandles();
         Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Breakpoint) {
             ThreadId = (int)e.Thread.Id,
             AllThreadsStopped = true,
         });
     }
-    private void TargetExceptionThrown(object sender, MonoClient.TargetEventArgs e) {
+    private void TargetExceptionThrown(object? sender, MonoClient.TargetEventArgs e) {
         ResetHandles();
         var ex = session.FindException(e.Thread.Id);
         Protocol.SendEvent(new StoppedEvent(StoppedEvent.ReasonValue.Exception) {
             Description = "Paused on exception",
-            Text = ex.Type ?? "Exception",
+            Text = ex?.Type ?? "Exception",
             ThreadId = (int)e.Thread.Id,
             AllThreadsStopped = true,
         });
     }
-    private void TargetReady(object sender, MonoClient.TargetEventArgs e) {
+    private void TargetReady(object? sender, MonoClient.TargetEventArgs e) {
         Protocol.SendEvent(new InitializedEvent());
     }
-    private void TargetExited(object sender, MonoClient.TargetEventArgs e) {
+    private void TargetExited(object? sender, MonoClient.TargetEventArgs e) {
         Protocol.SendEvent(new TerminatedEvent());
     }
-    private void TargetThreadStarted(object sender, MonoClient.TargetEventArgs e) {
+    private void TargetThreadStarted(object? sender, MonoClient.TargetEventArgs e) {
         int tid = (int)e.Thread.Id;
         Protocol.SendEvent(new ThreadEvent(ThreadEvent.ReasonValue.Started, tid));
     }
-    private void TargetThreadStopped(object sender, MonoClient.TargetEventArgs e) {
+    private void TargetThreadStopped(object? sender, MonoClient.TargetEventArgs e) {
         int tid = (int)e.Thread.Id;
         Protocol.SendEvent(new ThreadEvent(ThreadEvent.ReasonValue.Exited, tid));
     }
-    private void AssemblyLoaded(object sender, MonoClient.AssemblyEventArgs e) {
+    private void AssemblyLoaded(object? sender, MonoClient.AssemblyEventArgs e) {
         Protocol.SendEvent(new ModuleEvent(ModuleEvent.ReasonValue.New, e.Assembly.ToModule()));
     }
+    private void BreakpointStatusChanged(object? sender, MonoClient.BreakpointEventArgs e) {
+        Protocol.SendEvent(new BreakpointEvent(BreakpointEvent.ReasonValue.Changed, e.Breakpoint.ToBreakpoint(session)));
+    }
+
     private bool OnExceptionHandled(Exception ex) {
         MonoClient.DebuggerLoggingService.CustomLogger.LogError($"[Handled] {ex.Message}", ex);
         return true;
-    }
-    private void BreakpointStatusChanged(object sender, MonoClient.BreakpointEventArgs e) {
-        Protocol.SendEvent(new BreakpointEvent(BreakpointEvent.ReasonValue.Changed, e.Breakpoint.ToBreakpoint(session)));
     }
     private void OnSessionLog(bool isError, string message) {
         if (isError) MonoClient.DebuggerLoggingService.CustomLogger.LogError($"[Error] {message.Trim()}", null);

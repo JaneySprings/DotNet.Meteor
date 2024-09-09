@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using DotNet.Meteor.Common;
+﻿using DotNet.Meteor.Common;
 using DotNet.Meteor.Debug.Extensions;
 using Newtonsoft.Json.Linq;
 using Mono.Debugging.Client;
@@ -9,44 +6,41 @@ using Mono.Debugging.Client;
 namespace DotNet.Meteor.Debug;
 
 public class LaunchConfiguration {
-    public DebuggerSessionOptions DebuggerSessionOptions { get; init; }
-    public string OutputAssembly { get; init; }
-    public DeviceData Device { get; init; }
     public Project Project { get; init; }
+    public DeviceData Device { get; init; }
     public string Configuration { get; init; }
-    public string ProfilerMode { get; init; }
+
     public bool UninstallApp { get; init; }
     public bool SkipDebug { get; init; }
-
     public int DebugPort { get; init; }
-    public int ProfilerPort { get; init; }
     public int ReloadHostPort { get; init; }
-
-    public string TempDirectoryPath => Path.Combine(Path.GetDirectoryName(Project.Path), ".meteor");
+    public int ProfilerPort { get; init; }
+    public string? ProfilerMode { get; init; }
+    public string OutputAssembly { get; init; }
+    public DebuggerSessionOptions DebuggerSessionOptions { get; init; }
 
     public LaunchConfiguration(Dictionary<string, JToken> configurationProperties) {
-        Project = configurationProperties.TryGetValue("project").ToObject(TrimmableContext.Default.Project);
-        Device = configurationProperties.TryGetValue("device").ToObject(TrimmableContext.Default.DeviceData);
-        Configuration = configurationProperties.TryGetValue("configuration").ToObject(TrimmableContext.Default.String);
-        UninstallApp = configurationProperties.TryGetValue("uninstallApp").ToObject(TrimmableContext.Default.Boolean);
-        SkipDebug = configurationProperties.TryGetValue("skipDebug").ToObject(TrimmableContext.Default.Boolean);
-        OutputAssembly = configurationProperties.TryGetValue("program").ToObject(TrimmableContext.Default.String);
-        ProfilerMode = configurationProperties.TryGetValue("profilerMode").ToObject(TrimmableContext.Default.String);
-
-        DebugPort = configurationProperties.TryGetValue("debuggingPort").ToObject(TrimmableContext.Default.Int32);
-        ReloadHostPort = configurationProperties.TryGetValue("reloadHost").ToObject(TrimmableContext.Default.Int32);
-        ProfilerPort = configurationProperties.TryGetValue("profilerPort").ToObject(TrimmableContext.Default.Int32);
-        DebuggerSessionOptions = GetDebuggerSessionOptions(configurationProperties.TryGetValue("debuggerOptions"));
-
-        if (string.IsNullOrEmpty(OutputAssembly))
-            OutputAssembly = Project.FindOutputApplication(Configuration, Device, message => throw ServerExtensions.GetProtocolException(message));
+        Project = configurationProperties["project"].ToClass<Project>()!;
+        Device = configurationProperties["device"].ToClass<DeviceData>()!;
+        Configuration = configurationProperties["configuration"].ToClass<string>()!;
+        
+        UninstallApp = configurationProperties.TryGetValue("uninstallApp").ToValue<bool>();
+        SkipDebug = configurationProperties.TryGetValue("skipDebug").ToValue<bool>();
+        DebugPort = configurationProperties.TryGetValue("debuggingPort").ToValue<int>();
+        ReloadHostPort = configurationProperties.TryGetValue("reloadHost").ToValue<int>();
+        ProfilerPort = configurationProperties.TryGetValue("profilerPort").ToValue<int>();
+        ProfilerMode = configurationProperties.TryGetValue("profilerMode")?.ToClass<string>();
+        DebuggerSessionOptions = configurationProperties.TryGetValue("debuggerOptions")?.ToClass<DebuggerSessionOptions>() 
+            ?? ServerExtensions.DefaultDebuggerOptions;
+        
+        var outputAssembly = configurationProperties.TryGetValue("program")?.ToClass<string>();
+        OutputAssembly = string.IsNullOrEmpty(outputAssembly) 
+            ? Project.FindOutputApplication(Configuration, Device, message => throw ServerExtensions.GetProtocolException(message))
+            : outputAssembly;
 
         DebugPort = DebugPort == 0 ? ServerExtensions.FindFreePort() : DebugPort;
         ReloadHostPort = ReloadHostPort == 0 ? ServerExtensions.FindFreePort() : ReloadHostPort;
         ProfilerPort = ProfilerPort == 0 ? ServerExtensions.FindFreePort() : ProfilerPort;
-
-        if (!Directory.Exists(TempDirectoryPath))
-            Directory.CreateDirectory(TempDirectoryPath);
     }
 
     public string GetApplicationName() {
@@ -66,7 +60,7 @@ public class LaunchConfiguration {
 
         throw new NotSupportedException();
     }
-    public BaseLaunchAgent GetLauchAgent() {
+    public BaseLaunchAgent GetLaunchAgent() {
         if (ProfilerMode.EqualsInsensitive("trace"))
             return new TraceLaunchAgent(this);
         if (ProfilerMode.EqualsInsensitive("gcdump"))
@@ -75,35 +69,5 @@ public class LaunchConfiguration {
             return new DebugLaunchAgent(this);
 
         return new NoDebugLaunchAgent(this);
-    }
-
-    private static DebuggerSessionOptions GetDebuggerSessionOptions(JToken debuggerJsonToken) {
-        var debuggerOptions = ServerExtensions.DefaultDebuggerOptions;
-        var options = debuggerJsonToken.ToObject(DebuggerOptionsContext.Default.DebugOptions);
-        if (options == null)
-            return debuggerOptions;
-
-        debuggerOptions.EvaluationOptions.EvaluationTimeout = options.EvaluationTimeout;
-        debuggerOptions.EvaluationOptions.MemberEvaluationTimeout = options.MemberEvaluationTimeout;
-        debuggerOptions.EvaluationOptions.AllowTargetInvoke = options.AllowTargetInvoke;
-        debuggerOptions.EvaluationOptions.AllowMethodEvaluation = options.AllowMethodEvaluation;
-        debuggerOptions.EvaluationOptions.AllowToStringCalls = options.AllowToStringCalls;
-        debuggerOptions.EvaluationOptions.FlattenHierarchy = options.FlattenHierarchy;
-        debuggerOptions.EvaluationOptions.GroupPrivateMembers = options.GroupPrivateMembers;
-        debuggerOptions.EvaluationOptions.GroupStaticMembers = options.GroupStaticMembers;
-        debuggerOptions.EvaluationOptions.UseExternalTypeResolver = options.UseExternalTypeResolver;
-        debuggerOptions.EvaluationOptions.CurrentExceptionTag = options.CurrentExceptionTag;
-        debuggerOptions.EvaluationOptions.EllipsizeStrings = options.EllipsizeStrings;
-        debuggerOptions.EvaluationOptions.EllipsizedLength = options.EllipsizedLength;
-        debuggerOptions.EvaluationOptions.IntegerDisplayFormat = DebugOptions.GetIntegerDisplayFormat(options.IntegerDisplayFormat);
-        debuggerOptions.ProjectAssembliesOnly = options.ProjectAssembliesOnly;
-        debuggerOptions.StepOverPropertiesAndOperators = options.StepOverPropertiesAndOperators;
-        debuggerOptions.SearchMicrosoftSymbolServer = options.SearchMicrosoftSymbolServer;
-        debuggerOptions.SearchNuGetSymbolServer = options.SearchNuGetSymbolServer;
-        debuggerOptions.SourceCodeMappings = options.SourceCodeMappings;
-        debuggerOptions.AutomaticSourceLinkDownload = options.AutomaticSourceLinkDownload;
-        debuggerOptions.SymbolSearchPaths = options.SymbolSearchPaths;
-
-        return debuggerOptions;
     }
 }

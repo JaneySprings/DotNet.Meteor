@@ -22,7 +22,7 @@ public class HotReloadClient {
         this.port = port;
     }
 
-    public void SendNotification(string filePath, IProcessLogger? logger = null) {
+    public void SendNotification(string? filePath, IProcessLogger? logger = null) {
         if (!IsRunning)
             TryConnectAsync().Wait();
 

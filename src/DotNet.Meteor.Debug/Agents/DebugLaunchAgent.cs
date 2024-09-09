@@ -1,4 +1,3 @@
-using System;
 using System.Net;
 using DotNet.Meteor.Debug.Extensions;
 using DotNet.Meteor.Debug.Sdb;

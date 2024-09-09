@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using DotNet.Meteor.HotReload;
 using DotNet.Meteor.Processes;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
@@ -30,11 +28,11 @@ public abstract class BaseLaunchAgent {
     public abstract void Launch(IProcessLogger logger);
     public virtual void HandleCommand(string command, string args, IProcessLogger logger) { }
 
-    public virtual void SendHotReloadNotification(string filePath, IProcessLogger logger = null) {
+    public virtual void SendHotReloadNotification(string? filePath, IProcessLogger? logger = null) {
         try {
             HotReloadClient.SendNotification(filePath, logger);
         } catch (Exception ex) {
-            logger.OnErrorDataReceived($"[HotReload]: {ex.Message}");
+            logger?.OnErrorDataReceived($"[HotReload]: {ex.Message}");
         }
     }
     public void HandleCommand(string command, IProcessLogger logger) {

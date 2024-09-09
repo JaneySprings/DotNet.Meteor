@@ -1,4 +1,3 @@
-using System;
 using Mono.Debugger.Soft;
 using Mono.Debugging.Client;
 using Mono.Debugging.Soft;

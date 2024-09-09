@@ -2,19 +2,15 @@ using System.Net;
 using System.Net.Sockets;
 using Mono.Debugging.Client;
 using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
 using Newtonsoft.Json.Linq;
 using NewtonConverter = Newtonsoft.Json.JsonConvert;
 using DebugProtocol = Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
-using System.IO;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using DotNet.Meteor.Common;
 using DotNet.Meteor.Common.Extensions;
 using Mono.Debugging.Soft;
 using System.IO.Compression;
-using System;
-using System.Linq;
-using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace DotNet.Meteor.Debug.Extensions;
 
@@ -38,15 +34,19 @@ public static class ServerExtensions {
         },
         ProjectAssembliesOnly = true
     };
+    public static JsonSerializerOptions SerializerOptions { get; } = new JsonSerializerOptions {
+        Converters = { new JsonStringEnumConverter() },
+        PropertyNameCaseInsensitive = true,
+    };
 
     public static int FindFreePort() {
-        TcpListener listener = null;
+        TcpListener? listener = null;
         try {
             listener = new TcpListener(IPAddress.Loopback, 0);
             listener.Start();
             return ((IPEndPoint)listener.LocalEndpoint).Port;
         } finally {
-            listener.Stop();
+            listener?.Stop();
         }
     }
     public static bool TryDeleteFile(string path) {
@@ -56,6 +56,12 @@ public static class ServerExtensions {
     }
     public static ProtocolException GetProtocolException(string message) {
         return new ProtocolException(message, 0, message, url: $"file://{LogConfig.DebugLogFile}");
+    }
+    public static int GetSourceReference(this StackFrame frame) {
+        var key = string.IsNullOrEmpty(frame.SourceLocation.FileName)
+            ? frame.SourceLocation.MethodName ?? "null"
+            : frame.SourceLocation.FileName;
+        return Math.Abs(key.GetHashCode());
     }
     public static string ExtractAndroidAssemblies(string assemblyPath) {
         var targetDirectory = Path.GetDirectoryName(assemblyPath)!;
@@ -78,8 +84,7 @@ public static class ServerExtensions {
             foreach (var entry in assembliesEntry) {
                 var assemblyFileName = entry.Name.TrimStart("lib_").TrimEnd(".so");
                 var targetPath = Path.Combine(targetDirectory, assemblyFileName);
-                if (File.Exists(targetPath))
-                    File.Delete(targetPath);
+                TryDeleteFile(targetPath);
 
                 using var fileStream = File.Create(targetPath);
                 using var stream = entry.Open();
@@ -92,11 +97,11 @@ public static class ServerExtensions {
             return targetDirectory;
         }
     }
-    public static string TrimExpression(this DebugProtocol.EvaluateArguments args) {
+    public static string? TrimExpression(this DebugProtocol.EvaluateArguments args) {
         return args.Expression?.TrimEnd(';')?.Replace("?.", ".");
     }
 
-    public static T DoSafe<T>(Func<T> handler, Action finalizer = null) {
+    public static T DoSafe<T>(Func<T> handler, Action? finalizer = null) {
         try {
             return handler.Invoke();
         } catch (Exception ex) {
@@ -108,12 +113,12 @@ public static class ServerExtensions {
         }
     }
 
-    public static JToken TryGetValue(this Dictionary<string, JToken> dictionary, string key) {
+    public static JToken? TryGetValue(this Dictionary<string, JToken> dictionary, string key) {
         if (dictionary.TryGetValue(key, out var value))
             return value;
         return null;
     }
-    public static T ToObject<T>(this JToken jtoken, JsonTypeInfo<T> type) {
+    public static T? ToClass<T>(this JToken? jtoken) where T: class {
         if (jtoken == null)
             return default;
 
@@ -121,7 +126,17 @@ public static class ServerExtensions {
         if (string.IsNullOrEmpty(json))
             return default;
 
-        return JsonSerializer.Deserialize(json, type);
+        return JsonSerializer.Deserialize<T>(json, SerializerOptions);
+    }
+    public static T ToValue<T>(this JToken? jtoken) where T: struct {
+        if (jtoken == null)
+            return default;
+
+        string json = NewtonConverter.SerializeObject(jtoken);
+        if (string.IsNullOrEmpty(json))
+            return default;
+
+        return JsonSerializer.Deserialize<T>(json);
     }
     public static DebugProtocol.CompletionItem ToCompletionItem(this CompletionItem item) {
         return new DebugProtocol.CompletionItem() {
@@ -170,6 +185,12 @@ public static class ServerExtensions {
             VsAppDomain = assembly.AppDomain,
         };
     }
+    public static DebugProtocol.VSSourceLinkInfo ToSourceLinkInfo(this SourceLink sourceLink) {
+        return new DebugProtocol.VSSourceLinkInfo {
+            Url = sourceLink?.Uri,
+            RelativeFilePath = sourceLink?.RelativeFilePath,
+        };
+    }
 }
 
 public class HotReloadRequest : DebugProtocol.DebugRequest<HotReloadArguments> {
@@ -177,5 +198,5 @@ public class HotReloadRequest : DebugProtocol.DebugRequest<HotReloadArguments> {
 }
 public class HotReloadResponse : DebugProtocol.ResponseBody {}
 public class HotReloadArguments {
-    public string FilePath { get; set; }
+    public string? FilePath { get; set; }
 }

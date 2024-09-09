@@ -1,5 +1,3 @@
-using System;
-using System.IO;
 using System.Diagnostics;
 using DotNet.Meteor.Processes;
 using DotNet.Meteor.Common;
@@ -7,7 +5,7 @@ using DotNet.Meteor.Common;
 namespace DotNet.Meteor.Debug.Sdk;
 
 public static class MonoLaunch {
-    public static Process TcpTunnel(string serial, int port, IProcessLogger logger = null) {
+    public static Process TcpTunnel(string serial, int port, IProcessLogger? logger = null) {
         FileInfo tool = AppleSdk.MLaunchTool();
         return new ProcessRunner(tool, new ProcessArgumentBuilder()
             .Append($"--tcp-tunnel={port}:{port}")
@@ -15,7 +13,7 @@ public static class MonoLaunch {
             .Start();
     }
 
-    public static void InstallDev(string serial, string bundlePath, IProcessLogger logger = null) {
+    public static void InstallDev(string serial, string bundlePath, IProcessLogger? logger = null) {
         var tool = AppleSdk.MLaunchTool();
         logger?.OnOutputDataReceived(tool.FullName);
         new ProcessRunner(tool, new ProcessArgumentBuilder()
@@ -24,7 +22,7 @@ public static class MonoLaunch {
             .WaitForExit();
     }
 
-    public static void LaunchDev(string serial, string bundlePath, IProcessLogger logger = null) {
+    public static void LaunchDev(string serial, string bundlePath, IProcessLogger? logger = null) {
         var tool = AppleSdk.MLaunchTool();
         var arguments = new ProcessArgumentBuilder()
             .Append( "--launchdev").AppendQuoted(bundlePath)
@@ -35,7 +33,7 @@ public static class MonoLaunch {
             throw new InvalidOperationException(string.Join(Environment.NewLine, result.StandardError));
     }
 
-    public static Process LaunchSim(string serial, string bundlePath, IProcessLogger logger = null) {
+    public static Process LaunchSim(string serial, string bundlePath, IProcessLogger? logger = null) {
         var tool = AppleSdk.MLaunchTool();
         var arguments = new ProcessArgumentBuilder()
             .Append( "--launchsim").AppendQuoted(bundlePath)
@@ -43,7 +41,7 @@ public static class MonoLaunch {
         return new ProcessRunner(tool, arguments, logger).Start();
     }
 
-    public static Process DebugDev(string serial, string bundlePath, int port, IProcessLogger logger = null) {
+    public static Process DebugDev(string serial, string bundlePath, int port, IProcessLogger? logger = null) {
         var tool = AppleSdk.MLaunchTool();
         var arguments = new ProcessArgumentBuilder()
             .Append( "--launchdev").AppendQuoted(bundlePath)
@@ -55,7 +53,7 @@ public static class MonoLaunch {
         return new ProcessRunner(tool, arguments, logger).Start();
     }
 
-    public static Process ProfileDev(string serial, string bundlePath, string port, IProcessLogger logger = null) {
+    public static Process ProfileDev(string serial, string bundlePath, string port, IProcessLogger? logger = null) {
         var tool = AppleSdk.MLaunchTool();
         var arguments = new ProcessArgumentBuilder()
             .Append( "--launchdev").AppendQuoted(bundlePath)
@@ -69,7 +67,7 @@ public static class MonoLaunch {
         return new ProcessRunner(tool, arguments, logger).Start();
     }
 
-    public static Process DebugSim(string serial, string bundlePath, int port, IProcessLogger logger = null) {
+    public static Process DebugSim(string serial, string bundlePath, int port, IProcessLogger? logger = null) {
         var tool = AppleSdk.MLaunchTool();
         logger?.OnOutputDataReceived(tool.FullName);
         var arguments = new ProcessArgumentBuilder()
@@ -81,7 +79,7 @@ public static class MonoLaunch {
         return new ProcessRunner(tool, arguments, logger).Start();
     }
 
-    public static Process ProfileSim(string serial, string bundlePath, string port, IProcessLogger logger = null) {
+    public static Process ProfileSim(string serial, string bundlePath, string port, IProcessLogger? logger = null) {
         var tool = AppleSdk.MLaunchTool();
         var arguments = new ProcessArgumentBuilder()
             .Append( "--launchsim").AppendQuoted(bundlePath)

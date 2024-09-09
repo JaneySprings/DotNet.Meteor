@@ -1,10 +1,6 @@
-using System;
 using System.CommandLine;
 using System.CommandLine.IO;
-using System.IO;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using DotNet.Meteor.Processes;
 
 namespace DotNet.Meteor.Debug.Extensions;
@@ -63,14 +59,14 @@ public class ConsoleLogger : IConsole {
     public bool IsInputRedirected => false;
 
     private class StringWriter : TextWriter {
-        private readonly Action<string> handler;
+        private readonly Action<string?> handler;
 
-        public StringWriter(Action<string> handler) {
+        public StringWriter(Action<string?> handler) {
             this.handler = handler;
         }
 
         public override Encoding Encoding => Encoding.UTF8;
-        public override void Write(string value) {
+        public override void Write(string? value) {
             handler.Invoke(value);
         }
     }

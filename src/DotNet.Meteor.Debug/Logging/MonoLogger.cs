@@ -1,6 +1,6 @@
-using System;
 using Mono.Debugging.Client;
 using NLog;
+
 namespace DotNet.Meteor.Debug.Logging;
 
 public class MonoLogger : ICustomLogger {

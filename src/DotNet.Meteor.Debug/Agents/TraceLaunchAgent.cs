@@ -1,5 +1,3 @@
-using System;
-using System.IO;
 using DotNet.Meteor.Debug.Extensions;
 using DotNet.Meteor.Debug.Sdk;
 using DotNet.Meteor.Debug.Sdk.Profiling;
@@ -13,7 +11,7 @@ public class TraceLaunchAgent : BaseLaunchAgent {
     public TraceLaunchAgent(LaunchConfiguration configuration) : base(configuration) { }
     public override void Connect(SoftDebuggerSession session) { }
     public override void Launch(IProcessLogger logger) {
-        var nettracePath = Path.Combine(Configuration.TempDirectoryPath, $"{Configuration.GetApplicationName()}.nettrace");
+        var nettracePath = Path.Combine(Path.GetDirectoryName(Configuration.Project.Path)!, ".meteor", $"{Configuration.GetApplicationName()}.nettrace");
         var diagnosticPort = Path.Combine(RuntimeSystem.HomeDirectory, $"{Configuration.Device.Platform}-port.lock");
         ServerExtensions.TryDeleteFile(diagnosticPort);
 
