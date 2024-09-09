@@ -17,7 +17,7 @@ public class GCDumpLaunchAgent : BaseLaunchAgent {
     public GCDumpLaunchAgent(LaunchConfiguration configuration) : base(configuration) { }
     public override void Connect(SoftDebuggerSession session) { }
     public override void Launch(IProcessLogger logger) {
-        gcdumpPath = Path.Combine(Path.GetDirectoryName(Configuration.Project.Path)!, ".meteor", $"{Configuration.GetApplicationName()}.gcdump");
+        gcdumpPath = Path.Combine(Path.GetDirectoryName(Configuration.Project.Path)!, $"{Configuration.GetApplicationName()}.gcdump");
         diagnosticPort = Path.Combine(RuntimeSystem.HomeDirectory, $"{Configuration.Device.Platform}-port.lock");
         ServerExtensions.TryDeleteFile(diagnosticPort);
 
