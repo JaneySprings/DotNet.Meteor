@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text;
 using Mono.Debugging.Client;
@@ -24,7 +20,7 @@ public static class MonoExtensions {
         return dv;
     }
 
-    public static StackFrame GetFrameSafe(this Backtrace bt, int n) {
+    public static StackFrame? GetFrameSafe(this Backtrace bt, int n) {
         try {
             return bt.GetFrame(n);
         } catch (Exception) {
@@ -39,14 +35,14 @@ public static class MonoExtensions {
         
         return sb.ToString();
     }
-    public static ThreadInfo FindThread(this SoftDebuggerSession session, long id) {
+    public static ThreadInfo? FindThread(this SoftDebuggerSession session, long id) {
         var process = session.GetProcesses().FirstOrDefault();
         if (process == null)
             return null;
 
         return process.GetThreads().FirstOrDefault(it => it.Id == id);
     }
-    public static ExceptionInfo FindException(this SoftDebuggerSession session, long id) {
+    public static ExceptionInfo? FindException(this SoftDebuggerSession session, long id) {
         var thread = session.FindThread(id);
         if (thread == null)
             return null;
@@ -60,8 +56,8 @@ public static class MonoExtensions {
 
         return null;
     }
-    public static string RemapSourceLocation(this SoftDebuggerSession session, SourceLocation location) {
-        if (location == null || string.IsNullOrEmpty(location.FileName))
+    public static string? RemapSourceLocation(this SoftDebuggerSession session, SourceLocation location) {
+        if (string.IsNullOrEmpty(location.FileName))
             return null;
 
         foreach (var remap in session.Options.SourceCodeMappings) {
@@ -87,7 +83,7 @@ public static class MonoExtensions {
                     continue;
                 }
 
-                string assemblySymbolsFilePath = SymbolServerExtensions.SearchSymbols(options.SymbolSearchPaths, assemblyPath);
+                string? assemblySymbolsFilePath = SymbolServerExtensions.SearchSymbols(options.SymbolSearchPaths, assemblyPath);
                 if (string.IsNullOrEmpty(assemblySymbolsFilePath) && options.SearchMicrosoftSymbolServer)
                     assemblySymbolsFilePath = SymbolServerExtensions.DownloadSourceSymbols(assemblyPath, assemblyDefinition.Name.Name, SymbolServerExtensions.MicrosoftSymbolServerAddress);
                 if (string.IsNullOrEmpty(assemblySymbolsFilePath) && options.SearchNuGetSymbolServer)

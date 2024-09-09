@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Text.RegularExpressions;
 using DotNet.Meteor.Processes;
 using DotNet.Meteor.Common;
@@ -72,7 +69,7 @@ public static class DeviceBridge {
         return string.Join(Environment.NewLine, result.StandardOutput);
     }
 
-    public static void Install(string serial, string apk, IProcessLogger logger = null) {
+    public static void Install(string serial, string apk, IProcessLogger? logger = null) {
         var adb = AndroidSdk.AdbTool();
         var arguments = new ProcessArgumentBuilder()
             .Append("-s", serial)
@@ -83,7 +80,7 @@ public static class DeviceBridge {
         if (!result.Success)
             throw new Exception(string.Join(Environment.NewLine, result.StandardError));
     }
-    public static void Uninstall(string serial, string pkg, IProcessLogger logger = null) {
+    public static void Uninstall(string serial, string pkg, IProcessLogger? logger = null) {
         var adb = AndroidSdk.AdbTool();
         var argument = new ProcessArgumentBuilder()
             .Append("-s", serial)
@@ -91,7 +88,7 @@ public static class DeviceBridge {
             .Append(pkg);
         new ProcessRunner(adb, argument, logger).WaitForExit();
     }
-    public static void Launch(string serial, string pkg, IProcessLogger logger = null) {
+    public static void Launch(string serial, string pkg, IProcessLogger? logger = null) {
         // This is a legacy method that is no longer used (device auto-rotation issue).
         // string result = Shell(serial, "monkey", "--pct-syskeys", "0", "-p", pkg, "1");
         string result = Shell(serial, "am", "start", $"{pkg}/$(cmd package resolve-activity -c android.intent.category.LAUNCHER {pkg} | sed -n '/name=/s/^.*name=//p')");
@@ -148,7 +145,7 @@ public static class DeviceBridge {
 
         return devices;
     }
-    public static string EmuName(string serial) {
+    public static string? EmuName(string serial) {
         var adb = AndroidSdk.AdbTool();
         ProcessResult result = new ProcessRunner(adb, new ProcessArgumentBuilder()
             .Append("-s", serial)

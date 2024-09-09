@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
 using System.Reflection.PortableExecutable;
-using System.Threading.Tasks;
+using System.Text;
 using Mono.Debugging.Client;
 
 namespace DotNet.Meteor.Debug.Extensions;
@@ -14,39 +9,26 @@ public static class SymbolServerExtensions {
     public const string NuGetSymbolServerAddress = "https://symbols.nuget.org/download/symbols";
 
     private static readonly HttpClient httpClient;
-    private static Action<string> eventLogger;
+    private static Action<string>? eventLogger;
     private static string symbolsDirectory;
-    private static string sourcesDirectory;
 
     static SymbolServerExtensions() {
         httpClient = new HttpClient();
-        SetSourcesDirectory(AppDomain.CurrentDomain.BaseDirectory);
-        SetSymbolsDirectory(AppDomain.CurrentDomain.BaseDirectory);
+        symbolsDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "symbols");
     }
 
-    public static void SetSourcesDirectory(string directory) {
-        sourcesDirectory = Path.Combine(directory, "sources");
-    }
-    public static void SetSymbolsDirectory(string directory) {
-        symbolsDirectory = Path.Combine(directory, "symbols");
-    }
     public static void SetEventLogger(Action<string> logger) {
         eventLogger = logger;
     }
-    public static string DownloadSourceFile(string uri) {
+    public static string? DownloadSourceFile(string uri) {
         if (!Uri.TryCreate(uri, UriKind.Absolute, out var sourceLinkUri)) {
             DebuggerLoggingService.CustomLogger.LogMessage($"Invalid source link '{uri}'");
             return null;
         }
 
-        var outputFilePath = Path.Combine(sourcesDirectory, sourceLinkUri.LocalPath.TrimStart('/'));
-        if (File.Exists(outputFilePath))
-            return outputFilePath;
-
-        _ = DownloadFileAsync(uri, outputFilePath, writeErrorInTarget: true);
-        return outputFilePath;
+        return GetFileContentAsync(uri).Result;
     }
-    public static string DownloadSourceSymbols(string assemblyPath, string assemblyName, string serverAddress) {
+    public static string? DownloadSourceSymbols(string assemblyPath, string assemblyName, string serverAddress) {
         var pdbData = GetPdbData(assemblyPath);
         if (pdbData == null)
             return null;
@@ -78,7 +60,7 @@ public static class SymbolServerExtensions {
         pdbPath = Path.Combine(symbolsDirectory, pdbData.Id + ".pdb");
         return File.Exists(pdbPath);
     }
-    public static string SearchSymbols(IEnumerable<string> searchPaths, string assemblyPath) {
+    public static string? SearchSymbols(IEnumerable<string> searchPaths, string assemblyPath) {
         var pdbPath = Path.ChangeExtension(assemblyPath, ".pdb");
         if (File.Exists(pdbPath))
             return pdbPath;
@@ -93,7 +75,7 @@ public static class SymbolServerExtensions {
         return null;
     }
 
-    private static async Task<bool> DownloadFileAsync(string url, string outputFilePath, bool writeErrorInTarget = false) {
+    private static async Task<bool> DownloadFileAsync(string url, string outputFilePath) {
         try {
             // if (!string.IsNullOrEmpty(header)) {
             //     httpClient.DefaultRequestHeaders.Remove("SymbolChecksum");
@@ -103,7 +85,7 @@ public static class SymbolServerExtensions {
             if (!response.IsSuccessStatusCode)
                 return false;
 
-            var directory = Path.GetDirectoryName(outputFilePath);
+            var directory = Path.GetDirectoryName(outputFilePath)!;
             if (!Directory.Exists(directory))
                 Directory.CreateDirectory(directory);
 
@@ -111,14 +93,24 @@ public static class SymbolServerExtensions {
             var data = await content.ReadAsByteArrayAsync();
             File.WriteAllBytes(outputFilePath, data);
             return true;
-        } catch (Exception ex) {
-            if (writeErrorInTarget)
-                File.WriteAllText(outputFilePath, ex.ToString());
-
+        } catch (Exception) {
             return false;
         }
     }
-    private static PdbData GetPdbData(string assemblyPath) {
+    private static async Task<string> GetFileContentAsync(string url) {
+        try {
+            using var response = await httpClient.GetAsync(url);
+            if (!response.IsSuccessStatusCode)
+                return $"Error while loading file '{url}': {response.StatusCode}";
+           
+            using var content = response.Content;
+            var data = await content.ReadAsByteArrayAsync();
+            return Encoding.Default.GetString(data);
+        } catch (Exception ex) {
+            return ex.Message;
+        }
+    }
+    private static PdbData? GetPdbData(string assemblyPath) {
         try {
             using var peReader = new PEReader(File.OpenRead(assemblyPath));
             var codeViewEntries = peReader.ReadDebugDirectory().Where(entry => entry.Type == DebugDirectoryEntryType.CodeView);

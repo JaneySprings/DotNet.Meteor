@@ -1,4 +1,3 @@
-using System;
 using Mono.Debugger.Soft;
 using Mono.Debugging.Client;
 using Mono.Debugging.Soft;
@@ -9,7 +8,7 @@ using DotNet.Meteor.Debug.Extensions;
 namespace DotNet.Meteor.Debug.Sdb;
 
 public class ClientConnectionProvider : SoftDebuggerStartArgs, ISoftDebuggerConnectionProvider {
-    private TcpClient client;
+    private TcpClient client = null!;
     private readonly string appName;
     private readonly IPEndPoint endPoint;
 

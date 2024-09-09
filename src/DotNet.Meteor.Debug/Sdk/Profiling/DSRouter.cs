@@ -1,6 +1,4 @@
-using System;
 using System.Diagnostics;
-using System.IO;
 using DotNet.Meteor.Processes;
 using DotNet.Meteor.Common;
 
@@ -17,7 +15,7 @@ public static class DSRouter {
         return new FileInfo(path);
     }
 
-    public static Process ServerToServer(int port, IProcessLogger logger = null) {
+    public static Process ServerToServer(int port, IProcessLogger? logger = null) {
         var dsrouter = DSRouter.DSRouterTool();
         var arguments = new ProcessArgumentBuilder()
             .Append("server-server")
@@ -25,7 +23,7 @@ public static class DSRouter {
         return new ProcessRunner(dsrouter, arguments, logger).Start();
     }
 
-    public static Process ClientToServer(string ipcc, string tcps, IProcessLogger logger = null) {
+    public static Process ClientToServer(string ipcc, string tcps, IProcessLogger? logger = null) {
         var dsrouter = DSRouter.DSRouterTool();
         var arguments = new ProcessArgumentBuilder()
             .Append("client-server")
@@ -34,7 +32,7 @@ public static class DSRouter {
         return new ProcessRunner(dsrouter, arguments, logger).Start();
     }
 
-    public static Process ServerToClient(string ipcs, string tcpc, bool forwardApple = false, IProcessLogger logger = null) {
+    public static Process ServerToClient(string? ipcs, string tcpc, bool forwardApple = false, IProcessLogger? logger = null) {
         var dsrouter = DSRouter.DSRouterTool();
         var arguments = new ProcessArgumentBuilder()
             .Append("server-client")
@@ -46,20 +44,4 @@ public static class DSRouter {
 
         return new ProcessRunner(dsrouter, arguments, logger).Start();
     }
-
-    // public static ProfilingTask ServerToServer(string ipc, string tcp) {
-    //     var cancellationTokenSource = new CancellationTokenSource();
-    //     var token = cancellationTokenSource.Token;
-    //     var commands = new DiagnosticsServerRouterCommands();
-    //     var task = Task.Run(async() => await commands.RunIpcServerTcpServerRouter(token, ipc, tcp, 0, "none", string.Empty));
-    //     return new ProfilingTask(task, cancellationTokenSource);
-    // }
-
-    // public static ProfilingTask ClientToServer(string ipc, string tcp) {
-    //     var cancellationTokenSource = new CancellationTokenSource();
-    //     var token = cancellationTokenSource.Token;
-    //     var commands = new DiagnosticsServerRouterCommands();
-    //     var task = Task.Run(async() => await commands.RunIpcClientTcpServerRouter(token, ipc, tcp, 0, "none", string.Empty));
-    //     return new ProfilingTask(task, cancellationTokenSource);
-    // }
 }

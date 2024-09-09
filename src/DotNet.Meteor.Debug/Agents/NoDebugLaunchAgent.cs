@@ -1,5 +1,3 @@
-using System;
-using System.IO;
 using DotNet.Meteor.Debug.Extensions;
 using DotNet.Meteor.Debug.Sdk;
 using DotNet.Meteor.Processes;

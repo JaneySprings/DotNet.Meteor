@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
+﻿namespace DotNet.Meteor.Debug;
 
-namespace DotNet.Meteor.Debug;
-
-public class Handles<T> {
+public class Handles<T> where T: class {
     private const int StartHandle = 1000;
 
     private int nextHandle;
@@ -24,12 +22,12 @@ public class Handles<T> {
         return handle;
     }
 
-    public bool TryGet(int handle, out T value) {
+    public bool TryGet(int handle, out T? value) {
         return handleMap.TryGetValue(handle, out value);
     }
 
-    public T Get(int handle, T defaultValue) {
-        if (handleMap.TryGetValue(handle, out T value))
+    public T? Get(int handle, T? defaultValue = null) {
+        if (handleMap.TryGetValue(handle, out T? value))
             return value;
         return defaultValue;
     }

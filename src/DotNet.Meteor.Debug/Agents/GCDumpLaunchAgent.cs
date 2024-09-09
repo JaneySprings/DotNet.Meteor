@@ -1,5 +1,3 @@
-using System;
-using System.IO;
 using DotNet.Meteor.Debug.Extensions;
 using DotNet.Meteor.Debug.Sdk;
 using DotNet.Meteor.Debug.Sdk.Profiling;
@@ -10,8 +8,8 @@ using Mono.Debugging.Soft;
 namespace DotNet.Meteor.Debug;
 
 public class GCDumpLaunchAgent : BaseLaunchAgent {
-    private string diagnosticPort;
-    private string gcdumpPath;
+    private string? diagnosticPort;
+    private string? gcdumpPath;
     private int applicationPID;
 
     protected override string ProcessedCommand => "dump";
@@ -19,7 +17,7 @@ public class GCDumpLaunchAgent : BaseLaunchAgent {
     public GCDumpLaunchAgent(LaunchConfiguration configuration) : base(configuration) { }
     public override void Connect(SoftDebuggerSession session) { }
     public override void Launch(IProcessLogger logger) {
-        gcdumpPath = Path.Combine(Configuration.TempDirectoryPath, $"{Configuration.GetApplicationName()}.gcdump");
+        gcdumpPath = Path.Combine(Path.GetDirectoryName(Configuration.Project.Path)!, ".meteor", $"{Configuration.GetApplicationName()}.gcdump");
         diagnosticPort = Path.Combine(RuntimeSystem.HomeDirectory, $"{Configuration.Device.Platform}-port.lock");
         ServerExtensions.TryDeleteFile(diagnosticPort);
 

@@ -7,11 +7,6 @@
 
 	<Import Project="..\Common.Build.props" />
 
-	<PropertyGroup>
-		<Nullable>disable</Nullable>
-		<ImplicitUsings>disable</ImplicitUsings>
-	</PropertyGroup>
-
 	<ItemGroup>
 		<PackageReference Include="Microsoft.VisualStudio.Shared.VSCodeDebugProtocol" Version="17.2.60629.1" />
 		<ProjectReference Include="..\Mono.Debugger\Mono.Debugger.Soft\Mono.Debugger.Soft.csproj" />

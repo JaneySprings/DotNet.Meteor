@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Mono.Cecil;
 using Mono.Debugging.Client;
 
@@ -6,8 +5,8 @@ namespace DotNet.Meteor.Debug.Extensions;
 
 public static class TypeResolverExtensions {
     private static readonly Dictionary<string, string> typesCache = new Dictionary<string, string>();
-    private static EvaluationOptions evaluationOptions;
-    private static StackFrame context;
+    private static EvaluationOptions? evaluationOptions;
+    private static StackFrame? context;
 
     public static void RegisterTypes(IEnumerable<TypeDefinition> types) {
         foreach (var type in types) {

@@ -1,6 +1,3 @@
-using System;
-using System.Linq;
-using System.Threading;
 using System.Diagnostics;
 using DotNet.Meteor.Processes;
 using DotNet.Meteor.Common;
@@ -27,18 +24,18 @@ public static class AndroidEmulator {
     }
 
     public static string WaitForBoot() {
-        string serial = WaitForSerial();
+        string? serial = WaitForSerial();
 
         if (serial == null)
             throw new Exception("Emulator started but no serial number was found");
 
-        while (!DeviceBridge.Shell(serial, "getprop", "sys.boot_completed").Contains("1"))
+        while (!DeviceBridge.Shell(serial, "getprop", "sys.boot_completed").Contains('1'))
             Thread.Sleep(1000);
 
         return serial;
     }
 
-    private static string WaitForSerial() {
+    private static string? WaitForSerial() {
         var currentState = DeviceBridge.Devices();
 
         for (int i = 0; i < AppearingRetryCount; i++) {
@@ -54,16 +51,16 @@ public static class AndroidEmulator {
         return null;
     }
 
-    private static string SerialIfRunning(string avdName) {
+    private static string? SerialIfRunning(string avdName) {
         var serials = DeviceBridge.Devices().Where(it => it.StartsWith("emulator-"));
-        return serials.FirstOrDefault(it => DeviceBridge.EmuName(it).Equals(avdName));
+        return serials.FirstOrDefault(it => DeviceBridge.EmuName(it) == avdName);
     }
 
     public class StartResult {
         public string Serial { get; }
-        public Process Process { get; }
+        public Process? Process { get; }
 
-        public StartResult(string serial, Process process) {
+        public StartResult(string serial, Process? process) {
             Serial = serial;
             Process = process;
         }

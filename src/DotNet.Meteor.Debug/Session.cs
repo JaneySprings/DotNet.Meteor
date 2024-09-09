@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using DotNet.Meteor.Processes;
+﻿using DotNet.Meteor.Processes;
 using Mono.Debugging.Client;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
@@ -40,10 +38,10 @@ public abstract class Session : DebugAdapterBase, IProcessLogger {
             Category = category
         });
     }
-    private void LogMessage(object sender, LogEventArgs args) {
+    private void LogMessage(object? sender, LogEventArgs args) {
         DebuggerLoggingService.CustomLogger.LogMessage(args.Message);
     }
-    private void LogError(object sender, DispatcherErrorEventArgs args) {
+    private void LogError(object? sender, DispatcherErrorEventArgs args) {
         DebuggerLoggingService.CustomLogger.LogError($"[Fatal] {args.Exception.Message}", args.Exception);
         OnUnhandledException(args.Exception);
     }
