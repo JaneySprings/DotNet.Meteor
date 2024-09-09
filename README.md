@@ -99,7 +99,7 @@ public static class MauiProgram
 6. Press `ctrl + F5` to launch the application without debugging.
 * If you use the `gcdump` mode, type a `/dump` command in the `Debug Console` to capture the report. You will see the message:
 ```
-Writing gcdump to '/Users/You/.../.meteor/MauiProf.gcdump'...
+Writing gcdump to '/Users/You/.../Project/MauiProf.gcdump'...
 command handled by DotNet.Meteor.Debug.GCDumpLaunchAgent
 Finished writing 2759872 bytes.
 ```
@@ -107,10 +107,10 @@ Finished writing 2759872 bytes.
 * If you use the `trace` mode, click `Stop Debugging` in the VSCode to stop the profiling. **Don't close the application manually, because this may damage the report.** After completion, you will see the message:
 ```
 Trace completed.
-Writing:	/Users/You/.../MauiProf/.meteor/MauiProf.speedscope.json
+Writing:	/Users/You/.../Project/MauiProf.speedscope.json
 Conversion complete
 ```
-7. You can see the `speedscope.json` report in the `.meteor` folder of your project. You can use the [Speedscope in VSCode](https://marketplace.visualstudio.com/items?itemName=sransara.speedscope-in-vscode) extension to view it. Alternatively, you can upload it directly to the [speedscope](https://www.speedscope.app) site. For the `gcdump` report, you can use the [dotnet-heapview](https://github.com/1hub/dotnet-heapview) or _Visual Studio for Windows_.
+7. You can see the `speedscope.json` report in the root folder of your project. You can use the [Speedscope in VSCode](https://marketplace.visualstudio.com/items?itemName=sransara.speedscope-in-vscode) extension to view it. Alternatively, you can upload it directly to the [speedscope](https://www.speedscope.app) site. For the `gcdump` report, you can use the [dotnet-heapview](https://github.com/1hub/dotnet-heapview) or _Visual Studio for Windows_.
 
 ![image](https://github.com/JaneySprings/DotNet.Meteor/raw/main/assets/demo_trace.gif)
 
@@ -144,8 +144,3 @@ If you encounter any issues, please check the following:
 
 &emsp;*You can debug WinUI apps using the C# VSCode extension with attaching the .NET Core Debugger.*
 
----
-
-## About the Author
-
-&emsp;I'm Nikita Romanov, a passionate programming enthusiast with a focus on .NET MAUI. I work with an amazing team at `DevExpress` to make the lives of developers around us easier. Our team is dedicated to creating a comprehensive [mobile component suite](https://www.devexpress.com/maui) for .NET MAUI which is currently available `free-of-charge`. In my free time, I work on my hobby project, `DotNet.Meteor`, which is always open to feedback and contributions. Feel free to share your thoughts with me, and **let's make the .NET MAUI community even better together!**

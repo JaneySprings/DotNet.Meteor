@@ -11,7 +11,7 @@ public class TraceLaunchAgent : BaseLaunchAgent {
     public TraceLaunchAgent(LaunchConfiguration configuration) : base(configuration) { }
     public override void Connect(SoftDebuggerSession session) { }
     public override void Launch(IProcessLogger logger) {
-        var nettracePath = Path.Combine(Path.GetDirectoryName(Configuration.Project.Path)!, ".meteor", $"{Configuration.GetApplicationName()}.nettrace");
+        var nettracePath = Path.Combine(Path.GetDirectoryName(Configuration.Project.Path)!, $"{Configuration.GetApplicationName()}.nettrace");
         var diagnosticPort = Path.Combine(RuntimeSystem.HomeDirectory, $"{Configuration.Device.Platform}-port.lock");
         ServerExtensions.TryDeleteFile(diagnosticPort);
 
