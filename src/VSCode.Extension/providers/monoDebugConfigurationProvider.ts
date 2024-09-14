@@ -1,4 +1,4 @@
-import { ConfigurationController } from '../configurationController';
+import { ConfigurationController } from '../controllers/configurationController';
 import { WorkspaceFolder, DebugConfiguration } from 'vscode';
 import * as res from '../resources/constants';
 import * as vscode from 'vscode';
@@ -18,10 +18,6 @@ export class MonoDebugConfigurationProvider implements vscode.DebugConfiguration
 			vscode.window.showErrorMessage(res.messageDebugNotSupported, { modal: true });
 			return undefined;
 		}
-		if (!config.noDebug && ConfigurationController.isWindows()) {
-			vscode.window.showErrorMessage(res.messageDebugNotSupportedWin, { modal: true });
-			return undefined;
-		}
 
 		if (!config.type && !config.request && !config.name) {
 			config.preLaunchTask = `${res.extensionId}: ${res.taskDefinitionDefaultTargetCapitalized}`
@@ -30,12 +26,22 @@ export class MonoDebugConfigurationProvider implements vscode.DebugConfiguration
 			config.request = 'launch';
 		}
 		
-		if (config.project == undefined)
+		if (config.project === undefined)
 			config.project = ConfigurationController.project;
-		if (config.configuration == undefined)
+		if (config.configuration === undefined)
 			config.configuration = ConfigurationController.target;
-		if (config.device == undefined)
+		if (config.device === undefined)
         	config.device = ConfigurationController.device;
+		if (config.program === undefined)
+			config.program = await ConfigurationController.getProgramPath(config.project, config.configuration, config.device);
+
+		if (ConfigurationController.isWindows() && !ConfigurationController.profiler) {
+			config.type = 'coreclr';
+			config.project = undefined;
+			config.configuration = undefined;
+			config.device = undefined;
+			return config;
+		}
 
 		config.skipDebug = config.noDebug ?? false;
 		config.debuggingPort = ConfigurationController.getDebuggingPort();

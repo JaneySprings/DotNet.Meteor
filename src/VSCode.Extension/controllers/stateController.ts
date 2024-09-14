@@ -1,8 +1,8 @@
 import { ConfigurationController } from './configurationController';
 import { StatusBarController } from './statusbarController';
 import { ExtensionContext } from 'vscode';
-import { Target } from './models/target';
-import { Device } from './models/device';
+import { Target } from '../models/target';
+import { Device } from '../models/device';
 
 export class StateController {
     private static context: ExtensionContext | undefined;

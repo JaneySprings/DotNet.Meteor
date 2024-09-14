@@ -1,16 +1,15 @@
 import { ConfigurationController } from './configurationController';
-import { InteropController } from "./interop/interopController";
+import { InteropController } from "./interopController";
 import { StateController } from './stateController';
-import { XamlController } from './xamlController';
-import { PublicExports } from './publicExports';
-import { Project } from './models/project';
-import { ProjectItem } from './models/projectItem';
-import { Device } from './models/device';
-import { DeviceItem } from './models/deviceItem';
-import { Target } from './models/target';
-import { SeparatorItem } from './models/separatorItem';
-import { Icons } from './resources/icons';
-import * as res from './resources/constants';
+import { PublicExports } from '../publicExports';
+import { Project } from '../models/project';
+import { ProjectItem } from '../models/projectItem';
+import { Device } from '../models/device';
+import { DeviceItem } from '../models/deviceItem';
+import { Target } from '../models/target';
+import { SeparatorItem } from '../models/separatorItem';
+import { Icons } from '../resources/icons';
+import * as res from '../resources/constants';
 import * as vscode from 'vscode';
 
 export class StatusBarController {

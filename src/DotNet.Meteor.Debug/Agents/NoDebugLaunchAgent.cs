@@ -22,26 +22,26 @@ public class NoDebugLaunchAgent : BaseLaunchAgent {
 
     private void LaunchAppleMobile(IProcessLogger logger) {
         if (Configuration.Device.IsEmulator) {
-            var appProcess = MonoLaunch.DebugSim(Configuration.Device.Serial, Configuration.OutputAssembly, Configuration.DebugPort, logger);
+            var appProcess = MonoLaunch.DebugSim(Configuration.Device.Serial, Configuration.ProgramPath, Configuration.DebugPort, logger);
             Disposables.Add(() => appProcess.Terminate());
         } else {
             var hotReloadPortForwarding = MonoLaunch.TcpTunnel(Configuration.Device.Serial, Configuration.ReloadHostPort, logger);
-            MonoLaunch.InstallDev(Configuration.Device.Serial, Configuration.OutputAssembly, logger);
-            var appProcess = MonoLaunch.DebugDev(Configuration.Device.Serial, Configuration.OutputAssembly, Configuration.DebugPort, logger);
+            MonoLaunch.InstallDev(Configuration.Device.Serial, Configuration.ProgramPath, logger);
+            var appProcess = MonoLaunch.DebugDev(Configuration.Device.Serial, Configuration.ProgramPath, Configuration.DebugPort, logger);
             Disposables.Add(() => appProcess.Terminate());
             Disposables.Add(() => hotReloadPortForwarding.Terminate());
         }
     }
     private void LaunchMacCatalyst(IProcessLogger logger) {
         var tool = AppleSdk.OpenTool();
-        var processRunner = new ProcessRunner(tool, new ProcessArgumentBuilder().AppendQuoted(Configuration.OutputAssembly));
+        var processRunner = new ProcessRunner(tool, new ProcessArgumentBuilder().AppendQuoted(Configuration.ProgramPath));
         var result = processRunner.WaitForExit();
 
         if (!result.Success)
             throw ServerExtensions.GetProtocolException(string.Join(Environment.NewLine, result.StandardError));
     }
     private void LaunchWindows(IProcessLogger logger) {
-        var program = new FileInfo(Configuration.OutputAssembly);
+        var program = new FileInfo(Configuration.ProgramPath);
         var process = new ProcessRunner(program, new ProcessArgumentBuilder(), logger).Start();
         Disposables.Add(() => process.Terminate());
     }
@@ -56,7 +56,7 @@ public class NoDebugLaunchAgent : BaseLaunchAgent {
         if (Configuration.UninstallApp)
             DeviceBridge.Uninstall(Configuration.Device.Serial, applicationId, logger);
 
-        DeviceBridge.Install(Configuration.Device.Serial, Configuration.OutputAssembly, logger);
+        DeviceBridge.Install(Configuration.Device.Serial, Configuration.ProgramPath, logger);
         DeviceBridge.Launch(Configuration.Device.Serial, applicationId, logger);
         DeviceBridge.Flush(Configuration.Device.Serial);
 

@@ -1,6 +1,6 @@
 import { LanguageClient, ServerOptions } from "vscode-languageclient/node";
 import { ConfigurationController } from "./configurationController";
-import * as res from './resources/constants';
+import * as res from './../resources/constants';
 import * as vscode from 'vscode';
 import * as path from "path";
 
@@ -80,6 +80,6 @@ export class XamlController {
 
     public static reloadDocumentChanges(filePath: string) {
         if (filePath.endsWith('.xaml') && vscode.debug.activeDebugSession?.configuration.type === res.debuggerMeteorId)
-            vscode.debug.activeDebugSession.customRequest('hotReload', { filePath: filePath });
+            vscode.debug.activeDebugSession?.customRequest('hotReload', { filePath: filePath });
     }
 }

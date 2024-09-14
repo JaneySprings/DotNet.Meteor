@@ -1,5 +1,5 @@
 import { ProcessArgumentBuilder } from '../interop/processArgumentBuilder';
-import { ConfigurationController } from '../configurationController';
+import { ConfigurationController } from '../controllers/configurationController';
 import * as res from '../resources/constants';
 import * as vscode from 'vscode';
 

@@ -1,10 +1,11 @@
 import { window, workspace, ExtensionContext } from 'vscode';
-import { InteropController } from './interop/interopController';
+import { InteropController } from './interopController';
 import { StatusBarController } from "./statusbarController";
-import { Project } from './models/project';
-import { Device } from './models/device';
-import { Target } from './models/target';
-import * as res from './resources/constants';
+import { Project } from '../models/project';
+import { Device } from '../models/device';
+import { Target } from '../models/target';
+import * as res from '../resources/constants';
+import * as path from 'path';
 
 export class ConfigurationController {
     public static androidSdkDirectory: string | undefined;
@@ -14,14 +15,43 @@ export class ConfigurationController {
     public static target: Target | undefined;
 
     public static activate(context: ExtensionContext) {
-        ConfigurationController.androidSdkDirectory = InteropController.androidSdk();
+        ConfigurationController.androidSdkDirectory = InteropController.getAndroidSdk();
+    }
+
+    public static isMacCatalyst() { return ConfigurationController.device?.platform === 'maccatalyst'; }
+    public static isWindows() { return ConfigurationController.device?.platform === 'windows'; }
+    public static isAndroid() { return ConfigurationController.device?.platform === 'android'; }
+    public static isAppleMobile() { return ConfigurationController.device?.platform === 'ios'; }
+
+    public static isValid(): boolean {
+        if (!ConfigurationController.project?.path) {
+            window.showErrorMessage(res.messageNoProjectFound, { modal: true });
+            return false;
+        }
+        if (!ConfigurationController.device?.platform) {
+            window.showErrorMessage(res.messageNoDeviceFound, { modal: true });
+            return false;
+        }
+        if (!StatusBarController.devices.some(it => it.name === ConfigurationController.device?.name)) {
+            window.showErrorMessage(res.messageDeviceNotExists, { modal: true });
+            return false;
+        }
+        if (!ConfigurationController.getTargetFramework()) {
+            window.showErrorMessage(res.messageNoFrameworkFound, { modal: true });
+            return false;
+        }
+
+        return true;
+    }
+    public static isActive(): boolean {
+        return ConfigurationController.project !== undefined && ConfigurationController.device !== undefined;
     }
 
     public static getDebuggingPort(): number {
-        if (ConfigurationController.isAndroid()) 
+        if (ConfigurationController.isAndroid())
             return ConfigurationController.getSetting(res.configIdMonoSdbDebuggerPortAndroid, res.configDefaultMonoSdbDebuggerPortAndroid);
 
-        if (ConfigurationController.isAppleMobile() && !ConfigurationController.device?.is_emulator) 
+        if (ConfigurationController.isAppleMobile() && !ConfigurationController.device?.is_emulator)
             return ConfigurationController.getSetting(res.configIdMonoSdbDebuggerPortApple, res.configDefaultMonoSdbDebuggerPortApple);
 
         return 0;
@@ -68,40 +98,37 @@ export class ConfigurationController {
             searchMicrosoftSymbolServer: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsSearchMicrosoftSymbolServer),
         };
     }
-
-    public static isMacCatalyst() { return ConfigurationController.device?.platform === 'maccatalyst'; }
-    public static isWindows() { return ConfigurationController.device?.platform === 'windows'; }
-    public static isAndroid() { return ConfigurationController.device?.platform === 'android'; }
-    public static isAppleMobile() { return ConfigurationController.device?.platform === 'ios'; }
-
-    public static isValid(): boolean {
-        if (!ConfigurationController.project?.path) {
-            window.showErrorMessage(res.messageNoProjectFound, { modal: true });
-            return false;
-        }
-        if (!ConfigurationController.device?.platform) {
-            window.showErrorMessage(res.messageNoDeviceFound, { modal: true });
-            return false;
-        }
-        if (!StatusBarController.devices.some(it => it.name === ConfigurationController.device?.name)) {
-            window.showErrorMessage(res.messageDeviceNotExists, { modal: true });
-            return false;
-        }
-        if (!ConfigurationController.getTargetFramework()) {
-            window.showErrorMessage(res.messageNoFrameworkFound, { modal: true });
-            return false;
-        }
-
-        return true;
-    }
-    public static isActive(): boolean {
-        return ConfigurationController.project !== undefined && ConfigurationController.device !== undefined;
-    }
-
     public static getSetting<TResult>(id: string, fallback: TResult): TResult {
         return workspace.getConfiguration(res.configId).get(id) ?? fallback;
     }
     public static getSettingOrDefault<TResult>(id: string): TResult | undefined {
         return workspace.getConfiguration(res.configId).get(id);
+    }
+    public static getProgramPath(project: Project, configuration: Target, device: Device): string | undefined {
+        const targetPath = InteropController.getPropertyValue('TargetPath', project, configuration, device);
+        if (targetPath === undefined)
+            return undefined;
+
+        if (ConfigurationController.isAndroid()) {
+            const outDir = path.dirname(targetPath);
+            const packageName = InteropController.getPropertyValue('ApplicationId', project, configuration, device);
+            if (packageName !== undefined)
+                return path.join(outDir, packageName + '-Signed.apk');
+        }
+
+        if (ConfigurationController.isWindows()) {
+            const targetDirectory = path.dirname(targetPath);
+            const targetFile = path.basename(targetPath, '.dll');
+            return path.join(targetDirectory, targetFile + '.exe');
+        }
+    
+        if (ConfigurationController.isAppleMobile() || ConfigurationController.isMacCatalyst()) {
+            const outDir = path.dirname(targetPath);
+            const bundleName = InteropController.getPropertyValue('_AppBundleName', project, configuration, device);
+            if (bundleName !== undefined)
+                return path.join(outDir, bundleName + '.app');
+        }
+
+        return undefined;
     }
 } 
