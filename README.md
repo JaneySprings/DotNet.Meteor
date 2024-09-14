@@ -137,10 +137,7 @@ If you encounter any issues, please check the following:
 
 | Application Type | Build and Run | Hot Reload | Debugging | Profiling |
 |-|:-:|:-:|:-:|:-:|
-| **WinUI** | ✅ | ✅ | ❌ | ✅ |
+| **WinUI** | ✅ | ❌ | ✅ | ✅ |
 | **Android** | ✅ | ✅ | ✅ | ✅ |
 | **iOS** | ✅ | ✅ | ✅ | ✅ |
 | **MacCatalyst** | ✅ | ✅ | ✅ | ✅ |
-
-&emsp;*You can debug WinUI apps using the C# VSCode extension with attaching the .NET Core Debugger.*
-

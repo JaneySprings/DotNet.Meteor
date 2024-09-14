@@ -46,14 +46,14 @@ public class GCDumpLaunchAgent : BaseLaunchAgent {
     private void LaunchAppleMobile(IProcessLogger logger) {
         if (Configuration.Device.IsEmulator) {
             var routerProcess = DSRouter.ServerToClient($"{diagnosticPort}", $"127.0.0.1:{Configuration.ProfilerPort}", false, logger);
-            var simProcess = MonoLaunch.ProfileSim(Configuration.Device.Serial, Configuration.OutputAssembly, $"127.0.0.1:{Configuration.ProfilerPort},nosuspend,listen", logger);
+            var simProcess = MonoLaunch.ProfileSim(Configuration.Device.Serial, Configuration.ProgramPath, $"127.0.0.1:{Configuration.ProfilerPort},nosuspend,listen", logger);
 
             Disposables.Add(() => routerProcess.Terminate());
             Disposables.Add(() => simProcess.Terminate());
         } else {
             var routerProcess = DSRouter.ServerToClient(diagnosticPort, $"127.0.0.1:{Configuration.ProfilerPort}", forwardApple: true, logger);
-            MonoLaunch.InstallDev(Configuration.Device.Serial, Configuration.OutputAssembly, logger);
-            var devProcess = MonoLaunch.ProfileDev(Configuration.Device.Serial, Configuration.OutputAssembly, $"127.0.0.1:{Configuration.ProfilerPort},nosuspend,listen", logger);
+            MonoLaunch.InstallDev(Configuration.Device.Serial, Configuration.ProgramPath, logger);
+            var devProcess = MonoLaunch.ProfileDev(Configuration.Device.Serial, Configuration.ProgramPath, $"127.0.0.1:{Configuration.ProfilerPort},nosuspend,listen", logger);
 
             Disposables.Add(() => routerProcess.Terminate());
             Disposables.Add(() => devProcess.Terminate());
@@ -61,7 +61,7 @@ public class GCDumpLaunchAgent : BaseLaunchAgent {
     }
     private void LaunchMacCatalyst(IProcessLogger logger) {
         var tool = AppleSdk.OpenTool();
-        var processRunner = new ProcessRunner(tool, new ProcessArgumentBuilder().AppendQuoted(Configuration.OutputAssembly));
+        var processRunner = new ProcessRunner(tool, new ProcessArgumentBuilder().AppendQuoted(Configuration.ProgramPath));
 
         diagnosticPort = $"127.0.0.1:{Configuration.ProfilerPort}";
         processRunner.SetEnvironmentVariable("DOTNET_DiagnosticPorts", $"127.0.0.1:{Configuration.ProfilerPort},nosuspend,listen");
@@ -86,13 +86,13 @@ public class GCDumpLaunchAgent : BaseLaunchAgent {
 
         if (Configuration.UninstallApp)
             DeviceBridge.Uninstall(Configuration.Device.Serial, applicationId, logger);
-        DeviceBridge.Install(Configuration.Device.Serial, Configuration.OutputAssembly, logger);
+        DeviceBridge.Install(Configuration.Device.Serial, Configuration.ProgramPath, logger);
         DeviceBridge.Launch(Configuration.Device.Serial, applicationId, logger);
 
         Disposables.Add(() => DeviceBridge.Shell(Configuration.Device.Serial, "am", "force-stop", applicationId));
     }
     private void LaunchWindows(IProcessLogger logger) {
-        var exeProcess = new ProcessRunner(new FileInfo(Configuration.OutputAssembly), null, logger).Start();
+        var exeProcess = new ProcessRunner(new FileInfo(Configuration.ProgramPath), null, logger).Start();
         applicationPID = exeProcess.Id;
 
         Disposables.Add(() => exeProcess.Terminate());

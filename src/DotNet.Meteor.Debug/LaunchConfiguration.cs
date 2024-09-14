@@ -16,7 +16,7 @@ public class LaunchConfiguration {
     public int ReloadHostPort { get; init; }
     public int ProfilerPort { get; init; }
     public string? ProfilerMode { get; init; }
-    public string OutputAssembly { get; init; }
+    public string ProgramPath { get; init; }
     public DebuggerSessionOptions DebuggerSessionOptions { get; init; }
 
     public LaunchConfiguration(Dictionary<string, JToken> configurationProperties) {
@@ -32,31 +32,30 @@ public class LaunchConfiguration {
         ProfilerMode = configurationProperties.TryGetValue("profilerMode")?.ToClass<string>();
         DebuggerSessionOptions = configurationProperties.TryGetValue("debuggerOptions")?.ToClass<DebuggerSessionOptions>() 
             ?? ServerExtensions.DefaultDebuggerOptions;
-        
-        var outputAssembly = configurationProperties.TryGetValue("program")?.ToClass<string>();
-        OutputAssembly = string.IsNullOrEmpty(outputAssembly) 
-            ? Project.FindOutputApplication(Configuration, Device, message => throw ServerExtensions.GetProtocolException(message))
-            : outputAssembly;
 
         DebugPort = DebugPort == 0 ? ServerExtensions.FindFreePort() : DebugPort;
         ReloadHostPort = ReloadHostPort == 0 ? ServerExtensions.FindFreePort() : ReloadHostPort;
         ProfilerPort = ProfilerPort == 0 ? ServerExtensions.FindFreePort() : ProfilerPort;
+
+        ProgramPath = configurationProperties.TryGetValue("program").ToClass<string>() ?? string.Empty;
+        if (!File.Exists(ProgramPath) && !Directory.Exists(ProgramPath))
+            throw ServerExtensions.GetProtocolException($"Incorrect path to program: '{ProgramPath}'");
     }
 
     public string GetApplicationName() {
         if (!Device.IsAndroid)
-            return Path.GetFileNameWithoutExtension(OutputAssembly);
+            return Path.GetFileNameWithoutExtension(ProgramPath);
 
-        var assemblyName = Path.GetFileNameWithoutExtension(OutputAssembly);
+        var assemblyName = Path.GetFileNameWithoutExtension(ProgramPath);
         return assemblyName.Replace("-Signed", "");
     }
     public string GetApplicationAssembliesDirectory() {
         if (Device.IsMacCatalyst)
-            return Path.Combine(OutputAssembly, "Contents", "MonoBundle");
+            return Path.Combine(ProgramPath, "Contents", "MonoBundle");
         if (Device.IsIPhone)
-            return OutputAssembly;
+            return ProgramPath;
         if (Device.IsAndroid)
-            return ServerExtensions.ExtractAndroidAssemblies(OutputAssembly);
+            return ServerExtensions.ExtractAndroidAssemblies(ProgramPath);
 
         throw new NotSupportedException();
     }

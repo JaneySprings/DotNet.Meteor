@@ -48,14 +48,14 @@ public class DebugLaunchAgent : BaseLaunchAgent {
         // }
 
         if (Configuration.Device.IsEmulator) {
-            var debugProcess = MonoLaunch.DebugSim(Configuration.Device.Serial, Configuration.OutputAssembly, Configuration.DebugPort, logger);
+            var debugProcess = MonoLaunch.DebugSim(Configuration.Device.Serial, Configuration.ProgramPath, Configuration.DebugPort, logger);
             Disposables.Add(() => debugProcess.Terminate());
         } else {
             var debugPortForwarding = MonoLaunch.TcpTunnel(Configuration.Device.Serial, Configuration.DebugPort, logger);
             var hotReloadPortForwarding = MonoLaunch.TcpTunnel(Configuration.Device.Serial, Configuration.ReloadHostPort, logger);
-            MonoLaunch.InstallDev(Configuration.Device.Serial, Configuration.OutputAssembly, logger);
+            MonoLaunch.InstallDev(Configuration.Device.Serial, Configuration.ProgramPath, logger);
 
-            var debugProcess = MonoLaunch.DebugDev(Configuration.Device.Serial, Configuration.OutputAssembly, Configuration.DebugPort, logger);
+            var debugProcess = MonoLaunch.DebugDev(Configuration.Device.Serial, Configuration.ProgramPath, Configuration.DebugPort, logger);
             Disposables.Add(() => debugProcess.Terminate());
             Disposables.Add(() => debugPortForwarding.Terminate());
             Disposables.Add(() => hotReloadPortForwarding.Terminate());
@@ -63,7 +63,7 @@ public class DebugLaunchAgent : BaseLaunchAgent {
     }
     private void LaunchMacCatalyst(IProcessLogger logger) {
         var tool = AppleSdk.OpenTool();
-        var processRunner = new ProcessRunner(tool, new ProcessArgumentBuilder().AppendQuoted(Configuration.OutputAssembly));
+        var processRunner = new ProcessRunner(tool, new ProcessArgumentBuilder().AppendQuoted(Configuration.ProgramPath));
         processRunner.SetEnvironmentVariable("__XAMARIN_DEBUG_HOSTS__", "127.0.0.1");
         processRunner.SetEnvironmentVariable("__XAMARIN_DEBUG_PORT__", Configuration.DebugPort.ToString());
         var result = processRunner.WaitForExit();
@@ -82,7 +82,7 @@ public class DebugLaunchAgent : BaseLaunchAgent {
         if (Configuration.UninstallApp)
             DeviceBridge.Uninstall(Configuration.Device.Serial, applicationId, logger);
 
-        DeviceBridge.Install(Configuration.Device.Serial, Configuration.OutputAssembly, logger);
+        DeviceBridge.Install(Configuration.Device.Serial, Configuration.ProgramPath, logger);
         DeviceBridge.Shell(Configuration.Device.Serial, "setprop", "debug.mono.connect", $"port={Configuration.DebugPort}");
         DeviceBridge.Shell(Configuration.Device.Serial, "am", "set-debug-app", applicationId);
         DeviceBridge.Launch(Configuration.Device.Serial, applicationId, logger);

@@ -1,10 +1,10 @@
 import { MonoDebugConfigurationProvider } from './providers/monoDebugConfigurationProvider';
 import { DotNetTaskProvider } from './providers/dotnetTaskProvider';
-import { ConfigurationController } from './configurationController';
-import { StatusBarController } from './statusbarController';
-import { InteropController } from './interop/interopController';
-import { StateController } from './stateController';
-import { XamlController } from './xamlController';
+import { ConfigurationController } from './controllers/configurationController';
+import { StatusBarController } from './controllers/statusbarController';
+import { InteropController } from './controllers/interopController';
+import { StateController } from './controllers/stateController';
+import { XamlController } from './controllers/xamlController';
 import { PublicExports } from './publicExports';
 import { ModulesView } from './features/modulesView';
 import * as res from './resources/constants';
