@@ -33,7 +33,7 @@ export class MonoDebugConfigurationProvider implements vscode.DebugConfiguration
 		if (config.device === undefined)
         	config.device = ConfigurationController.device;
 		if (config.program === undefined)
-			config.program = await ConfigurationController.getProgramPath(config.project, config.configuration, config.device);
+			config.program = ConfigurationController.getProgramPath(config.project, config.configuration, config.device);
 
 		if (ConfigurationController.isWindows() && !ConfigurationController.profiler) {
 			config.type = 'coreclr';
