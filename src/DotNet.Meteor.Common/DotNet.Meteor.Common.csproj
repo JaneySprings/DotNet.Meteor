@@ -5,14 +5,8 @@
 
     <Import Project="$(MSBuildThisFileDirectory)..\Common.Build.props" />
 
-    <PropertyGroup>
-        <ImplicitUsings>disable</ImplicitUsings>
-        <Nullable>disable</Nullable>
-    </PropertyGroup>
-
     <ItemGroup>
         <InternalsVisibleTo Include="DotNet.Meteor.Tests" />
-        <PackageReference Include="System.Text.Json" Version="7.0.3" />
         <PackageReference Include="NLog" Version="5.2.4" />
     </ItemGroup>
 </Project>

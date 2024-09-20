@@ -1,0 +1,66 @@
+{
+    "command": "launch",
+    "arguments": {
+        "name": "C#: MauiTestApp",
+        "type": "monovsdbg",
+        "request": "launch",
+        "projectPath": "${workspaceFolder}\\MauiTestApp.csproj",
+        "launchConfigurationId": "vscode-maui",
+        "brokeredServicePipeName": "\\\\.\\pipe\\f56a857a-bc7a-4646-9e8f-98a8657cafa1",
+        "noDebug": false,
+        "sessionId": "2e7cb335-51dd-4375-ba54-66ad890bb291",
+        "workspaceDirectory": "c:\\Users\\nromanov\\Storage\\MauiTestApp",
+        "project": "C:\\Users\\nromanov\\Storage\\MauiTestApp\\MauiTestApp.csproj",
+        "platform": "android",
+        "debugTarget": "Nexus_7_2012_API_34",
+        "isEmulator": true,
+        "platformArchitecture": "x86_64",
+        "configuration": "Debug",
+        "isMaui": true,
+        "isMultiplatform": true,
+        "mauiVersion": "9.0.0-preview.7.24407.4",
+        "dotnetVersion": "9.0.100-preview.7.24407.12",
+        "isMultiPlatform": true,
+        "targetFramework": "net9.0-android",
+        "dotnetPath": "C:\\Program Files\\dotnet",
+        "device": "emulator-5554",
+        "skipDebug": false,
+        "debugPort": 59168,
+        "useVSDbg": 1,
+        "_mauiBuildOutputPropsFile": "C:\\Users\\nromanov\\AppData\\Local\\Temp\\dotnet-maui\\maui-vsc-7ed0e321-1511-488f-acc5-876e19a4fc11.json",
+        "androidLocalTunnels": [
+            {
+                "deviceId": "emulator-5554",
+                "port": 59169
+            }
+        ],
+        "monoDebuggerOptions": {
+            "ip": "127.0.0.1",
+            "port": 59168,
+            "platform": "android",
+            "isServer": false,
+            "assetsPath": "C:\\Users\\nromanov\\Storage\\MauiTestApp\\obj\\Debug\\net9.0-android\\android\\assets\\;C:\\Users\\nromanov\\Storage\\MauiTestApp\\obj\\Debug\\net9.0-android\\android\\assets\\x86_64\\"
+        },
+        "program": "C:\\Users\\nromanov\\Storage\\MauiTestApp\\bin\\Debug\\net9.0-android\\MauiTestApp.dll",
+        "justMyCode": true,
+        "symbolOptions": {
+            "searchPaths": [],
+            "searchMicrosoftSymbolServer": false,
+            "searchNuGetOrgSymbolServer": false,
+            "cachePath": "",
+            "moduleFilter": {
+                "mode": "loadAllButExcluded",
+                "excludedModules": [],
+                "includedModules": [],
+                "includeSymbolsNextToModules": true,
+                "includeSymbolsOnDemand": true
+            }
+        },
+        "requireExactSource": true,
+        "sourceFileMap": {},
+        "enableStepFiltering": true,
+        "__sessionId": "91744f04-fb7b-45f0-ad5d-4b4e0ca431a1"
+    },
+    "type": "request",
+    "seq": 2
+}

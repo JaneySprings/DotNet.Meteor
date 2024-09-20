@@ -21,12 +21,14 @@ export const commandIdTriggerHotReload = "dotnet-meteor.triggerHotReload";
 export const commandIdXamlReplaceCode = "dotnet-meteor.xaml.replaceCode";
 
 export const taskDefinitionId = "dotnet-meteor.task";
-export const taskDefinitionDefaultTarget = "build";
-export const taskDefinitionDefaultTargetCapitalized = "Build";
+export const taskDefinitionDefaultTarget = "Build";
 export const taskProblemMatcherId = "dotnet-meteor.problemMatcher";
 
 export const debuggerMeteorId = "dotnet-meteor.debugger";
 export const debuggerMeteorTitle = ".NET Meteor Debugger";
+
+export const debuggerVsdbgId = "coreclr";
+export const debuggerVsdbgTitle = ".NET Core Debugger";
 
 export const extendedViewIdModules = "dotnet-meteor.modulesView";
 

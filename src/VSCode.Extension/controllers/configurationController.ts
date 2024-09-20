@@ -110,10 +110,7 @@ export class ConfigurationController {
             return undefined;
 
         if (ConfigurationController.isAndroid()) {
-            const outDir = path.dirname(targetPath);
-            const packageName = InteropController.getPropertyValue('ApplicationId', project, configuration, device);
-            if (packageName !== undefined)
-                return path.join(outDir, packageName + '-Signed.apk');
+            return targetPath;
         }
 
         if (ConfigurationController.isWindows()) {

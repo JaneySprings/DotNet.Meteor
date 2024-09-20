@@ -1,4 +1,5 @@
 ﻿using DotNet.Meteor.Common;
+using DotNet.Meteor.Workspace.Android;
 using NLog;
 using System.Reflection;
 using System.Text.Json;
@@ -11,6 +12,7 @@ public class Program {
         { "--all-devices", AllDevices },
         { "--android-sdk-path", AndroidSdkPath },
         { "--analyze-workspace", AnalyzeWorkspace },
+        { "--run-emulator", RunEmulator },
         { "--help", Help }
     };
 
@@ -40,12 +42,15 @@ public class Program {
         var devices = DeviceProvider.GetDevices(logger.Error, logger.Debug);
         Console.WriteLine(JsonSerializer.Serialize(devices, TrimmableContext.Default.ListDeviceData));
     }
-
     public static void AndroidSdkPath(string[] args) {
         string path = AndroidSdk.SdkLocation();
         Console.WriteLine(path);
     }
-
+    public static void RunEmulator(string[] args) {
+        var emuName = args[1];
+        var result = AndroidEmulator.Run(emuName);
+        Console.WriteLine(JsonSerializer.Serialize(result.Serial, TrimmableContext.Default.String));
+    }
     public static void AnalyzeWorkspace(string[] args) {
         var projects = new List<Project>();
 
