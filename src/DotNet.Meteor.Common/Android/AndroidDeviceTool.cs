@@ -1,18 +1,17 @@
-using DotNet.Meteor.Common;
-using DotNet.Meteor.Workspace.Utilities;
+using DotNet.Meteor.Common.Utilities;
 
-namespace DotNet.Meteor.Workspace.Android;
+namespace DotNet.Meteor.Common.Android;
 
-public static class AndroidTool {
+public static class AndroidDeviceTool {
     public static List<DeviceData> VirtualDevices() {
         var runningAvds = new Dictionary<string, string>();
         var avds = new List<DeviceData>();
-        var avdHome = AndroidSdk.AvdLocation();
+        var avdHome = AndroidSdkLocator.AvdLocation();
 
-        foreach(var serial in DeviceBridge.Devices()) {
+        foreach(var serial in AndroidDebugBridge.Devices()) {
             if (!serial.StartsWith("emulator-"))
                 continue;
-            runningAvds.Add(DeviceBridge.EmuName(serial), serial);
+            runningAvds.Add(AndroidDebugBridge.EmuName(serial), serial);
         }
 
         if (Directory.Exists(avdHome)) {
@@ -21,7 +20,7 @@ public static class AndroidTool {
                 var name = Path.GetFileNameWithoutExtension(file);
                 avds.Add(new DeviceData {
                     Name = name,
-                    Serial = runningAvds.ContainsKey(name) ? runningAvds[name] : null,
+                    Serial = runningAvds.ContainsKey(name) ? runningAvds[name] : string.Empty,
                     Detail = Details.AndroidEmulator,
                     Platform = Platforms.Android,
                     OSVersion = ini.GetField("target") ?? "Unknown",
@@ -41,7 +40,7 @@ public static class AndroidTool {
                 Serial = avd.Value,
                 Detail = Details.AndroidEmulator,
                 Platform = Platforms.Android,
-                OSVersion = $"android-{DeviceBridge.Shell(avd.Value, "getprop", "ro.build.version.sdk")}",
+                OSVersion = $"android-{AndroidDebugBridge.Shell(avd.Value, "getprop", "ro.build.version.sdk")}",
                 IsRunning = true,
                 IsEmulator = true,
                 IsMobile = true
@@ -50,9 +49,8 @@ public static class AndroidTool {
 
         return avds;
     }
-
     public static List<DeviceData> PhysicalDevices() {
-        var runningDevices = DeviceBridge.Devices();
+        var runningDevices = AndroidDebugBridge.Devices();
         var devices = new List<DeviceData>();
 
         foreach(var serial in runningDevices) {
@@ -60,8 +58,8 @@ public static class AndroidTool {
                 continue;
 
             devices.Add(new DeviceData {
-                Name = DeviceBridge.Shell(serial, "getprop", "ro.product.model"),
-                OSVersion = $"android-{DeviceBridge.Shell(serial, "getprop", "ro.build.version.sdk")}",
+                Name = AndroidDebugBridge.Shell(serial, "getprop", "ro.product.model"),
+                OSVersion = $"android-{AndroidDebugBridge.Shell(serial, "getprop", "ro.build.version.sdk")}",
                 Platform = Platforms.Android,
                 Detail = Details.AndroidDevice,
                 IsEmulator = false,

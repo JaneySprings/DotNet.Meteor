@@ -1,5 +1,5 @@
+using DotNet.Meteor.Common.Processes;
 using DotNet.Meteor.Debug.Extensions;
-using DotNet.Meteor.Processes;
 using TraceCollectHandler = Microsoft.Diagnostics.Tools.Trace.CollectCommandHandler;
 
 namespace DotNet.Meteor.Debug.Sdk.Profiling;

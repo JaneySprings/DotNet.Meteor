@@ -2,9 +2,9 @@
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using DotNet.Meteor.Common.Processes;
 using DotNet.Meteor.HotReload.Extensions;
 using DotNet.Meteor.HotReload.Models;
-using DotNet.Meteor.Processes;
 
 namespace DotNet.Meteor.HotReload;
 

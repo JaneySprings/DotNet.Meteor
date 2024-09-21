@@ -2,6 +2,7 @@
 using DotNet.Meteor.Debug.Extensions;
 using Newtonsoft.Json.Linq;
 using Mono.Debugging.Client;
+using DotNet.Meteor.Common.Extensions;
 
 namespace DotNet.Meteor.Debug;
 

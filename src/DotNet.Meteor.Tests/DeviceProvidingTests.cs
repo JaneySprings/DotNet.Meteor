@@ -27,7 +27,7 @@ public class DeviceProvidingTests: TestFixture {
     public void AppleVirtualDeviceTest() {
         if (!RuntimeSystem.IsMacOS)
             return;
-        var result = AppleTool.VirtualDevices();
+        var result = AppleDeviceTool.VirtualDevices();
         Assert.NotNull(result);
         Assert.NotEmpty(result);
     }
@@ -36,7 +36,7 @@ public class DeviceProvidingTests: TestFixture {
     public void ApplePhysicalDeviceTest() {
         if (!RuntimeSystem.IsMacOS)
             return;
-        var result = AppleTool.PhysicalDevices();
+        var result = AppleDeviceTool.PhysicalDevices();
         Assert.NotNull(result);
     }
 
@@ -44,7 +44,7 @@ public class DeviceProvidingTests: TestFixture {
     public void AppleMacDeviceTest() {
         if (!RuntimeSystem.IsMacOS)
             return;
-        var result = AppleTool.MacintoshDevices();
+        var result = AppleDeviceTool.MacintoshDevices();
 
         if (SystemProfiler.IsArch64()) Assert.Equal(2, result.Count);
         else Assert.Single(result);
