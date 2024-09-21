@@ -27,6 +27,7 @@ export const taskProblemMatcherId = "dotnet-meteor.problemMatcher";
 
 export const debuggerMeteorId = "dotnet-meteor.debugger";
 export const debuggerMeteorTitle = ".NET Meteor Debugger";
+export const debuggerVsdbgId = "coreclr";
 
 export const extendedViewIdModules = "dotnet-meteor.modulesView";
 

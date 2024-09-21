@@ -1,10 +1,10 @@
 using DotNet.Meteor.Debug.Extensions;
-using DotNet.Meteor.Debug.Sdk.Profiling;
 using DotNet.Meteor.Common;
 using Mono.Debugging.Soft;
 using DotNet.Meteor.Common.Processes;
 using DotNet.Meteor.Common.Apple;
 using DotNet.Meteor.Common.Android;
+using DotNet.Meteor.Debug.Tools;
 
 namespace DotNet.Meteor.Debug;
 

@@ -9,16 +9,12 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
         return ConfigurationController.isActive() ? this.getTask(task.definition) : task;
     }
     provideTasks(token: vscode.CancellationToken): vscode.ProviderResult<vscode.Task[]> {
-        return ConfigurationController.isActive() ? [this.getTask({ type: res.taskDefinitionId, target: res.taskDefinitionDefaultTarget })] : undefined;
+        return ConfigurationController.isActive() ? [this.getTask({ type: res.taskDefinitionId })] : undefined;
     }
 
     private getTask(definition: vscode.TaskDefinition): vscode.Task {
-        if (!definition.target)
-            definition.target = res.taskDefinitionDefaultTarget;
-    
-        const defaultTarget = definition.target === res.taskDefinitionDefaultTarget;
         const builder = new ProcessArgumentBuilder('dotnet')
-            .append(definition.target.toLowerCase())
+            .append('build')
             .append(ConfigurationController.project!.path)
             .append(`-p:Configuration=${ConfigurationController.target}`)
             .append(`-p:TargetFramework=${ConfigurationController.getTargetFramework()}`)
@@ -30,26 +26,24 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
             builder.conditional('-p:AndroidEnableProfiler=true', () => ConfigurationController.profiler && defaultTarget);
         }
         if (ConfigurationController.isAppleMobile()) {
-            builder.conditional('-p:_BundlerDebug=true', () => !ConfigurationController.profiler && defaultTarget);
-            builder.conditional('-p:MtouchProfiling=true', () => ConfigurationController.profiler && defaultTarget);
+            builder.conditional('-p:_BundlerDebug=true', () => !ConfigurationController.profiler);
+            builder.conditional('-p:MtouchProfiling=true', () => ConfigurationController.profiler);
         }
         if (ConfigurationController.isMacCatalyst()) {
-            builder.conditional('-p:_BundlerDebug=true', () => !ConfigurationController.profiler && defaultTarget);
-            builder.conditional('-p:Profiling=true', () => ConfigurationController.profiler && defaultTarget);
+            builder.conditional('-p:_BundlerDebug=true', () => !ConfigurationController.profiler);
+            builder.conditional('-p:Profiling=true', () => ConfigurationController.profiler);
         }
         if (ConfigurationController.isWindows()) {
-            builder.conditional('-p:WindowsPackageType=None', () => defaultTarget);
-            builder.conditional('-p:WinUISDKReferences=false', () => defaultTarget);
+            builder.append('-p:WindowsPackageType=None');
+            builder.append('-p:WinUISDKReferences=false');
         }
 
         definition.args?.forEach((arg: string) => builder.override(arg));
         
         return new vscode.Task(
             definition, 
-            vscode.TaskScope.Workspace, 
-            /* It will be nice to use the 'definition.target' property 
-            * but it's a huge breaking change for users */
-            definition.target.charAt(0).toUpperCase() + definition.target.slice(1),
+            vscode.TaskScope.Workspace,
+            res.taskDefinitionDefaultTargetCapitalized,
             res.extensionId,
             new vscode.ShellExecution(builder.getCommand(), builder.getArguments()),
             `$${res.taskProblemMatcherId}`
