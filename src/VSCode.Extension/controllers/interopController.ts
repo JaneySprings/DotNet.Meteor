@@ -1,10 +1,10 @@
 import { ProcessArgumentBuilder } from '../interop/processArgumentBuilder';
 import { ProcessRunner } from '../interop/processRunner';
 import { Project } from '../models/project';
+import { Target } from '../models/target';
 import { Device } from '../models/device';
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { Target } from '../models/target';
 
 
 export class InteropController {
