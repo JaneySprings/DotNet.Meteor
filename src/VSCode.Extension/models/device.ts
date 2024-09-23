@@ -6,6 +6,7 @@ export interface Device {
     platform: string | undefined;
     os_version: string | undefined;
     runtime_id: string | undefined;
+    arch: string | undefined;
     is_emulator: boolean | undefined;
     is_running: boolean | undefined;
     is_mobile: boolean | undefined;

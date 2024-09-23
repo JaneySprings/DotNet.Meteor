@@ -12,7 +12,7 @@ public class DebugSession : Session {
     private BaseLaunchAgent launchAgent = null!;
 
     private readonly Handles<MonoClient.StackFrame> frameHandles = new Handles<MonoClient.StackFrame>();
-    private readonly Handles<MonoClient.ObjectValue[]> variableHandles = new Handles<MonoClient.ObjectValue[]>();
+    private readonly Handles<Func<MonoClient.ObjectValue[]>> variableHandles = new Handles<Func<MonoClient.ObjectValue[]>>();
     private readonly SoftDebuggerSession session = new SoftDebuggerSession();
 
     public DebugSession(Stream input, Stream output) : base(input, output) {
@@ -282,7 +282,7 @@ public class DebugSession : Session {
                     Column = frame.SourceLocation.Column,
                     EndLine = frame.SourceLocation.EndLine,
                     EndColumn = frame.SourceLocation.EndColumn,
-                    PresentationHint = File.Exists(source.Path)
+                    PresentationHint = File.Exists(source.Path) || source.VsSourceLinkInfo != null
                         ? StackFrame.PresentationHintValue.Normal
                         : StackFrame.PresentationHintValue.Subtle
                 });
@@ -304,7 +304,8 @@ public class DebugSession : Session {
 
             scopes.Add(new DebugProtocol.Scope() {
                 Name = "Locals",
-                VariablesReference = variableHandles.Create(frame.GetAllLocals())
+                PresentationHint = DebugProtocol.Scope.PresentationHintValue.Locals,
+                VariablesReference = variableHandles.Create(frame.GetAllLocals)
             });
 
             return new ScopesResponse(scopes);
@@ -316,15 +317,12 @@ public class DebugSession : Session {
         return ServerExtensions.DoSafe(() => {
             var reference = arguments.VariablesReference;
             var variables = new List<DebugProtocol.Variable>();
-            if (variableHandles.TryGet(reference, out MonoClient.ObjectValue[]? children) && children?.Length > 0) {
-                if (children.Length < 20) {
-                    // Wait for all values at once.
-                    WaitHandle.WaitAll(children.Select(x => x.WaitHandle).ToArray(), session.EvaluationOptions.EvaluationTimeout);
+
+            if (variableHandles.TryGet(reference, out Func<MonoClient.ObjectValue[]>? getChildrenDelegate)) {
+                var children = getChildrenDelegate?.Invoke();
+                if (children != null && children.Length > 0) {
                     foreach (var v in children) {
-                        variables.Add(CreateVariable(v));
-                    }
-                } else {
-                    foreach (var v in children) {
+                        // Not matter how many variables, callbacks start automatically after 'GetChildren' is called
                         v.WaitHandle.WaitOne(session.EvaluationOptions.EvaluationTimeout);
                         variables.Add(CreateVariable(v));
                     }
@@ -380,7 +378,7 @@ public class DebugSession : Session {
 
             int handle = 0;
             if (value.HasChildren)
-                handle = variableHandles.Create(value.GetAllChildren());
+                handle = variableHandles.Create(value.GetAllChildren);
 
             return new EvaluateResponse(value.ToDisplayValue(), handle);
         });
@@ -517,9 +515,8 @@ public class DebugSession : Session {
     }
     private DebugProtocol.Variable CreateVariable(MonoClient.ObjectValue v) {
         var childrenReference = 0;
-        if (v.HasChildren) {
-            var objectValues = v.GetAllChildren();
-            childrenReference = variableHandles.Create(objectValues);
+        if (v.HasChildren && !v.HasNullValue()) {
+            childrenReference = variableHandles.Create(v.GetAllChildren);
         }
         return new DebugProtocol.Variable {
             Name = v.Name,

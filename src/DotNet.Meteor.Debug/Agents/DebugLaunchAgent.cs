@@ -14,7 +14,9 @@ public class DebugLaunchAgent : BaseLaunchAgent {
     private readonly SoftDebuggerStartInfo startInformation;
 
     public DebugLaunchAgent(LaunchConfiguration configuration) : base(configuration) {
-        if (configuration.Device.IsAndroid || (configuration.Device.IsIPhone && !configuration.Device.IsEmulator))
+        if (configuration.Device.IsAndroid)
+            startArguments = new AutoConnectionProvider(IPAddress.Loopback, configuration.DebugPort, configuration.Project.Name);
+        else if (configuration.Device.IsIPhone && !configuration.Device.IsEmulator)
             startArguments = new ClientConnectionProvider(IPAddress.Loopback, configuration.DebugPort, configuration.Project.Name);
         else if (configuration.Device.IsIPhone || configuration.Device.IsMacCatalyst)
             startArguments = new ServerConnectionProvider(IPAddress.Loopback, configuration.DebugPort, configuration.Project.Name);
@@ -22,7 +24,7 @@ public class DebugLaunchAgent : BaseLaunchAgent {
         ArgumentNullException.ThrowIfNull(startArguments, "Debugger connection arguments not implemented.");
 
         startInformation = new SoftDebuggerStartInfo(startArguments);
-        startInformation.SetAssemblies(configuration.GetApplicationAssembliesDirectory(), configuration.DebuggerSessionOptions);
+        startInformation.SetAssemblies(configuration.AssemblyPath, configuration.DebuggerSessionOptions);
     }
     public override void Launch(IProcessLogger logger) {
         if (Configuration.Device.IsAndroid)
@@ -74,24 +76,13 @@ public class DebugLaunchAgent : BaseLaunchAgent {
     }
     private void LaunchAndroid(IProcessLogger logger) {
         var applicationId = Configuration.GetApplicationName();
-        if (Configuration.Device.IsEmulator)
-            Configuration.Device.Serial = AndroidEmulator.Run(Configuration.Device.Name).Serial;
-
         AndroidDebugBridge.Forward(Configuration.Device.Serial, Configuration.ReloadHostPort);
-        AndroidDebugBridge.Forward(Configuration.Device.Serial, Configuration.DebugPort);
-
-        if (Configuration.UninstallApp)
-            AndroidDebugBridge.Uninstall(Configuration.Device.Serial, applicationId, logger);
-
-        AndroidDebugBridge.Install(Configuration.Device.Serial, Configuration.ProgramPath, logger);
-        AndroidDebugBridge.Shell(Configuration.Device.Serial, "setprop", "debug.mono.connect", $"port={Configuration.DebugPort}");
-        AndroidDebugBridge.Shell(Configuration.Device.Serial, "am", "set-debug-app", applicationId);
-        AndroidDebugBridge.Launch(Configuration.Device.Serial, applicationId, logger);
+        Disposables.Add(() => AndroidDebugBridge.RemoveForward(Configuration.Device.Serial));
+        
         AndroidDebugBridge.Flush(Configuration.Device.Serial);
 
         var logcatProcess = AndroidDebugBridge.Logcat(Configuration.Device.Serial, logger);
-
         Disposables.Add(() => logcatProcess.Terminate());
-        Disposables.Add(() => AndroidDebugBridge.RemoveForward(Configuration.Device.Serial));
+        Disposables.Add(() => AndroidDebugBridge.Shell(Configuration.Device.Serial, "am", "force-stop", applicationId));
     }
 }

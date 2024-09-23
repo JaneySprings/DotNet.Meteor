@@ -2,35 +2,34 @@
 using DotNet.Meteor.Debug.Extensions;
 using Newtonsoft.Json.Linq;
 using Mono.Debugging.Client;
-using DotNet.Meteor.Common.Extensions;
 
 namespace DotNet.Meteor.Debug;
 
 public class LaunchConfiguration {
     public Project Project { get; init; }
     public DeviceData Device { get; init; }
-    public string Configuration { get; init; }
+    public string ProgramPath { get; init; }
+    public string AssemblyPath { get; init; }
 
     public bool UninstallApp { get; init; }
-    public bool SkipDebug { get; init; }
     public int DebugPort { get; init; }
     public int ReloadHostPort { get; init; }
     public int ProfilerPort { get; init; }
-    public string? ProfilerMode { get; init; }
-    public string ProgramPath { get; init; }
     public DebuggerSessionOptions DebuggerSessionOptions { get; init; }
+
+    private ProfilerMode Profiler { get; init; }
+    private bool SkipDebug { get; init; }
 
     public LaunchConfiguration(Dictionary<string, JToken> configurationProperties) {
         Project = configurationProperties["project"].ToClass<Project>()!;
         Device = configurationProperties["device"].ToClass<DeviceData>()!;
-        Configuration = configurationProperties["configuration"].ToClass<string>()!;
         
         UninstallApp = configurationProperties.TryGetValue("uninstallApp").ToValue<bool>();
         SkipDebug = configurationProperties.TryGetValue("skipDebug").ToValue<bool>();
         DebugPort = configurationProperties.TryGetValue("debuggingPort").ToValue<int>();
         ReloadHostPort = configurationProperties.TryGetValue("reloadHost").ToValue<int>();
         ProfilerPort = configurationProperties.TryGetValue("profilerPort").ToValue<int>();
-        ProfilerMode = configurationProperties.TryGetValue("profilerMode")?.ToClass<string>();
+        Profiler = configurationProperties.TryGetValue("profilerMode").ToValue<ProfilerMode>();
         DebuggerSessionOptions = configurationProperties.TryGetValue("debuggerOptions")?.ToClass<DebuggerSessionOptions>() 
             ?? ServerExtensions.DefaultDebuggerOptions;
 
@@ -38,9 +37,13 @@ public class LaunchConfiguration {
         ReloadHostPort = ReloadHostPort == 0 ? ServerExtensions.FindFreePort() : ReloadHostPort;
         ProfilerPort = ProfilerPort == 0 ? ServerExtensions.FindFreePort() : ProfilerPort;
 
-        ProgramPath = configurationProperties.TryGetValue("program").ToClass<string>() ?? string.Empty;
+        ProgramPath = Project.GetRelativePath(configurationProperties.TryGetValue("program").ToClass<string>());
         if (!File.Exists(ProgramPath) && !Directory.Exists(ProgramPath))
             throw ServerExtensions.GetProtocolException($"Incorrect path to program: '{ProgramPath}'");
+        
+        AssemblyPath = Project.GetRelativePath(configurationProperties.TryGetValue("assemblies").ToClass<string>());
+        if (!Directory.Exists(AssemblyPath))
+            throw ServerExtensions.GetProtocolException($"Incorrect path to program assemblies: '{AssemblyPath}'");
     }
 
     public string GetApplicationName() {
@@ -50,24 +53,16 @@ public class LaunchConfiguration {
         var assemblyName = Path.GetFileNameWithoutExtension(ProgramPath);
         return assemblyName.Replace("-Signed", "");
     }
-    public string GetApplicationAssembliesDirectory() {
-        if (Device.IsMacCatalyst)
-            return Path.Combine(ProgramPath, "Contents", "MonoBundle");
-        if (Device.IsIPhone)
-            return ProgramPath;
-        if (Device.IsAndroid)
-            return ServerExtensions.ExtractAndroidAssemblies(ProgramPath);
-
-        throw new NotSupportedException();
-    }
     public BaseLaunchAgent GetLaunchAgent() {
-        if (ProfilerMode.EqualsInsensitive("trace"))
+        if (Profiler == ProfilerMode.Trace)
             return new TraceLaunchAgent(this);
-        if (ProfilerMode.EqualsInsensitive("gcdump"))
+        if (Profiler == ProfilerMode.GCDump)
             return new GCDumpLaunchAgent(this);
         if (!SkipDebug)
             return new DebugLaunchAgent(this);
 
         return new NoDebugLaunchAgent(this);
     }
+
+    private enum ProfilerMode { None, Trace, GCDump }
 }

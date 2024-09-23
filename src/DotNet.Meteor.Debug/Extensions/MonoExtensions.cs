@@ -35,6 +35,9 @@ public static class MonoExtensions {
         
         return sb.ToString();
     }
+    public static bool HasNullValue(this ObjectValue objectValue) {
+        return objectValue.Value == "(null)";
+    }
     public static ThreadInfo? FindThread(this SoftDebuggerSession session, long id) {
         var process = session.GetProcesses().FirstOrDefault();
         if (process == null)
