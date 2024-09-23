@@ -277,14 +277,14 @@ public class DebugSession : Session {
                 stackFrames.Add(new DebugProtocol.StackFrame() {
                     Id = frameId,
                     Source = source,
-                    Name = frame.SourceLocation.MethodName,
+                    Name = frame.SourceLocation.GetMethodName(),
                     Line = frame.SourceLocation.Line,
                     Column = frame.SourceLocation.Column,
                     EndLine = frame.SourceLocation.EndLine,
                     EndColumn = frame.SourceLocation.EndColumn,
-                    PresentationHint = File.Exists(source.Path) || source.VsSourceLinkInfo != null
-                        ? StackFrame.PresentationHintValue.Normal
-                        : StackFrame.PresentationHintValue.Subtle
+                    PresentationHint = frame.IsExternalCode
+                        ? StackFrame.PresentationHintValue.Subtle
+                        : StackFrame.PresentationHintValue.Normal
                 });
             }
 

@@ -35,6 +35,12 @@ public static class MonoExtensions {
         
         return sb.ToString();
     }
+    public static string GetMethodName(this SourceLocation sourceLocation) {
+        if (sourceLocation.MethodName.EndsWith('.'))
+            return $"{sourceLocation.MethodName}AnonymousMethod__()";
+
+        return sourceLocation.MethodName;
+    }
     public static bool HasNullValue(this ObjectValue objectValue) {
         return objectValue.Value == "(null)";
     }
