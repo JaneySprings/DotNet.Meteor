@@ -21,14 +21,15 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
             .conditional(`-p:RuntimeIdentifier=${ConfigurationController.device?.runtime_id}`, () => ConfigurationController.device?.runtime_id)
 
         if (ConfigurationController.isAndroid()) {
-            builder.conditional('-t:Run', () => !ConfigurationController.profiler)
-            builder.conditional('-p:AndroidAttachDebugger=true', () => !ConfigurationController.profiler && !ConfigurationController.noDebug);
-            builder.conditional(`-p:AndroidSdbTargetPort=${ConfigurationController.getDebuggingPort()}`, () => !ConfigurationController.profiler && !ConfigurationController.noDebug);
-            builder.conditional(`-p:AndroidSdbHostPort=${ConfigurationController.getDebuggingPort()}`, () => !ConfigurationController.profiler && !ConfigurationController.noDebug);
-            builder.conditional(`-p:AdbTarget=-s%20${ConfigurationController.device?.serial}`, () => !ConfigurationController.profiler);
-            builder.conditional('-p:AndroidEnableProfiler=true', () => ConfigurationController.profiler);
-            builder.conditional('-p:EmbedAssembliesIntoApk=true', () => ConfigurationController.profiler);
+            // TODO: FastDev
+            // builder.conditional('-t:Run', () => !ConfigurationController.profiler)
+            // builder.conditional('-p:AndroidAttachDebugger=true', () => !ConfigurationController.profiler && !ConfigurationController.noDebug);
+            // builder.conditional(`-p:AndroidSdbTargetPort=${ConfigurationController.getDebuggingPort()}`, () => !ConfigurationController.profiler && !ConfigurationController.noDebug);
+            // builder.conditional(`-p:AndroidSdbHostPort=${ConfigurationController.getDebuggingPort()}`, () => !ConfigurationController.profiler && !ConfigurationController.noDebug);
+            // builder.conditional(`-p:AdbTarget=-s%20${ConfigurationController.device?.serial}`, () => !ConfigurationController.profiler);
+            builder.append('-p:EmbedAssembliesIntoApk=true');
             builder.append(`-p:AndroidSdkDirectory=${ConfigurationController.androidSdkDirectory}`);
+            builder.conditional('-p:AndroidEnableProfiler=true', () => ConfigurationController.profiler);
         }
         if (ConfigurationController.isAppleMobile()) {
             builder.conditional('-p:_BundlerDebug=true', () => !ConfigurationController.profiler);

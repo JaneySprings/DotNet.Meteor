@@ -134,26 +134,6 @@ export class ConfigurationController {
 
         return undefined;
     }
-    public static getAssemblyPath(programPath: string, project: Project, configuration: Target, device: Device): string | undefined {
-        if (ConfigurationController.isWindows())
-            return undefined;
-
-        if (ConfigurationController.isMacCatalyst())
-            return path.join(programPath, 'Contents', 'MonoBundle');
-
-        if (ConfigurationController.isAppleMobile())
-            return programPath;
-
-        if (ConfigurationController.isAndroid()) {
-            const assembliesDir = InteropController.getPropertyValue('MonoAndroidIntermediateAssemblyDir', project, configuration, device);
-            if (assembliesDir === undefined)
-                return undefined; 
-
-            return path.join(assembliesDir, device.arch ?? '');
-        }
-
-        return undefined;
-    }
 
     public static async activateAndroidEmulator(): Promise<void> {
         if (!ConfigurationController.isAndroid() || ConfigurationController.device === undefined)

@@ -47,9 +47,18 @@ public class NoDebugLaunchAgent : BaseLaunchAgent {
         Disposables.Add(() => process.Terminate());
     }
     private void LaunchAndroid(IProcessLogger logger) {
+        var applicationId = Configuration.GetApplicationName();
+        if (Configuration.Device.IsEmulator && !Configuration.Device.IsRunning)
+            Configuration.Device.Serial = AndroidEmulator.Run(Configuration.Device.Name).Serial;
+
         AndroidDebugBridge.Forward(Configuration.Device.Serial, Configuration.ReloadHostPort);
         Disposables.Add(() => AndroidDebugBridge.RemoveForward(Configuration.Device.Serial));
 
+        if (Configuration.UninstallApp)
+            AndroidDebugBridge.Uninstall(Configuration.Device.Serial, applicationId, logger);
+
+        AndroidDebugBridge.Install(Configuration.Device.Serial, Configuration.ProgramPath, logger);
+        AndroidDebugBridge.Launch(Configuration.Device.Serial, applicationId, logger);
         AndroidDebugBridge.Flush(Configuration.Device.Serial);
 
         var logcatProcess = AndroidDebugBridge.Logcat(Configuration.Device.Serial, logger);

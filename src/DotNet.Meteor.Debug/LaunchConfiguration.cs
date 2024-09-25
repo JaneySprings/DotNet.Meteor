@@ -9,7 +9,6 @@ public class LaunchConfiguration {
     public Project Project { get; init; }
     public DeviceData Device { get; init; }
     public string ProgramPath { get; init; }
-    public string AssemblyPath { get; init; }
 
     public bool UninstallApp { get; init; }
     public int DebugPort { get; init; }
@@ -40,10 +39,6 @@ public class LaunchConfiguration {
         ProgramPath = Project.GetRelativePath(configurationProperties.TryGetValue("program").ToClass<string>());
         if (!File.Exists(ProgramPath) && !Directory.Exists(ProgramPath))
             throw ServerExtensions.GetProtocolException($"Incorrect path to program: '{ProgramPath}'");
-        
-        AssemblyPath = Project.GetRelativePath(configurationProperties.TryGetValue("assemblies").ToClass<string>());
-        if (!Directory.Exists(AssemblyPath))
-            throw ServerExtensions.GetProtocolException($"Incorrect path to program assemblies: '{AssemblyPath}'");
     }
 
     public string GetApplicationName() {
@@ -52,6 +47,14 @@ public class LaunchConfiguration {
 
         var assemblyName = Path.GetFileNameWithoutExtension(ProgramPath);
         return assemblyName.Replace("-Signed", "");
+    }
+    public string GetAssemblyPath() {
+        if (Device.IsMacCatalyst)
+            return Path.Combine(ProgramPath, "Contents", "MonoBundle");
+        if (Device.IsIPhone)
+            return ProgramPath;
+
+        return Path.GetDirectoryName(ProgramPath)!;
     }
     public BaseLaunchAgent GetLaunchAgent() {
         if (Profiler == ProfilerMode.Trace)

@@ -19,7 +19,8 @@ export class MonoDebugConfigurationProvider implements vscode.DebugConfiguration
 		if (!ConfigurationController.isValid())
 			return undefined;
 
-		await ConfigurationController.activateAndroidEmulator();
+		// Meteor can launch AVD before debugging
+		// await ConfigurationController.activateAndroidEmulator();
 
 		if (!config.type && !config.request && !config.name) {
 			config.preLaunchTask = `${res.extensionId}: ${res.taskDefinitionDefaultTargetCapitalized}`
@@ -35,8 +36,6 @@ export class MonoDebugConfigurationProvider implements vscode.DebugConfiguration
         	config.device = ConfigurationController.device;
 		if (config.program === undefined)
 			config.program = ConfigurationController.getProgramPath(config.project, config.configuration, config.device);
-		if (config.assemblies === undefined)
-			config.assemblies = ConfigurationController.getAssemblyPath(config.program, config.project, config.configuration, config.device);
 
 		if (ConfigurationController.isWindows() && !ConfigurationController.profiler) {
 			config.type = res.debuggerVsdbgId;

@@ -94,6 +94,8 @@ public static class ProjectExtensions {
     public static string ToPlatformPath(this string path) {
         return path
             .Replace('\\', System.IO.Path.DirectorySeparatorChar)
-            .Replace('/', System.IO.Path.DirectorySeparatorChar);
+            .Replace('/', System.IO.Path.DirectorySeparatorChar)
+            .Replace("\\\\", $"{System.IO.Path.DirectorySeparatorChar}")
+            .Replace("//", $"{System.IO.Path.DirectorySeparatorChar}");
     }
 }
