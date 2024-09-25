@@ -7,7 +7,9 @@ using NewtonConverter = Newtonsoft.Json.JsonConvert;
 using DebugProtocol = Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using DotNet.Meteor.Common;
+using DotNet.Meteor.Common.Extensions;
 using Mono.Debugging.Soft;
+using System.IO.Compression;
 using System.Text.Json.Serialization;
 
 namespace DotNet.Meteor.Debug.Extensions;
@@ -60,6 +62,37 @@ public static class ServerExtensions {
             : frame.SourceLocation.FileName;
         return Math.Abs(key.GetHashCode());
     }
+    public static string ExtractAndroidAssemblies(string programPath) {
+        var targetDirectory = Path.GetDirectoryName(programPath)!;
+
+        try {
+            using var archive = new ZipArchive(File.OpenRead(programPath));
+            var assembliesEntry = archive.Entries.Where(entry => entry.FullName.StartsWith("assemblies", StringComparison.OrdinalIgnoreCase));
+            if (!assembliesEntry.Any()) {
+                // For net9+ the assemblies are not in the assemblies folder
+                assembliesEntry = archive.Entries.Where(entry =>
+                    entry.FullName.EndsWith(".dll.so", StringComparison.OrdinalIgnoreCase) ||
+                    entry.FullName.EndsWith(".pdb.so", StringComparison.OrdinalIgnoreCase)
+                );
+            }
+            if (!assembliesEntry.Any())
+                return targetDirectory;
+
+            foreach (var entry in assembliesEntry) {
+                var assemblyFileName = entry.Name.TrimStart("lib_").TrimEnd(".so");
+                var targetPath = Path.Combine(targetDirectory, assemblyFileName);
+                TryDeleteFile(targetPath);
+
+                using var fileStream = File.Create(targetPath);
+                using var stream = entry.Open();
+                stream.CopyTo(fileStream);
+            }
+            return targetDirectory;
+        } catch (Exception ex) {
+            DebuggerLoggingService.CustomLogger.LogError(ex.Message, ex);
+            return targetDirectory;
+        }
+    }
     public static string? TrimExpression(this DebugProtocol.EvaluateArguments args) {
         return args.Expression?.TrimEnd(';')?.Replace("?.", ".");
     }
@@ -99,7 +132,7 @@ public static class ServerExtensions {
         if (string.IsNullOrEmpty(json))
             return default;
 
-        return JsonSerializer.Deserialize<T>(json, SerializerOptions);
+        return JsonSerializer.Deserialize<T>(json);
     }
     public static DebugProtocol.CompletionItem ToCompletionItem(this CompletionItem item) {
         return new DebugProtocol.CompletionItem() {

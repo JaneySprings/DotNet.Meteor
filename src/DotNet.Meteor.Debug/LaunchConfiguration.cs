@@ -53,6 +53,8 @@ public class LaunchConfiguration {
             return Path.Combine(ProgramPath, "Contents", "MonoBundle");
         if (Device.IsIPhone)
             return ProgramPath;
+        if (Device.IsAndroid)
+            return ServerExtensions.ExtractAndroidAssemblies(ProgramPath);
 
         return Path.GetDirectoryName(ProgramPath)!;
     }
