@@ -44,15 +44,16 @@ namespace DotNet.Meteor.Common {
             if (File.Exists(mlaunchToolPath))
                 return new FileInfo(mlaunchToolPath);
 
-            var dotnetPath = Common.MicrosoftSdk.DotNetRootLocation();
-            var sdkPath = Path.Combine(dotnetPath, "packs", "Microsoft.iOS.Sdk");
-            if (!Directory.Exists(sdkPath)) {
-                var sdkPaths = Directory.GetDirectories(Path.Combine(dotnetPath, "packs"), "Microsoft.iOS.Sdk.net*");
-                if (sdkPaths.Length == 0)
-                    throw new FileNotFoundException("Could not find mlaunch tool");
+            var sdkPath = string.Empty;
+            var dotnetPacksPath = Path.Combine(Common.MicrosoftSdk.DotNetRootLocation(), "packs");
+            var sdkPaths = Directory.GetDirectories(dotnetPacksPath, "Microsoft.iOS.Sdk.net*");
 
+            if (sdkPaths.Length > 0)
                 sdkPath = sdkPaths.OrderByDescending(x => Path.GetFileName(x)).First();
-            }
+            if (string.IsNullOrEmpty(sdkPath))
+                sdkPath = Path.Combine(dotnetPacksPath, "Microsoft.iOS.Sdk");
+            if (!Directory.Exists(sdkPath))
+                throw new DirectoryNotFoundException("Could not find mlaunch tool");
 
             var toolLocations = Directory.GetDirectories(sdkPath);
             if (toolLocations.Length == 0)
