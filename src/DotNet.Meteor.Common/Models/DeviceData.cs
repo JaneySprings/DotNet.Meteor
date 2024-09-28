@@ -9,7 +9,6 @@ public class DeviceData {
     [JsonPropertyName("platform")] public string Platform { get; set; } = string.Empty;
     [JsonPropertyName("runtime_id")] public string RuntimeId { get; set; } = string.Empty;
     [JsonPropertyName("os_version")] public string OSVersion { get; set; } = string.Empty;
-    [JsonPropertyName("arch")] public string Architecture { get; set; } = string.Empty;
 
     [JsonPropertyName("is_emulator")] public bool IsEmulator { get; set; }
     [JsonPropertyName("is_running")] public bool IsRunning { get; set; }
@@ -48,9 +47,4 @@ public static class Runtimes {
     public const string WindowsArm64 = "win-arm64";
     public const string iOSSimulatorX64 = "iossimulator-x64";
     public const string iOSSimulatorArm64 = "iossimulator-arm64";
-}
-
-public static class Architectures {
-    public const string X86_64 = "x86_64";
-    public const string ArmV8a = "arm64-v8a";
 }

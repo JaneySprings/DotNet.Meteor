@@ -24,7 +24,6 @@ public static class AndroidDeviceTool {
                     Detail = Details.AndroidEmulator,
                     Platform = Platforms.Android,
                     OSVersion = ini.GetField("target") ?? "Unknown",
-                    Architecture = RuntimeSystem.IsAarch64 ? Architectures.ArmV8a : Architectures.X86_64,
                     IsRunning = runningAvds.ContainsKey(name),
                     IsEmulator = true,
                     IsMobile = true
@@ -42,7 +41,6 @@ public static class AndroidDeviceTool {
                 Detail = Details.AndroidEmulator,
                 Platform = Platforms.Android,
                 OSVersion = $"android-{AndroidDebugBridge.Shell(avd.Value, "getprop", "ro.build.version.sdk")}",
-                Architecture = RuntimeSystem.IsAarch64 ? Architectures.ArmV8a : Architectures.X86_64,
                 IsRunning = true,
                 IsEmulator = true,
                 IsMobile = true
@@ -62,7 +60,6 @@ public static class AndroidDeviceTool {
             devices.Add(new DeviceData {
                 Name = AndroidDebugBridge.Shell(serial, "getprop", "ro.product.model"),
                 OSVersion = $"android-{AndroidDebugBridge.Shell(serial, "getprop", "ro.build.version.sdk")}",
-                Architecture = Architectures.ArmV8a,
                 Platform = Platforms.Android,
                 Detail = Details.AndroidDevice,
                 IsEmulator = false,
