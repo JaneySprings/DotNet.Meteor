@@ -38,7 +38,7 @@ public class LaunchConfiguration {
 
         ProgramPath = Project.GetRelativePath(configurationProperties.TryGetValue("program").ToClass<string>());
         if (!File.Exists(ProgramPath) && !Directory.Exists(ProgramPath))
-            throw ServerExtensions.GetProtocolException($"Incorrect path to program: '{ProgramPath}'");
+            ProgramPath = FindProgramPath(ProgramPath); // Last chance to get program path
     }
 
     public string GetApplicationName() {
@@ -67,6 +67,25 @@ public class LaunchConfiguration {
             return new DebugLaunchAgent(this);
 
         return new NoDebugLaunchAgent(this);
+    }
+
+    private string FindProgramPath(string programPath) {
+        if (string.IsNullOrEmpty(programPath))
+            throw ServerExtensions.GetProtocolException("Program path is null or empty");
+        
+        var programDirectory = Path.GetDirectoryName(programPath)!;
+        if (Device.IsAndroid) {
+            var apkPaths = Directory.GetFiles(programDirectory, "*-Signed.apk");
+            if (apkPaths.Length == 1)
+                return apkPaths[0];
+        }
+        if (Device.IsMacCatalyst || Device.IsIPhone) {
+            var appPaths = Directory.GetDirectories(programDirectory, "*.app");
+            if (appPaths.Length == 1)
+                return appPaths[0];
+        }
+
+        throw ServerExtensions.GetProtocolException($"Incorrect path to program: '{ProgramPath}'");
     }
 
     private enum ProfilerMode { None, Trace, GCDump }
