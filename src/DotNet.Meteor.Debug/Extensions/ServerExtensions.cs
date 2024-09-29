@@ -38,16 +38,7 @@ public static class ServerExtensions {
         PropertyNameCaseInsensitive = true,
     };
 
-    public static int FindFreePort() {
-        TcpListener? listener = null;
-        try {
-            listener = new TcpListener(IPAddress.Loopback, 0);
-            listener.Start();
-            return ((IPEndPoint)listener.LocalEndpoint).Port;
-        } finally {
-            listener?.Stop();
-        }
-    }
+
     public static bool TryDeleteFile(string path) {
         if (File.Exists(path))
             File.Delete(path);
@@ -189,10 +180,3 @@ public static class ServerExtensions {
     }
 }
 
-public class HotReloadRequest : DebugProtocol.DebugRequest<HotReloadArguments> {
-    public HotReloadRequest() : base("hotReload") {}
-}
-public class HotReloadResponse : DebugProtocol.ResponseBody {}
-public class HotReloadArguments {
-    public string? FilePath { get; set; }
-}

@@ -6,6 +6,7 @@ public string ArtifactsDirectory => _Path.Combine(RootDirectory, "artifacts");
 public string ExtensionStagingDirectory => _Path.Combine(RootDirectory, "extension");
 public string MeteorWorkspaceProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Workspace", "DotNet.Meteor.Workspace.csproj");
 public string MeteorXamlProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Xaml", "DotNet.Meteor.Xaml.LanguageServer", "DotNet.Meteor.Xaml.LanguageServer.csproj");
+public string MeteorHotReloadProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.HotReload", "DotNet.Meteor.HotReload.csproj");
 public string MeteorDebugProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Debug", "DotNet.Meteor.Debug.csproj");
 public string MeteorTestsProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Tests", "DotNet.Meteor.Tests.csproj");
 public string MeteorPluginProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.HotReload.Plugin", "DotNet.Meteor.HotReload.Plugin.csproj");
@@ -34,6 +35,12 @@ Task("workspace").Does(() => DotNetPublish(MeteorWorkspaceProjectPath, new DotNe
 Task("xaml").Does(() => DotNetPublish(MeteorXamlProjectPath, new DotNetPublishSettings {
 	MSBuildSettings = new DotNetMSBuildSettings { AssemblyVersion = version },
 	OutputDirectory = _Path.Combine(ExtensionStagingDirectory, "bin", "Xaml"),
+	Configuration = configuration,
+	Runtime = runtime,
+}));
+Task("hotreload").Does(() => DotNetPublish(MeteorHotReloadProjectPath, new DotNetPublishSettings {
+	MSBuildSettings = new DotNetMSBuildSettings { AssemblyVersion = version },
+	OutputDirectory = _Path.Combine(ExtensionStagingDirectory, "bin", "HotReload"),
 	Configuration = configuration,
 	Runtime = runtime,
 }));
@@ -73,6 +80,7 @@ Task("vsix")
 	.IsDependentOn("clean")
 	.IsDependentOn("workspace")
 	.IsDependentOn("xaml")
+	.IsDependentOn("hotreload")
 	.IsDependentOn("debugger")
 	.IsDependentOn("dsrouter")
 	.IsDependentOn("gcdump")

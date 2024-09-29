@@ -193,7 +193,7 @@
         {
           "command": "dotnet-meteor.triggerHotReload",
           "group": "navigation2",
-          "when": "debugType == dotnet-meteor.debugger"
+          "when": "debugType == dotnet-meteor.debugger || debugType == coreclr"
         }
       ]
     },
