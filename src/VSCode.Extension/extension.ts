@@ -4,10 +4,10 @@ import { ConfigurationController } from './controllers/configurationController';
 import { StatusBarController } from './controllers/statusbarController';
 import { InteropController } from './controllers/interopController';
 import { StateController } from './controllers/stateController';
-import { XamlController } from './controllers/xamlController';
 import { PublicExports } from './publicExports';
 import { ModulesView } from './features/modulesView';
 import { HotReload } from './features/hotReload';
+import { XamlServer } from './features/xamlServer';
 import * as res from './resources/constants';
 import * as vscode from 'vscode';
 
@@ -22,12 +22,11 @@ export function activate(context: vscode.ExtensionContext): PublicExports | unde
 	ConfigurationController.activate(context);
 	StateController.activate(context);
 	StatusBarController.activate(context);
-	StatusBarController.update().then(() => {
-		XamlController.activate(context);
-	});
+	StatusBarController.update();
 
 	ModulesView.feature.activate(context);
 	HotReload.feature.activate(context);
+	XamlServer.feature.activate(context);
 	
 	context.subscriptions.push(vscode.commands.registerCommand(res.commandIdSelectActiveProject, StatusBarController.showQuickPickProject));
 	context.subscriptions.push(vscode.commands.registerCommand(res.commandIdSelectActiveConfiguration, StatusBarController.showQuickPickTarget));

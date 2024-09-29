@@ -1,14 +1,15 @@
 import { LanguageClient, ServerOptions } from "vscode-languageclient/node";
-import { ConfigurationController } from "./configurationController";
-import * as res from './../resources/constants';
+import * as res from '../resources/constants';
 import * as vscode from 'vscode';
 import * as path from "path";
 
-export class XamlController {
+export class XamlServer {
+    public static feature : XamlServer = new XamlServer();
+
     private static client: LanguageClient;
     private static command: string;
 
-    public static async activate(context: vscode.ExtensionContext) {
+    public async activate(context: vscode.ExtensionContext): Promise<void> {
         context.subscriptions.push(vscode.commands.registerCommand(res.commandIdXamlReplaceCode, async (edit) => {
             const newEdit = new vscode.WorkspaceEdit();
             const uri = vscode.Uri.parse(edit.TextDocument.Uri);
@@ -26,26 +27,27 @@ export class XamlController {
         }));
 
         if ((await vscode.workspace.findFiles('**/*.xaml')).length > 0)
-            XamlController.activateServer(context);
+            this.activateServer(context);
     }
-    private static activateServer(context: vscode.ExtensionContext) {
+
+    private activateServer(context: vscode.ExtensionContext) {
         const extensionPath = context.extensionPath;
         const serverExecutable = path.join(extensionPath, "extension", "bin", "Xaml", "DotNet.Meteor.Xaml.LanguageServer");
         const serverExtension = process.platform === 'win32' ? '.exe' : '';
-        XamlController.command = serverExecutable + serverExtension;
-        XamlController.start();
+        XamlServer.command = serverExecutable + serverExtension;
+        
+        this.start();
 
-        context.subscriptions.push(XamlController.client);
+        context.subscriptions.push(XamlServer.client);
         context.subscriptions.push(vscode.tasks.onDidEndTaskProcess(ev => {
             if (ev.execution.task.definition.type.includes(res.taskDefinitionId) && ev.exitCode === 0)
-                XamlController.restart();
+                this.restart();
         }));
     }
-
-    private static initialize() {
-        const serverArguments = [ ConfigurationController.project?.path ?? "" ];
-        const serverOptions: ServerOptions = { command: XamlController.command, args: serverArguments };
-        XamlController.client = new LanguageClient(res.extensionId, res.extensionId, serverOptions, {
+    private initialize() {
+        const serverArguments: string[] = [ /*ConfigurationController.project?.path ?? ""*/ ]; //TODO: Wait for initialization
+        const serverOptions: ServerOptions = { command: XamlServer.command, args: serverArguments };
+        XamlServer.client = new LanguageClient(res.extensionId, res.extensionId, serverOptions, {
             diagnosticCollectionName: res.extensionDisplayName,
             synchronize: {
                 configurationSection: res.extensionId,
@@ -55,16 +57,17 @@ export class XamlController {
             }
         });
     }
-    public static start() {
-        XamlController.initialize();
-        XamlController.client.start();
+
+    public start() {
+        this.initialize();
+        XamlServer.client.start();
     }
-    public static stop() {
-        XamlController.client.stop();
-        XamlController.client.dispose();
+    public stop() {
+        XamlServer.client.stop();
+        XamlServer.client.dispose();
     }
-    public static restart() {
-        XamlController.stop();
-        XamlController.start();
+    public restart() {
+        this.stop();
+        this.start();
     }
 }
