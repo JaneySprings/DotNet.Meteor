@@ -11,10 +11,8 @@ export class ProcessRunner {
         return result.stdout.toString().trimEnd();
     }
     public static runAsync<TModel>(builder: ProcessArgumentBuilder): Promise<TModel> {
-        return new Promise<TModel>((resolve, reject) => {
-            const command = `\"${builder.getCommand()}\"`;
-            const args = builder.getArguments().map(arg => `\"${arg}\"`).join(' ');
-            exec(`${command} ${args}`, (error, stdout, stderr) => {
+        return new Promise<TModel>((resolve, reject) => { 
+            exec(builder.build(), (error, stdout, stderr) => {
                 if (error) {
                     console.error(stderr);
                     reject(stderr);

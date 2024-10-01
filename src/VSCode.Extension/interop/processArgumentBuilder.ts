@@ -37,4 +37,9 @@ export class ProcessArgumentBuilder {
             this.arguments.push(arg);
         return this;
     }
+    public build(): string {
+        const command = `\"${this.getCommand()}\"`;
+        const args = this.getArguments().map(arg => `\"${arg}\"`).join(' ');
+        return `${command} ${args}`;
+    }
 }
