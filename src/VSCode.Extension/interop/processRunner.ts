@@ -1,4 +1,4 @@
-import { spawnSync, spawn } from 'child_process';
+import { spawnSync, exec } from 'child_process';
 import { ProcessArgumentBuilder } from './processArgumentBuilder';
 
 export class ProcessRunner {
@@ -12,14 +12,16 @@ export class ProcessRunner {
     }
     public static runAsync<TModel>(builder: ProcessArgumentBuilder): Promise<TModel> {
         return new Promise<TModel>((resolve, reject) => {
-            const process = spawn(builder.getCommand(), builder.getArguments());
-            process.stdout.on('data', (data) => {
-                resolve(JSON.parse(data.toString()));
-            });
-            process.stderr.on('data', (data) => {
-                console.error(data.toString());
-                reject(data.toString());
-            });
+            const command = `\"${builder.getCommand()}\"`;
+            const args = builder.getArguments().map(arg => `\"${arg}\"`).join(' ');
+            exec(`${command} ${args}`, (error, stdout, stderr) => {
+                if (error) {
+                    console.error(stderr);
+                    reject(stderr);
+                }
+
+                resolve(JSON.parse(stdout.toString()));
+            })
         });
     }
 }
