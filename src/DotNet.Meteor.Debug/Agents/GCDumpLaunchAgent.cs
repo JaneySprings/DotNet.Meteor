@@ -73,7 +73,7 @@ public class GCDumpLaunchAgent : BaseLaunchAgent {
     }
     private void LaunchAndroid(IProcessLogger logger) {
         var applicationId = Configuration.GetApplicationName();
-        if (Configuration.Device.IsEmulator && !Configuration.Device.IsRunning)
+        if (Configuration.Device.IsEmulator)
             Configuration.Device.Serial = AndroidEmulator.Run(Configuration.Device.Name).Serial;
 
         AndroidDebugBridge.Reverse(Configuration.Device.Serial, Configuration.ProfilerPort, Configuration.ProfilerPort + 1);

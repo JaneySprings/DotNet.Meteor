@@ -48,7 +48,7 @@ public class NoDebugLaunchAgent : BaseLaunchAgent {
     }
     private void LaunchAndroid(IProcessLogger logger) {
         var applicationId = Configuration.GetApplicationName();
-        if (Configuration.Device.IsEmulator && !Configuration.Device.IsRunning)
+        if (Configuration.Device.IsEmulator)
             Configuration.Device.Serial = AndroidEmulator.Run(Configuration.Device.Name).Serial;
 
         AndroidDebugBridge.Forward(Configuration.Device.Serial, Configuration.ReloadHostPort);

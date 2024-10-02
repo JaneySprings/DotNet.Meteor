@@ -1,5 +1,4 @@
 import { ConfigurationController } from '../controllers/configurationController';
-import { StatusBarController } from '../controllers/statusbarController';
 import { WorkspaceFolder, DebugConfiguration } from 'vscode';
 import * as res from '../resources/constants';
 import * as vscode from 'vscode';
@@ -15,7 +14,9 @@ export class MonoDebugConfigurationProvider implements vscode.DebugConfiguration
 		if (!ConfigurationController.isActive())
 			return undefined;
 
-		await StatusBarController.update();
+		// It adds a delay to the start of the debug session
+		// await StatusBarController.update();
+
 		if (!ConfigurationController.isValid())
 			return undefined;
 

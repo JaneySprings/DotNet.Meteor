@@ -65,7 +65,7 @@ public class TraceLaunchAgent : BaseLaunchAgent {
     }
     private void LaunchAndroid(IProcessLogger logger, string diagnosticPort, string nettracePath) {
         var applicationId = Configuration.GetApplicationName();
-        if (Configuration.Device.IsEmulator && !Configuration.Device.IsRunning)
+        if (Configuration.Device.IsEmulator)
             Configuration.Device.Serial = AndroidEmulator.Run(Configuration.Device.Name).Serial;
 
         AndroidDebugBridge.Reverse(Configuration.Device.Serial, Configuration.ProfilerPort, Configuration.ProfilerPort + 1);
