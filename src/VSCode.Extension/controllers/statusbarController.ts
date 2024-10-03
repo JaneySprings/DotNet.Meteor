@@ -6,7 +6,6 @@ import { Project } from '../models/project';
 import { ProjectItem } from '../models/projectItem';
 import { Device } from '../models/device';
 import { DeviceItem } from '../models/deviceItem';
-import { Target } from '../models/target';
 import { SeparatorItem } from '../models/separatorItem';
 import { Icons } from '../resources/icons';
 import * as res from '../resources/constants';
@@ -54,7 +53,7 @@ export class StatusBarController {
         
         StateController.load();
         StatusBarController.performSelectProject(ConfigurationController.project);
-        StatusBarController.performSelectTarget(ConfigurationController.target);
+        StatusBarController.performSelectConfiguration(ConfigurationController.configuration);
         StatusBarController.performSelectDevice(ConfigurationController.device);
 
         StatusBarController.targetStatusItem.show();
@@ -70,10 +69,10 @@ export class StatusBarController {
         PublicExports.instance.projectChangedEventHandler.invoke(ConfigurationController.project);
         StateController.saveProject();
     }
-    public static performSelectTarget(item: Target | undefined = undefined) {
-        ConfigurationController.target = item ?? Target.Debug;
-        StatusBarController.targetStatusItem.text = `${Icons.target} ${ConfigurationController.target} | Any CPU`;
-        PublicExports.instance.targetChangedEventHandler.invoke(ConfigurationController.target);
+    public static performSelectConfiguration(item: string | undefined = undefined) {
+        ConfigurationController.configuration = item ?? 'Debug';
+        StatusBarController.targetStatusItem.text = `${Icons.target} ${ConfigurationController.configuration} | Any CPU`;
+        PublicExports.instance.configurationChangedEventHandler.invoke(ConfigurationController.configuration);
         StateController.saveTarget();
     }
     public static performSelectDevice(item: Device | undefined = undefined) {
@@ -88,16 +87,18 @@ export class StatusBarController {
         const options = { placeHolder: res.commandTitleSelectActiveProject };
         const selectedItem = await vscode.window.showQuickPick(items, options);
 
-        if (selectedItem !== undefined) 
+        if (selectedItem !== undefined) {
             StatusBarController.performSelectProject(selectedItem.item);
+            StatusBarController.performSelectConfiguration(undefined);
+        }
     }
-    public static async showQuickPickTarget() {
-        const items = [ Target.Debug, Target.Release ];
+    public static async showQuickPickConfiguration() {
+        const items = ConfigurationController.project?.configurations ?? [];
         const options = { placeHolder: res.commandTitleSelectActiveConfiguration };
         const selectedItem = await vscode.window.showQuickPick(items, options);
         
         if (selectedItem !== undefined)
-            StatusBarController.performSelectTarget(selectedItem as Target);
+            StatusBarController.performSelectConfiguration(selectedItem);
     }
     public static async showQuickPickDevice() {
         const picker = vscode.window.createQuickPick();

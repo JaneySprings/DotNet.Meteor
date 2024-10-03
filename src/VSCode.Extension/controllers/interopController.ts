@@ -1,7 +1,6 @@
 import { ProcessArgumentBuilder } from '../interop/processArgumentBuilder';
 import { ProcessRunner } from '../interop/processRunner';
 import { Project } from '../models/project';
-import { Target } from '../models/target';
 import { Device } from '../models/device';
 import * as vscode from 'vscode';
 import * as path from 'path';
@@ -33,7 +32,7 @@ export class InteropController {
         return ProcessRunner.runSync(new ProcessArgumentBuilder(InteropController.workspaceToolPath)
             .append("--android-sdk-path"));
     }
-    public static getPropertyValue(propertyName: string, project: Project, configuration: Target, device: Device) : string | undefined {
+    public static getPropertyValue(propertyName: string, project: Project, configuration: string, device: Device) : string | undefined {
         const targetFramework = project.frameworks.find(it => it.includes(device.platform ?? 'undefined'));
         const runtimeIdentifier = device?.runtime_id;
 

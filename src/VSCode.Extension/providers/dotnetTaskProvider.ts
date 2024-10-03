@@ -16,7 +16,7 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
         const builder = new ProcessArgumentBuilder('dotnet')
             .append('build')
             .append(ConfigurationController.project!.path)
-            .append(`-p:Configuration=${ConfigurationController.target}`)
+            .append(`-p:Configuration=${ConfigurationController.configuration}`)
             .append(`-p:TargetFramework=${ConfigurationController.getTargetFramework()}`)
             .conditional(`-p:RuntimeIdentifier=${ConfigurationController.device?.runtime_id}`, () => ConfigurationController.device?.runtime_id)
 

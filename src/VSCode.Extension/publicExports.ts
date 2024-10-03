@@ -2,19 +2,19 @@
 export class PublicExports {
     public static instance: PublicExports;
     public projectChangedEventHandler: EventHandler;
-    public targetChangedEventHandler: EventHandler;
+    public configurationChangedEventHandler: EventHandler;
     public deviceChangedEventHandler: EventHandler;
 
     constructor() {
         PublicExports.instance = this;
         this.projectChangedEventHandler = new EventHandler();
-        this.targetChangedEventHandler = new EventHandler();
+        this.configurationChangedEventHandler = new EventHandler();
         this.deviceChangedEventHandler = new EventHandler();
     }
 
     public invokeAll() {
         this.projectChangedEventHandler.invoke(undefined);
-        this.targetChangedEventHandler.invoke(undefined);
+        this.configurationChangedEventHandler.invoke(undefined);
         this.deviceChangedEventHandler.invoke(undefined);
     }
 }

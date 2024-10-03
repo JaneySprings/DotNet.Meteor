@@ -32,7 +32,7 @@ export class MonoDebugConfigurationProvider implements vscode.DebugConfiguration
 		if (config.project === undefined)
 			config.project = ConfigurationController.project;
 		if (config.configuration === undefined)
-			config.configuration = ConfigurationController.target;
+			config.configuration = ConfigurationController.configuration;
 		if (config.device === undefined)
         	config.device = ConfigurationController.device;
 		if (config.program === undefined)

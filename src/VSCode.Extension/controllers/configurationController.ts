@@ -3,7 +3,6 @@ import { InteropController } from './interopController';
 import { StatusBarController } from "./statusbarController";
 import { Project } from '../models/project';
 import { Device } from '../models/device';
-import { Target } from '../models/target';
 import * as res from '../resources/constants';
 import * as path from 'path';
 
@@ -13,7 +12,7 @@ export class ConfigurationController {
     public static profiler: string | undefined;
     public static project: Project | undefined;
     public static device: Device | undefined;
-    public static target: Target | undefined;
+    public static configuration: string | undefined;
 
     public static activate(context: ExtensionContext) {
         ConfigurationController.androidSdkDirectory = InteropController.getAndroidSdk();
@@ -109,7 +108,7 @@ export class ConfigurationController {
     public static getSettingOrDefault<TResult>(id: string): TResult | undefined {
         return workspace.getConfiguration(res.configId).get(id);
     }
-    public static getProgramPath(project: Project, configuration: Target, device: Device): string | undefined {
+    public static getProgramPath(project: Project, configuration: string, device: Device): string | undefined {
         const targetPath = InteropController.getPropertyValue('TargetPath', project, configuration, device);
         if (targetPath === undefined)
             return undefined;
