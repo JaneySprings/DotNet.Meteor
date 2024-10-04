@@ -137,7 +137,9 @@ If you encounter any issues, please check the following:
 
 | Application Type | Build and Run | Hot Reload | Debugging | Profiling |
 |-|:-:|:-:|:-:|:-:|
-| **WinUI** | ✅ | ❌ | ✅ | ✅ |
+| **WinUI** | ✅ | ✅ | ✅* | ✅ |
 | **Android** | ✅ | ✅ | ✅ | ✅ |
 | **iOS** | ✅ | ✅ | ✅ | ✅ |
 | **MacCatalyst** | ✅ | ✅ | ✅ | ✅ |
+
+&emsp;*For debugging of the WinUI applications you should install **one of the following** extensions: [C#](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csharp) or [DotRush.Essentials](https://github.com/JaneySprings/DotRush.Essentials/releases).*

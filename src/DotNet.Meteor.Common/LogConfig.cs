@@ -1,5 +1,3 @@
-using System;
-using System.IO;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
@@ -19,6 +17,8 @@ public static class LogConfig {
             FileName = DebugLogFile,
             Layout = "${time}|${message}",
             DeleteOldFileOnStartup = true,
+            MaxArchiveFiles = 1,
+            ArchiveAboveSize = 1 * 1024 * 1024, //MB
         };
         var commonAsyncTarget = new AsyncTargetWrapper(commonTarget, 500, AsyncTargetWrapperOverflowAction.Discard);
         configuration.AddTarget("log", commonAsyncTarget);
@@ -27,6 +27,8 @@ public static class LogConfig {
             FileName = ErrorLogFile,
             DeleteOldFileOnStartup = true,
             Layout = "${longdate}|${message}${newline}at ${stacktrace:format=Flat:separator= at :reverse=true}${newline}${callsite-filename}[${callsite-linenumber}]",
+            MaxArchiveFiles = 1,
+            ArchiveAboveSize = 1 * 1024 * 1024, //MB
         };
         var errorAsyncTarget = new AsyncTargetWrapper(errorTarget, 500, AsyncTargetWrapperOverflowAction.Discard);
         configuration.AddTarget("errorLog", errorAsyncTarget);

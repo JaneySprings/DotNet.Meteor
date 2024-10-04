@@ -1,15 +1,16 @@
 using DotNet.Meteor.Debug.Extensions;
-using DotNet.Meteor.Debug.Sdk;
-using DotNet.Meteor.Debug.Sdk.Profiling;
-using DotNet.Meteor.Processes;
 using DotNet.Meteor.Common;
 using Mono.Debugging.Soft;
+using DotNet.Meteor.Common.Processes;
+using DotNet.Meteor.Common.Apple;
+using DotNet.Meteor.Common.Android;
+using DotNet.Meteor.Debug.Tools;
 
 namespace DotNet.Meteor.Debug;
 
 public class GCDumpLaunchAgent : BaseLaunchAgent {
-    private string? diagnosticPort;
-    private string? gcdumpPath;
+    private string diagnosticPort = null!;
+    private string gcdumpPath = null!;
     private int applicationPID;
 
     protected override string ProcessedCommand => "dump";
@@ -46,21 +47,21 @@ public class GCDumpLaunchAgent : BaseLaunchAgent {
     private void LaunchAppleMobile(IProcessLogger logger) {
         if (Configuration.Device.IsEmulator) {
             var routerProcess = DSRouter.ServerToClient($"{diagnosticPort}", $"127.0.0.1:{Configuration.ProfilerPort}", false, logger);
-            var simProcess = MonoLaunch.ProfileSim(Configuration.Device.Serial, Configuration.ProgramPath, $"127.0.0.1:{Configuration.ProfilerPort},nosuspend,listen", logger);
+            var simProcess = MonoLauncher.ProfileSim(Configuration.Device.Serial, Configuration.ProgramPath, $"127.0.0.1:{Configuration.ProfilerPort},nosuspend,listen", logger);
 
             Disposables.Add(() => routerProcess.Terminate());
             Disposables.Add(() => simProcess.Terminate());
         } else {
             var routerProcess = DSRouter.ServerToClient(diagnosticPort, $"127.0.0.1:{Configuration.ProfilerPort}", forwardApple: true, logger);
-            MonoLaunch.InstallDev(Configuration.Device.Serial, Configuration.ProgramPath, logger);
-            var devProcess = MonoLaunch.ProfileDev(Configuration.Device.Serial, Configuration.ProgramPath, $"127.0.0.1:{Configuration.ProfilerPort},nosuspend,listen", logger);
+            MonoLauncher.InstallDev(Configuration.Device.Serial, Configuration.ProgramPath, logger);
+            var devProcess = MonoLauncher.ProfileDev(Configuration.Device.Serial, Configuration.ProgramPath, $"127.0.0.1:{Configuration.ProfilerPort},nosuspend,listen", logger);
 
             Disposables.Add(() => routerProcess.Terminate());
             Disposables.Add(() => devProcess.Terminate());
         }
     }
     private void LaunchMacCatalyst(IProcessLogger logger) {
-        var tool = AppleSdk.OpenTool();
+        var tool = AppleSdkLocator.OpenTool();
         var processRunner = new ProcessRunner(tool, new ProcessArgumentBuilder().AppendQuoted(Configuration.ProgramPath));
 
         diagnosticPort = $"127.0.0.1:{Configuration.ProfilerPort}";
@@ -68,28 +69,28 @@ public class GCDumpLaunchAgent : BaseLaunchAgent {
 
         var appLaunchResult = processRunner.WaitForExit();
         if (!appLaunchResult.Success)
-            throw new Exception(string.Join(Environment.NewLine, appLaunchResult.StandardError));
+            throw new InvalidOperationException(string.Join(Environment.NewLine, appLaunchResult.StandardError));
     }
     private void LaunchAndroid(IProcessLogger logger) {
         var applicationId = Configuration.GetApplicationName();
         if (Configuration.Device.IsEmulator)
             Configuration.Device.Serial = AndroidEmulator.Run(Configuration.Device.Name).Serial;
 
-        DeviceBridge.Reverse(Configuration.Device.Serial, Configuration.ProfilerPort, Configuration.ProfilerPort + 1);
-        DeviceBridge.Shell(Configuration.Device.Serial, "setprop", "debug.mono.profile", $"127.0.0.1:{Configuration.ProfilerPort},nosuspend,connect");
+        AndroidDebugBridge.Reverse(Configuration.Device.Serial, Configuration.ProfilerPort, Configuration.ProfilerPort + 1);
+        AndroidDebugBridge.Shell(Configuration.Device.Serial, "setprop", "debug.mono.profile", $"127.0.0.1:{Configuration.ProfilerPort},nosuspend,connect");
 
         var routerProcess = DSRouter.ServerToServer(Configuration.ProfilerPort + 1, logger);
         applicationPID = routerProcess.Id;
 
         Disposables.Add(() => routerProcess.Terminate());
-        Disposables.Add(() => DeviceBridge.RemoveReverse(Configuration.Device.Serial));
+        Disposables.Add(() => AndroidDebugBridge.RemoveReverse(Configuration.Device.Serial));
 
         if (Configuration.UninstallApp)
-            DeviceBridge.Uninstall(Configuration.Device.Serial, applicationId, logger);
-        DeviceBridge.Install(Configuration.Device.Serial, Configuration.ProgramPath, logger);
-        DeviceBridge.Launch(Configuration.Device.Serial, applicationId, logger);
+            AndroidDebugBridge.Uninstall(Configuration.Device.Serial, applicationId, logger);
+        AndroidDebugBridge.Install(Configuration.Device.Serial, Configuration.ProgramPath, logger);
+        AndroidDebugBridge.Launch(Configuration.Device.Serial, applicationId, logger);
 
-        Disposables.Add(() => DeviceBridge.Shell(Configuration.Device.Serial, "am", "force-stop", applicationId));
+        Disposables.Add(() => AndroidDebugBridge.Shell(Configuration.Device.Serial, "am", "force-stop", applicationId));
     }
     private void LaunchWindows(IProcessLogger logger) {
         var exeProcess = new ProcessRunner(new FileInfo(Configuration.ProgramPath), null, logger).Start();

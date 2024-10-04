@@ -1,7 +1,6 @@
 import { ConfigurationController } from './configurationController';
 import { StatusBarController } from './statusbarController';
 import { ExtensionContext } from 'vscode';
-import { Target } from '../models/target';
 import { Device } from '../models/device';
 
 export class StateController {
@@ -20,11 +19,11 @@ export class StateController {
 
         const project = StateController.context.workspaceState.get<string>('project');
         const device = StateController.context.workspaceState.get<string>('device');
-        const target = StateController.context.workspaceState.get<Target>('target');
+        const target = StateController.context.workspaceState.get<string>('target');
 
-        ConfigurationController.device = StatusBarController.devices.find(it => StateController.getDeviceId(it) === device);
         ConfigurationController.project = StatusBarController.projects.find(it => it.path === project);
-        ConfigurationController.target = target;
+        ConfigurationController.device = StatusBarController.devices.find(it => StateController.getDeviceId(it) === device);
+        ConfigurationController.configuration = ConfigurationController.project?.configurations.find(it => it === target);
     }
     public static saveProject() {
         if (StateController.context !== undefined)
@@ -36,7 +35,7 @@ export class StateController {
     }
     public static saveTarget() {
         if (StateController.context !== undefined)
-            StateController.context.workspaceState.update('target', ConfigurationController.target);
+            StateController.context.workspaceState.update('target', ConfigurationController.configuration);
     }
 
     private static getDeviceId(device: Device | undefined): string {

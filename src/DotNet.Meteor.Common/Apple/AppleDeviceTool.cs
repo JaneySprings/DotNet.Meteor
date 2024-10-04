@@ -1,13 +1,12 @@
-using DotNet.Meteor.Common;
-using DotNet.Meteor.Workspace.Utilities;
+using DotNet.Meteor.Common.Utilities;
 
-namespace DotNet.Meteor.Workspace.Apple;
+namespace DotNet.Meteor.Common.Apple;
 
-public static class AppleTool {
+public static class AppleDeviceTool {
     public static List<DeviceData> VirtualDevices() {
         var devices = new List<DeviceData>();
-        var path = AppleSdk.SimulatorsLocation();
-        var runtimeId = SystemProfiler.IsArch64()
+        var path = AppleSdkLocator.SimulatorsLocation();
+        var runtimeId = RuntimeSystem.IsAarch64
             ? Runtimes.iOSSimulatorArm64
             : Runtimes.iOSSimulatorX64;
 
@@ -39,24 +38,22 @@ public static class AppleTool {
                 Detail = Details.iOSSimulator,
                 Platform = Platforms.iOS,
                 OSVersion = osVersion,
-                Serial = extractor.Extract("UDID")
+                Serial = extractor.Extract("UDID") ?? string.Empty
             });
             extractor.Free();
         }
 
         return devices;
     }
-
     public static List<DeviceData> PhysicalDevices() {
         return SystemProfiler.PhysicalDevices();
     }
-
     public static List<DeviceData> MacintoshDevices() {
         var devices = new List<DeviceData>();
         var tokens = Environment.OSVersion.VersionString.Split(' ');
         var osVersion = $"MacOS {tokens.Last()}";
 
-        if (SystemProfiler.IsArch64()) {
+        if (RuntimeSystem.IsAarch64) {
             devices.Add(new DeviceData {
                 IsEmulator = false,
                 IsRunning = true,

@@ -1,8 +1,8 @@
 using System.Diagnostics;
-using DotNet.Meteor.Processes;
 using DotNet.Meteor.Common;
+using DotNet.Meteor.Common.Processes;
 
-namespace DotNet.Meteor.Debug.Sdk.Profiling;
+namespace DotNet.Meteor.Debug.Tools;
 
 public static class DSRouter {
     public static FileInfo DSRouterTool() {
@@ -32,7 +32,7 @@ public static class DSRouter {
         return new ProcessRunner(dsrouter, arguments, logger).Start();
     }
 
-    public static Process ServerToClient(string? ipcs, string tcpc, bool forwardApple = false, IProcessLogger? logger = null) {
+    public static Process ServerToClient(string ipcs, string tcpc, bool forwardApple = false, IProcessLogger? logger = null) {
         var dsrouter = DSRouter.DSRouterTool();
         var arguments = new ProcessArgumentBuilder()
             .Append("server-client")

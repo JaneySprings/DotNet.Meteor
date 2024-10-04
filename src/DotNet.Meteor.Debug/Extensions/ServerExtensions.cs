@@ -15,7 +15,6 @@ using System.Text.Json.Serialization;
 namespace DotNet.Meteor.Debug.Extensions;
 
 public static class ServerExtensions {
-    private static bool isAndroidAssembliesExtracted;
     public static DebuggerSessionOptions DefaultDebuggerOptions { get; } = new DebuggerSessionOptions {
         EvaluationOptions = new EvaluationOptions {
             EvaluationTimeout = 1000,
@@ -39,16 +38,7 @@ public static class ServerExtensions {
         PropertyNameCaseInsensitive = true,
     };
 
-    public static int FindFreePort() {
-        TcpListener? listener = null;
-        try {
-            listener = new TcpListener(IPAddress.Loopback, 0);
-            listener.Start();
-            return ((IPEndPoint)listener.LocalEndpoint).Port;
-        } finally {
-            listener?.Stop();
-        }
-    }
+
     public static bool TryDeleteFile(string path) {
         if (File.Exists(path))
             File.Delete(path);
@@ -63,13 +53,11 @@ public static class ServerExtensions {
             : frame.SourceLocation.FileName;
         return Math.Abs(key.GetHashCode());
     }
-    public static string ExtractAndroidAssemblies(string assemblyPath) {
-        var targetDirectory = Path.GetDirectoryName(assemblyPath)!;
-        if (isAndroidAssembliesExtracted)
-            return targetDirectory;
+    public static string ExtractAndroidAssemblies(string programPath) {
+        var targetDirectory = Path.GetDirectoryName(programPath)!;
 
         try {
-            using var archive = new ZipArchive(File.OpenRead(assemblyPath));
+            using var archive = new ZipArchive(File.OpenRead(programPath));
             var assembliesEntry = archive.Entries.Where(entry => entry.FullName.StartsWith("assemblies", StringComparison.OrdinalIgnoreCase));
             if (!assembliesEntry.Any()) {
                 // For net9+ the assemblies are not in the assemblies folder
@@ -90,7 +78,6 @@ public static class ServerExtensions {
                 using var stream = entry.Open();
                 stream.CopyTo(fileStream);
             }
-            isAndroidAssembliesExtracted = true;
             return targetDirectory;
         } catch (Exception ex) {
             DebuggerLoggingService.CustomLogger.LogError(ex.Message, ex);
@@ -193,10 +180,3 @@ public static class ServerExtensions {
     }
 }
 
-public class HotReloadRequest : DebugProtocol.DebugRequest<HotReloadArguments> {
-    public HotReloadRequest() : base("hotReload") {}
-}
-public class HotReloadResponse : DebugProtocol.ResponseBody {}
-public class HotReloadArguments {
-    public string? FilePath { get; set; }
-}

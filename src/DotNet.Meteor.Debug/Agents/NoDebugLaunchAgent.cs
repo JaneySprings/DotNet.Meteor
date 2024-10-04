@@ -1,8 +1,9 @@
 using DotNet.Meteor.Debug.Extensions;
-using DotNet.Meteor.Debug.Sdk;
-using DotNet.Meteor.Processes;
 using DotNet.Meteor.Common;
 using Mono.Debugging.Soft;
+using DotNet.Meteor.Common.Processes;
+using DotNet.Meteor.Common.Apple;
+using DotNet.Meteor.Common.Android;
 
 namespace DotNet.Meteor.Debug;
 
@@ -22,18 +23,18 @@ public class NoDebugLaunchAgent : BaseLaunchAgent {
 
     private void LaunchAppleMobile(IProcessLogger logger) {
         if (Configuration.Device.IsEmulator) {
-            var appProcess = MonoLaunch.DebugSim(Configuration.Device.Serial, Configuration.ProgramPath, Configuration.DebugPort, logger);
+            var appProcess = MonoLauncher.DebugSim(Configuration.Device.Serial, Configuration.ProgramPath, Configuration.DebugPort, logger);
             Disposables.Add(() => appProcess.Terminate());
         } else {
-            var hotReloadPortForwarding = MonoLaunch.TcpTunnel(Configuration.Device.Serial, Configuration.ReloadHostPort, logger);
-            MonoLaunch.InstallDev(Configuration.Device.Serial, Configuration.ProgramPath, logger);
-            var appProcess = MonoLaunch.DebugDev(Configuration.Device.Serial, Configuration.ProgramPath, Configuration.DebugPort, logger);
+            var hotReloadPortForwarding = MonoLauncher.TcpTunnel(Configuration.Device.Serial, Configuration.ReloadHostPort, logger);
+            MonoLauncher.InstallDev(Configuration.Device.Serial, Configuration.ProgramPath, logger);
+            var appProcess = MonoLauncher.DebugDev(Configuration.Device.Serial, Configuration.ProgramPath, Configuration.DebugPort, logger);
             Disposables.Add(() => appProcess.Terminate());
             Disposables.Add(() => hotReloadPortForwarding.Terminate());
         }
     }
     private void LaunchMacCatalyst(IProcessLogger logger) {
-        var tool = AppleSdk.OpenTool();
+        var tool = AppleSdkLocator.OpenTool();
         var processRunner = new ProcessRunner(tool, new ProcessArgumentBuilder().AppendQuoted(Configuration.ProgramPath));
         var result = processRunner.WaitForExit();
 
@@ -50,17 +51,17 @@ public class NoDebugLaunchAgent : BaseLaunchAgent {
         if (Configuration.Device.IsEmulator)
             Configuration.Device.Serial = AndroidEmulator.Run(Configuration.Device.Name).Serial;
 
-        DeviceBridge.Forward(Configuration.Device.Serial, Configuration.ReloadHostPort);
-        Disposables.Add(() => DeviceBridge.RemoveForward(Configuration.Device.Serial));
+        AndroidDebugBridge.Forward(Configuration.Device.Serial, Configuration.ReloadHostPort);
+        Disposables.Add(() => AndroidDebugBridge.RemoveForward(Configuration.Device.Serial));
 
         if (Configuration.UninstallApp)
-            DeviceBridge.Uninstall(Configuration.Device.Serial, applicationId, logger);
+            AndroidDebugBridge.Uninstall(Configuration.Device.Serial, applicationId, logger);
 
-        DeviceBridge.Install(Configuration.Device.Serial, Configuration.ProgramPath, logger);
-        DeviceBridge.Launch(Configuration.Device.Serial, applicationId, logger);
-        DeviceBridge.Flush(Configuration.Device.Serial);
+        AndroidDebugBridge.Install(Configuration.Device.Serial, Configuration.ProgramPath, logger);
+        AndroidDebugBridge.Launch(Configuration.Device.Serial, applicationId, logger);
+        AndroidDebugBridge.Flush(Configuration.Device.Serial);
 
-        var logcatProcess = DeviceBridge.Logcat(Configuration.Device.Serial, logger);
+        var logcatProcess = AndroidDebugBridge.Logcat(Configuration.Device.Serial, logger);
         Disposables.Add(() => logcatProcess.Terminate());
     }
 }

@@ -1,7 +1,7 @@
 using DotNet.Meteor.Common;
-using DotNet.Meteor.Workspace.Apple;
-using DotNet.Meteor.Workspace.Android;
-using DotNet.Meteor.Workspace.Windows;
+using DotNet.Meteor.Common.Android;
+using DotNet.Meteor.Common.Apple;
+using DotNet.Meteor.Common.Windows;
 
 namespace DotNet.Meteor.Workspace;
 
@@ -12,29 +12,29 @@ public static class DeviceProvider {
 
         try {
             if (RuntimeSystem.IsWindows) {
-                devices.Add(WindowsTool.WindowsDevice());
+                devices.Add(WindowsDeviceTool.WindowsDevice());
                 debugHandler?.Invoke("Windows device added.");
                 //TODO: devices.Add(IDeviceTool.Info());
             }
         } catch (Exception e) { errorHandler?.Invoke(e); }
 
         try {
-            devices.AddRange(AndroidTool.PhysicalDevices().OrderBy(x => x.Name));
+            devices.AddRange(AndroidDeviceTool.PhysicalDevices().OrderBy(x => x.Name));
             debugHandler?.Invoke("Android physical devices added.");
 
-            devices.AddRange(AndroidTool.VirtualDevices().OrderBy(x => !x.IsRunning).ThenBy(x => x.Name));
+            devices.AddRange(AndroidDeviceTool.VirtualDevices().OrderBy(x => !x.IsRunning).ThenBy(x => x.Name));
             debugHandler?.Invoke("Android virtual devices added.");
         } catch (Exception e) { errorHandler?.Invoke(e); }
 
         try {
             if (RuntimeSystem.IsMacOS) {
-                devices.AddRange(AppleTool.MacintoshDevices());
+                devices.AddRange(AppleDeviceTool.MacintoshDevices());
                 debugHandler?.Invoke("MacOS devices added.");
 
-                devices.AddRange(AppleTool.PhysicalDevices().OrderBy(x => x.Name));
+                devices.AddRange(AppleDeviceTool.PhysicalDevices().OrderBy(x => x.Name));
                 debugHandler?.Invoke("Apple physical devices added.");
 
-                devices.AddRange(AppleTool.VirtualDevices().OrderBy(x => !x.IsRunning).ThenBy(x => x.Name));
+                devices.AddRange(AppleDeviceTool.VirtualDevices().OrderBy(x => !x.IsRunning).ThenBy(x => x.Name));
                 debugHandler?.Invoke("Apple virtual devices added.");
             }
         } catch (Exception e) { errorHandler?.Invoke(e); }

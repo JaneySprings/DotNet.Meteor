@@ -1,75 +1,73 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
+﻿using System.Diagnostics;
 
-namespace DotNet.Meteor.Processes {
-    public class ProcessRunner {
-        private List<string> standardOutput;
-        private List<string> standardError;
-        private readonly Process process;
+namespace DotNet.Meteor.Common.Processes;
 
-        public ProcessRunner(FileInfo executable, ProcessArgumentBuilder builder = null, IProcessLogger logger = null) {
-            process = new Process();
-            process.StartInfo.Arguments = builder?.ToString();
-            process.StartInfo.FileName = executable.FullName;
-            process.StartInfo.WorkingDirectory = executable.DirectoryName;
+public class ProcessRunner {
+    private List<string> standardOutput = null!;
+    private List<string> standardError = null!;
+    private readonly Process process;
 
-            SetupProcessLogging(logger);
-        }
-        public ProcessRunner(string command, ProcessArgumentBuilder builder = null) {
-            process = new Process();
-            process.StartInfo.Arguments = builder?.ToString();
-            process.StartInfo.FileName = command;
+    public ProcessRunner(FileInfo executable, ProcessArgumentBuilder? builder = null, IProcessLogger? logger = null) {
+        process = new Process();
+        process.StartInfo.Arguments = builder?.ToString();
+        process.StartInfo.FileName = executable.FullName;
+        process.StartInfo.WorkingDirectory = executable.DirectoryName;
 
-            SetupProcessLogging(null);
-        }
+        SetupProcessLogging(logger);
+    }
+    public ProcessRunner(string command, ProcessArgumentBuilder? builder = null) {
+        process = new Process();
+        process.StartInfo.Arguments = builder?.ToString();
+        process.StartInfo.FileName = command;
 
-        private void SetupProcessLogging(IProcessLogger logger = null) {
-            standardOutput = new List<string>();
-            standardError = new List<string>();
-            process.StartInfo.CreateNoWindow = true;
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.RedirectStandardOutput = true;
-            process.StartInfo.RedirectStandardError = true;
-            process.StartInfo.RedirectStandardInput = true;
-            process.OutputDataReceived += (s, e) => {
-                if (e.Data != null) {
-                    if (logger != null)
-                        logger.OnOutputDataReceived(e.Data);
-                    else standardOutput.Add(e.Data);
-                }
-            };
-            process.ErrorDataReceived += (s, e) => {
-                if (e.Data != null) {
-                    if (logger != null)
-                        logger.OnErrorDataReceived(e.Data);
-                    else standardError.Add(e.Data);
-                }
-            };
-        }
+        SetupProcessLogging(null);
+    }
 
-        public void SetEnvironmentVariable(string key, string value) {
-            process.StartInfo.EnvironmentVariables[key] = value;
-        }
+    private void SetupProcessLogging(IProcessLogger? logger = null) {
+        standardOutput = new List<string>();
+        standardError = new List<string>();
+        process.StartInfo.CreateNoWindow = true;
+        process.StartInfo.UseShellExecute = false;
+        process.StartInfo.RedirectStandardOutput = true;
+        process.StartInfo.RedirectStandardError = true;
+        process.StartInfo.RedirectStandardInput = true;
+        process.OutputDataReceived += (s, e) => {
+            if (e.Data != null) {
+                if (logger != null)
+                    logger.OnOutputDataReceived(e.Data);
+                else standardOutput.Add(e.Data);
+            }
+        };
+        process.ErrorDataReceived += (s, e) => {
+            if (e.Data != null) {
+                if (logger != null)
+                    logger.OnErrorDataReceived(e.Data);
+                else standardError.Add(e.Data);
+            }
+        };
+    }
 
-        public void Kill() {
-            process?.Kill();
-        }
-        public Process Start() {
-            process.Start();
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
-            return process;
-        }
+    public void SetEnvironmentVariable(string key, string value) {
+        process.StartInfo.EnvironmentVariables[key] = value;
+    }
 
-        public ProcessResult WaitForExit() {
-            Start();
-            process.WaitForExit();
+    public void Kill() {
+        process?.Kill();
+    }
+    public Process Start() {
+        process.Start();
+        process.BeginOutputReadLine();
+        process.BeginErrorReadLine();
+        return process;
+    }
 
-            var exitCode = process.ExitCode;
-            process.Close();
+    public ProcessResult WaitForExit() {
+        Start();
+        process.WaitForExit();
 
-            return new ProcessResult(standardOutput, standardError, exitCode);
-        }
+        var exitCode = process.ExitCode;
+        process.Close();
+
+        return new ProcessResult(standardOutput, standardError, exitCode);
     }
 }

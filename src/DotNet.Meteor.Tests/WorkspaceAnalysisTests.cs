@@ -22,6 +22,8 @@ public class WorkspaceAnalysisTests: TestFixture {
         Assert.Equal(ProjectName, actual.Name);
         Assert.Equal(projectPath, actual.Path);
         Assert.Equal("net7.0-android", string.Join(',', actual.Frameworks));
+        Assert.Equal(2, actual.Configurations.Count());
+        Assert.Equal("Debug,Release", string.Join(',', actual.Configurations));
         DeleteMockData();
     }
 
@@ -315,6 +317,70 @@ public class WorkspaceAnalysisTests: TestFixture {
         Assertion.CollectionsAreEqual(actual.Frameworks, new List<string>() {
             "net8.0-ios"
         });
+        DeleteMockData();
+    }
+
+    [Fact]
+    public void CustomConfigurationsTest() {
+        var projectPath = CreateMockProject(@"
+        <Project Sdk=""Microsoft.NET.Sdk"">
+            <PropertyGroup>
+                <OutputType>Exe</OutputType>
+                <UseMaui>true</UseMaui>
+                <TargetFramework>net7.0-android</TargetFramework>
+                <Configurations>Debug;Release;Custom</Configurations>
+            </PropertyGroup>
+        </Project>
+        ");
+        var actual = WorkspaceAnalyzer.AnalyzeProject(projectPath);
+
+        Assert.NotNull(actual);
+        Assert.Equal(ProjectName, actual.Name);
+        Assert.Equal(projectPath, actual.Path);
+        Assert.Equal(3, actual.Configurations.Count());
+        Assert.Equal("Custom,Debug,Release", string.Join(',', actual.Configurations));
+        DeleteMockData();
+    }
+    [Fact]
+    public void CustomConfigurations2Test() {
+        var projectPath = CreateMockProject(@"
+        <Project Sdk=""Microsoft.NET.Sdk"">
+            <PropertyGroup>
+                <OutputType>Exe</OutputType>
+                <UseMaui>true</UseMaui>
+                <TargetFramework>net7.0-android</TargetFramework>
+                <Configurations>Custom</Configurations>
+            </PropertyGroup>
+        </Project>
+        ");
+        var actual = WorkspaceAnalyzer.AnalyzeProject(projectPath);
+
+        Assert.NotNull(actual);
+        Assert.Equal(ProjectName, actual.Name);
+        Assert.Equal(projectPath, actual.Path);
+        Assert.Equal(3, actual.Configurations.Count());
+        Assert.Equal("Custom,Debug,Release", string.Join(',', actual.Configurations));
+        DeleteMockData();
+    }
+    [Fact]
+    public void CustomConfigurations3Test() {
+        var projectPath = CreateMockProject(@"
+        <Project Sdk=""Microsoft.NET.Sdk"">
+            <PropertyGroup>
+                <OutputType>Exe</OutputType>
+                <UseMaui>true</UseMaui>
+                <TargetFramework>net7.0-android</TargetFramework>
+                <Configurations></Configurations>
+            </PropertyGroup>
+        </Project>
+        ");
+        var actual = WorkspaceAnalyzer.AnalyzeProject(projectPath);
+
+        Assert.NotNull(actual);
+        Assert.Equal(ProjectName, actual.Name);
+        Assert.Equal(projectPath, actual.Path);
+        Assert.Equal(2, actual.Configurations.Count());
+        Assert.Equal("Debug,Release", string.Join(',', actual.Configurations));
         DeleteMockData();
     }
 }

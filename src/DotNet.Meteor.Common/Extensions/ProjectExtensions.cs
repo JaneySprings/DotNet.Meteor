@@ -1,11 +1,10 @@
-using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 
 namespace DotNet.Meteor.Common.Extensions;
 
 public static class ProjectExtensions {
-    public static string EvaluateProperty(this Project project, string name, string defaultValue = null) {
+    public static string? EvaluateProperty(this Project project, string name, string? defaultValue = null) {
         var propertyMatches = project.GetPropertyMatches(project.Path, name);
         if (propertyMatches == null)
             return defaultValue;
@@ -17,7 +16,7 @@ public static class ProjectExtensions {
         return propertyValue;
     }
 
-    private static MatchCollection GetPropertyMatches(this Project project, string projectPath, string propertyName, bool isEndPoint = false) {
+    private static MatchCollection? GetPropertyMatches(this Project project, string projectPath, string propertyName, bool isEndPoint = false) {
         if (!File.Exists(projectPath))
             return null;
 
@@ -29,7 +28,7 @@ public static class ProjectExtensions {
             return propertyMatch;
         var importRegex = new Regex(@"<Import\s+Project\s*=\s*""(.*?)""");
         /* Find in imported project */
-        foreach(Match importMatch in importRegex.Matches(content)) {
+        foreach (Match importMatch in importRegex.Matches(content)) {
             var importedProjectPath = ResolveImportPath(projectPath, importMatch.Groups[1].Value);
             if (!File.Exists(importedProjectPath))
                 return null;
@@ -72,7 +71,7 @@ public static class ProjectExtensions {
         }
         return resultSequence.ToString();
     }
-    private static string GetDirectoryPropsPath(string workspacePath) {
+    private static string? GetDirectoryPropsPath(string workspacePath) {
         var propFiles = Directory.GetFiles(workspacePath, "Directory.Build.props", SearchOption.TopDirectoryOnly);
         if (propFiles.Length > 0)
             return propFiles[0];
@@ -84,11 +83,19 @@ public static class ProjectExtensions {
         return GetDirectoryPropsPath(parentDirectory.FullName);
     }
     private static string ResolveImportPath(string filePath, string importPath) {
-        var thisFileDirectory = Path.GetDirectoryName(filePath);
+        var thisFileDirectory = Path.GetDirectoryName(filePath)!;
         var importFilePath = importPath.Replace("$(MSBuildThisFileDirectory)", thisFileDirectory + Path.DirectorySeparatorChar);
         if (Path.IsPathRooted(importFilePath))
             return Path.GetFullPath(importFilePath).ToPlatformPath();
 
         return Path.GetFullPath(Path.Combine(thisFileDirectory, importFilePath)).ToPlatformPath();
+    }
+
+    public static string ToPlatformPath(this string path) {
+        return path
+            .Replace('\\', System.IO.Path.DirectorySeparatorChar)
+            .Replace('/', System.IO.Path.DirectorySeparatorChar)
+            .Replace("\\\\", $"{System.IO.Path.DirectorySeparatorChar}")
+            .Replace("//", $"{System.IO.Path.DirectorySeparatorChar}");
     }
 }

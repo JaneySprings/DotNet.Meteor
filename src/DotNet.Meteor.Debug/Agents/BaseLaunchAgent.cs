@@ -1,5 +1,4 @@
-using DotNet.Meteor.HotReload;
-using DotNet.Meteor.Processes;
+using DotNet.Meteor.Common.Processes;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 using Mono.Debugging.Soft;
 using DebuggerLoggingService = Mono.Debugging.Client.DebuggerLoggingService;
@@ -12,29 +11,18 @@ public abstract class BaseLaunchAgent {
 
     protected List<Action> Disposables { get; init; }
     protected LaunchConfiguration Configuration { get; init; }
-    protected HotReloadClient HotReloadClient { get; init; }
 
     protected virtual string ProcessedCommand => string.Empty;
 
     protected BaseLaunchAgent(LaunchConfiguration configuration) {
         Disposables = new List<Action>();
         Configuration = configuration;
-
-        HotReloadClient = new HotReloadClient(configuration.ReloadHostPort);
-        Disposables.Add(() => HotReloadClient.Close());
     }
 
     public abstract void Connect(SoftDebuggerSession session);
     public abstract void Launch(IProcessLogger logger);
     public virtual void HandleCommand(string command, string args, IProcessLogger logger) { }
 
-    public virtual void SendHotReloadNotification(string? filePath, IProcessLogger? logger = null) {
-        try {
-            HotReloadClient.SendNotification(filePath, logger);
-        } catch (Exception ex) {
-            logger?.OnErrorDataReceived($"[HotReload]: {ex.Message}");
-        }
-    }
     public void HandleCommand(string command, IProcessLogger logger) {
         if (string.IsNullOrEmpty(ProcessedCommand) || !command.StartsWith($"{CommandPrefix}{ProcessedCommand}", StringComparison.OrdinalIgnoreCase))
             return;

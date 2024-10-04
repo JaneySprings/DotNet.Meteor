@@ -1,8 +1,7 @@
 using System.Diagnostics;
-using DotNet.Meteor.Processes;
-using DotNet.Meteor.Common;
+using DotNet.Meteor.Common.Processes;
 
-namespace DotNet.Meteor.Debug.Sdk;
+namespace DotNet.Meteor.Common.Android;
 
 public static class AndroidEmulator {
     private const int AppearingRetryCount = 120; //seconds
@@ -12,7 +11,7 @@ public static class AndroidEmulator {
         if (rSerial != null)
             return new StartResult(rSerial, null);
 
-        var emulator = AndroidSdk.EmulatorTool();
+        var emulator = AndroidSdkLocator.EmulatorTool();
         var runner = new ProcessRunner(emulator, new ProcessArgumentBuilder()
             .Append("-avd")
             .Append(name));
@@ -23,24 +22,23 @@ public static class AndroidEmulator {
         return new StartResult(serial, process);
     }
 
-    public static string WaitForBoot() {
+    private static string WaitForBoot() {
         string? serial = WaitForSerial();
 
         if (serial == null)
-            throw new Exception("Emulator started but no serial number was found");
+            throw new InvalidOperationException("Emulator started but no serial number was found");
 
-        while (!DeviceBridge.Shell(serial, "getprop", "sys.boot_completed").Contains('1'))
+        while (!AndroidDebugBridge.Shell(serial, "getprop", "sys.boot_completed").Contains('1'))
             Thread.Sleep(1000);
 
         return serial;
     }
-
     private static string? WaitForSerial() {
-        var currentState = DeviceBridge.Devices();
+        var currentState = AndroidDebugBridge.Devices();
 
         for (int i = 0; i < AppearingRetryCount; i++) {
             Thread.Sleep(1000);
-            var newState = DeviceBridge.Devices();
+            var newState = AndroidDebugBridge.Devices();
 
             if (newState.Count > currentState.Count) {
                 var newSerial = newState.Find(n => !currentState.Any(o => n.Equals(o)));
@@ -50,10 +48,9 @@ public static class AndroidEmulator {
         }
         return null;
     }
-
     private static string? SerialIfRunning(string avdName) {
-        var serials = DeviceBridge.Devices().Where(it => it.StartsWith("emulator-"));
-        return serials.FirstOrDefault(it => DeviceBridge.EmuName(it) == avdName);
+        var serials = AndroidDebugBridge.Devices().Where(it => it.StartsWith("emulator-"));
+        return serials.FirstOrDefault(it => AndroidDebugBridge.EmuName(it) == avdName);
     }
 
     public class StartResult {

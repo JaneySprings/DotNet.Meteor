@@ -3,16 +3,16 @@ import { InteropController } from './interopController';
 import { StatusBarController } from "./statusbarController";
 import { Project } from '../models/project';
 import { Device } from '../models/device';
-import { Target } from '../models/target';
 import * as res from '../resources/constants';
 import * as path from 'path';
 
 export class ConfigurationController {
     public static androidSdkDirectory: string | undefined;
+    public static noDebug: boolean | undefined;
     public static profiler: string | undefined;
     public static project: Project | undefined;
     public static device: Device | undefined;
-    public static target: Target | undefined;
+    public static configuration: string | undefined;
 
     public static activate(context: ExtensionContext) {
         ConfigurationController.androidSdkDirectory = InteropController.getAndroidSdk();
@@ -32,12 +32,16 @@ export class ConfigurationController {
             window.showErrorMessage(res.messageNoDeviceFound, { modal: true });
             return false;
         }
-        if (!StatusBarController.devices.some(it => it.name === ConfigurationController.device?.name)) {
-            window.showErrorMessage(res.messageDeviceNotExists, { modal: true });
-            return false;
-        }
         if (!ConfigurationController.getTargetFramework()) {
             window.showErrorMessage(res.messageNoFrameworkFound, { modal: true });
+            return false;
+        }
+        if (!ConfigurationController.noDebug && ConfigurationController.profiler) {
+			window.showErrorMessage(res.messageDebugWithProfilerNotSupported, { modal: true });
+			return false;
+		}
+        if (!StatusBarController.devices.some(it => it.name === ConfigurationController.device?.name)) {
+            window.showErrorMessage(res.messageDeviceNotExists, { modal: true });
             return false;
         }
 
@@ -104,7 +108,7 @@ export class ConfigurationController {
     public static getSettingOrDefault<TResult>(id: string): TResult | undefined {
         return workspace.getConfiguration(res.configId).get(id);
     }
-    public static getProgramPath(project: Project, configuration: Target, device: Device): string | undefined {
+    public static getProgramPath(project: Project, configuration: string, device: Device): string | undefined {
         const targetPath = InteropController.getPropertyValue('TargetPath', project, configuration, device);
         if (targetPath === undefined)
             return undefined;
@@ -115,13 +119,11 @@ export class ConfigurationController {
             if (packageName !== undefined)
                 return path.join(outDir, packageName + '-Signed.apk');
         }
-
         if (ConfigurationController.isWindows()) {
             const targetDirectory = path.dirname(targetPath);
             const targetFile = path.basename(targetPath, '.dll');
             return path.join(targetDirectory, targetFile + '.exe');
         }
-    
         if (ConfigurationController.isAppleMobile() || ConfigurationController.isMacCatalyst()) {
             const outDir = path.dirname(targetPath);
             const bundleName = InteropController.getPropertyValue('_AppBundleName', project, configuration, device);
@@ -130,5 +132,15 @@ export class ConfigurationController {
         }
 
         return undefined;
+    }
+
+    public static async activateAndroidEmulator(): Promise<void> {
+        if (!ConfigurationController.isAndroid() || ConfigurationController.device === undefined)
+            return;
+        if (!ConfigurationController.device.is_emulator || ConfigurationController.device.is_running)
+            return;
+
+        ConfigurationController.device.serial = await InteropController.runEmulator(ConfigurationController.device.name!);
+        ConfigurationController.device.is_running = ConfigurationController.device.serial !== undefined;
     }
 } 

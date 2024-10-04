@@ -1,8 +1,6 @@
-using DotNet.Meteor.Common;
+namespace DotNet.Meteor.Common.Windows;
 
-namespace DotNet.Meteor.Workspace.Windows;
-
-public static class WindowsTool {
+public static class WindowsDeviceTool {
     public static DeviceData WindowsDevice() {
         string version = Environment.OSVersion.VersionString;
         string osVersion = version.Split(' ').Last();
