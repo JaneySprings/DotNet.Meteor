@@ -19,10 +19,6 @@ export class ProcessArgumentBuilder {
         args.forEach(a => this.arguments.push(a));
         return this;
     }
-    public appendQuoted(...args: string[]): ProcessArgumentBuilder {
-        args.forEach(a => this.arguments.push(`"${a}"`));
-        return this;
-    }
     public conditional(arg: string, condition: () => any): ProcessArgumentBuilder {
         if (condition())
             this.arguments.push(arg);
@@ -42,6 +38,8 @@ export class ProcessArgumentBuilder {
         return this;
     }
     public build(): string {
-        return `${this.command} ${this.arguments.join(" ")}`;
+        const command = `\"${this.getCommand()}\"`;
+        const args = this.getArguments().map(arg => `\"${arg}\"`).join(' ');
+        return `${command} ${args}`;
     }
 }

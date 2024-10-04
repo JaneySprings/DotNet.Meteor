@@ -27,10 +27,11 @@ export const taskProblemMatcherId = "dotnet-meteor.problemMatcher";
 
 export const debuggerMeteorId = "dotnet-meteor.debugger";
 export const debuggerMeteorTitle = ".NET Meteor Debugger";
+export const debuggerVsdbgId = "coreclr";
 
 export const extendedViewIdModules = "dotnet-meteor.modulesView";
 
-export const messageDebugNotSupported = "Unable to debug an application when profiler is enabled. Run the application without debugger.";
+export const messageDebugWithProfilerNotSupported = "Unable to debug an application when profiler is enabled. Run the application without debugger.";
 export const messageDebugNotSupportedWin = "Mono Debugger cannot be attached to WinUI applications. You can run the application without debugger.";
 export const messageDeviceNotExists = "Selected device does not exist anymore. Make sure that the chosen device is connected to your machine.";
 export const messageNoFrameworkFound = "Supported framework not found. Make sure you have selected a correct device.";

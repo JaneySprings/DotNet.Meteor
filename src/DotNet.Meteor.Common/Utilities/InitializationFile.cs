@@ -1,5 +1,4 @@
-
-namespace DotNet.Meteor.Workspace.Utilities;
+namespace DotNet.Meteor.Common.Utilities;
 
 public class IniFile {
     private string[] content;

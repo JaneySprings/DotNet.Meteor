@@ -11,7 +11,7 @@ export class ProcessRunner {
         return result.stdout.toString().trimEnd();
     }
     public static runAsync<TModel>(builder: ProcessArgumentBuilder): Promise<TModel> {
-        return new Promise<TModel>((resolve, reject) => {
+        return new Promise<TModel>((resolve, reject) => { 
             exec(builder.build(), (error, stdout, stderr) => {
                 if (error) {
                     console.error(stderr);

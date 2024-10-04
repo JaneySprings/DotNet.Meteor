@@ -4,7 +4,6 @@ import { Project } from '../models/project';
 import { Device } from '../models/device';
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { Target } from '../models/target';
 
 
 export class InteropController {
@@ -15,6 +14,11 @@ export class InteropController {
         InteropController.workspaceToolPath = path.join(context.extensionPath, "extension", "bin", "Workspace", "DotNet.Meteor.Workspace" + executableExtension);
     }
 
+    public static async runEmulator(emuName: string): Promise<string> {
+        return await ProcessRunner.runAsync<string>(new ProcessArgumentBuilder(InteropController.workspaceToolPath)
+            .append("--run-emulator")
+            .append(emuName));
+    }
     public static async getDevices(): Promise<Device[]> {
         return await ProcessRunner.runAsync<Device[]>(new ProcessArgumentBuilder(InteropController.workspaceToolPath)
             .append("--all-devices"));
@@ -22,18 +26,18 @@ export class InteropController {
     public static async getProjects(folders: string[]): Promise<Project[]> {
         return await ProcessRunner.runAsync<Project[]>(new ProcessArgumentBuilder(InteropController.workspaceToolPath)
             .append("--analyze-workspace")
-            .appendQuoted(...folders));
+            .append(...folders));
     }
     public static getAndroidSdk(): string | undefined {
         return ProcessRunner.runSync(new ProcessArgumentBuilder(InteropController.workspaceToolPath)
             .append("--android-sdk-path"));
     }
-    public static getPropertyValue(propertyName: string, project: Project, configuration: Target, device: Device) : string | undefined {
+    public static getPropertyValue(propertyName: string, project: Project, configuration: string, device: Device) : string | undefined {
         const targetFramework = project.frameworks.find(it => it.includes(device.platform ?? 'undefined'));
         const runtimeIdentifier = device?.runtime_id;
 
         return ProcessRunner.runSync(new ProcessArgumentBuilder("dotnet")
-            .append("msbuild").appendQuoted(project.path)
+            .append("msbuild").append(project.path)
             .append(`-getProperty:${propertyName}`)
             .conditional(`-p:Configuration=${configuration}`, () => configuration)
             .conditional(`-p:TargetFramework=${targetFramework}`, () => targetFramework)

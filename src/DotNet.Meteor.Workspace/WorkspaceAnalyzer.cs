@@ -11,7 +11,7 @@ public static class WorkspaceAnalyzer {
             return projects;
         }
 
-        foreach (var projectFile in Directory.GetFiles(workspacePath, "*.*proj", SearchOption.AllDirectories)) {
+        foreach (var projectFile in Directory.EnumerateFiles(workspacePath, "*.*proj", SearchOption.AllDirectories)) {
             var project = AnalyzeProject(projectFile, callback);
             if (project == null)
                 continue;
@@ -30,8 +30,10 @@ public static class WorkspaceAnalyzer {
             return null;
         }
 
-        project.Frameworks = TargetFrameworks(project);
-        if (project.Frameworks?.Find(it => it.Contains("net", StringComparison.OrdinalIgnoreCase) && it.Contains('-')) == null) {
+        project.Configurations = GetConfigurations(project);
+        project.Frameworks = GetTargetFrameworks(project);
+
+        if (project.Frameworks?.FirstOrDefault(it => it.Contains("net", StringComparison.OrdinalIgnoreCase) && it.Contains('-')) == null) {
             callback?.Invoke($"Skipping project {project.Name} because it does not contain a valid target framework.");
             return null;
         }
@@ -39,7 +41,7 @@ public static class WorkspaceAnalyzer {
         return project;
     }
 
-    private static List<string> TargetFrameworks(Project project) {
+    private static IEnumerable<string> GetTargetFrameworks(Project project) {
         var frameworks = new List<string>();
 
         var singleFramework = project.EvaluateProperty("TargetFramework");
@@ -59,5 +61,17 @@ public static class WorkspaceAnalyzer {
         }
 
         return frameworks;
+    }
+    private static IEnumerable<string> GetConfigurations(Project project) {
+        var configurations = new List<string>();
+
+        var configurationsRaw = project.EvaluateProperty("Configurations", string.Empty) + ";Debug;Release";
+        foreach (var configuration in configurationsRaw.Split(';')) {
+            if (configurations.Contains(configuration) || string.IsNullOrEmpty(configuration))
+                continue;
+            configurations.Add(configuration);
+        }
+
+        return configurations.OrderBy(x => x).ToArray();
     }
 }

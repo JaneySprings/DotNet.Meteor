@@ -1,6 +1,7 @@
 using Xunit;
 using DotNet.Meteor.Common;
 using DotNet.Meteor.Common.Extensions;
+using DotNet.Meteor.Common.Android;
 
 namespace DotNet.Meteor.Tests;
 
@@ -8,7 +9,7 @@ public class OtherTests : TestFixture {
 
     [Fact]
     public void AndroidSdkDirectoryTests() {
-        var sdkLocation = AndroidSdk.SdkLocation();
+        var sdkLocation = AndroidSdkLocator.SdkLocation();
         Assert.NotNull(sdkLocation);
         Assert.True(Directory.Exists(sdkLocation));
     }

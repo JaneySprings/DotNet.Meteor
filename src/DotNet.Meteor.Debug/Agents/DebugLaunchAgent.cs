@@ -1,10 +1,11 @@
 using System.Net;
 using DotNet.Meteor.Debug.Extensions;
 using DotNet.Meteor.Debug.Sdb;
-using DotNet.Meteor.Debug.Sdk;
-using DotNet.Meteor.Processes;
 using DotNet.Meteor.Common;
 using Mono.Debugging.Soft;
+using DotNet.Meteor.Common.Processes;
+using DotNet.Meteor.Common.Apple;
+using DotNet.Meteor.Common.Android;
 
 namespace DotNet.Meteor.Debug;
 
@@ -21,7 +22,7 @@ public class DebugLaunchAgent : BaseLaunchAgent {
         ArgumentNullException.ThrowIfNull(startArguments, "Debugger connection arguments not implemented.");
 
         startInformation = new SoftDebuggerStartInfo(startArguments);
-        startInformation.SetAssemblies(configuration.GetApplicationAssembliesDirectory(), configuration.DebuggerSessionOptions);
+        startInformation.SetAssemblies(configuration.GetAssemblyPath(), configuration.DebuggerSessionOptions);
     }
     public override void Launch(IProcessLogger logger) {
         if (Configuration.Device.IsAndroid)
@@ -48,21 +49,21 @@ public class DebugLaunchAgent : BaseLaunchAgent {
         // }
 
         if (Configuration.Device.IsEmulator) {
-            var debugProcess = MonoLaunch.DebugSim(Configuration.Device.Serial, Configuration.ProgramPath, Configuration.DebugPort, logger);
+            var debugProcess = MonoLauncher.DebugSim(Configuration.Device.Serial, Configuration.ProgramPath, Configuration.DebugPort, logger);
             Disposables.Add(() => debugProcess.Terminate());
         } else {
-            var debugPortForwarding = MonoLaunch.TcpTunnel(Configuration.Device.Serial, Configuration.DebugPort, logger);
-            var hotReloadPortForwarding = MonoLaunch.TcpTunnel(Configuration.Device.Serial, Configuration.ReloadHostPort, logger);
-            MonoLaunch.InstallDev(Configuration.Device.Serial, Configuration.ProgramPath, logger);
+            var debugPortForwarding = MonoLauncher.TcpTunnel(Configuration.Device.Serial, Configuration.DebugPort, logger);
+            var hotReloadPortForwarding = MonoLauncher.TcpTunnel(Configuration.Device.Serial, Configuration.ReloadHostPort, logger);
+            MonoLauncher.InstallDev(Configuration.Device.Serial, Configuration.ProgramPath, logger);
 
-            var debugProcess = MonoLaunch.DebugDev(Configuration.Device.Serial, Configuration.ProgramPath, Configuration.DebugPort, logger);
+            var debugProcess = MonoLauncher.DebugDev(Configuration.Device.Serial, Configuration.ProgramPath, Configuration.DebugPort, logger);
             Disposables.Add(() => debugProcess.Terminate());
             Disposables.Add(() => debugPortForwarding.Terminate());
             Disposables.Add(() => hotReloadPortForwarding.Terminate());
         }
     }
     private void LaunchMacCatalyst(IProcessLogger logger) {
-        var tool = AppleSdk.OpenTool();
+        var tool = AppleSdkLocator.OpenTool();
         var processRunner = new ProcessRunner(tool, new ProcessArgumentBuilder().AppendQuoted(Configuration.ProgramPath));
         processRunner.SetEnvironmentVariable("__XAMARIN_DEBUG_HOSTS__", "127.0.0.1");
         processRunner.SetEnvironmentVariable("__XAMARIN_DEBUG_PORT__", Configuration.DebugPort.ToString());
@@ -76,21 +77,21 @@ public class DebugLaunchAgent : BaseLaunchAgent {
         if (Configuration.Device.IsEmulator)
             Configuration.Device.Serial = AndroidEmulator.Run(Configuration.Device.Name).Serial;
 
-        DeviceBridge.Forward(Configuration.Device.Serial, Configuration.ReloadHostPort);
-        DeviceBridge.Forward(Configuration.Device.Serial, Configuration.DebugPort);
+        AndroidDebugBridge.Forward(Configuration.Device.Serial, Configuration.ReloadHostPort);
+        AndroidDebugBridge.Forward(Configuration.Device.Serial, Configuration.DebugPort);
 
         if (Configuration.UninstallApp)
-            DeviceBridge.Uninstall(Configuration.Device.Serial, applicationId, logger);
+            AndroidDebugBridge.Uninstall(Configuration.Device.Serial, applicationId, logger);
 
-        DeviceBridge.Install(Configuration.Device.Serial, Configuration.ProgramPath, logger);
-        DeviceBridge.Shell(Configuration.Device.Serial, "setprop", "debug.mono.connect", $"port={Configuration.DebugPort}");
-        DeviceBridge.Shell(Configuration.Device.Serial, "am", "set-debug-app", applicationId);
-        DeviceBridge.Launch(Configuration.Device.Serial, applicationId, logger);
-        DeviceBridge.Flush(Configuration.Device.Serial);
+        AndroidDebugBridge.Install(Configuration.Device.Serial, Configuration.ProgramPath, logger);
+        AndroidDebugBridge.Shell(Configuration.Device.Serial, "setprop", "debug.mono.connect", $"port={Configuration.DebugPort}");
+        AndroidDebugBridge.Shell(Configuration.Device.Serial, "am", "set-debug-app", applicationId);
+        AndroidDebugBridge.Launch(Configuration.Device.Serial, applicationId, logger);
+        AndroidDebugBridge.Flush(Configuration.Device.Serial);
 
-        var logcatProcess = DeviceBridge.Logcat(Configuration.Device.Serial, logger);
+        var logcatProcess = AndroidDebugBridge.Logcat(Configuration.Device.Serial, logger);
 
         Disposables.Add(() => logcatProcess.Terminate());
-        Disposables.Add(() => DeviceBridge.RemoveForward(Configuration.Device.Serial));
+        Disposables.Add(() => AndroidDebugBridge.RemoveForward(Configuration.Device.Serial));
     }
 }

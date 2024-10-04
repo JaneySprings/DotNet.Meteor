@@ -1,7 +1,7 @@
 using DotNet.Meteor.Common;
-using DotNet.Meteor.Workspace.Android;
-using DotNet.Meteor.Workspace.Apple;
-using DotNet.Meteor.Workspace.Windows;
+using DotNet.Meteor.Common.Android;
+using DotNet.Meteor.Common.Apple;
+using DotNet.Meteor.Common.Windows;
 using Xunit;
 
 namespace DotNet.Meteor.Tests;
@@ -15,7 +15,7 @@ public class DeviceProvidingTests: TestFixture {
             return;
 
         try {
-            var result = AndroidTool.PhysicalDevices();
+            var result = AndroidDeviceTool.PhysicalDevices();
             Assert.NotNull(result);
         } catch (FileNotFoundException e) {
             System.Diagnostics.Debug.WriteLine(e);
@@ -27,7 +27,7 @@ public class DeviceProvidingTests: TestFixture {
     public void AppleVirtualDeviceTest() {
         if (!RuntimeSystem.IsMacOS)
             return;
-        var result = AppleTool.VirtualDevices();
+        var result = AppleDeviceTool.VirtualDevices();
         Assert.NotNull(result);
         Assert.NotEmpty(result);
     }
@@ -36,7 +36,7 @@ public class DeviceProvidingTests: TestFixture {
     public void ApplePhysicalDeviceTest() {
         if (!RuntimeSystem.IsMacOS)
             return;
-        var result = AppleTool.PhysicalDevices();
+        var result = AppleDeviceTool.PhysicalDevices();
         Assert.NotNull(result);
     }
 
@@ -44,9 +44,9 @@ public class DeviceProvidingTests: TestFixture {
     public void AppleMacDeviceTest() {
         if (!RuntimeSystem.IsMacOS)
             return;
-        var result = AppleTool.MacintoshDevices();
+        var result = AppleDeviceTool.MacintoshDevices();
 
-        if (SystemProfiler.IsArch64()) Assert.Equal(2, result.Count);
+        if (RuntimeSystem.IsAarch64) Assert.Equal(2, result.Count);
         else Assert.Single(result);
     }
 
@@ -54,7 +54,7 @@ public class DeviceProvidingTests: TestFixture {
     public void WindowsDeviceTest() {
         if (!RuntimeSystem.IsWindows)
             return;
-        var result = WindowsTool.WindowsDevice();
+        var result = WindowsDeviceTool.WindowsDevice();
         Assert.NotNull(result);
     }
 }

@@ -1,5 +1,3 @@
-using System;
-
 namespace DotNet.Meteor.Common.Extensions;
 
 public static class StringExtensions {
@@ -12,7 +10,6 @@ public static class StringExtensions {
 
         return target;
     }
-
     public static string TrimEnd(this string target, string trimString) {
         if (string.IsNullOrEmpty(trimString))
             return target;
@@ -22,4 +19,12 @@ public static class StringExtensions {
 
         return target;
     }
+    public static bool ContainsInsensitive(this string? source, string value) {
+        return source?.IndexOf(value, StringComparison.OrdinalIgnoreCase) >= 0;
+    }
+    public static bool EqualsInsensitive(this string? source, string value) {
+        return source?.Equals(value, StringComparison.OrdinalIgnoreCase) == true;
+    }
+
+
 }

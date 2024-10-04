@@ -82,15 +82,6 @@
         "type": "dotnet-meteor.task",
         "required": [],
         "properties": {
-          "target": {
-            "type": "string",
-            "default": "build",
-            "enum": [
-              "build",
-              "publish"
-            ],
-            "description": "%task.meteor.description.target%"
-          },
           "args": {
             "type": "array",
             "description": "%task.meteor.description.args%",
@@ -202,7 +193,7 @@
         {
           "command": "dotnet-meteor.triggerHotReload",
           "group": "navigation2",
-          "when": "debugType == dotnet-meteor.debugger"
+          "when": "debugType == dotnet-meteor.debugger || debugType == coreclr"
         }
       ]
     },

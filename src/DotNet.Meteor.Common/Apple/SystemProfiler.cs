@@ -1,12 +1,11 @@
 using System.Text.RegularExpressions;
-using DotNet.Meteor.Processes;
-using DotNet.Meteor.Common;
+using DotNet.Meteor.Common.Processes;
 
-namespace DotNet.Meteor.Workspace.Apple;
+namespace DotNet.Meteor.Common.Apple;
 
 public static class SystemProfiler {
     public static List<DeviceData> PhysicalDevices() {
-        var profiler = AppleSdk.SystemProfilerTool();
+        var profiler = AppleSdkLocator.SystemProfilerTool();
         var devices = new List<DeviceData>();
         var regex = new Regex(@"(?<dev>iPhone|iPad):[^,]*?Version:\s+(?<ver>\d+.\d+)[^,]*?Serial\sNumber:\s+(?<id>\S+)");
 
@@ -15,7 +14,7 @@ public static class SystemProfiler {
             .WaitForExit();
 
         if (!result.Success)
-            throw new Exception(string.Join(Environment.NewLine, result.StandardError));
+            throw new InvalidOperationException(string.Join(Environment.NewLine, result.StandardError));
 
         var output = string.Join(Environment.NewLine, result.StandardOutput);
 
@@ -39,20 +38,5 @@ public static class SystemProfiler {
             });
         }
         return devices;
-    }
-
-    public static bool IsArch64() {
-        var profiler = AppleSdk.SystemProfilerTool();
-        ProcessResult result = new ProcessRunner(profiler, new ProcessArgumentBuilder()
-            .Append("SPHardwareDataType"))
-            .WaitForExit();
-
-        if (!result.Success)
-            throw new Exception(string.Join(Environment.NewLine, result.StandardError));
-
-        var output = string.Join(Environment.NewLine, result.StandardOutput);
-        var appleSilicon = new Regex(@"Chip: *(?<name>.+)").Match(output);
-
-        return appleSilicon.Success;
     }
 }

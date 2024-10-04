@@ -8,16 +8,20 @@ export class MonoDebugConfigurationProvider implements vscode.DebugConfiguration
 									config: DebugConfiguration, 
 									token?: vscode.CancellationToken): Promise<DebugConfiguration | undefined> {
 		
+		ConfigurationController.profiler = config.profilerMode;
+		ConfigurationController.noDebug = config.noDebug;
+		
 		if (!ConfigurationController.isActive())
 			return undefined;
+
+		// It adds a delay to the start of the debug session
+		// await StatusBarController.update();
+
 		if (!ConfigurationController.isValid())
 			return undefined;
 
-		ConfigurationController.profiler = config.profilerMode;
-		if (!config.noDebug && ConfigurationController.profiler) {
-			vscode.window.showErrorMessage(res.messageDebugNotSupported, { modal: true });
-			return undefined;
-		}
+		// Meteor can launch AVD before debugging
+		// await ConfigurationController.activateAndroidEmulator();
 
 		if (!config.type && !config.request && !config.name) {
 			config.preLaunchTask = `${res.extensionId}: ${res.taskDefinitionDefaultTargetCapitalized}`
@@ -25,25 +29,24 @@ export class MonoDebugConfigurationProvider implements vscode.DebugConfiguration
 			config.type = res.debuggerMeteorId;
 			config.request = 'launch';
 		}
-		
 		if (config.project === undefined)
 			config.project = ConfigurationController.project;
 		if (config.configuration === undefined)
-			config.configuration = ConfigurationController.target;
+			config.configuration = ConfigurationController.configuration;
 		if (config.device === undefined)
         	config.device = ConfigurationController.device;
 		if (config.program === undefined)
 			config.program = ConfigurationController.getProgramPath(config.project, config.configuration, config.device);
 
 		if (ConfigurationController.isWindows() && !ConfigurationController.profiler) {
-			config.type = 'coreclr';
+			config.type = res.debuggerVsdbgId;
 			config.project = undefined;
 			config.configuration = undefined;
 			config.device = undefined;
 			return config;
 		}
 
-		config.skipDebug = config.noDebug ?? false;
+		config.skipDebug = ConfigurationController.noDebug;
 		config.debuggingPort = ConfigurationController.getDebuggingPort();
 		config.uninstallApp = ConfigurationController.getUninstallAppOption();
 		config.reloadHost = ConfigurationController.getReloadHostPort();
