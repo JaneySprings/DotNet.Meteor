@@ -44,8 +44,8 @@ export class HotReload {
     private startAgent() {
         if (this.agent !== undefined)
             this.stopAgent();
-
-        const args = [`${ConfigurationController.getReloadHostPort()}`, 'universal'];
+        
+        const args = [ process.pid.toString(), ConfigurationController.getReloadHostPort().toString(), 'universal'];
         this.agent = spawn(HotReload.toolPath, args);
     }
     private stopAgent() {
