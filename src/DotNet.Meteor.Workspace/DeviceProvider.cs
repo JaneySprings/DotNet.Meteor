@@ -14,7 +14,11 @@ public static class DeviceProvider {
             if (RuntimeSystem.IsWindows) {
                 devices.Add(WindowsDeviceTool.WindowsDevice());
                 debugHandler?.Invoke("Windows device added.");
-                //TODO: devices.Add(IDeviceTool.Info());
+
+                if (AppleSdkLocator.IsITunesInstalled()) {
+                    devices.AddRange(IDeviceTool.Info());
+                    debugHandler?.Invoke("iOS device added.");
+                }
             }
         } catch (Exception e) { errorHandler?.Invoke(e); }
 

@@ -24,23 +24,25 @@ public static class IDeviceTool {
             .Append("--debug"), logger)
             .Start();
     }
-    public static DeviceData Info() {
+    public static IEnumerable<DeviceData> Info() {
         var tool = new FileInfo(Path.Combine(AppleSdkLocator.IDeviceLocation(), "ideviceinfo.exe"));
         var result = new ProcessRunner(tool).WaitForExit();
 
         if (!result.Success)
-            throw new InvalidOperationException(string.Join(Environment.NewLine, result.StandardError));
+            return Enumerable.Empty<DeviceData>();
 
-        return new DeviceData {
-            Name = FindValue(result.StandardOutput, "DeviceName"),
-            Serial = FindValue(result.StandardOutput, "UniqueDeviceID"),
-            OSVersion = "iOS " + FindValue(result.StandardOutput, "ProductVersion"),
-            RuntimeId = Runtimes.iOSArm64,
-            Detail = Details.iOSDevice,
-            Platform = Platforms.iOS,
-            IsEmulator = false,
-            IsRunning = true,
-            IsMobile = true
+        return new List<DeviceData> {
+            new DeviceData {
+                Name = FindValue(result.StandardOutput, "DeviceName"),
+                Serial = FindValue(result.StandardOutput, "UniqueDeviceID"),
+                OSVersion = "iOS " + FindValue(result.StandardOutput, "ProductVersion"),
+                RuntimeId = Runtimes.iOSArm64,
+                Detail = Details.iOSDevice,
+                Platform = Platforms.iOS,
+                IsEmulator = false,
+                IsRunning = true,
+                IsMobile = true
+            }
         };
     }
 
