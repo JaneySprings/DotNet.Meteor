@@ -123,7 +123,7 @@ public static class ServerExtensions {
         if (string.IsNullOrEmpty(json))
             return default;
 
-        return JsonSerializer.Deserialize<T>(json);
+        return JsonSerializer.Deserialize<T>(json, SerializerOptions);
     }
     public static DebugProtocol.CompletionItem ToCompletionItem(this CompletionItem item) {
         return new DebugProtocol.CompletionItem() {
