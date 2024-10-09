@@ -99,10 +99,6 @@ public static class MonoExtensions {
                     assemblySymbolsFilePath = SymbolServerExtensions.DownloadSourceSymbols(assemblyPath, assemblyDefinition.Name.Name, SymbolServerExtensions.NuGetSymbolServerAddress);
                 if (string.IsNullOrEmpty(assemblySymbolsFilePath))
                     DebuggerLoggingService.CustomLogger.LogMessage($"No symbols found for '{assemblyPath}'");
-                
-
-                if (options.EvaluationOptions.UseExternalTypeResolver)
-                    TypeResolverExtensions.RegisterTypes(assemblyDefinition.MainModule.Types);
 
                 if (!string.IsNullOrEmpty(assemblySymbolsFilePath))
                     assemblySymbolPathMap.Add(assemblyDefinition.Name.FullName, assemblySymbolsFilePath);
