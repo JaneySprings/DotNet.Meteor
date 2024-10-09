@@ -1,12 +1,12 @@
 import { ConfigurationController } from '../controllers/configurationController';
-import { WorkspaceFolder, DebugConfiguration } from 'vscode';
+import { TypeResolver } from '../features/typeResolver';
 import * as res from '../resources/constants';
 import * as vscode from 'vscode';
 
 export class MonoDebugConfigurationProvider implements vscode.DebugConfigurationProvider {
-	async resolveDebugConfiguration(folder: WorkspaceFolder | undefined, 
-									config: DebugConfiguration, 
-									token?: vscode.CancellationToken): Promise<DebugConfiguration | undefined> {
+	async resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, 
+									config: vscode.DebugConfiguration, 
+									token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration | undefined> {
 		
 		ConfigurationController.profiler = config.profilerMode;
 		ConfigurationController.noDebug = config.noDebug;
@@ -19,9 +19,6 @@ export class MonoDebugConfigurationProvider implements vscode.DebugConfiguration
 
 		if (!ConfigurationController.isValid())
 			return undefined;
-
-		// Meteor can launch AVD before debugging
-		// await ConfigurationController.activateAndroidEmulator();
 
 		if (!config.type && !config.request && !config.name) {
 			config.preLaunchTask = `${res.extensionId}: ${res.taskDefinitionDefaultTargetCapitalized}`
@@ -46,6 +43,7 @@ export class MonoDebugConfigurationProvider implements vscode.DebugConfiguration
 			return config;
 		}
 
+		config.transportId = TypeResolver.feature.transportId;
 		config.skipDebug = ConfigurationController.noDebug;
 		config.debuggingPort = ConfigurationController.getDebuggingPort();
 		config.uninstallApp = ConfigurationController.getUninstallAppOption();

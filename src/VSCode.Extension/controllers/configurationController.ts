@@ -133,14 +133,4 @@ export class ConfigurationController {
 
         return undefined;
     }
-
-    public static async activateAndroidEmulator(): Promise<void> {
-        if (!ConfigurationController.isAndroid() || ConfigurationController.device === undefined)
-            return;
-        if (!ConfigurationController.device.is_emulator || ConfigurationController.device.is_running)
-            return;
-
-        ConfigurationController.device.serial = await InteropController.runEmulator(ConfigurationController.device.name!);
-        ConfigurationController.device.is_running = ConfigurationController.device.serial !== undefined;
-    }
 } 

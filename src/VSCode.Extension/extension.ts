@@ -8,6 +8,7 @@ import { PublicExports } from './publicExports';
 import { ModulesView } from './features/modulesView';
 import { HotReload } from './features/hotReload';
 import { XamlServer } from './features/xamlServer';
+import { TypeResolver } from './features/typeResolver';
 import * as res from './resources/constants';
 import * as vscode from 'vscode';
 
@@ -27,6 +28,7 @@ export function activate(context: vscode.ExtensionContext): PublicExports | unde
 	ModulesView.feature.activate(context);
 	HotReload.feature.activate(context);
 	XamlServer.feature.activate(context);
+	TypeResolver.feature.activate(context);
 	
 	context.subscriptions.push(vscode.commands.registerCommand(res.commandIdSelectActiveProject, StatusBarController.showQuickPickProject));
 	context.subscriptions.push(vscode.commands.registerCommand(res.commandIdSelectActiveConfiguration, StatusBarController.showQuickPickConfiguration));
