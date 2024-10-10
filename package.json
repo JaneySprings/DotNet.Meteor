@@ -15,6 +15,9 @@
     "type": "git",
     "url": "https://github.com/JaneySprings/DotNet.Meteor.git"
   },
+  "sponsor": {
+    "url": "https://github.com/sponsors/JaneySprings"
+  },
   "categories": [
     "Debuggers"
   ],
