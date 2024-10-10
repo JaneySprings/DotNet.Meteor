@@ -58,25 +58,36 @@ public static class AppleSdkLocator {
         return Directory.GetParent(sdkLocation)?.FullName ?? string.Empty;
     }
     public static string IDeviceLocation() {
-        string dotnetPath = AppleSdkLocator.DotNetRootLocation();
-        string sdkPath = Path.Combine(dotnetPath, "packs", "Microsoft.iOS.Windows.Sdk");
-        DirectoryInfo? newestTool = null;
+        var ideviceDirectory = Environment.GetEnvironmentVariable("IDEVICE_DIR");
+        if (Directory.Exists(ideviceDirectory))
+            return ideviceDirectory;
 
-        foreach (string directory in Directory.GetDirectories(sdkPath)) {
-            string idevicePath = Path.Combine(directory, "tools", "msbuild", "iOS", "imobiledevice-x64");
+        var sdkPath = string.Empty;
+        var dotnetPacksPath = Path.Combine(AppleSdkLocator.DotNetRootLocation(), "packs");
+        var sdkPaths = Directory.GetDirectories(dotnetPacksPath, "Microsoft.iOS.Windows.Sdk.net*");
+        
+        if (sdkPaths.Length > 0)
+            sdkPath = sdkPaths.OrderByDescending(x => Path.GetFileName(x)).First();
+        if (string.IsNullOrEmpty(sdkPath))
+            sdkPath = Path.Combine(dotnetPacksPath, "Microsoft.iOS.Windows.Sdk");
+        if (!Directory.Exists(sdkPath))
+            throw new DirectoryNotFoundException("Could not find idevice tool");
 
-            if (Directory.Exists(idevicePath)) {
-                var tool = new DirectoryInfo(idevicePath);
+        var toolLocations = Directory.GetDirectories(sdkPath);
+        if (toolLocations.Length == 0)
+            throw new FileNotFoundException("Could not find idevice tool");
 
-                if (newestTool == null || tool.CreationTime > newestTool.CreationTime)
-                    newestTool = tool;
-            }
-        }
+        var latestToolDirectory = toolLocations.OrderByDescending(x => Path.GetFileName(x)).First();
+        return Path.Combine(latestToolDirectory, "tools", "msbuild", "iOS", "imobiledevice-x64");
+    }
+    public static bool IsITunesInstalled() {
+        if (!RuntimeSystem.IsWindows)
+            throw new PlatformNotSupportedException();
 
-        if (newestTool == null || !newestTool.Exists)
-            throw new DirectoryNotFoundException("imobiledevice-x64");
-
-        return newestTool.FullName;
+        if (!String.IsNullOrEmpty(Environment.GetEnvironmentVariable("ITUNES_CHECK_BYPASS")))
+            return true;
+        
+        return Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyMusic), "iTunes"));
     }
 
     public static FileInfo SystemProfilerTool() {

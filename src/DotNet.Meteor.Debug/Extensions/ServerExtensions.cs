@@ -1,5 +1,3 @@
-using System.Net;
-using System.Net.Sockets;
 using Mono.Debugging.Client;
 using System.Text.Json;
 using Newtonsoft.Json.Linq;
@@ -84,10 +82,29 @@ public static class ServerExtensions {
             return targetDirectory;
         }
     }
+    public static string FindProgramPath(string programPath, DeviceData device) {
+        if (string.IsNullOrEmpty(programPath))
+            throw ServerExtensions.GetProtocolException("Program path is null or empty");
+        
+        var programDirectory = Path.GetDirectoryName(programPath)!;
+        if (device.IsAndroid) {
+            var apkPaths = Directory.GetFiles(programDirectory, "*-Signed.apk");
+            if (apkPaths.Length == 1)
+                return apkPaths[0];
+        }
+        if (device.IsMacCatalyst || device.IsIPhone) {
+            var appPaths = Directory.GetDirectories(programDirectory, "*.app");
+            if (appPaths.Length == 1)
+                return appPaths[0];
+        }
+
+        throw ServerExtensions.GetProtocolException($"Incorrect path to program: '{programPath}'");
+    }
+
     public static string? TrimExpression(this DebugProtocol.EvaluateArguments args) {
         return args.Expression?.TrimEnd(';')?.Replace("?.", ".");
     }
-
+    
     public static T DoSafe<T>(Func<T> handler, Action? finalizer = null) {
         try {
             return handler.Invoke();
@@ -99,7 +116,6 @@ public static class ServerExtensions {
             throw GetProtocolException(ex.Message);
         }
     }
-
     public static JToken? TryGetValue(this Dictionary<string, JToken> dictionary, string key) {
         if (dictionary.TryGetValue(key, out var value))
             return value;
@@ -125,6 +141,7 @@ public static class ServerExtensions {
 
         return JsonSerializer.Deserialize<T>(json, SerializerOptions);
     }
+    
     public static DebugProtocol.CompletionItem ToCompletionItem(this CompletionItem item) {
         return new DebugProtocol.CompletionItem() {
             Type = item.Flags.ToCompletionItemType(),
