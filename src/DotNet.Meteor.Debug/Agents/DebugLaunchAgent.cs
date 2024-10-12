@@ -45,25 +45,26 @@ public class DebugLaunchAgent : BaseLaunchAgent {
         }
     }
 
-    private void LaunchAppleMobile(IProcessLogger logger) {
-        // TODO: Implement Apple launching for Windows
-        // if (RuntimeSystem.IsWindows) {
-        //     IDeviceTool.Installer(Configuration.Device.Serial, Configuration.OutputAssembly, this);
-
-        //     var debugProcess = IDeviceTool.Debug(Configuration.Device.Serial, Configuration.GetApplicationId(), Configuration.DebugPort, this);
-        //     disposables.Add(() => debugProcess.Kill());
-        //     return;
-        // }
+    private void LaunchAppleMobile(DebugSession debugSession) {
+        if (RuntimeSystem.IsWindows) {
+            var programPath = Path.ChangeExtension(Configuration.ProgramPath, "ipa");
+            var forwardingProcess = IDeviceTool.Proxy(Configuration.Device.Serial, Configuration.DebugPort, debugSession);
+            Disposables.Add(() => forwardingProcess.Terminate());
+            
+            IDeviceTool.Installer(Configuration.Device.Serial, programPath, debugSession);
+            debugSession.OnImportantDataReceived("Application installed on device. Please tap on the app icon to run it.");
+            return;
+        }
 
         if (Configuration.Device.IsEmulator) {
-            var debugProcess = MonoLauncher.DebugSim(Configuration.Device.Serial, Configuration.ProgramPath, Configuration.DebugPort, logger);
+            var debugProcess = MonoLauncher.DebugSim(Configuration.Device.Serial, Configuration.ProgramPath, Configuration.DebugPort, debugSession);
             Disposables.Add(() => debugProcess.Terminate());
         } else {
-            var debugPortForwarding = MonoLauncher.TcpTunnel(Configuration.Device.Serial, Configuration.DebugPort, logger);
-            var hotReloadPortForwarding = MonoLauncher.TcpTunnel(Configuration.Device.Serial, Configuration.ReloadHostPort, logger);
-            MonoLauncher.InstallDev(Configuration.Device.Serial, Configuration.ProgramPath, logger);
+            var debugPortForwarding = MonoLauncher.TcpTunnel(Configuration.Device.Serial, Configuration.DebugPort, debugSession);
+            var hotReloadPortForwarding = MonoLauncher.TcpTunnel(Configuration.Device.Serial, Configuration.ReloadHostPort, debugSession);
+            MonoLauncher.InstallDev(Configuration.Device.Serial, Configuration.ProgramPath, debugSession);
 
-            var debugProcess = MonoLauncher.DebugDev(Configuration.Device.Serial, Configuration.ProgramPath, Configuration.DebugPort, logger);
+            var debugProcess = MonoLauncher.DebugDev(Configuration.Device.Serial, Configuration.ProgramPath, Configuration.DebugPort, debugSession);
             Disposables.Add(() => debugProcess.Terminate());
             Disposables.Add(() => debugPortForwarding.Terminate());
             Disposables.Add(() => hotReloadPortForwarding.Terminate());
