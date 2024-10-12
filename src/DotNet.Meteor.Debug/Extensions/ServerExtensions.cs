@@ -13,6 +13,9 @@ using System.Text.Json.Serialization;
 namespace DotNet.Meteor.Debug.Extensions;
 
 public static class ServerExtensions {
+    public const string CatchTargetProfile = "The runtime has been configured to pause";
+    public const string CatchTargetWinInstall = "Install: CreatingStagingDirectory";
+
     public static DebuggerSessionOptions DefaultDebuggerOptions { get; } = new DebuggerSessionOptions {
         EvaluationOptions = new EvaluationOptions {
             EvaluationTimeout = 1000,

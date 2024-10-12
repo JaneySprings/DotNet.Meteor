@@ -25,11 +25,10 @@ public class NoDebugLaunchAgent : BaseLaunchAgent {
     private void LaunchAppleMobile(DebugSession debugSession) {
         if (RuntimeSystem.IsWindows) {
             var programPath = Path.ChangeExtension(Configuration.ProgramPath, ".ipa");
-            var installProcess = IDeviceTool.Installer(Configuration.Device.Serial, programPath, debugSession);
+            var installProcess = IDeviceTool.Installer(Configuration.Device.Serial, programPath, new CatchTargetLogger(ServerExtensions.CatchTargetWinInstall, debugSession, () => {
+                debugSession.OnImportantDataReceived("Application installed on device. Please tap on the app icon to run it.");
+            }));
             Disposables.Add(() => installProcess.Terminate());
-            
-            System.Threading.Thread.Sleep(5000);
-            debugSession.OnImportantDataReceived("Application installed on device. Tap the icon to start the application.");
             return;
         }
 

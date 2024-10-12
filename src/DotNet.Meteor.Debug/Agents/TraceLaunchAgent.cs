@@ -31,20 +31,24 @@ public class TraceLaunchAgent : BaseLaunchAgent {
     private void LaunchAppleMobile(IProcessLogger logger, string diagnosticPort, string nettracePath) {
         if (Configuration.Device.IsEmulator) {
             var routerProcess = DSRouter.ClientToServer(diagnosticPort, $"127.0.0.1:{Configuration.ProfilerPort}", logger);
-            var simProcess = MonoLauncher.ProfileSim(Configuration.Device.Serial, Configuration.ProgramPath, $"127.0.0.1:{Configuration.ProfilerPort},suspend", new CatchStartLogger(logger, () => {
-                var traceProcess = Trace.Collect(diagnosticPort, nettracePath, logger);
-                Disposables.Insert(0, () => traceProcess.Terminate());
-            }));
+            var simProcess = MonoLauncher.ProfileSim(Configuration.Device.Serial, Configuration.ProgramPath, $"127.0.0.1:{Configuration.ProfilerPort},suspend",
+                new CatchTargetLogger(ServerExtensions.CatchTargetProfile, logger, () => {
+                    var traceProcess = Trace.Collect(diagnosticPort, nettracePath, logger);
+                    Disposables.Insert(0, () => traceProcess.Terminate());
+                })
+            );
 
             Disposables.Add(() => routerProcess.Terminate());
             Disposables.Add(() => simProcess.Terminate());
         } else {
             var routerProcess = DSRouter.ServerToClient(diagnosticPort, $"127.0.0.1:{Configuration.ProfilerPort}", forwardApple: true, logger);
             MonoLauncher.InstallDev(Configuration.Device.Serial, Configuration.ProgramPath, logger);
-            var devProcess = MonoLauncher.ProfileDev(Configuration.Device.Serial, Configuration.ProgramPath, $"127.0.0.1:{Configuration.ProfilerPort},suspend,listen", new CatchStartLogger(logger, () => {
-                var traceProcess = Trace.Collect($"{diagnosticPort},connect", nettracePath, logger);
-                Disposables.Insert(0, () => traceProcess.Terminate());
-            }));
+            var devProcess = MonoLauncher.ProfileDev(Configuration.Device.Serial, Configuration.ProgramPath, $"127.0.0.1:{Configuration.ProfilerPort},suspend,listen",
+                new CatchTargetLogger(ServerExtensions.CatchTargetProfile, logger, () => {
+                    var traceProcess = Trace.Collect($"{diagnosticPort},connect", nettracePath, logger);
+                    Disposables.Insert(0, () => traceProcess.Terminate());
+                })
+            );
 
             Disposables.Add(() => routerProcess.Terminate());
             Disposables.Add(() => devProcess.Terminate());
