@@ -11,19 +11,19 @@ namespace DotNet.Meteor.Debug;
 public class TraceLaunchAgent : BaseLaunchAgent {
     public TraceLaunchAgent(LaunchConfiguration configuration) : base(configuration) { }
     public override void Connect(SoftDebuggerSession session) { }
-    public override void Launch(IProcessLogger logger) {
+    public override void Launch(DebugSession debugSession) {
         var nettracePath = Path.Combine(Path.GetDirectoryName(Configuration.Project.Path)!, $"{Configuration.GetApplicationName()}.nettrace");
         var diagnosticPort = Path.Combine(RuntimeSystem.HomeDirectory, $"{Configuration.Device.Platform}-port.lock");
         ServerExtensions.TryDeleteFile(diagnosticPort);
 
         if (Configuration.Device.IsAndroid)
-            LaunchAndroid(logger, diagnosticPort, nettracePath);
+            LaunchAndroid(debugSession, diagnosticPort, nettracePath);
         if (Configuration.Device.IsIPhone)
-            LaunchAppleMobile(logger, diagnosticPort, nettracePath);
+            LaunchAppleMobile(debugSession, diagnosticPort, nettracePath);
         if (Configuration.Device.IsMacCatalyst)
-            LaunchMacCatalyst(logger, diagnosticPort, nettracePath);
+            LaunchMacCatalyst(debugSession, diagnosticPort, nettracePath);
         if (Configuration.Device.IsWindows)
-            LaunchWindows(logger, diagnosticPort, nettracePath);
+            LaunchWindows(debugSession, diagnosticPort, nettracePath);
 
         Disposables.Add(() => ServerExtensions.TryDeleteFile(diagnosticPort));
     }

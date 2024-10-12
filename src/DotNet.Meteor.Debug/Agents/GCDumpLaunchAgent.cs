@@ -17,19 +17,19 @@ public class GCDumpLaunchAgent : BaseLaunchAgent {
 
     public GCDumpLaunchAgent(LaunchConfiguration configuration) : base(configuration) { }
     public override void Connect(SoftDebuggerSession session) { }
-    public override void Launch(IProcessLogger logger) {
+    public override void Launch(DebugSession debugSession) {
         gcdumpPath = Path.Combine(Path.GetDirectoryName(Configuration.Project.Path)!, $"{Configuration.GetApplicationName()}.gcdump");
         diagnosticPort = Path.Combine(RuntimeSystem.HomeDirectory, $"{Configuration.Device.Platform}-port.lock");
         ServerExtensions.TryDeleteFile(diagnosticPort);
 
         if (Configuration.Device.IsAndroid)
-            LaunchAndroid(logger);
+            LaunchAndroid(debugSession);
         if (Configuration.Device.IsIPhone)
-            LaunchAppleMobile(logger);
+            LaunchAppleMobile(debugSession);
         if (Configuration.Device.IsMacCatalyst)
-            LaunchMacCatalyst(logger);
+            LaunchMacCatalyst(debugSession);
         if (Configuration.Device.IsWindows)
-            LaunchWindows(logger);
+            LaunchWindows(debugSession);
 
         Disposables.Add(() => ServerExtensions.TryDeleteFile(diagnosticPort));
     }

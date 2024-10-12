@@ -4,16 +4,13 @@ using DotNet.Meteor.Common.Processes;
 namespace DotNet.Meteor.Common.Apple;
 
 public static class IDeviceTool {
-    public static void Installer(string serial, string bundlePath, IProcessLogger? logger = null) {
+    // This tool hangs on Windows, so we need to return a process to kill it.
+    public static Process Installer(string serial, string bundlePath, IProcessLogger? logger = null) {
         var tool = new FileInfo(Path.Combine(AppleSdkLocator.IDeviceLocation(), "ideviceinstaller.exe"));
-        var result = new ProcessRunner(tool, new ProcessArgumentBuilder()
+        return new ProcessRunner(tool, new ProcessArgumentBuilder()
             .Append("--udid").Append(serial)
-            .Append("--install").AppendQuoted(bundlePath)
-            .Append("--notify-wait"), logger)
-            .WaitForExit();
-
-        if (!result.Success)
-            throw new InvalidOperationException(string.Join(Environment.NewLine, result.StandardError));
+            .Append("--install").AppendQuoted(bundlePath), logger)
+            .Start();
     }
     public static Process Debug(string serial, string bundleId, int port, IProcessLogger? logger = null) {
         var tool = new FileInfo(Path.Combine(AppleSdkLocator.IDeviceLocation(), "idevicedebug.exe"));
