@@ -26,13 +26,13 @@ public class DebugLaunchAgent : BaseLaunchAgent {
         startInformation = new SoftDebuggerStartInfo(startArguments);
         startInformation.SetAssemblies(configuration.GetAssemblyPath(), configuration.DebuggerSessionOptions);
     }
-    public override void Launch(IProcessLogger logger) {
+    public override void Launch(DebugSession debugSession) {
         if (Configuration.Device.IsAndroid)
-            LaunchAndroid(logger);
+            LaunchAndroid(debugSession);
         if (Configuration.Device.IsIPhone)
-            LaunchAppleMobile(logger);
+            LaunchAppleMobile(debugSession);
         if (Configuration.Device.IsMacCatalyst)
-            LaunchMacCatalyst(logger);
+            LaunchMacCatalyst(debugSession);
         if (Configuration.Device.IsWindows)
             throw new NotSupportedException();
     }

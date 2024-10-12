@@ -20,7 +20,7 @@ public abstract class BaseLaunchAgent {
     }
 
     public abstract void Connect(SoftDebuggerSession session);
-    public abstract void Launch(IProcessLogger logger);
+    public abstract void Launch(DebugSession debugSession);
     public virtual void HandleCommand(string command, string args, IProcessLogger logger) { }
 
     public void HandleCommand(string command, IProcessLogger logger) {
