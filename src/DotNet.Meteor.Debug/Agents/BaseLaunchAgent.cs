@@ -38,7 +38,7 @@ public abstract class BaseLaunchAgent {
             new CompletionItem() { Label = ProcessedCommand, Type = CompletionItemType.Snippet }
         };
     }
-    public virtual void Dispose() {
+    public void Dispose() {
         foreach (var disposable in Disposables) {
             try {
                 disposable.Invoke();
