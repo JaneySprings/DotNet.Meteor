@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 using DotNet.Meteor.Common.Processes;
 
@@ -80,14 +81,15 @@ public static class AppleSdkLocator {
         var latestToolDirectory = toolLocations.OrderByDescending(x => Path.GetFileName(x)).First();
         return Path.Combine(latestToolDirectory, "tools", "msbuild", "iOS", "imobiledevice-x64");
     }
-    public static bool IsITunesInstalled() {
+    public static bool IsAppleDriverRunning() {
         if (!RuntimeSystem.IsWindows)
             throw new PlatformNotSupportedException();
 
-        if (!String.IsNullOrEmpty(Environment.GetEnvironmentVariable("ITUNES_CHECK_BYPASS")))
+        if (!String.IsNullOrEmpty(Environment.GetEnvironmentVariable("USBMUXD_CHECK_BYPASS")))
             return true;
         
-        return Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyMusic), "iTunes"));
+        var process = Process.GetProcessesByName("AppleMobileDeviceProcess");
+        return process.Length > 0;
     }
 
     public static FileInfo SystemProfilerTool() {

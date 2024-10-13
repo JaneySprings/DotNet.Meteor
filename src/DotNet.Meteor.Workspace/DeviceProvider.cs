@@ -15,7 +15,7 @@ public static class DeviceProvider {
                 devices.Add(WindowsDeviceTool.WindowsDevice());
                 debugHandler?.Invoke("Windows device added.");
 
-                if (AppleSdkLocator.IsITunesInstalled()) {
+                if (AppleSdkLocator.IsAppleDriverRunning()) {
                     devices.AddRange(IDeviceTool.Info());
                     debugHandler?.Invoke("iOS device added.");
                 }

@@ -3,8 +3,9 @@ using DotNet.Meteor.Common.Processes;
 
 namespace DotNet.Meteor.Common.Apple;
 
+// This tool requires the 'Apple Devices' app daemon (AppleMobileDevice)
+// https://www.microsoft.com/store/productId/9NP83LWLPZ9K?ocid=pdpshare
 public static class IDeviceTool {
-    // This tool hangs on Windows, so we need to return a process to kill it.
     public static void Installer(string serial, string bundlePath, IProcessLogger? logger = null) {
         var tool = new FileInfo(Path.Combine(AppleSdkLocator.IDeviceLocation(), "ideviceinstaller.exe"));
         var result = new ProcessRunner(tool, new ProcessArgumentBuilder()
@@ -13,7 +14,7 @@ public static class IDeviceTool {
             .WaitForExit();
 
         if (!result.Success)
-            throw new InvalidOperationException("Failed to install application on device.");
+            throw new InvalidOperationException(string.Join(Environment.NewLine, result.StandardError));
     }
     public static Process Debug(string serial, string bundleId, int port, IProcessLogger? logger = null) {
         var tool = new FileInfo(Path.Combine(AppleSdkLocator.IDeviceLocation(), "idevicedebug.exe"));
