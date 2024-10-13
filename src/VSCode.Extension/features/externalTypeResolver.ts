@@ -1,8 +1,8 @@
 import * as res from '../resources/constants';
 import * as vscode from 'vscode';
 
-export class TypeResolver {
-    public static feature : TypeResolver = new TypeResolver();
+export class ExternalTypeResolver {
+    public static feature : ExternalTypeResolver = new ExternalTypeResolver();
     public transportId: string | undefined;
 
     public async activate(context: vscode.ExtensionContext): Promise<void> {

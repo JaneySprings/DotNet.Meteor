@@ -1,5 +1,5 @@
 import { ConfigurationController } from '../controllers/configurationController';
-import { TypeResolver } from '../features/typeResolver';
+import { ExternalTypeResolver } from '../features/externalTypeResolver';
 import * as res from '../resources/constants';
 import * as vscode from 'vscode';
 
@@ -43,7 +43,7 @@ export class MonoDebugConfigurationProvider implements vscode.DebugConfiguration
 			return config;
 		}
 
-		config.transportId = TypeResolver.feature.transportId;
+		config.transportId = ExternalTypeResolver.feature.transportId;
 		config.skipDebug = ConfigurationController.noDebug;
 		config.debuggingPort = ConfigurationController.getDebuggingPort();
 		config.uninstallApp = ConfigurationController.getUninstallAppOption();

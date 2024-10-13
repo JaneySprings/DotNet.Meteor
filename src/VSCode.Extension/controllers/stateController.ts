@@ -27,7 +27,7 @@ export class StateController {
     }
     public static saveProject() {
         if (StateController.context !== undefined)
-             StateController.context.workspaceState.update('project', ConfigurationController.project?.path);
+            StateController.context.workspaceState.update('project', ConfigurationController.project?.path);
     }
     public static saveDevice() {
         if (StateController.context !== undefined)
