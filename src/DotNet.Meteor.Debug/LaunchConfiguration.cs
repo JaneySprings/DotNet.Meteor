@@ -50,10 +50,11 @@ public class LaunchConfiguration {
         return assemblyName.Replace("-Signed", "");
     }
     public string GetAssemblyPath() {
+        // It raises BadImageFormatException on Windows while reading the assembly
+        // if (Device.IsIPhone)
+        //     return ProgramPath;
         if (Device.IsMacCatalyst)
             return Path.Combine(ProgramPath, "Contents", "MonoBundle");
-        if (Device.IsIPhone)
-            return ProgramPath;
         if (Device.IsAndroid)
             return ServerExtensions.ExtractAndroidAssemblies(ProgramPath);
 
