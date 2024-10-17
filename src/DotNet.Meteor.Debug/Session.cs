@@ -21,16 +21,19 @@ public abstract class Session : DebugAdapterBase, IProcessLogger {
         Protocol.Run();
     }
     public void OnOutputDataReceived(string stdout) {
-        SendConsoleEvent(OutputEvent.CategoryValue.Stdout, stdout);
+        SendMessageEvent(OutputEvent.CategoryValue.Stdout, stdout);
     }
     public void OnErrorDataReceived(string stderr) {
-        SendConsoleEvent(OutputEvent.CategoryValue.Stderr, stderr);
+        SendMessageEvent(OutputEvent.CategoryValue.Stderr, stderr);
     }
     public void OnDebugDataReceived(string debug) {
-        SendConsoleEvent(OutputEvent.CategoryValue.Console, debug);
+        SendMessageEvent(OutputEvent.CategoryValue.Console, debug);
+    }
+    public void OnImportantDataReceived(string message) {
+        SendMessageEvent(OutputEvent.CategoryValue.Important, message);
     }
 
-    private void SendConsoleEvent(OutputEvent.CategoryValue category, string message) {
+    private void SendMessageEvent(OutputEvent.CategoryValue category, string message) {
         Protocol.SendEvent(new OutputEvent(message.Trim() + Environment.NewLine) {
             Category = category
         });

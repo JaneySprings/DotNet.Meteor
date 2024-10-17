@@ -20,30 +20,6 @@ public class ProfilerTask {
     }
 }
 
-public class CatchStartLogger : IProcessLogger {
-    private readonly IProcessLogger innerLogger;
-    private readonly Action onCatchStart;
-
-    private const string CatchTarget = "The runtime has been configured to pause";
-
-    public CatchStartLogger(IProcessLogger innerLogger, Action onCatchStart) {
-        this.innerLogger = innerLogger;
-        this.onCatchStart = onCatchStart;
-    }
-
-    void IProcessLogger.OnErrorDataReceived(string stderr) {
-        innerLogger.OnErrorDataReceived(stderr);
-        if (stderr.Contains(CatchTarget, StringComparison.OrdinalIgnoreCase))
-            onCatchStart();
-    }
-
-    void IProcessLogger.OnOutputDataReceived(string stdout) {
-        innerLogger.OnOutputDataReceived(stdout);
-        if (stdout.Contains(CatchTarget, StringComparison.OrdinalIgnoreCase))
-            onCatchStart();
-    }
-}
-
 public class ConsoleLogger : IConsole {
     private IStandardStreamWriter _out;
     public IStandardStreamWriter Out => _out;
