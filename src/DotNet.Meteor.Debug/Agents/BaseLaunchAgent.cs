@@ -7,7 +7,6 @@ namespace DotNet.Meteor.Debug;
 
 public abstract class BaseLaunchAgent {
     public const string CommandPrefix = "/";
-    public const string LanguageSeparator = "!";
 
     protected List<Action> Disposables { get; init; }
     protected LaunchConfiguration Configuration { get; init; }

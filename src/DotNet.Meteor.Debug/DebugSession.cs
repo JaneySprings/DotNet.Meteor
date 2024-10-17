@@ -207,7 +207,7 @@ public class DebugSession : Session {
         foreach (var breakpointInfo in arguments.Breakpoints) {
             var languageName = "C#";
             var functionName = breakpointInfo.Name;
-            var functionParts = breakpointInfo.Name.Split(BaseLaunchAgent.LanguageSeparator);
+            var functionParts = breakpointInfo.Name.Split("!");
             if (functionParts.Length == 2) {
                 languageName = functionParts[0];
                 functionName = functionParts[1];
