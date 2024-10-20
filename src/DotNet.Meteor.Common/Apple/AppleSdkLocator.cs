@@ -63,6 +63,9 @@ public static class AppleSdkLocator {
         if (Directory.Exists(ideviceDirectory))
             return ideviceDirectory;
 
+        if (RuntimeSystem.IsLinux)
+            return Path.Combine("/usr", "bin"); // There is no 'Microsoft.iOS.Linux.Sdk' workload
+
         var sdkPath = string.Empty;
         var dotnetPacksPath = Path.Combine(AppleSdkLocator.DotNetRootLocation(), "packs");
         var sdkPaths = Directory.GetDirectories(dotnetPacksPath, "Microsoft.iOS.Windows.Sdk.net*");
@@ -82,13 +85,14 @@ public static class AppleSdkLocator {
         return Path.Combine(latestToolDirectory, "tools", "msbuild", "iOS", "imobiledevice-x64");
     }
     public static bool IsAppleDriverRunning() {
-        if (!RuntimeSystem.IsWindows)
+        if (RuntimeSystem.IsMacOS)
             throw new PlatformNotSupportedException();
 
         if (!String.IsNullOrEmpty(Environment.GetEnvironmentVariable("USBMUXD_CHECK_BYPASS")))
             return true;
         
-        var process = Process.GetProcessesByName("AppleMobileDeviceProcess");
+        var processName = RuntimeSystem.IsWindows ? "AppleMobileDeviceProcess" : "usbmuxd";
+        var process = Process.GetProcessesByName(processName);
         return process.Length > 0;
     }
 

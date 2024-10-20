@@ -7,7 +7,7 @@ namespace DotNet.Meteor.Common.Apple;
 // https://www.microsoft.com/store/productId/9NP83LWLPZ9K?ocid=pdpshare
 public static class IDeviceTool {
     public static void Installer(string serial, string bundlePath, IProcessLogger? logger = null) {
-        var tool = new FileInfo(Path.Combine(AppleSdkLocator.IDeviceLocation(), "ideviceinstaller.exe"));
+        var tool = new FileInfo(Path.Combine(AppleSdkLocator.IDeviceLocation(), "ideviceinstaller" + RuntimeSystem.ExecExtension));
         var result = new ProcessRunner(tool, new ProcessArgumentBuilder()
             .Append("--udid").Append(serial)
             .Append("--install").AppendQuoted(bundlePath), logger)
@@ -16,16 +16,8 @@ public static class IDeviceTool {
         if (!result.Success)
             throw new InvalidOperationException(string.Join(Environment.NewLine, result.StandardError));
     }
-    public static Process Debug(string serial, string bundleId, int port, IProcessLogger? logger = null) {
-        var tool = new FileInfo(Path.Combine(AppleSdkLocator.IDeviceLocation(), "idevicedebug.exe"));
-        return new ProcessRunner(tool, new ProcessArgumentBuilder()
-            .Append("run").Append(bundleId)
-            .Append("--udid").Append(serial)
-            .Append("--env").Append($"__XAMARIN_DEBUG_PORT__={port}"), logger)
-            .Start();
-    }
     public static IEnumerable<DeviceData> Info() {
-        var tool = new FileInfo(Path.Combine(AppleSdkLocator.IDeviceLocation(), "ideviceinfo.exe"));
+        var tool = new FileInfo(Path.Combine(AppleSdkLocator.IDeviceLocation(), "ideviceinfo" + RuntimeSystem.ExecExtension));
         var result = new ProcessRunner(tool).WaitForExit();
 
         if (!result.Success)
@@ -46,7 +38,7 @@ public static class IDeviceTool {
         };
     }
     public static Process Proxy(string serial, int port, IProcessLogger? logger = null) {
-        var tool = new FileInfo(Path.Combine(AppleSdkLocator.IDeviceLocation(), "iproxy.exe"));
+        var tool = new FileInfo(Path.Combine(AppleSdkLocator.IDeviceLocation(), "iproxy" + RuntimeSystem.ExecExtension));
         return new ProcessRunner(tool, new ProcessArgumentBuilder()
             .Append($"{port} {port}")
             .Append(serial), logger)
