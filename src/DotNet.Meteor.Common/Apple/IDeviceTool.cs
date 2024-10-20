@@ -39,8 +39,9 @@ public static class IDeviceTool {
     }
     public static Process Proxy(string serial, int port, IProcessLogger? logger = null) {
         var tool = new FileInfo(Path.Combine(AppleSdkLocator.IDeviceLocation(), "iproxy" + RuntimeSystem.ExecExtension));
+        var separator = RuntimeSystem.IsWindows ? ' ' : ':';
         return new ProcessRunner(tool, new ProcessArgumentBuilder()
-            .Append($"{port} {port}")
+            .Append($"{port}{separator}{port}")
             .Append(serial), logger)
             .Start();
     }
