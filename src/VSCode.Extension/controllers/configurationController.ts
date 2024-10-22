@@ -127,8 +127,9 @@ export class ConfigurationController {
         if (ConfigurationController.isAppleMobile() || ConfigurationController.isMacCatalyst()) {
             const outDir = path.dirname(targetPath);
             const bundleName = InteropController.getPropertyValue('_AppBundleName', project, configuration, device);
+            const bundleExt = process.platform === 'darwin' ? '.app' : '.ipa';
             if (bundleName !== undefined)
-                return path.join(outDir, bundleName + '.app');
+                return path.join(outDir, bundleName + bundleExt);
         }
 
         return undefined;

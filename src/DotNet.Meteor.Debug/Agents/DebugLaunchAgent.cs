@@ -47,13 +47,12 @@ public class DebugLaunchAgent : BaseLaunchAgent {
 
     private void LaunchAppleMobile(DebugSession debugSession) {
         if (RuntimeSystem.IsWindows) {
-            var programPath = Path.ChangeExtension(Configuration.ProgramPath, "ipa");
             var debugProxyProcess = IDeviceTool.Proxy(Configuration.Device.Serial, Configuration.DebugPort, debugSession);
             Disposables.Add(() => debugProxyProcess.Terminate());
             var reloadProxyProcess = IDeviceTool.Proxy(Configuration.Device.Serial, Configuration.ReloadHostPort, debugSession);
             Disposables.Add(() => debugProxyProcess.Terminate());
             
-            IDeviceTool.Installer(Configuration.Device.Serial, programPath, debugSession);
+            IDeviceTool.Installer(Configuration.Device.Serial, Configuration.ProgramPath, debugSession);
             debugSession.OnImportantDataReceived("Application installed on device. Please tap on the app icon to run it.");
             return;
         }

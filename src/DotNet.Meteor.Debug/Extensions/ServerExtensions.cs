@@ -96,7 +96,8 @@ public static class ServerExtensions {
                 return apkPaths[0];
         }
         if (device.IsMacCatalyst || device.IsIPhone) {
-            var appPaths = Directory.GetDirectories(programDirectory, "*.app");
+            var appExtension = RuntimeSystem.IsMacOS ? ".app" : ".ipa";
+            var appPaths = Directory.GetDirectories(programDirectory, $"*{appExtension}");
             if (appPaths.Length == 1)
                 return appPaths[0];
         }

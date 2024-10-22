@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text;
+using DotNet.Meteor.Common.Extensions;
 using Mono.Debugging.Client;
 using Mono.Debugging.Soft;
 
@@ -71,7 +72,7 @@ public static class MonoExtensions {
 
         foreach (var remap in session.Options.SourceCodeMappings) {
             if (location.FileName.Contains(remap.Key))
-                return location.FileName.Replace(remap.Key, remap.Value);
+                return location.FileName.Replace(remap.Key, remap.Value).ToPlatformPath();
         }
 
         return location.FileName;
