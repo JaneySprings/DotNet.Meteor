@@ -30,7 +30,7 @@
 	"configuration.description.debuggerOptions.flattenHierarchy": "Controls whether the debugger should flatten the hierarchy of inherited members.",
 	"configuration.description.debuggerOptions.groupPrivateMembers": "Controls whether the debugger should group private members in the debugging window.",
 	"configuration.description.debuggerOptions.groupStaticMembers": "Controls whether the debugger should group static members in the debugging window.",
-	"configuration.description.debuggerOptions.useExternalTypeResolver": "Search for unknown types in the project's assemblies for the evaluation expressions.",
+	"configuration.description.debuggerOptions.useExternalTypeResolver": "Resolve types using the external type resolver. Requires the [DotRush](https://github.com/JaneySprings/DotRush) extension.",
 	"configuration.description.debuggerOptions.currentExceptionTag": "Specifies the display name of the current exception in the debugging window.",
 	"configuration.description.debuggerOptions.ellipsizeStrings": "Truncates strings in the debugging window.",
 	"configuration.description.debuggerOptions.ellipsizedLength": "The maximum length of a truncated string.",

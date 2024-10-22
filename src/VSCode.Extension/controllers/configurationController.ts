@@ -127,20 +127,11 @@ export class ConfigurationController {
         if (ConfigurationController.isAppleMobile() || ConfigurationController.isMacCatalyst()) {
             const outDir = path.dirname(targetPath);
             const bundleName = InteropController.getPropertyValue('_AppBundleName', project, configuration, device);
+            const bundleExt = process.platform === 'darwin' ? '.app' : '.ipa';
             if (bundleName !== undefined)
-                return path.join(outDir, bundleName + '.app');
+                return path.join(outDir, bundleName + bundleExt);
         }
 
         return undefined;
-    }
-
-    public static async activateAndroidEmulator(): Promise<void> {
-        if (!ConfigurationController.isAndroid() || ConfigurationController.device === undefined)
-            return;
-        if (!ConfigurationController.device.is_emulator || ConfigurationController.device.is_running)
-            return;
-
-        ConfigurationController.device.serial = await InteropController.runEmulator(ConfigurationController.device.name!);
-        ConfigurationController.device.is_running = ConfigurationController.device.serial !== undefined;
     }
 } 

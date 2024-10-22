@@ -22,7 +22,6 @@ public class DebugSession : Session {
         session.DebugWriter = OnDebugLog;
         session.OutputWriter = OnLog;
         session.ExceptionHandler = OnExceptionHandled;
-        session.TypeResolverHandler = TypeResolverExtensions.ResolveIdentifier;
 
         session.TargetStopped += TargetStopped;
         session.TargetHitBreakpoint += TargetHitBreakpoint;
@@ -208,7 +207,7 @@ public class DebugSession : Session {
         foreach (var breakpointInfo in arguments.Breakpoints) {
             var languageName = "C#";
             var functionName = breakpointInfo.Name;
-            var functionParts = breakpointInfo.Name.Split(BaseLaunchAgent.LanguageSeparator);
+            var functionParts = breakpointInfo.Name.Split("!");
             if (functionParts.Length == 2) {
                 languageName = functionParts[0];
                 functionName = functionParts[1];
@@ -363,9 +362,12 @@ public class DebugSession : Session {
             if (frame == null)
                 throw new ProtocolException("no active stackframe");
 
-            TypeResolverExtensions.SetContext(frame, session.Options.EvaluationOptions);
-            var value = frame.GetExpressionValue(expression, session.Options.EvaluationOptions);
-            value.WaitHandle.WaitOne(session.Options.EvaluationOptions.EvaluationTimeout);
+            var options = session.Options.EvaluationOptions.Clone();
+            if (arguments.Context == EvaluateArguments.ContextValue.Hover)
+                options.UseExternalTypeResolver = false;
+
+            var value = frame.GetExpressionValue(expression, options);
+            value.WaitHandle.WaitOne(options.EvaluationTimeout);
 
             if (value.IsEvaluating)
                 throw new ProtocolException("evaluation timeout expected");
