@@ -46,29 +46,28 @@ public class DebugLaunchAgent : BaseLaunchAgent {
     }
 
     private void LaunchAppleMobile(DebugSession debugSession) {
-        if (RuntimeSystem.IsWindows) {
+        if (RuntimeSystem.IsMacOS) {
+            if (Configuration.Device.IsEmulator) {
+                var debugProcess = MonoLauncher.DebugSim(Configuration.Device.Serial, Configuration.ProgramPath, Configuration.DebugPort, debugSession);
+                Disposables.Add(() => debugProcess.Terminate());
+            } else {
+                var debugPortForwarding = MonoLauncher.TcpTunnel(Configuration.Device.Serial, Configuration.DebugPort, debugSession);
+                var hotReloadPortForwarding = MonoLauncher.TcpTunnel(Configuration.Device.Serial, Configuration.ReloadHostPort, debugSession);
+                MonoLauncher.InstallDev(Configuration.Device.Serial, Configuration.ProgramPath, debugSession);
+
+                var debugProcess = MonoLauncher.DebugDev(Configuration.Device.Serial, Configuration.ProgramPath, Configuration.DebugPort, debugSession);
+                Disposables.Add(() => debugProcess.Terminate());
+                Disposables.Add(() => debugPortForwarding.Terminate());
+                Disposables.Add(() => hotReloadPortForwarding.Terminate());
+            }
+        } else {
             var debugProxyProcess = IDeviceTool.Proxy(Configuration.Device.Serial, Configuration.DebugPort, debugSession);
             Disposables.Add(() => debugProxyProcess.Terminate());
             var reloadProxyProcess = IDeviceTool.Proxy(Configuration.Device.Serial, Configuration.ReloadHostPort, debugSession);
             Disposables.Add(() => debugProxyProcess.Terminate());
-            
+
             IDeviceTool.Installer(Configuration.Device.Serial, Configuration.ProgramPath, debugSession);
             debugSession.OnImportantDataReceived("Application installed on device. Please tap on the app icon to run it.");
-            return;
-        }
-
-        if (Configuration.Device.IsEmulator) {
-            var debugProcess = MonoLauncher.DebugSim(Configuration.Device.Serial, Configuration.ProgramPath, Configuration.DebugPort, debugSession);
-            Disposables.Add(() => debugProcess.Terminate());
-        } else {
-            var debugPortForwarding = MonoLauncher.TcpTunnel(Configuration.Device.Serial, Configuration.DebugPort, debugSession);
-            var hotReloadPortForwarding = MonoLauncher.TcpTunnel(Configuration.Device.Serial, Configuration.ReloadHostPort, debugSession);
-            MonoLauncher.InstallDev(Configuration.Device.Serial, Configuration.ProgramPath, debugSession);
-
-            var debugProcess = MonoLauncher.DebugDev(Configuration.Device.Serial, Configuration.ProgramPath, Configuration.DebugPort, debugSession);
-            Disposables.Add(() => debugProcess.Terminate());
-            Disposables.Add(() => debugPortForwarding.Terminate());
-            Disposables.Add(() => hotReloadPortForwarding.Terminate());
         }
     }
     private void LaunchMacCatalyst(IProcessLogger logger) {

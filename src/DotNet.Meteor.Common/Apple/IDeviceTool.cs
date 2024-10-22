@@ -3,7 +3,7 @@ using DotNet.Meteor.Common.Processes;
 
 namespace DotNet.Meteor.Common.Apple;
 
-// This tool requires the 'Apple Devices' app daemon (AppleMobileDevice)
+// This tool requires the 'Apple Devices' app daemon (AppleMobileDevice) or (usbmuxd) to be running.
 // https://www.microsoft.com/store/productId/9NP83LWLPZ9K?ocid=pdpshare
 public static class IDeviceTool {
     public static void Installer(string serial, string bundlePath, IProcessLogger? logger = null) {
