@@ -48,13 +48,8 @@ public class LaunchConfiguration {
         return assemblyName.Replace("-Signed", "");
     }
     public string GetAssemblyPath() {
-        if (Device.IsMacCatalyst)
-            return Path.Combine(ProgramPath, "Contents", "MonoBundle");
-        if (Device.IsIPhone)
-            return ProgramPath;
-        if (Device.IsAndroid)
-            return ServerExtensions.ExtractAndroidAssemblies(ProgramPath);
-
+        // We need to use this location because all assemblies,
+        // located inside app, are broken since net9.0 
         return Path.GetDirectoryName(ProgramPath)!;
     }
     public BaseLaunchAgent GetLaunchAgent() {

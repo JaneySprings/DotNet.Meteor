@@ -28,6 +28,7 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
             // builder.conditional(`-p:AndroidSdbHostPort=${ConfigurationController.getDebuggingPort()}`, () => !ConfigurationController.profiler && !ConfigurationController.noDebug);
             // builder.conditional(`-p:AdbTarget=-s%20${ConfigurationController.device?.serial}`, () => !ConfigurationController.profiler);
             builder.append('-p:EmbedAssembliesIntoApk=true');
+            builder.append('-p:CopyLocalLockFileAssemblies=true'); // because all DLLs inside app are broken
             builder.append(`-p:AndroidSdkDirectory=${ConfigurationController.androidSdkDirectory}`);
             builder.conditional('-p:AndroidEnableProfiler=true', () => ConfigurationController.profiler);
         }
