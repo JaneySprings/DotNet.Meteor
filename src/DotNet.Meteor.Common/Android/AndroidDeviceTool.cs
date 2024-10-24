@@ -20,6 +20,7 @@ public static class AndroidDeviceTool {
                 var name = Path.GetFileNameWithoutExtension(file);
                 avds.Add(new DeviceData {
                     Name = name,
+                    Arch = RuntimeSystem.IsAarch64 ? Architectures.Arm64 : Architectures.X64, //TODO: Get value from device
                     Serial = runningAvds.ContainsKey(name) ? runningAvds[name] : string.Empty,
                     Detail = Details.AndroidEmulator,
                     Platform = Platforms.Android,
@@ -40,6 +41,7 @@ public static class AndroidDeviceTool {
                 Serial = avd.Value,
                 Detail = Details.AndroidEmulator,
                 Platform = Platforms.Android,
+                Arch = RuntimeSystem.IsAarch64 ? Architectures.Arm64 : Architectures.X64, //TODO: Get value from device
                 OSVersion = $"android-{AndroidDebugBridge.Shell(avd.Value, "getprop", "ro.build.version.sdk")}",
                 IsRunning = true,
                 IsEmulator = true,
@@ -60,6 +62,7 @@ public static class AndroidDeviceTool {
             devices.Add(new DeviceData {
                 Name = AndroidDebugBridge.Shell(serial, "getprop", "ro.product.model"),
                 OSVersion = $"android-{AndroidDebugBridge.Shell(serial, "getprop", "ro.build.version.sdk")}",
+                Arch = Architectures.Arm64, //TODO: Get value from device
                 Platform = Platforms.Android,
                 Detail = Details.AndroidDevice,
                 IsEmulator = false,

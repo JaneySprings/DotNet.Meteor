@@ -4,6 +4,7 @@ namespace DotNet.Meteor.Common;
 
 public class DeviceData {
     [JsonPropertyName("name")] public string Name { get; set; } = string.Empty;
+    [JsonPropertyName("arch")] public string Arch { get; set; } = string.Empty;
     [JsonPropertyName("detail")] public string Detail { get; set; } = string.Empty;
     [JsonPropertyName("serial")] public string Serial { get; set; } = string.Empty;
     [JsonPropertyName("platform")] public string Platform { get; set; } = string.Empty;
@@ -47,4 +48,9 @@ public static class Runtimes {
     public const string WindowsArm64 = "win-arm64";
     public const string iOSSimulatorX64 = "iossimulator-x64";
     public const string iOSSimulatorArm64 = "iossimulator-arm64";
+}
+
+public static class Architectures {
+    public const string Arm64 = "arm64-v8a";
+    public const string X64 = "x86_64";
 }

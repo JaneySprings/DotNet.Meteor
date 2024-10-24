@@ -1,5 +1,6 @@
 
 export interface Device {
+    arch: string | undefined;
     name: string | undefined;
     detail: string | undefined;
     serial: string | undefined;

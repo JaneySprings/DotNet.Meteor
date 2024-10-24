@@ -18,6 +18,16 @@ public static class AndroidDebugBridge {
 
         return string.Join(Environment.NewLine, result.StandardOutput);
     }
+    public static ProcessResult ShellResult(string serial, params string[] args) {
+        var adb = AndroidSdkLocator.AdbTool();
+        var result = new ProcessRunner(adb, new ProcessArgumentBuilder()
+            .Append("-s", serial)
+            .Append("shell")
+            .Append(args))
+            .WaitForExit();
+
+        return result;
+    }
     public static List<string> Devices() {
         var adb = AndroidSdkLocator.AdbTool();
         ProcessResult result = new ProcessRunner(adb, new ProcessArgumentBuilder()
@@ -139,6 +149,17 @@ public static class AndroidDebugBridge {
             .Append("logcat")
             .Append("-v", "tag");
         return new ProcessRunner(adb, arguments, logger).Start();
+    }
+    public static void Push(string serial, string source, string destination, IProcessLogger? logger = null) {
+        var adb = AndroidSdkLocator.AdbTool();
+        var arguments = new ProcessArgumentBuilder()
+            .Append("-s", serial)
+            .Append("push")
+            .AppendQuoted(source)
+            .AppendQuoted(destination);
+        var result = new ProcessRunner(adb, arguments, logger).WaitForExit();
+        if (!result.Success)
+            throw new InvalidOperationException(string.Join(Environment.NewLine, result.StandardError));
     }
 
     public static string EmuName(string serial) {

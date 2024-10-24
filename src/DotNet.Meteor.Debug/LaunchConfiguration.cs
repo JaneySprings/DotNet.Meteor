@@ -9,6 +9,7 @@ public class LaunchConfiguration {
     public Project Project { get; init; }
     public DeviceData Device { get; init; }
     public string ProgramPath { get; init; }
+    public string AssembliesPath { get; init; }
 
     public bool UninstallApp { get; init; }
     public int DebugPort { get; init; }
@@ -38,6 +39,10 @@ public class LaunchConfiguration {
         ProgramPath = Project.GetRelativePath(configurationProperties.TryGetValue("program").ToClass<string>());
         if (!File.Exists(ProgramPath) && !Directory.Exists(ProgramPath))
             ProgramPath = FindProgramPath(ProgramPath); // Last chance to get program path
+
+        AssembliesPath = Project.GetRelativePath(configurationProperties.TryGetValue("assemblies").ToClass<string>());
+        if (!ServerExtensions.IsAssembliesPath(AssembliesPath))
+            AssembliesPath = FindAssembliesPath(AssembliesPath); // Last chance to get assemblies path
     }
 
     public string GetApplicationName() {
@@ -46,11 +51,6 @@ public class LaunchConfiguration {
 
         var assemblyName = Path.GetFileNameWithoutExtension(ProgramPath);
         return assemblyName.Replace("-Signed", "");
-    }
-    public string GetAssemblyPath() {
-        // We need to use this location because all assemblies,
-        // located inside app, are broken since net9.0 
-        return Path.GetDirectoryName(ProgramPath)!;
     }
     public BaseLaunchAgent GetLaunchAgent() {
         if (Profiler == ProfilerMode.Trace)
@@ -80,6 +80,15 @@ public class LaunchConfiguration {
         }
 
         throw ServerExtensions.GetProtocolException($"Incorrect path to program: '{ProgramPath}'");
+    }
+    private string FindAssembliesPath(string assembliesPath) {
+        if (!string.IsNullOrEmpty(Device.Arch)) {
+            var archPath = Path.Combine(assembliesPath, Device.Arch);
+            if (ServerExtensions.IsAssembliesPath(archPath))
+                return archPath;
+        }
+
+        return Path.GetDirectoryName(ProgramPath)!;
     }
 
     private enum ProfilerMode { None, Trace, GCDump }
