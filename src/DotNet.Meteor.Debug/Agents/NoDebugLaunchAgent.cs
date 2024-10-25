@@ -59,7 +59,7 @@ public class NoDebugLaunchAgent : BaseLaunchAgent {
 
         AndroidDebugBridge.Install(Configuration.Device.Serial, Configuration.ProgramPath, logger);
 
-        AndroidFastDev.TryPushAssemblies(Configuration.Device, Configuration.AssembliesPath, applicationId, logger);
+        AndroidFastDev.TryPushAssemblies(Configuration.Device, Configuration.AssetsPath, applicationId, logger);
 
         AndroidDebugBridge.Launch(Configuration.Device.Serial, applicationId, logger);
         AndroidDebugBridge.Flush(Configuration.Device.Serial);

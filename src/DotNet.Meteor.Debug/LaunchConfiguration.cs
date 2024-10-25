@@ -9,7 +9,7 @@ public class LaunchConfiguration {
     public Project Project { get; init; }
     public DeviceData Device { get; init; }
     public string ProgramPath { get; init; }
-    public string AssembliesPath { get; init; }
+    public string AssetsPath { get; init; }
 
     public bool UninstallApp { get; init; }
     public int DebugPort { get; init; }
@@ -40,9 +40,7 @@ public class LaunchConfiguration {
         if (!File.Exists(ProgramPath) && !Directory.Exists(ProgramPath))
             ProgramPath = FindProgramPath(ProgramPath); // Last chance to get program path
 
-        AssembliesPath = Project.GetRelativePath(configurationProperties.TryGetValue("assemblies").ToClass<string>());
-        if (!ServerExtensions.IsAssembliesPath(AssembliesPath))
-            AssembliesPath = FindAssembliesPath(AssembliesPath); // Last chance to get assemblies path
+        AssetsPath = Project.GetRelativePath(configurationProperties.TryGetValue("assets").ToClass<string>());
     }
 
     public string GetApplicationName() {
@@ -62,6 +60,9 @@ public class LaunchConfiguration {
 
         return new NoDebugLaunchAgent(this);
     }
+    public string GetAssembliesPath() {
+        return Path.GetDirectoryName(ProgramPath)!;
+    }
 
     private string FindProgramPath(string programPath) {
         if (string.IsNullOrEmpty(programPath))
@@ -80,15 +81,6 @@ public class LaunchConfiguration {
         }
 
         throw ServerExtensions.GetProtocolException($"Incorrect path to program: '{ProgramPath}'");
-    }
-    private string FindAssembliesPath(string assembliesPath) {
-        if (!string.IsNullOrEmpty(Device.Arch)) {
-            var archPath = Path.Combine(assembliesPath, Device.Arch);
-            if (ServerExtensions.IsAssembliesPath(archPath))
-                return archPath;
-        }
-
-        return Path.GetDirectoryName(ProgramPath)!;
     }
 
     private enum ProfilerMode { None, Trace, GCDump }

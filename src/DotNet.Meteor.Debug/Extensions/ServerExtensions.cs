@@ -40,12 +40,6 @@ public static class ServerExtensions {
             File.Delete(path);
         return !File.Exists(path);
     }
-    public static bool IsAssembliesPath(string path) {
-        if (string.IsNullOrEmpty(path) || !Directory.Exists(path))
-            return false;
-
-        return Directory.GetFiles(path, "*.dll").Length > 0;
-    }
     public static ProtocolException GetProtocolException(string message) {
         return new ProtocolException(message, 0, message, url: $"file://{LogConfig.DebugLogFile}");
     }

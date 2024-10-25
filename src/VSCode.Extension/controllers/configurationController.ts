@@ -133,9 +133,9 @@ export class ConfigurationController {
 
         return undefined;
     }
-    public static getAssembliesPath(project: Project, configuration: string, device: Device): string | undefined {
+    public static getAssetsPath(project: Project, configuration: string, device: Device): string | undefined {
         if (!ConfigurationController.isAndroid())
-            return undefined; // Will be resolved on Debug Adapter side
+            return undefined;
 
         const assembliesDir = InteropController.getPropertyValue('MonoAndroidIntermediateAssemblyDir', project, configuration, device);
         return assembliesDir;
