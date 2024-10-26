@@ -9,6 +9,7 @@ public class LaunchConfiguration {
     public Project Project { get; init; }
     public DeviceData Device { get; init; }
     public string ProgramPath { get; init; }
+    public string AssetsPath { get; init; }
 
     public bool UninstallApp { get; init; }
     public int DebugPort { get; init; }
@@ -38,6 +39,8 @@ public class LaunchConfiguration {
         ProgramPath = Project.GetRelativePath(configurationProperties.TryGetValue("program").ToClass<string>());
         if (!File.Exists(ProgramPath) && !Directory.Exists(ProgramPath))
             ProgramPath = FindProgramPath(ProgramPath); // Last chance to get program path
+
+        AssetsPath = Project.GetRelativePath(configurationProperties.TryGetValue("assets").ToClass<string>());
     }
 
     public string GetApplicationName() {
@@ -46,11 +49,6 @@ public class LaunchConfiguration {
 
         var assemblyName = Path.GetFileNameWithoutExtension(ProgramPath);
         return assemblyName.Replace("-Signed", "");
-    }
-    public string GetAssemblyPath() {
-        // We need to use this location because all assemblies,
-        // located inside app, are broken since net9.0 
-        return Path.GetDirectoryName(ProgramPath)!;
     }
     public BaseLaunchAgent GetLaunchAgent() {
         if (Profiler == ProfilerMode.Trace)
@@ -61,6 +59,9 @@ public class LaunchConfiguration {
             return new DebugLaunchAgent(this);
 
         return new NoDebugLaunchAgent(this);
+    }
+    public string GetAssembliesPath() {
+        return Path.GetDirectoryName(ProgramPath)!;
     }
 
     private string FindProgramPath(string programPath) {

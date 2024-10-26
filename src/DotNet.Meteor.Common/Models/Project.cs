@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using DotNet.Meteor.Common.Extensions;
 using SystemPath = System.IO.Path;
 
 namespace DotNet.Meteor.Common;
@@ -19,6 +20,7 @@ public class Project {
     }
 
     public string GetRelativePath(string? path) {
+        path = path?.ToPlatformPath();
         if (string.IsNullOrEmpty(path) || SystemPath.IsPathRooted(path))
             return path ?? string.Empty;
 
