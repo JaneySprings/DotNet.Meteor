@@ -22,7 +22,7 @@ public class DebugLaunchAgent : BaseLaunchAgent {
         ArgumentNullException.ThrowIfNull(startArguments, "Debugger connection arguments not implemented.");
 
         startInformation = new SoftDebuggerStartInfo(startArguments);
-        startInformation.SetAssemblies(configuration.GetAssemblyPath(), configuration.DebuggerSessionOptions);
+        startInformation.SetAssemblies(configuration.GetAssembliesPath(), configuration.DebuggerSessionOptions);
     }
     public override void Launch(IProcessLogger logger) {
         if (Configuration.Device.IsAndroid)
@@ -86,6 +86,9 @@ public class DebugLaunchAgent : BaseLaunchAgent {
         AndroidDebugBridge.Install(Configuration.Device.Serial, Configuration.ProgramPath, logger);
         AndroidDebugBridge.Shell(Configuration.Device.Serial, "setprop", "debug.mono.connect", $"port={Configuration.DebugPort}");
         AndroidDebugBridge.Shell(Configuration.Device.Serial, "am", "set-debug-app", applicationId);
+
+        AndroidFastDev.TryPushAssemblies(Configuration.Device, Configuration.AssetsPath, applicationId, logger);
+
         AndroidDebugBridge.Launch(Configuration.Device.Serial, applicationId, logger);
         AndroidDebugBridge.Flush(Configuration.Device.Serial);
 

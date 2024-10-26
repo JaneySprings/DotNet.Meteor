@@ -14,6 +14,9 @@ public class ProcessResult {
     public string GetOutput() {
         return string.Join(Environment.NewLine, this.StandardOutput);
     }
+    public string GetError() {
+        return string.Join(Environment.NewLine, this.StandardError);
+    }
 
     internal ProcessResult(List<string> stdOut, List<string> stdErr, int exitCode) {
         this.StandardOutput = stdOut;

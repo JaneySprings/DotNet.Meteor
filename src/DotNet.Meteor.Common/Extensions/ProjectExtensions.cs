@@ -98,4 +98,7 @@ public static class ProjectExtensions {
             .Replace("\\\\", $"{System.IO.Path.DirectorySeparatorChar}")
             .Replace("//", $"{System.IO.Path.DirectorySeparatorChar}");
     }
+    public static string TrimPathEnd(this string path) {
+        return path.TrimEnd(System.IO.Path.DirectorySeparatorChar);
+    }
 }

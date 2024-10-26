@@ -14,11 +14,6 @@ export class InteropController {
         InteropController.workspaceToolPath = path.join(context.extensionPath, "extension", "bin", "Workspace", "DotNet.Meteor.Workspace" + executableExtension);
     }
 
-    public static async runEmulator(emuName: string): Promise<string> {
-        return await ProcessRunner.runAsync<string>(new ProcessArgumentBuilder(InteropController.workspaceToolPath)
-            .append("--run-emulator")
-            .append(emuName));
-    }
     public static async getDevices(): Promise<Device[]> {
         return await ProcessRunner.runAsync<Device[]>(new ProcessArgumentBuilder(InteropController.workspaceToolPath)
             .append("--all-devices"));

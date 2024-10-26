@@ -169,6 +169,9 @@
               "program": {
                 "type": "string"
               },
+              "assets": {
+                "type": "string"
+              },
               "project": {
                 "type": "object"
               },

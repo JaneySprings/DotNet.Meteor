@@ -21,15 +21,10 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
             .conditional(`-p:RuntimeIdentifier=${ConfigurationController.device?.runtime_id}`, () => ConfigurationController.device?.runtime_id)
 
         if (ConfigurationController.isAndroid()) {
-            // TODO: FastDev
-            // builder.conditional('-t:Run', () => !ConfigurationController.profiler)
-            // builder.conditional('-p:AndroidAttachDebugger=true', () => !ConfigurationController.profiler && !ConfigurationController.noDebug);
-            // builder.conditional(`-p:AndroidSdbTargetPort=${ConfigurationController.getDebuggingPort()}`, () => !ConfigurationController.profiler && !ConfigurationController.noDebug);
-            // builder.conditional(`-p:AndroidSdbHostPort=${ConfigurationController.getDebuggingPort()}`, () => !ConfigurationController.profiler && !ConfigurationController.noDebug);
-            // builder.conditional(`-p:AdbTarget=-s%20${ConfigurationController.device?.serial}`, () => !ConfigurationController.profiler);
-            builder.append('-p:EmbedAssembliesIntoApk=true');
-            builder.append('-p:CopyLocalLockFileAssemblies=true'); // because all DLLs inside app are broken
             builder.append(`-p:AndroidSdkDirectory=${ConfigurationController.androidSdkDirectory}`);
+            builder.conditional('-p:AndroidIncludeDebugSymbols=true', () => !ConfigurationController.profiler);
+            builder.conditional('-p:CopyLocalLockFileAssemblies=true', () => !ConfigurationController.profiler); // Just for shared code
+            builder.conditional('-p:EmbedAssembliesIntoApk=true', () => ConfigurationController.profiler);
             builder.conditional('-p:AndroidEnableProfiler=true', () => ConfigurationController.profiler);
         }
         if (ConfigurationController.isAppleMobile()) {
