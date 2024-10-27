@@ -12,6 +12,7 @@ namespace DotNet.Meteor.Debug;
 public class DebugLaunchAgent : BaseLaunchAgent {
     private readonly SoftDebuggerStartArgs startArguments;
     private readonly SoftDebuggerStartInfo startInformation;
+    private readonly ExternalTypeResolver typeResolver;
 
     public DebugLaunchAgent(LaunchConfiguration configuration) : base(configuration) {
         if (configuration.Device.IsAndroid || (configuration.Device.IsIPhone && !configuration.Device.IsEmulator))
@@ -21,6 +22,7 @@ public class DebugLaunchAgent : BaseLaunchAgent {
 
         ArgumentNullException.ThrowIfNull(startArguments, "Debugger connection arguments not implemented.");
 
+        typeResolver = new ExternalTypeResolver(configuration.TransportId);
         startInformation = new SoftDebuggerStartInfo(startArguments);
         startInformation.SetAssemblies(configuration.GetAssembliesPath(), configuration.DebuggerSessionOptions);
     }
@@ -36,6 +38,10 @@ public class DebugLaunchAgent : BaseLaunchAgent {
     }
     public override void Connect(SoftDebuggerSession session) {
         session.Run(startInformation, Configuration.DebuggerSessionOptions);
+        if (typeResolver.TryConnect()) {
+            Disposables.Add(() => typeResolver.Dispose());
+            session.TypeResolverHandler = typeResolver.Resolve;
+        }
     }
 
     private void LaunchAppleMobile(IProcessLogger logger) {
