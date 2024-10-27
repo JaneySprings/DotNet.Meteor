@@ -15,6 +15,7 @@ public class LaunchConfiguration {
     public int DebugPort { get; init; }
     public int ReloadHostPort { get; init; }
     public int ProfilerPort { get; init; }
+    public string? TransportId { get; init; }
     public DebuggerSessionOptions DebuggerSessionOptions { get; init; }
 
     private ProfilerMode Profiler { get; init; }
@@ -30,6 +31,7 @@ public class LaunchConfiguration {
         ReloadHostPort = configurationProperties.TryGetValue("reloadHost").ToValue<int>();
         ProfilerPort = configurationProperties.TryGetValue("profilerPort").ToValue<int>();
         Profiler = configurationProperties.TryGetValue("profilerMode").ToValue<ProfilerMode>();
+        TransportId = configurationProperties.TryGetValue("transportId").ToClass<string>();
         DebuggerSessionOptions = configurationProperties.TryGetValue("debuggerOptions")?.ToClass<DebuggerSessionOptions>() 
             ?? ServerExtensions.DefaultDebuggerOptions;
 

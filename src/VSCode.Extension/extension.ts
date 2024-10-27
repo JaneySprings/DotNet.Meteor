@@ -6,8 +6,8 @@ import { InteropController } from './controllers/interopController';
 import { StateController } from './controllers/stateController';
 import { PublicExports } from './publicExports';
 import { ModulesView } from './features/modulesView';
-import { HotReload } from './features/hotReload';
-import { XamlServer } from './features/xamlServer';
+import { MauiEssentials } from './features/mauiEssentials';
+import { ExternalTypeResolver } from './features/externalTypeResolver';
 import * as res from './resources/constants';
 import * as vscode from 'vscode';
 
@@ -25,8 +25,8 @@ export function activate(context: vscode.ExtensionContext): PublicExports | unde
 	StatusBarController.update();
 
 	ModulesView.feature.activate(context);
-	HotReload.feature.activate(context);
-	XamlServer.feature.activate(context);
+	MauiEssentials.feature.activate(context);
+	ExternalTypeResolver.feature.activate(context);
 	
 	context.subscriptions.push(vscode.commands.registerCommand(res.commandIdSelectActiveProject, StatusBarController.showQuickPickProject));
 	context.subscriptions.push(vscode.commands.registerCommand(res.commandIdSelectActiveConfiguration, StatusBarController.showQuickPickConfiguration));

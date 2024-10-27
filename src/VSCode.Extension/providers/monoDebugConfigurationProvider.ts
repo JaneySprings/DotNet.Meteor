@@ -1,12 +1,12 @@
 import { ConfigurationController } from '../controllers/configurationController';
-import { WorkspaceFolder, DebugConfiguration } from 'vscode';
+import { ExternalTypeResolver } from '../features/externalTypeResolver';
 import * as res from '../resources/constants';
 import * as vscode from 'vscode';
 
 export class MonoDebugConfigurationProvider implements vscode.DebugConfigurationProvider {
-	async resolveDebugConfiguration(folder: WorkspaceFolder | undefined, 
-									config: DebugConfiguration, 
-									token?: vscode.CancellationToken): Promise<DebugConfiguration | undefined> {
+	async resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, 
+									config: vscode.DebugConfiguration, 
+									token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration | undefined> {
 		
 		ConfigurationController.profiler = config.profilerMode;
 		ConfigurationController.noDebug = config.noDebug;
@@ -45,6 +45,7 @@ export class MonoDebugConfigurationProvider implements vscode.DebugConfiguration
 			return config;
 		}
 
+		config.transportId = ExternalTypeResolver.feature.transportId;
 		config.skipDebug = ConfigurationController.noDebug;
 		config.debuggingPort = ConfigurationController.getDebuggingPort();
 		config.uninstallApp = ConfigurationController.getUninstallAppOption();

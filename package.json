@@ -292,7 +292,7 @@
         "dotnetMeteor.debuggerOptions.useExternalTypeResolver": {
           "type": "boolean",
           "default": true,
-          "description": "%configuration.description.debuggerOptions.useExternalTypeResolver%"
+          "markdownDescription": "%configuration.description.debuggerOptions.useExternalTypeResolver%"
         },
         "dotnetMeteor.debuggerOptions.currentExceptionTag": {
           "type": "string",
