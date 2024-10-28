@@ -28,8 +28,10 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
             builder.conditional('-p:AndroidEnableProfiler=true', () => ConfigurationController.profiler);
         }
         if (ConfigurationController.isAppleMobile()) {
-            builder.conditional('-p:_BundlerDebug=true', () => !ConfigurationController.profiler);
-            builder.conditional('-p:MtouchProfiling=true', () => ConfigurationController.profiler);
+            // TODO: https://github.com/xamarin/xamarin-macios/issues/21530
+            // builder.conditional('-p:_BundlerDebug=true', () => !ConfigurationController.profiler);
+            // builder.conditional('-p:MtouchProfiling=true', () => ConfigurationController.profiler);
+            builder.append('-p:MtouchDebug=true');
         }
         if (ConfigurationController.isMacCatalyst()) {
             builder.conditional('-p:_BundlerDebug=true', () => !ConfigurationController.profiler);
