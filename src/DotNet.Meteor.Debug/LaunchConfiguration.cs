@@ -63,6 +63,20 @@ public class LaunchConfiguration {
         return new NoDebugLaunchAgent(this);
     }
     public string GetAssembliesPath() {
+        if (!Device.IsAndroid)
+            return Path.GetDirectoryName(ProgramPath)!;
+
+        if (Directory.Exists(AssetsPath) && Directory.GetFiles(AssetsPath, "*.dll").Length > 0)
+            return AssetsPath;
+
+        var platformAssetsPath = Path.Combine(AssetsPath, Architectures.X64);
+        if (Directory.Exists(platformAssetsPath) && Directory.GetFiles(platformAssetsPath, "*.dll").Length > 0)
+            return platformAssetsPath;
+
+        platformAssetsPath = Path.Combine(AssetsPath, Architectures.Arm64);
+        if (Directory.Exists(platformAssetsPath) && Directory.GetFiles(platformAssetsPath, "*.dll").Length > 0)
+            return platformAssetsPath;
+
         return Path.GetDirectoryName(ProgramPath)!;
     }
 
@@ -77,7 +91,8 @@ public class LaunchConfiguration {
                 return apkPaths[0];
         }
         if (Device.IsMacCatalyst || Device.IsIPhone) {
-            var appPaths = Directory.GetDirectories(programDirectory, "*.app");
+            var appExtension = RuntimeSystem.IsMacOS ? ".app" : ".ipa";
+            var appPaths = Directory.GetDirectories(programDirectory, $"*{appExtension}");
             if (appPaths.Length == 1)
                 return appPaths[0];
         }

@@ -48,3 +48,10 @@ public static class Runtimes {
     public const string iOSSimulatorX64 = "iossimulator-x64";
     public const string iOSSimulatorArm64 = "iossimulator-arm64";
 }
+
+public static class Architectures {
+    public const string Arm64 = "arm64-v8a";
+    public const string Arm = "armeabi-v7a";
+    public const string X64 = "x86_64";
+    public const string X86 = "x86";
+}

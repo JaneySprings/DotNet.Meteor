@@ -20,7 +20,7 @@ public class Project {
     }
 
     public string GetRelativePath(string? path) {
-        path = path?.ToPlatformPath();
+        path = path?.ToPlatformPath().TrimPathEnd();
         if (string.IsNullOrEmpty(path) || SystemPath.IsPathRooted(path))
             return path ?? string.Empty;
 

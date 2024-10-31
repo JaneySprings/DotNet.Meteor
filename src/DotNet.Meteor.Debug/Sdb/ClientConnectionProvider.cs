@@ -15,6 +15,8 @@ public class ClientConnectionProvider : SoftDebuggerStartArgs, ISoftDebuggerConn
     public ClientConnectionProvider(IPAddress host, int port, string appName) {
         this.appName = appName;
         this.endPoint = new IPEndPoint(host, port);
+        // On Windows and Linux we need to wait for the app to start manually
+        // One minute should be enough
         MaxConnectionAttempts = 120;
         TimeBetweenConnectionAttempts = 500;
     }

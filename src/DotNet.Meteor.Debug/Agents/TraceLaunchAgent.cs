@@ -11,19 +11,19 @@ namespace DotNet.Meteor.Debug;
 public class TraceLaunchAgent : BaseLaunchAgent {
     public TraceLaunchAgent(LaunchConfiguration configuration) : base(configuration) { }
     public override void Connect(SoftDebuggerSession session) { }
-    public override void Launch(IProcessLogger logger) {
+    public override void Launch(DebugSession debugSession) {
         var nettracePath = Path.Combine(Path.GetDirectoryName(Configuration.Project.Path)!, $"{Configuration.GetApplicationName()}.nettrace");
         var diagnosticPort = Path.Combine(RuntimeSystem.HomeDirectory, $"{Configuration.Device.Platform}-port.lock");
         ServerExtensions.TryDeleteFile(diagnosticPort);
 
         if (Configuration.Device.IsAndroid)
-            LaunchAndroid(logger, diagnosticPort, nettracePath);
+            LaunchAndroid(debugSession, diagnosticPort, nettracePath);
         if (Configuration.Device.IsIPhone)
-            LaunchAppleMobile(logger, diagnosticPort, nettracePath);
+            LaunchAppleMobile(debugSession, diagnosticPort, nettracePath);
         if (Configuration.Device.IsMacCatalyst)
-            LaunchMacCatalyst(logger, diagnosticPort, nettracePath);
+            LaunchMacCatalyst(debugSession, diagnosticPort, nettracePath);
         if (Configuration.Device.IsWindows)
-            LaunchWindows(logger, diagnosticPort, nettracePath);
+            LaunchWindows(debugSession, diagnosticPort, nettracePath);
 
         Disposables.Add(() => ServerExtensions.TryDeleteFile(diagnosticPort));
     }
@@ -31,20 +31,24 @@ public class TraceLaunchAgent : BaseLaunchAgent {
     private void LaunchAppleMobile(IProcessLogger logger, string diagnosticPort, string nettracePath) {
         if (Configuration.Device.IsEmulator) {
             var routerProcess = DSRouter.ClientToServer(diagnosticPort, $"127.0.0.1:{Configuration.ProfilerPort}", logger);
-            var simProcess = MonoLauncher.ProfileSim(Configuration.Device.Serial, Configuration.ProgramPath, $"127.0.0.1:{Configuration.ProfilerPort},suspend", new CatchStartLogger(logger, () => {
-                var traceProcess = Trace.Collect(diagnosticPort, nettracePath, logger);
-                Disposables.Insert(0, () => traceProcess.Terminate());
-            }));
+            var simProcess = MonoLauncher.ProfileSim(Configuration.Device.Serial, Configuration.ProgramPath, $"127.0.0.1:{Configuration.ProfilerPort},suspend",
+                new CatchStartLogger(logger, () => {
+                    var traceProcess = Trace.Collect(diagnosticPort, nettracePath, logger);
+                    Disposables.Insert(0, () => traceProcess.Terminate());
+                })
+            );
 
             Disposables.Add(() => routerProcess.Terminate());
             Disposables.Add(() => simProcess.Terminate());
         } else {
             var routerProcess = DSRouter.ServerToClient(diagnosticPort, $"127.0.0.1:{Configuration.ProfilerPort}", forwardApple: true, logger);
             MonoLauncher.InstallDev(Configuration.Device.Serial, Configuration.ProgramPath, logger);
-            var devProcess = MonoLauncher.ProfileDev(Configuration.Device.Serial, Configuration.ProgramPath, $"127.0.0.1:{Configuration.ProfilerPort},suspend,listen", new CatchStartLogger(logger, () => {
-                var traceProcess = Trace.Collect($"{diagnosticPort},connect", nettracePath, logger);
-                Disposables.Insert(0, () => traceProcess.Terminate());
-            }));
+            var devProcess = MonoLauncher.ProfileDev(Configuration.Device.Serial, Configuration.ProgramPath, $"127.0.0.1:{Configuration.ProfilerPort},suspend,listen",
+                new CatchStartLogger(logger, () => {
+                    var traceProcess = Trace.Collect($"{diagnosticPort},connect", nettracePath, logger);
+                    Disposables.Insert(0, () => traceProcess.Terminate());
+                })
+            );
 
             Disposables.Add(() => routerProcess.Terminate());
             Disposables.Add(() => devProcess.Terminate());
