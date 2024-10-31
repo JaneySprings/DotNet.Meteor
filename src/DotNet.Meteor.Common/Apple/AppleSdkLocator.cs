@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 using DotNet.Meteor.Common.Processes;
 
@@ -58,25 +59,41 @@ public static class AppleSdkLocator {
         return Directory.GetParent(sdkLocation)?.FullName ?? string.Empty;
     }
     public static string IDeviceLocation() {
-        string dotnetPath = AppleSdkLocator.DotNetRootLocation();
-        string sdkPath = Path.Combine(dotnetPath, "packs", "Microsoft.iOS.Windows.Sdk");
-        DirectoryInfo? newestTool = null;
+        var ideviceDirectory = Environment.GetEnvironmentVariable("IDEVICE_DIR");
+        if (Directory.Exists(ideviceDirectory))
+            return ideviceDirectory;
 
-        foreach (string directory in Directory.GetDirectories(sdkPath)) {
-            string idevicePath = Path.Combine(directory, "tools", "msbuild", "iOS", "imobiledevice-x64");
+        if (RuntimeSystem.IsLinux)
+            return Path.Combine("/usr", "bin"); // There is no 'Microsoft.iOS.Linux.Sdk' workload
 
-            if (Directory.Exists(idevicePath)) {
-                var tool = new DirectoryInfo(idevicePath);
+        var sdkPath = string.Empty;
+        var dotnetPacksPath = Path.Combine(AppleSdkLocator.DotNetRootLocation(), "packs");
+        var sdkPaths = Directory.GetDirectories(dotnetPacksPath, "Microsoft.iOS.Windows.Sdk.net*");
+        
+        if (sdkPaths.Length > 0)
+            sdkPath = sdkPaths.OrderByDescending(x => Path.GetFileName(x)).First();
+        if (string.IsNullOrEmpty(sdkPath))
+            sdkPath = Path.Combine(dotnetPacksPath, "Microsoft.iOS.Windows.Sdk");
+        if (!Directory.Exists(sdkPath))
+            throw new DirectoryNotFoundException("Could not find idevice tool");
 
-                if (newestTool == null || tool.CreationTime > newestTool.CreationTime)
-                    newestTool = tool;
-            }
-        }
+        var toolLocations = Directory.GetDirectories(sdkPath);
+        if (toolLocations.Length == 0)
+            throw new FileNotFoundException("Could not find idevice tool");
 
-        if (newestTool == null || !newestTool.Exists)
-            throw new DirectoryNotFoundException("imobiledevice-x64");
+        var latestToolDirectory = toolLocations.OrderByDescending(x => Path.GetFileName(x)).First();
+        return Path.Combine(latestToolDirectory, "tools", "msbuild", "iOS", "imobiledevice-x64");
+    }
+    public static bool IsAppleDriverRunning() {
+        if (RuntimeSystem.IsMacOS)
+            throw new PlatformNotSupportedException();
 
-        return newestTool.FullName;
+        if (!String.IsNullOrEmpty(Environment.GetEnvironmentVariable("USBMUXD_CHECK_BYPASS")))
+            return true;
+        
+        var processName = RuntimeSystem.IsWindows ? "AppleMobileDeviceProcess" : "usbmuxd";
+        var process = Process.GetProcessesByName(processName);
+        return process.Length > 0;
     }
 
     public static FileInfo SystemProfilerTool() {

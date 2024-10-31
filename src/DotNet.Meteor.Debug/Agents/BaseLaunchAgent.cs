@@ -7,7 +7,6 @@ namespace DotNet.Meteor.Debug;
 
 public abstract class BaseLaunchAgent {
     public const string CommandPrefix = "/";
-    public const string LanguageSeparator = "!";
 
     protected List<Action> Disposables { get; init; }
     protected LaunchConfiguration Configuration { get; init; }
@@ -20,7 +19,7 @@ public abstract class BaseLaunchAgent {
     }
 
     public abstract void Connect(SoftDebuggerSession session);
-    public abstract void Launch(IProcessLogger logger);
+    public abstract void Launch(DebugSession debugSession);
     public virtual void HandleCommand(string command, string args, IProcessLogger logger) { }
 
     public void HandleCommand(string command, IProcessLogger logger) {
@@ -38,7 +37,7 @@ public abstract class BaseLaunchAgent {
             new CompletionItem() { Label = ProcessedCommand, Type = CompletionItemType.Snippet }
         };
     }
-    public virtual void Dispose() {
+    public void Dispose() {
         foreach (var disposable in Disposables) {
             try {
                 disposable.Invoke();

@@ -7,6 +7,7 @@ namespace DotNet.Meteor.Common;
 public static class RuntimeSystem {
     public static bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
     public static bool IsMacOS => RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+    public static bool IsLinux => RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
     public static bool IsAarch64 => RuntimeInformation.ProcessArchitecture == Architecture.Arm64;
 
     public static string ExecExtension => IsWindows ? ".exe" : "";

@@ -14,7 +14,6 @@ public static class DeviceProvider {
             if (RuntimeSystem.IsWindows) {
                 devices.Add(WindowsDeviceTool.WindowsDevice());
                 debugHandler?.Invoke("Windows device added.");
-                //TODO: devices.Add(IDeviceTool.Info());
             }
         } catch (Exception e) { errorHandler?.Invoke(e); }
 
@@ -36,6 +35,10 @@ public static class DeviceProvider {
 
                 devices.AddRange(AppleDeviceTool.VirtualDevices().OrderBy(x => !x.IsRunning).ThenBy(x => x.Name));
                 debugHandler?.Invoke("Apple virtual devices added.");
+            } 
+            else if (AppleSdkLocator.IsAppleDriverRunning()) {
+                devices.AddRange(IDeviceTool.Info());
+                debugHandler?.Invoke("iOS device added.");
             }
         } catch (Exception e) { errorHandler?.Invoke(e); }
 
