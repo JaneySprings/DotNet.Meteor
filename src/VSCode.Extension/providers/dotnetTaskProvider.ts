@@ -31,6 +31,7 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
             // builder.conditional('-p:_BundlerDebug=true', () => !ConfigurationController.profiler);
             // builder.conditional('-p:MtouchProfiling=true', () => ConfigurationController.profiler);
             builder.append('-p:MtouchDebug=true');
+            builder.conditional('-p:BuildIpa=true', () => !ConfigurationController.onMac);
         }
         if (ConfigurationController.isMacCatalyst()) {
             builder.conditional('-p:_BundlerDebug=true', () => !ConfigurationController.profiler);

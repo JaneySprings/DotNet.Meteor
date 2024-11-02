@@ -1,3 +1,4 @@
+import { ConfigurationController } from './configurationController';
 import { ProcessArgumentBuilder } from '../interop/processArgumentBuilder';
 import { ProcessRunner } from '../interop/processRunner';
 import { Project } from '../models/project';
@@ -10,7 +11,7 @@ export class InteropController {
     private static workspaceToolPath: string;
 
     public static activate(context: vscode.ExtensionContext) {
-        const executableExtension = process.platform === 'win32' ? '.exe' : '';
+        const executableExtension = ConfigurationController.onWindows ? '.exe' : '';
         InteropController.workspaceToolPath = path.join(context.extensionPath, "extension", "bin", "Workspace", "DotNet.Meteor.Workspace" + executableExtension);
     }
 
