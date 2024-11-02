@@ -17,7 +17,7 @@ export class MauiEssentials {
 
     public async activate(context: vscode.ExtensionContext): Promise<void> {
         const agentExecutable = path.join(context.extensionPath, "extension", "bin", "HotReload", "DotNet.Meteor.HotReload");
-        const agentExtension = process.platform === 'win32' ? '.exe' : '';
+        const agentExtension = ConfigurationController.onWindows ? '.exe' : '';
         MauiEssentials.reloadAgentPath = agentExecutable + agentExtension;
         
         context.subscriptions.push(vscode.commands.registerCommand(res.commandIdXamlReplaceCode, async (edit) => {
@@ -67,7 +67,7 @@ export class MauiEssentials {
     private activateServer(context: vscode.ExtensionContext) {
         const extensionPath = context.extensionPath;
         const serverExecutable = path.join(extensionPath, "extension", "bin", "Xaml", "DotNet.Meteor.Xaml.LanguageServer");
-        const serverExtension = process.platform === 'win32' ? '.exe' : '';
+        const serverExtension = ConfigurationController.onWindows ? '.exe' : '';
         MauiEssentials.languageServerPath = serverExecutable + serverExtension;
         
         this.startServer();

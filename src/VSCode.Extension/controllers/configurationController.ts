@@ -14,6 +14,10 @@ export class ConfigurationController {
     public static device: Device | undefined;
     public static configuration: string | undefined;
 
+    public static onWindows: boolean = process.platform === 'win32';
+    public static onLinux: boolean = process.platform === 'linux';
+    public static onMac: boolean = process.platform === 'darwin';
+
     public static activate(context: ExtensionContext) {
         ConfigurationController.androidSdkDirectory = InteropController.getAndroidSdk();
     }
@@ -56,7 +60,9 @@ export class ConfigurationController {
             return ConfigurationController.getSetting(res.configIdMonoSdbDebuggerPortAndroid, res.configDefaultMonoSdbDebuggerPortAndroid);
 
         if (ConfigurationController.isAppleMobile() && !ConfigurationController.device?.is_emulator)
-            return ConfigurationController.getSetting(res.configIdMonoSdbDebuggerPortApple, res.configDefaultMonoSdbDebuggerPortApple);
+            return ConfigurationController.onMac
+                ? ConfigurationController.getSetting(res.configIdMonoSdbDebuggerPortApple, res.configDefaultMonoSdbDebuggerPortApple) 
+                : 10000; /* We can't specify the port on Windows or Linux, so we use the default one */
 
         return 0;
     }
@@ -127,7 +133,7 @@ export class ConfigurationController {
         if (ConfigurationController.isAppleMobile() || ConfigurationController.isMacCatalyst()) {
             const outDir = path.dirname(targetPath);
             const bundleName = InteropController.getPropertyValue('_AppBundleName', project, configuration, device);
-            const bundleExt = process.platform === 'darwin' ? '.app' : '.ipa';
+            const bundleExt = ConfigurationController.onMac ? '.app' : '.ipa';
             if (bundleName !== undefined)
                 return path.join(outDir, bundleName + bundleExt);
         }
