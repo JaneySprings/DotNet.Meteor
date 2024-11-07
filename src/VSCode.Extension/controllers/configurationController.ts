@@ -1,5 +1,5 @@
 import { window, workspace, ExtensionContext } from 'vscode';
-import { InteropController } from './interopController';
+import { Interop } from '../interop/interop';
 import { StatusBarController } from "./statusbarController";
 import { Project } from '../models/project';
 import { Device } from '../models/device';
@@ -19,7 +19,7 @@ export class ConfigurationController {
     public static onMac: boolean = process.platform === 'darwin';
 
     public static activate(context: ExtensionContext) {
-        ConfigurationController.androidSdkDirectory = InteropController.getAndroidSdk();
+        ConfigurationController.androidSdkDirectory = Interop.getAndroidSdk();
     }
 
     public static isMacCatalyst() { return ConfigurationController.device?.platform === 'maccatalyst'; }
@@ -115,13 +115,13 @@ export class ConfigurationController {
         return workspace.getConfiguration(res.configId).get(id);
     }
     public static getProgramPath(project: Project, configuration: string, device: Device): string | undefined {
-        const targetPath = InteropController.getPropertyValue('TargetPath', project, configuration, device);
+        const targetPath = Interop.getPropertyValue('TargetPath', project, configuration, device);
         if (targetPath === undefined)
             return undefined;
 
         if (ConfigurationController.isAndroid()) {
             const outDir = path.dirname(targetPath);
-            const packageName = InteropController.getPropertyValue('ApplicationId', project, configuration, device);
+            const packageName = Interop.getPropertyValue('ApplicationId', project, configuration, device);
             if (packageName !== undefined)
                 return path.join(outDir, packageName + '-Signed.apk');
         }
@@ -132,7 +132,7 @@ export class ConfigurationController {
         }
         if (ConfigurationController.isAppleMobile() || ConfigurationController.isMacCatalyst()) {
             const outDir = path.dirname(targetPath);
-            const bundleName = InteropController.getPropertyValue('_AppBundleName', project, configuration, device);
+            const bundleName = Interop.getPropertyValue('_AppBundleName', project, configuration, device);
             const bundleExt = ConfigurationController.onMac ? '.app' : '.ipa';
             if (bundleName !== undefined)
                 return path.join(outDir, bundleName + bundleExt);
@@ -144,7 +144,7 @@ export class ConfigurationController {
         if (!ConfigurationController.isAndroid())
             return undefined;
 
-        const assembliesDir = InteropController.getPropertyValue('MonoAndroidIntermediateAssemblyDir', project, configuration, device);
+        const assembliesDir = Interop.getPropertyValue('MonoAndroidIntermediateAssemblyDir', project, configuration, device);
         return assembliesDir;
     }
 } 

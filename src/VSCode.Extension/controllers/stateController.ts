@@ -38,6 +38,13 @@ export class StateController {
             StateController.context.workspaceState.update('target', ConfigurationController.configuration);
     }
 
+    public static getGlobal<TValue>(key: string): TValue | undefined {
+        return StateController.context?.globalState.get<TValue>(key);
+    }
+    public static putGlobal(key: string, value: any) {
+        StateController.context?.globalState.update(key, value);
+    }
+
     private static getDeviceId(device: Device | undefined): string {
         return device ? `${device.name}_${device.platform}_${device.os_version}` : 'null';
     }

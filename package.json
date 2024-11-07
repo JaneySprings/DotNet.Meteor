@@ -71,6 +71,11 @@
         "title": "%command.title.selectActiveDevice%"
       },
       {
+        "command": "dotnet-meteor.pairToMac",
+        "category": "%extension.displayName%",
+        "title": "%command.title.pairToMac%"
+      },
+      {
         "command": "dotnet-meteor.triggerHotReload",
         "category": "%extension.displayName%",
         "title": "%command.title.triggerHotReload%",
