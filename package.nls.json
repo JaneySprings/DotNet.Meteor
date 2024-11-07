@@ -4,6 +4,7 @@
 	"command.title.selectActiveProject": "Select workspace project",
 	"command.title.selectActiveConfiguration": "Select project configuration",
 	"command.title.selectActiveDevice": "Select device",
+	"command.title.pairToMac": "Pair to Mac",
 	"command.title.triggerHotReload": "Trigger Hot Reload",
 
 	"task.meteor.description.target": "Specifies whether the project should be build or published.",

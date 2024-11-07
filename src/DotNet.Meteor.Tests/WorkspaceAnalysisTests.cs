@@ -383,4 +383,30 @@ public class WorkspaceAnalysisTests: TestFixture {
         Assert.Equal("Debug,Release", string.Join(',', actual.Configurations));
         DeleteMockData();
     }
+    [Fact]
+    public void CustomConfigurations4Test() {
+        var propsReference = CreateCustomProps("MyProps.props", @"
+        <Project>
+            <PropertyGroup>
+                <TargetFrameworks>net8.0-ios</TargetFrameworks>
+                <OutputType>Exe</OutputType>
+                <UseMaui>true</UseMaui>
+                <Configurations>Custom</Configurations>
+            </PropertyGroup>
+        </Project>
+        ");
+        var projectPath = CreateMockProject(@$"
+        <Project Sdk=""Microsoft.NET.Sdk"">
+            <Import Project=""..\MyProps.props""/>
+        </Project>
+        ");
+        var actual = WorkspaceAnalyzer.AnalyzeProject(projectPath);
+
+        Assert.NotNull(actual);
+        Assert.Equal(ProjectName, actual.Name);
+        Assert.Equal(projectPath, actual.Path);
+        Assert.Equal(3, actual.Configurations.Count());
+        Assert.Equal("Custom,Debug,Release", string.Join(',', actual.Configurations));
+        DeleteMockData();
+    }
 }

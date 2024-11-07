@@ -20,6 +20,7 @@ export const commandIdActiveDeviceName = "dotnet-meteor.activeDeviceName";
 export const commandIdActiveDeviceSerial = "dotnet-meteor.activeDeviceSerial";
 export const commandIdTriggerHotReload = "dotnet-meteor.triggerHotReload";
 export const commandIdXamlReplaceCode = "dotnet-meteor.xaml.replaceCode";
+export const commandIdPairToMac = "dotnet-meteor.pairToMac";
 
 export const taskDefinitionId = "dotnet-meteor.task";
 export const taskDefinitionDefaultTarget = "build";
@@ -33,12 +34,15 @@ export const debuggerVsdbgId = "coreclr";
 export const extendedViewIdModules = "dotnet-meteor.modulesView";
 
 export const messageDebugWithProfilerNotSupported = "Unable to debug an application when profiler is enabled. Run the application without debugger.";
-export const messageDebugNotSupportedWin = "Mono Debugger cannot be attached to WinUI applications. You can run the application without debugger.";
+export const messageRemoteHostNotSupported = "Remote build is not supported on this platform.";
 export const messageDeviceNotExists = "Selected device does not exist anymore. Make sure that the chosen device is connected to your machine.";
 export const messageNoFrameworkFound = "Supported framework not found. Make sure you have selected a correct device.";
 export const messageNoProjectFound = "Selected project not found. Make sure you have selected a project in the status bar.";
 export const messageNoDeviceFound = "Incorrect selected device. Make sure you have selected a device.";
 export const messageDeviceLoading = "Fetching devices...";
+export const messageRemoteHostAddress = "Hostname or IP address";
+export const messageRemoteHostUsername = "Username";
+export const messageRemoteHostPassword = "Password";
 
 export const configId = "dotnetMeteor";
 

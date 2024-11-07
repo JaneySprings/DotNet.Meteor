@@ -2,23 +2,25 @@ import { MonoDebugConfigurationProvider } from './providers/monoDebugConfigurati
 import { DotNetTaskProvider } from './providers/dotnetTaskProvider';
 import { ConfigurationController } from './controllers/configurationController';
 import { StatusBarController } from './controllers/statusbarController';
-import { InteropController } from './controllers/interopController';
+import { Interop } from './interop/interop';
 import { StateController } from './controllers/stateController';
 import { PublicExports } from './publicExports';
 import { ModulesView } from './features/modulesView';
 import { MauiEssentials } from './features/mauiEssentials';
 import { ExternalTypeResolver } from './features/externalTypeResolver';
+import { RemoteHostProvider } from './features/removeHostProvider';
 import * as res from './resources/constants';
 import * as vscode from 'vscode';
 
 
 export function activate(context: vscode.ExtensionContext): PublicExports | undefined {
+	Interop.initialize(context.extensionPath);
+
 	if (vscode.workspace.workspaceFolders === undefined) 
 		return undefined;
 
 	const exports = new PublicExports();
 	
-	InteropController.activate(context);
 	ConfigurationController.activate(context);
 	StateController.activate(context);
 	StatusBarController.activate(context);
@@ -27,6 +29,7 @@ export function activate(context: vscode.ExtensionContext): PublicExports | unde
 	ModulesView.feature.activate(context);
 	MauiEssentials.feature.activate(context);
 	ExternalTypeResolver.feature.activate(context);
+	RemoteHostProvider.feature.activate(context);
 	
 	context.subscriptions.push(vscode.commands.registerCommand(res.commandIdSelectActiveProject, StatusBarController.showQuickPickProject));
 	context.subscriptions.push(vscode.commands.registerCommand(res.commandIdSelectActiveConfiguration, StatusBarController.showQuickPickConfiguration));

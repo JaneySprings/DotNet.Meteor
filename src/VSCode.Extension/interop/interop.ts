@@ -1,31 +1,30 @@
-import { ConfigurationController } from './configurationController';
-import { ProcessArgumentBuilder } from '../interop/processArgumentBuilder';
-import { ProcessRunner } from '../interop/processRunner';
+import { ConfigurationController } from '../controllers/configurationController';
+import { ProcessArgumentBuilder } from './processArgumentBuilder';
+import { ProcessRunner } from './processRunner';
 import { Project } from '../models/project';
 import { Device } from '../models/device';
-import * as vscode from 'vscode';
 import * as path from 'path';
 
 
-export class InteropController {
+export class Interop {
     private static workspaceToolPath: string;
 
-    public static activate(context: vscode.ExtensionContext) {
+    public static initialize(extensionPath : string) {
         const executableExtension = ConfigurationController.onWindows ? '.exe' : '';
-        InteropController.workspaceToolPath = path.join(context.extensionPath, "extension", "bin", "Workspace", "DotNet.Meteor.Workspace" + executableExtension);
+        Interop.workspaceToolPath = path.join(extensionPath, "extension", "bin", "Workspace", "DotNet.Meteor.Workspace" + executableExtension);
     }
 
     public static async getDevices(): Promise<Device[]> {
-        return await ProcessRunner.runAsync<Device[]>(new ProcessArgumentBuilder(InteropController.workspaceToolPath)
+        return await ProcessRunner.runAsync<Device[]>(new ProcessArgumentBuilder(Interop.workspaceToolPath)
             .append("--all-devices"));
     }
     public static async getProjects(folders: string[]): Promise<Project[]> {
-        return await ProcessRunner.runAsync<Project[]>(new ProcessArgumentBuilder(InteropController.workspaceToolPath)
+        return await ProcessRunner.runAsync<Project[]>(new ProcessArgumentBuilder(Interop.workspaceToolPath)
             .append("--analyze-workspace")
             .append(...folders));
     }
     public static getAndroidSdk(): string | undefined {
-        return ProcessRunner.runSync(new ProcessArgumentBuilder(InteropController.workspaceToolPath)
+        return ProcessRunner.runSync(new ProcessArgumentBuilder(Interop.workspaceToolPath)
             .append("--android-sdk-path"));
     }
     public static getPropertyValue(propertyName: string, project: Project, configuration: string, device: Device) : string | undefined {
