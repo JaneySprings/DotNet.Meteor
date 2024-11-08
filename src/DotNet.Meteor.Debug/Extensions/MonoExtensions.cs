@@ -45,6 +45,17 @@ public static class MonoExtensions {
     public static bool HasNullValue(this ObjectValue objectValue) {
         return objectValue.Value == "(null)";
     }
+    public static string ResolveValue(this ObjectValue variable, string value) {
+        var fullName = variable.TypeName;
+        if (string.IsNullOrEmpty(fullName))
+            return value;
+
+        var shortName = fullName.Split('.').Last();
+        if (!value.StartsWith($"new {shortName}"))
+            return value;
+
+        return value.Replace($"new {shortName}", $"new {fullName}");
+    }
     public static ThreadInfo? FindThread(this SoftDebuggerSession session, long id) {
         var process = session.GetProcesses().FirstOrDefault();
         if (process == null)

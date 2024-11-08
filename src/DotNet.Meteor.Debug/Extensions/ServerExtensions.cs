@@ -143,5 +143,14 @@ public static class ServerExtensions {
             RelativeFilePath = sourceLink?.RelativeFilePath,
         };
     }
+    public static DebugProtocol.SetVariableResponse ToSetVariableResponse(this DebugProtocol.Variable variable) {
+        return new DebugProtocol.SetVariableResponse {
+            Value = variable.Value,
+            Type = variable.Type,
+            VariablesReference = variable.VariablesReference,
+            NamedVariables = variable.NamedVariables,
+            IndexedVariables = variable.IndexedVariables,
+        };
+    }
 }
 
