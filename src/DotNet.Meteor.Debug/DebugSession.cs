@@ -51,6 +51,7 @@ public class DebugSession : Session {
             SupportsExceptionOptions = true,
             SupportsExceptionFilterOptions = true,
             SupportsCompletionsRequest = true,
+            SupportsSetVariable = true,
             CompletionTriggerCharacters = new List<string> { "." },
             ExceptionBreakpointFilters = new List<ExceptionBreakpointsFilter> {
                 ExceptionsFilter.AllExceptions
@@ -441,6 +442,22 @@ public class DebugSession : Session {
         });
     }
     #endregion Completions
+    #region SetVariable
+    protected override SetVariableResponse HandleSetVariableRequest(SetVariableArguments arguments) {
+        var variablesDelegate = variableHandles.Get(arguments.VariablesReference, null);
+        if (variablesDelegate == null)
+            throw new ProtocolException("VariablesReference not found");
+
+        var variables = variablesDelegate.Invoke();
+        var variable = variables.FirstOrDefault(v => v.Name == arguments.Name);
+        if (variable == null)
+            throw new ProtocolException("variable not found");
+        // No way to use ExternalTypeResolver for setting variables. Use hardcoded value
+        variable.SetValue(variable.ResolveValue(arguments.Value), session.Options.EvaluationOptions);
+        variable.Refresh();
+        return CreateVariable(variable).ToSetVariableResponse();
+    }
+    #endregion SetVariable
 
     private void TargetStopped(object? sender, MonoClient.TargetEventArgs e) {
         ResetHandles();
