@@ -12,6 +12,7 @@ public class DebugSession : Session {
     private BaseLaunchAgent launchAgent = null!;
 
     private readonly Handles<MonoClient.StackFrame> frameHandles = new Handles<MonoClient.StackFrame>();
+    private readonly Handles<MonoClient.SourceLocation> gotoHandles = new Handles<MonoClient.SourceLocation>();
     private readonly Handles<Func<MonoClient.ObjectValue[]>> variableHandles = new Handles<Func<MonoClient.ObjectValue[]>>();
     private readonly SoftDebuggerSession session = new SoftDebuggerSession();
 
@@ -52,6 +53,7 @@ public class DebugSession : Session {
             SupportsExceptionFilterOptions = true,
             SupportsCompletionsRequest = true,
             SupportsSetVariable = true,
+            SupportsGotoTargetsRequest = true,
             CompletionTriggerCharacters = new List<string> { "." },
             ExceptionBreakpointFilters = new List<ExceptionBreakpointsFilter> {
                 ExceptionsFilter.AllExceptions
@@ -231,12 +233,8 @@ public class DebugSession : Session {
     #region StackTrace
     protected override StackTraceResponse HandleStackTraceRequest(StackTraceArguments arguments) {
         return ServerExtensions.DoSafe(() => {
-            var thread = session.ActiveThread;
-            if (thread.Id != arguments.ThreadId) {
-                thread = session.FindThread(arguments.ThreadId);
-                thread?.SetActive();
-            }
-
+            // Avoid using 'session.ActiveThread' because its backtrace may be not actual
+            var thread = session.FindThread(arguments.ThreadId);
             var stackFrames = new List<DebugProtocol.StackFrame>();
             var bt = thread?.Backtrace;
 
@@ -458,6 +456,23 @@ public class DebugSession : Session {
         return CreateVariable(variable).ToSetVariableResponse();
     }
     #endregion SetVariable
+    #region GotoTargets
+    protected override GotoTargetsResponse HandleGotoTargetsRequest(GotoTargetsArguments arguments) {
+        var targetId = gotoHandles.Create(new MonoClient.SourceLocation(string.Empty, arguments.Source.Path, arguments.Line, arguments.Column ?? 1, 0, 0));
+        return arguments.ToJumpToCursorTarget(targetId);
+    }
+    protected override GotoResponse HandleGotoRequest(GotoArguments arguments) {
+        return ServerExtensions.DoSafe(() => {
+            var target = gotoHandles.Get(arguments.TargetId, null);
+            if (target == null)
+                throw new ProtocolException("GotoTarget not found");
+        
+            session.SetNextStatement(target.FileName, target.Line, target.Column);
+            return new GotoResponse();
+        });
+    }
+    #endregion GotoTargets
+
 
     private void TargetStopped(object? sender, MonoClient.TargetEventArgs e) {
         ResetHandles();
@@ -525,6 +540,7 @@ public class DebugSession : Session {
     private void ResetHandles() {
         variableHandles.Reset();
         frameHandles.Reset();
+        gotoHandles.Reset();
     }
     private DebugProtocol.Variable CreateVariable(MonoClient.ObjectValue v) {
         var childrenReference = 0;

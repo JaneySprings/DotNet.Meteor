@@ -152,5 +152,17 @@ public static class ServerExtensions {
             IndexedVariables = variable.IndexedVariables,
         };
     }
+    public static DebugProtocol.GotoTargetsResponse ToJumpToCursorTarget(this DebugProtocol.GotoTargetsArguments args, int id) {
+        return new DebugProtocol.GotoTargetsResponse { Targets = new List<DebugProtocol.GotoTarget>() {
+            new DebugProtocol.GotoTarget {
+                Id = id,
+                Label = "Jump to cursor",
+                Line = args.Line,
+                Column = args.Column,
+                EndLine = 0,
+                EndColumn = 0
+            }
+        }};
+    }
 }
 
