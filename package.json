@@ -204,7 +204,7 @@
         {
           "command": "dotnet-meteor.triggerHotReload",
           "group": "navigation2",
-          "when": "debugType == dotnet-meteor.debugger || debugType == coreclr"
+          "when": "dotnet-meteor.hotReloadEnabled"
         }
       ]
     },
