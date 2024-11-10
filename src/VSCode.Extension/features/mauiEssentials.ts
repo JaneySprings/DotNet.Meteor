@@ -8,18 +8,49 @@ import * as path from "path";
 export class MauiEssentials {
     public static feature : MauiEssentials = new MauiEssentials();
 
-    private static lanuageServerClient: LanguageClient;
-    private static languageServerPath: string;
-    private static reloadAgentPath: string;
+    private static hotReloadEnabledKey: string = `${res.extensionId}.hotReloadEnabled`;
 
-    private isProgrammaticalySaving: boolean = false;
+    private static languageServerPath: string;
+    private lanuageServerClient: LanguageClient | undefined;
+    
+    private static reloadAgentPath: string;
     private reloadAgent: ChildProcess | undefined;
 
+
     public async activate(context: vscode.ExtensionContext): Promise<void> {
+        // Deactivate if no XAML files are found
+        if ((await vscode.workspace.findFiles('**/*.xaml')).length <= 0)
+            return;
+
+        // Hot Reload
         const agentExecutable = path.join(context.extensionPath, "extension", "bin", "HotReload", "DotNet.Meteor.HotReload");
         const agentExtension = ConfigurationController.onWindows ? '.exe' : '';
         MauiEssentials.reloadAgentPath = agentExecutable + agentExtension;
-        
+
+        let isProgrammaticalySaving = false;
+        context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(ev => {
+            if (isProgrammaticalySaving)
+                return;
+            if (ConfigurationController.getSetting<boolean>(res.configIdApplyHotReloadChangesOnSave, true))
+                this.reloadDocumentChanges(ev.fileName);
+        }));
+        context.subscriptions.push(vscode.commands.registerCommand(res.commandIdTriggerHotReload, async () => {
+            if (vscode.window.activeTextEditor !== undefined) {
+                isProgrammaticalySaving = true;
+                await vscode.window.activeTextEditor.document.save();
+                isProgrammaticalySaving = false;
+
+                this.reloadDocumentChanges(vscode.window.activeTextEditor.document.fileName);
+            }
+        }));
+        context.subscriptions.push(vscode.debug.onDidStartDebugSession(ev => {
+            if ((ev.type === res.debuggerMeteorId || ev.type === res.debuggerVsdbgId))
+                MauiEssentials.feature.startAgent();
+        }));
+        context.subscriptions.push(vscode.debug.onDidTerminateDebugSession(ev => {
+            if (ev.type === res.debuggerMeteorId || ev.type === res.debuggerVsdbgId)
+                MauiEssentials.feature.stopAgent();
+        }));
         context.subscriptions.push(vscode.commands.registerCommand(res.commandIdXamlReplaceCode, async (edit) => {
             const newEdit = new vscode.WorkspaceEdit();
             const uri = vscode.Uri.parse(edit.TextDocument.Uri);
@@ -35,53 +66,26 @@ export class MauiEssentials {
                     await doc.save();
             });
         }));
-    
-        context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(ev => {
-            if (this.isProgrammaticalySaving)
-                return;
-            if (ConfigurationController.getSetting<boolean>(res.configIdApplyHotReloadChangesOnSave, true))
-                this.reloadDocumentChanges(ev.fileName);
-        }));
-        context.subscriptions.push(vscode.commands.registerCommand(res.commandIdTriggerHotReload, async () => {
-            if (vscode.window.activeTextEditor !== undefined) {
-                this.isProgrammaticalySaving = true;
-                await vscode.window.activeTextEditor.document.save();
-                this.isProgrammaticalySaving = false;
-
-                this.reloadDocumentChanges(vscode.window.activeTextEditor.document.fileName);
-            }
-        }));
-        context.subscriptions.push(vscode.debug.onDidStartDebugSession(ev => {
-            if (ev.type === res.debuggerMeteorId || ev.type === res.debuggerVsdbgId)
-                this.startAgent();
-        }));
-        context.subscriptions.push(vscode.debug.onDidTerminateDebugSession(ev => {
-            if (ev.type === res.debuggerMeteorId || ev.type === res.debuggerVsdbgId)
-                this.stopAgent();
-        }));
-
-        if ((await vscode.workspace.findFiles('**/*.xaml')).length > 0)
-            this.activateServer(context);
-    }
-
-    private activateServer(context: vscode.ExtensionContext) {
-        const extensionPath = context.extensionPath;
-        const serverExecutable = path.join(extensionPath, "extension", "bin", "Xaml", "DotNet.Meteor.Xaml.LanguageServer");
+        
+        // Language Server
+        const serverExecutable = path.join(context.extensionPath, "extension", "bin", "Xaml", "DotNet.Meteor.Xaml.LanguageServer");
         const serverExtension = ConfigurationController.onWindows ? '.exe' : '';
         MauiEssentials.languageServerPath = serverExecutable + serverExtension;
-        
-        this.startServer();
 
-        context.subscriptions.push(MauiEssentials.lanuageServerClient);
         context.subscriptions.push(vscode.tasks.onDidEndTaskProcess(ev => {
             if (ev.execution.task.definition.type.includes(res.taskDefinitionId) && ev.exitCode === 0)
-                this.restartServer();
+                MauiEssentials.feature.restartServer();
         }));
+        
+        MauiEssentials.feature.startServer();
+        if (MauiEssentials.feature.lanuageServerClient !== undefined)
+            context.subscriptions.push(MauiEssentials.feature.lanuageServerClient);
     }
-    private initialize() {
+
+    public startServer() {
         const serverArguments: string[] = [ /*ConfigurationController.project?.path ?? ""*/ ]; //TODO: Wait for initialization
         const serverOptions: ServerOptions = { command: MauiEssentials.languageServerPath, args: serverArguments };
-        MauiEssentials.lanuageServerClient = new LanguageClient(res.extensionId, res.extensionId, serverOptions, {
+        MauiEssentials.feature.lanuageServerClient = new LanguageClient(res.extensionId, res.extensionId, serverOptions, {
             diagnosticCollectionName: res.extensionDisplayName,
             synchronize: {
                 configurationSection: res.extensionId,
@@ -90,38 +94,35 @@ export class MauiEssentials {
                 maxRestartCount: 2,
             }
         });
-    }
-    public startServer() {
-        this.initialize();
-        MauiEssentials.lanuageServerClient.start();
+        MauiEssentials.feature.lanuageServerClient?.start();
     }
     public stopServer() {
-        MauiEssentials.lanuageServerClient.stop();
-        MauiEssentials.lanuageServerClient.dispose();
+        MauiEssentials.feature.lanuageServerClient?.stop();
+        MauiEssentials.feature.lanuageServerClient?.dispose();
     }
     public restartServer() {
-        this.stopServer();
-        this.startServer();
+        MauiEssentials.feature.stopServer();
+        MauiEssentials.feature.startServer();
     }
 
     private startAgent() {
-        if (this.reloadAgent !== undefined)
-            this.stopAgent();
+        if (MauiEssentials.feature.reloadAgent !== undefined)
+            MauiEssentials.feature.stopAgent();
         
         const args = [ process.pid.toString(), ConfigurationController.getReloadHostPort().toString(), 'universal'];
-        this.reloadAgent = spawn(MauiEssentials.reloadAgentPath, args);
+        MauiEssentials.feature.reloadAgent = spawn(MauiEssentials.reloadAgentPath, args);
+        vscode.commands.executeCommand('setContext', MauiEssentials.hotReloadEnabledKey, true);
     }
     private stopAgent() {
-        if (this.reloadAgent === undefined)
+        if (MauiEssentials.feature.reloadAgent === undefined)
             return;
         
-        this.reloadAgent.kill();
-        this.reloadAgent = undefined;
+        MauiEssentials.feature.reloadAgent.kill();
+        MauiEssentials.feature.reloadAgent = undefined;
+        vscode.commands.executeCommand('setContext', MauiEssentials.hotReloadEnabledKey, false);
     }
     private reloadDocumentChanges(path: string) {
-        if (this.reloadAgent === undefined || !path.endsWith('.xaml'))
-            return;
-
-        this.reloadAgent.stdin?.write(`${path}\n`);
+        if (MauiEssentials.feature.reloadAgent !== undefined && path.endsWith('.xaml'))
+            MauiEssentials.feature.reloadAgent.stdin?.write(`${path}\n`);
     }
 }
