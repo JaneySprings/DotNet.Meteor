@@ -1,35 +1,30 @@
-<p align="center">
-<img src="https://github.com/JaneySprings/DotNet.Meteor/raw/main/assets/header.jpg" width="1180px" alt=".NET Meteor" />
-<a href="https://dev.to/nromanov/boost-net-maui-development-productivity-6-powerful-features-of-net-meteor-for-vs-code-in-windows-mac-linux-d0b">Features</a> | <a href="https://github.com/JaneySprings/DotNet.Meteor/wiki">Documentation</a> | <a href="https://github.com/JaneySprings/DotNet.Meteor/issues">Support</a>
-
----
+<img src="https://github.com/JaneySprings/DotNet.Meteor/raw/main/assets/header.jpg" width="1180px" alt=".NET Meteor" align="center" />
 
 ## Overview
 
-&emsp;The .NET Meteor allows you to build, debug `.NET` apps and deploy them to devices or emulators.
+&emsp;The .NET Meteor extension allows you to build, debug and deploy **.NET apps** to devices or emulators.
 
 - **Cross-Platform** </br>
 You can use this extension in the `Windows`, `MacOS`, and `Linux` operation systems.
 
-- **XAML IntelliSense** </br>
-The extension provides you with a basic `XAML` syntax highlighting and shows snippets for .NET MAUI / third-party controls (it's necessary to build your project first).
-
-- **XAML Hot Reload** </br>
-Meteor support XAML Hot Reload for any platform. See the instruction below to enable Hot Reload in your project.
+- **No additional dependencies** </br>
+The extension doesn't require any additional extensions to work. You can use it out of the box.
 
 - **Performance and Memory Profiling** </br>
-You can profile your application to find performance bottlenecks and undisposed objects that persist in the memory.
+You can profile your application to find performance bottlenecks and undisposed objects that persist in the memory. See the instruction below to enable profiling in your project.
 
-- **MAUI Blazor Support** </br>
-The extension allows you to build and debug `MAUI Blazor` apps (including the `.razor` files).
+- **Debug iOS Devices on Windows with Pair to Mac** </br>
+Build your project on a remote Mac and deploy it to an iOS device connected to your Windows machine using the Pair to Mac feature. Check these [instructions](https://github.com/JaneySprings/DotNet.Meteor/wiki/Build-and-debug-iOS-application-on-Windows-with-Pair-to-Mac) for more details. Please note that only physical devices (not simulators) are currently supported.
 
-- **Multiple Folders in a Workspace** </br>
+- **Enhanced MAUI support** </br>
+The extension provides you with a `XAML intellisense` and `XAML Hot Reload` for any platform. See the instruction below to enable Hot Reload in your project.
+
+- **Multi-root Workspaces support** </br>
 You can use muliple folders in your workspace and change the current running project.
 
 - **F# support** </br>
 Your can build and debug projects, written in the `F#` language.
 
----
 
 ## Run the Application
 
@@ -43,7 +38,6 @@ Your can build and debug projects, written in the `F#` language.
 
 ![image](https://github.com/JaneySprings/DotNet.Meteor/raw/main/assets/demo_dbg.gif)
 
----
 
 ## Enable XAML Hot Reload
 
@@ -78,7 +72,6 @@ public static class MauiProgram
 
 ![image](https://github.com/JaneySprings/DotNet.Meteor/raw/main/assets/demo_hr.gif)
 
----
 
 ## Profile the Application
 
@@ -116,30 +109,19 @@ Conversion complete
 
 &emsp;*The profiler can capture and analyze functions executed within the Mono runtime. To profile native code, you can leverage platform-specific tools, such as Android Studio and Xcode.*
 
-### Troubleshooting
 
-**.NET Meteor** uses the `.NET Diagnostics` tools to profile applications. The process of profiling consists of two stages:
+## Troubleshooting
 
-1) `dsrouter` creates a connection between the application and the profiler.
-2) `dotnet-trace` or `dotnet-gcdump` captures the data.
+&emsp;**.NET Meteor** creates log files in the `~/.vscode/extensions/dotnet-meteor-*/extension/bin` folder. You can find the following logs:
+- `Workspace/Logs` - logs from the current workspace.
+- `Xaml/Logs` - logs from the XAML IntelliSense server.
+- `HotReload/Logs` - logs from the Hot Reload server.
+- `Debug/Logs` - log from the debugger and profiler.
 
-If you encounter any issues, please check the following:
+If checking the logs didn’t solve the issue, please open a new issue in this GitHub repository. Be sure to include a description of the problem along with the log files.
+
+&emsp;**.NET Meteor** uses the `.NET Diagnostics` tools to profile applications. If you encounter any issues, please check the following:
 
 - VSCode **Debug Console** tab should display a message about the successful connection. If you see the `Router stopped` message or something similar, the connection is not established. You can try to change the **profiler port** in the **.NET Meteor** settings.
 
 - When profiling is started, the **Debug Console** tab should display the `Output File:` message. If you don't see this message after running the app and displaying the first view (after the splash screen), try deleting the `bin` and `obj` folders and rerunning the project. *Sometimes the issue occurs when you frequently switch between the profiling and debugging modes.*
-
----
-
-## Compatibility
-
-&emsp;The following table lists supported .NET target platforms and their capabilities:
-
-| Application Type | Build and Run | Hot Reload | Debugging | Profiling |
-|-|:-:|:-:|:-:|:-:|
-| **WinUI** | ✅ | ✅ | ✅* | ✅ |
-| **Android** | ✅ | ✅ | ✅ | ✅ |
-| **iOS** | ✅ | ✅ | ✅ | ✅ |
-| **MacCatalyst** | ✅ | ✅ | ✅ | ✅ |
-
-&emsp;*For debugging of the WinUI applications you should install **one of the following** extensions: [C#](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csharp) or [DotRush.Essentials](https://github.com/JaneySprings/DotRush.Essentials/releases).*
