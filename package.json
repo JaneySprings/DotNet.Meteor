@@ -2,7 +2,7 @@
   "name": "dotnet-meteor",
   "publisher": "nromanov",
   "version": "1.0.0",
-  "description": "Run and Debug .NET Apps",
+  "description": "Run and Debug .NET Apps (MAUI, Avalonia, Xamarin.Native)",
   "displayName": ".NET Meteor",
   "author": "Nikita Romanov",
   "license": "MIT",
@@ -25,7 +25,9 @@
     "C#",
     ".NET",
     "MAUI",
-    "dotnet"
+    "dotnet",
+    "Xamarin",
+    "Avalonia"
   ],
   "activationEvents": [
     "onLanguage:csharp",
