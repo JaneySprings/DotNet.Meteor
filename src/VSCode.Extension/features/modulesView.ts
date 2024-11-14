@@ -57,13 +57,16 @@ export class ModulesView implements TreeDataProvider<any>, DebugAdapterTrackerFa
         const treeView = this;
         return {
             onDidSendMessage(message: any) {
-                if (message.type != 'event' || message.event != 'module')
+                if (message.type != 'event')
                     return;
-                if (message.body.reason != 'new')
-                    return;
-        
-                treeView.loadedModules.push(message.body.module);
-                treeView.treeViewDataChangedEmitter.fire(null);
+
+                if (message.event == 'module' && message.body.reason == 'new') {
+                    treeView.loadedModules.push(message.body.module);
+                    treeView.treeViewDataChangedEmitter.fire(null);
+                }
+                if (message.event == 'output' && message.body.category == 'important') {
+                    vscode.window.showInformationMessage(message.body.output, { modal: true });
+                }
             },
             onWillStopSession() {
                 treeView.loadedModules = [];
