@@ -138,7 +138,7 @@ export class ConfigurationController {
                 return path.join(outDir, bundleName + bundleExt);
         }
 
-        return undefined;
+        return targetPath;
     }
     public static getAssetsPath(project: Project, configuration: string, device: Device): string | undefined {
         if (!ConfigurationController.isAndroid())
@@ -146,5 +146,13 @@ export class ConfigurationController {
 
         const assembliesDir = Interop.getPropertyValue('MonoAndroidIntermediateAssemblyDir', project, configuration, device);
         return assembliesDir;
+    }
+
+    public static isVsdbgRequired(): boolean {
+        const framework = ConfigurationController.getTargetFramework();
+        if (framework === undefined)
+            return true;
+
+        return !framework.includes('-android') && !framework.includes('-ios') && !framework.includes('-maccatalyst');
     }
 } 

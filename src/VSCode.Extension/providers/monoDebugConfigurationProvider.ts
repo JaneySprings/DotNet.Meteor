@@ -37,7 +37,7 @@ export class MonoDebugConfigurationProvider implements vscode.DebugConfiguration
 		if (config.assets === undefined)
 			config.assets = ConfigurationController.getAssetsPath(config.project, config.configuration, config.device);
 
-		if (ConfigurationController.isWindows() && !ConfigurationController.profiler) {
+		if (ConfigurationController.isVsdbgRequired()) {
 			config.type = res.debuggerVsdbgId;
 			config.project = undefined;
 			config.configuration = undefined;

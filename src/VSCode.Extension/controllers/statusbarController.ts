@@ -66,19 +66,20 @@ export class StatusBarController {
     public static performSelectProject(item: Project | undefined = undefined) {
         ConfigurationController.project = item ?? StatusBarController.projects[0];
         StatusBarController.projectStatusItem.text = `${Icons.project} ${ConfigurationController.project?.name}`;
-        PublicExports.instance.projectChangedEventHandler.invoke(ConfigurationController.project);
+        PublicExports.instance.onActiveProjectChanged.invoke(ConfigurationController.project);
         StateController.saveProject();
     }
     public static performSelectConfiguration(item: string | undefined = undefined) {
         ConfigurationController.configuration = item ?? 'Debug';
         StatusBarController.targetStatusItem.text = `${Icons.target} ${ConfigurationController.configuration} | Any CPU`;
-        PublicExports.instance.configurationChangedEventHandler.invoke(ConfigurationController.configuration);
+        PublicExports.instance.onActiveConfigurationChanged.invoke(ConfigurationController.configuration);
         StateController.saveTarget();
     }
     public static performSelectDevice(item: Device | undefined = undefined) {
         ConfigurationController.device = item ?? StatusBarController.devices[0];
         StatusBarController.deviceStatusItem.text = `${Icons.deviceKind(ConfigurationController.device)} ${ConfigurationController.device?.name}`;
-        PublicExports.instance.deviceChangedEventHandler.invoke(ConfigurationController.device);
+        PublicExports.instance.onActiveDeviceChanged.invoke(ConfigurationController.device);
+        PublicExports.instance.onActiveFrameworkChanged.invoke(ConfigurationController.getTargetFramework());
         StateController.saveDevice();
     }
 
