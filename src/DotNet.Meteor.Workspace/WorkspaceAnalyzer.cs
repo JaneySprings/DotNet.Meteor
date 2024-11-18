@@ -33,11 +33,6 @@ public static class WorkspaceAnalyzer {
         project.Configurations = GetConfigurations(project);
         project.Frameworks = GetTargetFrameworks(project);
 
-        if (project.Frameworks?.FirstOrDefault(it => it.Contains("net", StringComparison.OrdinalIgnoreCase) && it.Contains('-')) == null) {
-            callback?.Invoke($"Skipping project {project.Name} because it does not contain a valid target framework.");
-            return null;
-        }
-
         return project;
     }
 
