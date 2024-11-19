@@ -407,9 +407,7 @@ public class DebugSession : Session {
             if (ex == null)
                 throw new ProtocolException("No exception available");
 
-            return new ExceptionInfoResponse(ex.Type, DebugProtocol.ExceptionBreakMode.Always) {
-                Description = ex.Message
-            };
+            return ex.ToExceptionInfoResponse();
         });
     }
     #endregion ExceptionInfo
