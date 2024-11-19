@@ -164,5 +164,30 @@ public static class ServerExtensions {
             }
         }};
     }
+    public static DebugProtocol.ExceptionInfoResponse ToExceptionInfoResponse(this ExceptionInfo exeption) {
+        return new DebugProtocol.ExceptionInfoResponse(exeption.Type, DebugProtocol.ExceptionBreakMode.Always) {
+            Description = exeption.Message,
+            Details = exeption.ToExceptionDetails(),
+        };
+    }
+    private static DebugProtocol.ExceptionDetails? ToExceptionDetails(this ExceptionInfo? exception) {
+        if (exception == null)
+            return null;
+        
+        var innerExceptions = new List<ExceptionInfo>();
+        if (exception.InnerException != null)
+            innerExceptions.Add(exception.InnerException);
+
+        var _innerExceptions = exception.InnerExceptions;
+        if (_innerExceptions != null)
+            innerExceptions.AddRange(_innerExceptions.Where(it => it != null));
+
+        return new DebugProtocol.ExceptionDetails {
+            FullTypeName = exception.Type,
+            Message = exception.Message,
+            InnerException = innerExceptions.Select(it => it.ToExceptionDetails()).ToList(),
+            StackTrace = string.Join('\n', exception.StackTrace?.Select(it => $"    at {it?.DisplayText} in {it?.File}:line {it?.Line}") ?? Array.Empty<string>())
+        };
+    }
 }
 
