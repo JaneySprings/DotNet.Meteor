@@ -76,9 +76,11 @@ export class ConfigurationController {
         return ConfigurationController.getSetting<boolean>(res.configIdUninstallApplicationBeforeInstalling, true);
     }
     public static getTargetFramework(): string | undefined {
-        return ConfigurationController.project?.frameworks.find(it => {
-            return it.includes(ConfigurationController.device?.platform ?? 'undefined');
-        });
+        const framework = ConfigurationController.project?.frameworks.find(it => it.includes(ConfigurationController.device?.platform ?? 'undefined'));
+        if (framework === undefined && (ConfigurationController.isWindows() || ConfigurationController.isMacCatalyst()))
+            return ConfigurationController.project?.frameworks.find(it => !it.includes('-'));
+
+        return framework;
     }
     public static getDebuggerOptions(): any {
         return {
