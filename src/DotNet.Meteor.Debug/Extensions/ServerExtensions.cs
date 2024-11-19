@@ -7,6 +7,7 @@ using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using DotNet.Meteor.Common;
 using Mono.Debugging.Soft;
 using System.Text.Json.Serialization;
+using System.Text;
 
 namespace DotNet.Meteor.Debug.Extensions;
 
@@ -186,8 +187,23 @@ public static class ServerExtensions {
             FullTypeName = exception.Type,
             Message = exception.Message,
             InnerException = innerExceptions.Select(it => it.ToExceptionDetails()).ToList(),
-            StackTrace = string.Join('\n', exception.StackTrace?.Select(it => $"    at {it?.DisplayText} in {it?.File}:line {it?.Line}") ?? Array.Empty<string>())
+            StackTrace = string.Join('\n', exception.StackTrace?.Select(it => it.ToStackTraceLine()) ?? Array.Empty<string>()),
         };
+    }
+    private static string ToStackTraceLine(this ExceptionStackFrame? frame) {
+        var sb = new StringBuilder();
+        if (frame?.DisplayText == null)
+            return "<unknown>";
+
+        sb.Append("    ");
+        if (!frame.DisplayText.StartsWith("at "))
+            sb.Append("at ");
+
+        sb.Append(frame.DisplayText);
+        if (!string.IsNullOrEmpty(frame.File))
+            sb.Append($" in {frame.File}:line {frame.Line}");
+
+        return sb.ToString();
     }
 }
 
