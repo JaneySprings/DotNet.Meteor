@@ -359,6 +359,36 @@
           "items": {
             "type": "string"
           }
+        },
+        "dotnetMeteor.debuggerOptions.skipNativeTransitions": {
+          "type": "boolean",
+          "default": true,
+          "description": "%configuration.description.debuggerOptions.skipNativeTransitions%"
+        },
+        "dotnetMeteor.debuggerOptions.stackFrameFormat.module": {
+          "type": "boolean",
+          "default": true,
+          "description": "%configuration.description.debuggerOptions.stackFrameFormat.module%"
+        },
+        "dotnetMeteor.debuggerOptions.stackFrameFormat.parameterTypes": {
+          "type": "boolean",
+          "default": false,
+          "description": "%configuration.description.debuggerOptions.stackFrameFormat.parameterTypes%"
+        },
+        "dotnetMeteor.debuggerOptions.stackFrameFormat.parameterValues": {
+          "type": "boolean",
+          "default": false,
+          "description": "%configuration.description.debuggerOptions.stackFrameFormat.parameterValues%"
+        },
+        "dotnetMeteor.debuggerOptions.stackFrameFormat.parameterNames": {
+          "type": "boolean",
+          "default": false,
+          "description": "%configuration.description.debuggerOptions.stackFrameFormat.parameterNames%"
+        },
+        "dotnetMeteor.debuggerOptions.stackFrameFormat.language": {
+          "type": "boolean",
+          "default": false,
+          "description": "%configuration.description.debuggerOptions.stackFrameFormat.language%"
         }
       }
     },

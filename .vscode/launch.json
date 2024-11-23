@@ -20,13 +20,13 @@
             "name": ".NET Core Debugger (attach)",
             "type": "coreclr",
             "request": "attach",
-            "processId": "${command:dotrush-essentials.pickProcess}"
+            "processId": "${command:dotrush.pickProcess}"
         },
         {
             "name": ".NET Core Debugger (launch)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "dotrush-essentials: Build"
+            "preLaunchTask": "dotrush: Build"
         }
     ]
 }
