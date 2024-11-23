@@ -1,4 +1,4 @@
-import { window, workspace, ExtensionContext } from 'vscode';
+import { window, workspace, ExtensionContext, DebugConfiguration } from 'vscode';
 import { Interop } from '../interop/interop';
 import { StatusBarController } from "./statusbarController";
 import { Project } from '../models/project';
@@ -115,6 +115,18 @@ export class ConfigurationController {
             searchMicrosoftSymbolServer: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsSearchMicrosoftSymbolServer),
             skipNativeTransitions: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsSkipNativeTransitions),
         };
+    }
+    public static convertMonoToVsdbgOptions(config: DebugConfiguration): DebugConfiguration {
+        config.justMyCode = false; //ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsProjectAssembliesOnly);
+        config.enableStepFiltering = ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsStepOverPropertiesAndOperators);
+        config.symbolOptions = {
+            searchPaths: ConfigurationController.getSettingOrDefault<string[]>(res.configIdDebuggerOptionsSymbolSearchPaths),
+            searchMicrosoftSymbolServer: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsSearchMicrosoftSymbolServer),
+        };
+        config.sourceLinkOptions = {
+            "*": { enabled: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsAutomaticSourcelinkDownload) }
+        }
+        return config;
     }
     public static getSetting<TResult>(id: string, fallback: TResult): TResult {
         return workspace.getConfiguration(res.configId).get(id) ?? fallback;
