@@ -98,8 +98,13 @@ export class ConfigurationController {
                 currentExceptionTag: ConfigurationController.getSettingOrDefault<string>(res.configIdDebuggerOptionsCurrentExceptionTag),
                 ellipsizeStrings: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsEllipsizeStrings),
                 ellipsizedLength: ConfigurationController.getSettingOrDefault<number>(res.configIdDebuggerOptionsEllipsizedLength),
-                StackFrameFormat: {
-
+                stackFrameFormat: {
+                    line: false, // VSCode already shows the line number
+                    module: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsStackFrameFormatModule),
+                    parameterTypes: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsStackFrameFormatParameterTypes),
+                    parameterValues: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsStackFrameFormatParameterValues),
+                    parameterNames: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsStackFrameFormatParameterNames),
+                    language: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsStackFrameFormatLanguage),
                 },
             },
             stepOverPropertiesAndOperators: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsStepOverPropertiesAndOperators),
@@ -108,6 +113,7 @@ export class ConfigurationController {
             symbolSearchPaths: ConfigurationController.getSettingOrDefault<string[]>(res.configIdDebuggerOptionsSymbolSearchPaths),
             sourceCodeMappings: ConfigurationController.getSettingOrDefault<any>(res.configIdDebuggerOptionsSourceCodeMappings),
             searchMicrosoftSymbolServer: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsSearchMicrosoftSymbolServer),
+            skipNativeTransitions: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsSkipNativeTransitions),
         };
     }
     public static getSetting<TResult>(id: string, fallback: TResult): TResult {

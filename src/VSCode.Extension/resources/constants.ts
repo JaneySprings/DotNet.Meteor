@@ -62,6 +62,8 @@ export const configIdUninstallApplicationBeforeInstalling = "uninstallApplicatio
 export const configIdApplyHotReloadChangesOnSave = "applyHotReloadChangesOnSave";
 
 export const configIdDebuggerOptions = "debuggerOptions";
+export const configIdStackFrameFormat = `${configIdDebuggerOptions}.stackFrameFormat`;
+
 export const configIdDebuggerOptionsEvaluationTimeout = `${configIdDebuggerOptions}.evaluationTimeout`;
 export const configIdDebuggerOptionsMemberEvaluationTimeout = `${configIdDebuggerOptions}.memberEvaluationTimeout`;
 export const configIdDebuggerOptionsAllowTargetInvoke = `${configIdDebuggerOptions}.allowTargetInvoke`;
@@ -82,3 +84,10 @@ export const configIdDebuggerOptionsSearchNuGetSymbolServer = `${configIdDebugge
 export const configIdDebuggerOptionsSourceCodeMappings = `${configIdDebuggerOptions}.sourceCodeMappings`;
 export const configIdDebuggerOptionsAutomaticSourcelinkDownload = `${configIdDebuggerOptions}.automaticSourcelinkDownload`;
 export const configIdDebuggerOptionsSymbolSearchPaths = `${configIdDebuggerOptions}.symbolSearchPaths`;
+export const configIdDebuggerOptionsSkipNativeTransitions = `${configIdDebuggerOptions}.skipNativeTransitions`;
+
+export const configIdDebuggerOptionsStackFrameFormatModule = `${configIdStackFrameFormat}.module`;
+export const configIdDebuggerOptionsStackFrameFormatParameterTypes = `${configIdStackFrameFormat}.parameterTypes`;
+export const configIdDebuggerOptionsStackFrameFormatParameterValues = `${configIdStackFrameFormat}.parameterValues`;
+export const configIdDebuggerOptionsStackFrameFormatParameterNames = `${configIdStackFrameFormat}.parameterNames`;
+export const configIdDebuggerOptionsStackFrameFormatLanguage = `${configIdStackFrameFormat}.language`;

@@ -42,5 +42,12 @@
 	"configuration.description.debuggerOptions.integerDisplayFormat": "Specifies the format of displayed integers in the debugging window.",
 	"configuration.description.debuggerOptions.sourceCodeMappings": "Modifies locations for the debugged source code by replacing values on the left with values on the right.",
 	"configuration.description.debuggerOptions.automaticSourcelinkDownload": "Automatically downloads source files from the SourceLink.",
-	"configuration.description.debuggerOptions.symbolSearchPaths": "Specifies the paths to search for symbols."
+	"configuration.description.debuggerOptions.symbolSearchPaths": "Specifies the paths to search for symbols.",
+	"configuration.description.debuggerOptions.skipNativeTransitions": "Specifies whether the debugger should skip native transitions in the call stack.",
+
+	"configuration.description.debuggerOptions.stackFrameFormat.module": "Display stack frame module in debugger.",
+	"configuration.description.debuggerOptions.stackFrameFormat.parameterTypes": "Display stack frame parameter types in debugger.",
+	"configuration.description.debuggerOptions.stackFrameFormat.parameterValues": "Display stack frame parameter values in debugger.",
+	"configuration.description.debuggerOptions.stackFrameFormat.parameterNames": "Display stack frame parameter names in debugger.",
+	"configuration.description.debuggerOptions.stackFrameFormat.language": "Display stack frame language type in debugger."
 }

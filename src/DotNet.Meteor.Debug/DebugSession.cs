@@ -250,6 +250,8 @@ public class DebugSession : Session {
                     stackFrames.Add(new DebugProtocol.StackFrame(0, "<unknown>", 0, 0));
                     continue;
                 }
+                if (frame.Language == "Transition" && session.Options.SkipNativeTransitions)
+                    continue;
 
                 DebugProtocol.Source? source = null;
                 var frameId = frameHandles.Create(frame);
@@ -267,7 +269,7 @@ public class DebugSession : Session {
                         AlternateSourceReference = frameId,
                         VsSourceLinkInfo = frame.SourceLocation.SourceLink.ToSourceLinkInfo(),
                         Name = string.IsNullOrEmpty(frame.SourceLocation.FileName)
-                            ? frame.FullModuleName
+                            ? Path.GetFileName(frame.FullModuleName)
                             : Path.GetFileName(frame.SourceLocation.FileName)
                     };
                 }
@@ -275,14 +277,16 @@ public class DebugSession : Session {
                 stackFrames.Add(new DebugProtocol.StackFrame() {
                     Id = frameId,
                     Source = source,
-                    Name = frame.SourceLocation.GetMethodName(),
+                    Name = frame.GetFullStackFrameText(),
                     Line = frame.SourceLocation.Line,
                     Column = frame.SourceLocation.Column,
                     EndLine = frame.SourceLocation.EndLine,
                     EndColumn = frame.SourceLocation.EndColumn,
-                    PresentationHint = frame.IsExternalCode
-                        ? StackFrame.PresentationHintValue.Subtle
-                        : StackFrame.PresentationHintValue.Normal
+                    PresentationHint = StackFrame.PresentationHintValue.Normal
+                    // VSCode does not focus the exceptions in the 'Subtle' presentation hint
+                    // PresentationHint = frame.IsExternalCode
+                    //     ? StackFrame.PresentationHintValue.Subtle
+                    //     : StackFrame.PresentationHintValue.Normal
                 });
             }
 
@@ -389,8 +393,11 @@ public class DebugSession : Session {
     protected override SourceResponse HandleSourceRequest(SourceArguments arguments) {
         return ServerExtensions.DoSafe(() => {
             var sourceLinkUri = arguments.Source.VsSourceLinkInfo?.Url;
-            if (!string.IsNullOrEmpty(sourceLinkUri) && session.Options.AutomaticSourceLinkDownload)
-                return new SourceResponse(SymbolServerExtensions.DownloadSourceFile(sourceLinkUri));
+            if (!string.IsNullOrEmpty(sourceLinkUri) && session.Options.AutomaticSourceLinkDownload) {
+                var content = SymbolServerExtensions.DownloadSourceFile(sourceLinkUri);
+                if (!string.IsNullOrEmpty(content))
+                    return new SourceResponse(content);
+            }
 
             var frame = frameHandles.Get(arguments.Source.AlternateSourceReference ?? -1, null);
             if (frame == null)

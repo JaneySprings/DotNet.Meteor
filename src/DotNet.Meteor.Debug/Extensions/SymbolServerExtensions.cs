@@ -97,11 +97,11 @@ public static class SymbolServerExtensions {
             return false;
         }
     }
-    private static async Task<string> GetFileContentAsync(string url) {
+    private static async Task<string?> GetFileContentAsync(string url) {
         try {
             using var response = await httpClient.GetAsync(url);
             if (!response.IsSuccessStatusCode)
-                return $"Error while loading file '{url}': {response.StatusCode}";
+                return null;
            
             using var content = response.Content;
             var data = await content.ReadAsByteArrayAsync();
