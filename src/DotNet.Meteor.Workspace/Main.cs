@@ -9,6 +9,7 @@ namespace DotNet.Meteor.Workspace;
 public class Program {
     private static readonly Logger logger = LogManager.GetCurrentClassLogger();
     public static readonly Dictionary<string, Action<string[]>> CommandHandler = new() {
+        { "--initialize", Initialize },
         { "--all-devices", AllDevices },
         { "--android-sdk-path", AndroidSdkPath },
         { "--analyze-workspace", AnalyzeWorkspace },
@@ -56,5 +57,12 @@ public class Program {
             projects.AddRange(WorkspaceAnalyzer.AnalyzeWorkspace(args[i], logger.Info));
 
         Console.WriteLine(JsonSerializer.Serialize(projects, TrimmableContext.Default.ListProject));
+    }
+    public static void Initialize(string[] args) {
+        // start android daemon (workaround for nodejs child_process hanging issue)
+        try { AndroidDebugBridge.StartServer(); } catch(Exception e) { logger.Error(e); }
+        // TODO: usbmuxd
+        // run usbmuxd manually
+        Console.WriteLine(JsonSerializer.Serialize(true, TrimmableContext.Default.Boolean));
     }
 }
