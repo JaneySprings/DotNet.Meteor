@@ -1,9 +1,9 @@
-import { window, workspace, ExtensionContext, DebugConfiguration } from 'vscode';
 import { Interop } from '../interop/interop';
 import { StatusBarController } from "./statusbarController";
 import { Project } from '../models/project';
 import { Device } from '../models/device';
 import * as res from '../resources/constants';
+import * as vscode from 'vscode';
 import * as path from 'path';
 
 export class ConfigurationController {
@@ -18,8 +18,14 @@ export class ConfigurationController {
     public static onLinux: boolean = process.platform === 'linux';
     public static onMac: boolean = process.platform === 'darwin';
 
-    public static activate(context: ExtensionContext) {
+    public static activate(context: vscode.ExtensionContext) {
         ConfigurationController.androidSdkDirectory = Interop.getAndroidSdk();
+
+        context.subscriptions.push(vscode.commands.registerCommand(res.commandIdActiveTargetFramework, () => ConfigurationController.getTargetFramework()));
+        context.subscriptions.push(vscode.commands.registerCommand(res.commandIdActiveConfiguration, () => ConfigurationController.configuration));
+        context.subscriptions.push(vscode.commands.registerCommand(res.commandIdActiveProjectPath, () => ConfigurationController.project?.path));
+        context.subscriptions.push(vscode.commands.registerCommand(res.commandIdActiveDeviceName, () => ConfigurationController.device?.name));
+        context.subscriptions.push(vscode.commands.registerCommand(res.commandIdActiveDeviceSerial, () => ConfigurationController.device?.serial));
     }
 
     public static isMacCatalyst() { return ConfigurationController.device?.platform === 'maccatalyst'; }
@@ -29,23 +35,23 @@ export class ConfigurationController {
 
     public static isValid(): boolean {
         if (!ConfigurationController.project?.path) {
-            window.showErrorMessage(res.messageNoProjectFound, { modal: true });
+            vscode.window.showErrorMessage(res.messageNoProjectFound, { modal: true });
             return false;
         }
         if (!ConfigurationController.device?.platform) {
-            window.showErrorMessage(res.messageNoDeviceFound, { modal: true });
+            vscode.window.showErrorMessage(res.messageNoDeviceFound, { modal: true });
             return false;
         }
         if (!ConfigurationController.getTargetFramework()) {
-            window.showErrorMessage(res.messageNoFrameworkFound, { modal: true });
+            vscode.window.showErrorMessage(res.messageNoFrameworkFound, { modal: true });
             return false;
         }
         if (!ConfigurationController.noDebug && ConfigurationController.profiler) {
-			window.showErrorMessage(res.messageDebugWithProfilerNotSupported, { modal: true });
+			vscode.window.showErrorMessage(res.messageDebugWithProfilerNotSupported, { modal: true });
 			return false;
 		}
         if (!StatusBarController.devices.some(it => it.name === ConfigurationController.device?.name)) {
-            window.showErrorMessage(res.messageDeviceNotExists, { modal: true });
+            vscode.window.showErrorMessage(res.messageDeviceNotExists, { modal: true });
             return false;
         }
 
@@ -116,7 +122,7 @@ export class ConfigurationController {
             skipNativeTransitions: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsSkipNativeTransitions),
         };
     }
-    public static convertMonoToVsdbgOptions(config: DebugConfiguration): DebugConfiguration {
+    public static convertMonoToVsdbgOptions(config: vscode.DebugConfiguration): vscode.DebugConfiguration {
         config.justMyCode = false; //ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsProjectAssembliesOnly);
         config.enableStepFiltering = ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsStepOverPropertiesAndOperators);
         config.symbolOptions = {
@@ -129,10 +135,10 @@ export class ConfigurationController {
         return config;
     }
     public static getSetting<TResult>(id: string, fallback: TResult): TResult {
-        return workspace.getConfiguration(res.configId).get(id) ?? fallback;
+        return vscode.workspace.getConfiguration(res.configId).get(id) ?? fallback;
     }
     public static getSettingOrDefault<TResult>(id: string): TResult | undefined {
-        return workspace.getConfiguration(res.configId).get(id);
+        return vscode.workspace.getConfiguration(res.configId).get(id);
     }
     public static getProgramPath(project: Project, configuration: string, device: Device): string | undefined {
         const targetPath = Interop.getPropertyValue('TargetPath', project, configuration, device);

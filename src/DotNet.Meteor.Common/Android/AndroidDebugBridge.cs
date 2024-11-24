@@ -174,4 +174,12 @@ public static class AndroidDebugBridge {
 
         return result.StandardOutput.FirstOrDefault() ?? string.Empty;
     }
+    public static bool StartServer() {
+        var adb = AndroidSdkLocator.AdbTool();
+        ProcessResult result = new ProcessRunner(adb, new ProcessArgumentBuilder()
+            .Append("start-server"))
+            .WaitForExit();
+
+        return result.Success;
+    }
 }

@@ -12,6 +12,13 @@ export class Interop {
     public static initialize(extensionPath : string) {
         const executableExtension = ConfigurationController.onWindows ? '.exe' : '';
         Interop.workspaceToolPath = path.join(extensionPath, "extension", "bin", "Workspace", "DotNet.Meteor.Workspace" + executableExtension);
+        Interop.init();
+    }
+
+    private static init() {
+        // This call is hanging because the child processes is not exiting
+        ProcessRunner.runAsync<boolean>(new ProcessArgumentBuilder(Interop.workspaceToolPath)
+            .append("--initialize"));
     }
 
     public static async getDevices(): Promise<Device[]> {
