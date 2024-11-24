@@ -45,9 +45,12 @@ public static class ServerExtensions {
         return new ProtocolException(message, 0, message, url: $"file://{LogConfig.DebugLogFile}");
     }
     public static int GetSourceReference(this StackFrame frame) {
-        var key = string.IsNullOrEmpty(frame.SourceLocation.FileName)
-            ? frame.SourceLocation.MethodName ?? "null"
-            : frame.SourceLocation.FileName;
+        var key = frame.SourceLocation.MethodName ?? "null";
+        if (!string.IsNullOrEmpty(frame.SourceLocation.FileName)) {
+            key = frame.SourceLocation.FileName;
+            if (frame.SourceLocation.FileName.Contains(".g.cs", StringComparison.OrdinalIgnoreCase))
+                key = $"{frame.SourceLocation.FileName}:{frame.SourceLocation.Line}";
+        }
         return Math.Abs(key.GetHashCode());
     }
     public static string? TrimExpression(this DebugProtocol.EvaluateArguments args) {
