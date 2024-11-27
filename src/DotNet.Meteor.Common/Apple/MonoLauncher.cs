@@ -8,7 +8,8 @@ public static class MonoLauncher {
         FileInfo tool = AppleSdkLocator.MLaunchTool();
         return new ProcessRunner(tool, new ProcessArgumentBuilder()
             .Append($"--tcp-tunnel={port}:{port}")
-            .Append($"--devname={serial}"), logger)
+            .Append($"--devname={serial}")
+            .Append( "--use-device-ctl=false"), logger)
             .Start();
     }
 
