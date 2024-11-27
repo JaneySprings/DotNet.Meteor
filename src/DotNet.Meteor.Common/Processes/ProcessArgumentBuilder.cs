@@ -18,6 +18,13 @@ public class ProcessArgumentBuilder {
         return this;
     }
 
+    public ProcessArgumentBuilder Conditional(string arg, Func<bool> condition) {
+        if (condition.Invoke())
+            this.args.Add(arg);
+
+        return this;
+    }
+
     public override string ToString() {
         return string.Join(" ", this.args);
     }

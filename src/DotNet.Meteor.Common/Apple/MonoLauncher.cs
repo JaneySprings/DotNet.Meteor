@@ -4,12 +4,15 @@ using DotNet.Meteor.Common.Processes;
 namespace DotNet.Meteor.Common.Apple;
 
 public static class MonoLauncher {
+    // https://github.com/xamarin/xamarin-macios/issues/21664
+    public static bool UseDeviceCtl { get; set; }
+
     public static Process TcpTunnel(string serial, int port, IProcessLogger? logger = null) {
         FileInfo tool = AppleSdkLocator.MLaunchTool();
         return new ProcessRunner(tool, new ProcessArgumentBuilder()
             .Append($"--tcp-tunnel={port}:{port}")
             .Append($"--devname={serial}")
-            .Append( "--use-device-ctl=false"), logger)
+            .Conditional("--use-device-ctl=false", () => !MonoLauncher.UseDeviceCtl), logger)
             .Start();
     }
 
@@ -18,7 +21,9 @@ public static class MonoLauncher {
         logger?.OnOutputDataReceived(tool.FullName);
         new ProcessRunner(tool, new ProcessArgumentBuilder()
             .Append( "--installdev").AppendQuoted(bundlePath)
-            .Append($"--devname={serial}"), logger)
+            .Append($"--devname={serial}")
+            .Append( "--install-progress")
+            .Conditional("--use-device-ctl=false", () => !MonoLauncher.UseDeviceCtl), logger)
             .WaitForExit();
     }
 
