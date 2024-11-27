@@ -59,4 +59,9 @@ public class OtherTests : TestFixture {
             Assert.Equal(expectedTargetFramework, dotnetDSRouterProject.EvaluateProperty("TargetFramework", "error4"));
         });
     }
+
+    [Fact]
+    public void ToolingDefaultsTest() {
+        Assert.False(Common.Apple.MonoLauncher.UseDeviceCtl, "UseDeviceCtl should be false: https://github.com/xamarin/xamarin-macios/issues/21664");
+    }
 }
