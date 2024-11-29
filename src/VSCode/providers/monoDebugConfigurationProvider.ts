@@ -42,7 +42,7 @@ export class MonoDebugConfigurationProvider implements vscode.DebugConfiguration
 			config.project = undefined;
 			config.configuration = undefined;
 			config.device = undefined;
-			return ConfigurationController.convertMonoToVsdbgOptions(config);
+			return ConfigurationController.getVsdbgOptions(config);
 		}
 
 		config.transportId = ExternalTypeResolver.feature.transportId;

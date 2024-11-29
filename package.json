@@ -40,7 +40,7 @@
   "scripts": {
     "vscode:prepublish": "npm run package",
     "compile": "webpack",
-    "watch": "tsc -watch -p ./src/VSCode.Extension/tsconfig.json",
+    "watch": "tsc -watch -p ./src/VSCode/tsconfig.json",
     "package": "webpack --mode production"
   },
   "dependencies": {

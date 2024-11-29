@@ -5,12 +5,15 @@ namespace DotNet.Meteor.Common.Android;
 
 public static class AndroidFastDev {
     public static void TryPushAssemblies(DeviceData device, string assetsPath, string applicationId, IProcessLogger? logger) {
+        assetsPath = assetsPath.TrimPathEnd();
         if (string.IsNullOrEmpty(assetsPath) || !Directory.Exists(assetsPath)) {
             logger?.OnErrorDataReceived($"[FastDev]: Path '{assetsPath}' is not valid or does not exist.");
             return;
         }
-
-        assetsPath = assetsPath.TrimPathEnd();
+        if (Directory.GetFiles(assetsPath, "*.dll", SearchOption.AllDirectories).Length == 0) {
+            logger?.OnErrorDataReceived($"[FastDev]: Skipping push, no assemblies found in '{assetsPath}'");
+            return;
+        }
 
         logger?.OnOutputDataReceived($"[FastDev]: Pushing '{assetsPath}' to device...");
         AndroidDebugBridge.Shell(device.Serial, "mkdir", "-p", $"/data/local/tmp/{applicationId}");

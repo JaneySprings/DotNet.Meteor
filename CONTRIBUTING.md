@@ -21,7 +21,7 @@ The `src/` folder contains the source code of the repository. It has the followi
 - `DotNet.Meteor.Workspace`: Tools for managing the workspace and the devices.
 - `DotNet.Meteor.Xaml`: Submodule that contains XAML Language Server (LSP) for .NET MAUI project.
 - `DotNet.Meteor.Tests`: Unit tests for the projects.
-- `VSCode.Extension`: Visual Studio Code extension.
+- `VSCode`: Visual Studio Code extension.
 
 ### Build the projects
 To build the projects, you can use the [build.cake](https://github.com/JaneySprings/DotNet.Meteor/blob/main/build.cake) script in the root folder. It will run the `vsix` target in the `debug` configuration by default:
