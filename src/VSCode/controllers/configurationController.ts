@@ -60,6 +60,13 @@ export class ConfigurationController {
     public static isActive(): boolean {
         return ConfigurationController.project !== undefined && ConfigurationController.device !== undefined;
     }
+    public static isVsdbgRequired(): boolean {
+        const framework = ConfigurationController.getTargetFramework();
+        if (framework === undefined)
+            return true;
+
+        return !framework.includes('-android') && !framework.includes('-ios') && !framework.includes('-maccatalyst');
+    }
 
     public static getDebuggingPort(): number {
         if (ConfigurationController.isAndroid())
@@ -122,7 +129,7 @@ export class ConfigurationController {
             skipNativeTransitions: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsSkipNativeTransitions),
         };
     }
-    public static convertMonoToVsdbgOptions(config: vscode.DebugConfiguration): vscode.DebugConfiguration {
+    public static getVsdbgOptions(config: vscode.DebugConfiguration): vscode.DebugConfiguration {
         config.justMyCode = false; //ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsProjectAssembliesOnly);
         config.enableStepFiltering = ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsStepOverPropertiesAndOperators);
         config.symbolOptions = {
@@ -172,13 +179,5 @@ export class ConfigurationController {
 
         const assembliesDir = Interop.getPropertyValue('MonoAndroidIntermediateAssemblyDir', project, configuration, device);
         return assembliesDir;
-    }
-
-    public static isVsdbgRequired(): boolean {
-        const framework = ConfigurationController.getTargetFramework();
-        if (framework === undefined)
-            return true;
-
-        return !framework.includes('-android') && !framework.includes('-ios') && !framework.includes('-maccatalyst');
     }
 } 
