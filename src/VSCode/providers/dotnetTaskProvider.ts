@@ -25,11 +25,11 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
             builder.append(`-p:AndroidSdkDirectory=${ConfigurationController.androidSdkDirectory}`);
             builder.conditional('-p:EmbedAssembliesIntoApk=true', () => ConfigurationController.profiler);
             builder.conditional('-p:AndroidEnableProfiler=true', () => ConfigurationController.profiler);
+            // TODO: https://github.com/dotnet/android/issues/9567
+            builder.conditional(`-p:AdbTarget=-s%20${ConfigurationController.device?.serial}`, () => ConfigurationController.device?.serial);
         }
         if (ConfigurationController.isAppleMobile()) {
             // TODO: https://github.com/xamarin/xamarin-macios/issues/21530
-            // builder.conditional('-p:_BundlerDebug=true', () => !ConfigurationController.profiler);
-            // builder.conditional('-p:MtouchProfiling=true', () => ConfigurationController.profiler);
             builder.append('-p:MtouchDebug=true');
             builder.conditional('-p:BuildIpa=true', () => !ConfigurationController.onMac);
         }
