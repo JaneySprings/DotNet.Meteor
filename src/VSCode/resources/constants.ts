@@ -43,6 +43,7 @@ export const messageDeviceLoading = "Fetching devices...";
 export const messageRemoteHostAddress = "Hostname or IP address";
 export const messageRemoteHostUsername = "Username";
 export const messageRemoteHostPassword = "Password";
+export const messageStartupProject = "Startup Project";
 
 export const configId = "dotnetMeteor";
 

@@ -10,11 +10,13 @@ import { SeparatorItem } from '../models/separatorItem';
 import { Icons } from '../resources/icons';
 import * as res from '../resources/constants';
 import * as vscode from 'vscode';
+import * as path from 'path';
 
 export class StatusBarController {
     private static projectStatusItem: vscode.StatusBarItem;
     private static targetStatusItem: vscode.StatusBarItem;
     private static deviceStatusItem: vscode.StatusBarItem;
+    private static projectDecorationProvider: StartupProjectDecorationProvider;
 
     public static projects: Project[];
     public static devices: Device[];
@@ -23,6 +25,7 @@ export class StatusBarController {
         StatusBarController.projectStatusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
         StatusBarController.targetStatusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 90);
         StatusBarController.deviceStatusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 80);
+        StatusBarController.projectDecorationProvider = new StartupProjectDecorationProvider();
 
         StatusBarController.targetStatusItem.command = res.commandIdSelectActiveConfiguration;
         StatusBarController.projectStatusItem.command = res.commandIdSelectActiveProject;
@@ -35,6 +38,7 @@ export class StatusBarController {
         context.subscriptions.push(vscode.commands.registerCommand(res.commandIdSelectActiveProject, StatusBarController.showQuickPickProject));
         context.subscriptions.push(vscode.commands.registerCommand(res.commandIdSelectActiveConfiguration, StatusBarController.showQuickPickConfiguration));
         context.subscriptions.push(vscode.commands.registerCommand(res.commandIdSelectActiveDevice, StatusBarController.showQuickPickDevice));
+        context.subscriptions.push(vscode.window.registerFileDecorationProvider(StatusBarController.projectDecorationProvider));
 
         context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(StatusBarController.update));
         context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(ev => {
@@ -71,6 +75,7 @@ export class StatusBarController {
         ConfigurationController.project = item ?? StatusBarController.projects[0];
         StatusBarController.projectStatusItem.text = `${Icons.project} ${ConfigurationController.project?.name}`;
         PublicExports.instance.onActiveProjectChanged.invoke(ConfigurationController.project);
+        StatusBarController.projectDecorationProvider.update(item);
         StateController.saveProject();
     }
     public static performSelectConfiguration(item: string | undefined = undefined) {
@@ -132,5 +137,39 @@ export class StatusBarController {
         picker.items = items;
         picker.placeholder = res.commandTitleSelectActiveDevice;
         picker.busy = false;
+    }
+}
+
+class StartupProjectDecorationProvider implements vscode.FileDecorationProvider {
+    private _onDidChangeFileDecorations: vscode.EventEmitter<vscode.Uri | vscode.Uri[] | undefined> = new vscode.EventEmitter<vscode.Uri | vscode.Uri[] | undefined>();
+    private startupProjectUri: vscode.Uri | undefined;
+    private startupProjectDirectoryUri: vscode.Uri | undefined;
+
+    public onDidChangeFileDecorations?: vscode.Event<vscode.Uri | vscode.Uri[] | undefined> | undefined = this._onDidChangeFileDecorations.event;
+    public provideFileDecoration(uri: vscode.Uri, token: vscode.CancellationToken): vscode.ProviderResult<vscode.FileDecoration> {
+        if (this.startupProjectUri === undefined || this.startupProjectDirectoryUri === undefined)
+            return undefined;
+
+        if (uri.fsPath !== this.startupProjectUri.fsPath && uri.fsPath !== this.startupProjectDirectoryUri.fsPath)
+            return undefined;
+
+        return { 
+            badge: '●',
+            color: new vscode.ThemeColor('list.focusHighlightForeground'), 
+            tooltip: res.messageStartupProject
+        };
+    }
+
+    public update(project: Project | undefined) {
+        if (project === undefined) {
+            this.startupProjectUri = undefined;
+            this.startupProjectDirectoryUri = undefined;
+            this._onDidChangeFileDecorations.fire(undefined);
+            return;
+        }
+
+        this.startupProjectUri = vscode.Uri.file(project.path);
+        this.startupProjectDirectoryUri = vscode.Uri.file(path.dirname(project.path));
+        this._onDidChangeFileDecorations.fire(undefined);
     }
 }
