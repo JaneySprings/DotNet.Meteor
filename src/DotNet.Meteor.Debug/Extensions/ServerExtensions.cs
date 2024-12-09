@@ -208,5 +208,10 @@ public static class ServerExtensions {
 
         return sb.ToString();
     }
+    public static string ToEnvString(this Dictionary<string, string> env) {
+        //https://github.com/dotnet/android/blob/b1241329f531b985b9c462b3f684e2ca3e0db98d/Documentation/workflow/SystemProperties.md#debugmonoenv
+        var envString = string.Join('|', env.Select(it => $"{it.Key}={it.Value}"));
+        return $"'{envString}'";
+    }
 }
 

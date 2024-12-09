@@ -17,20 +17,20 @@ public class NoDebugLaunchAgent : BaseLaunchAgent {
         if (Configuration.Device.IsMacCatalyst)
             LaunchMacCatalyst(debugSession);
         if (Configuration.Device.IsWindows)
-            LaunchWindows(debugSession);
+            throw new NotSupportedException();
     }
     public override void Connect(SoftDebuggerSession session) {}
 
     private void LaunchAppleMobile(DebugSession debugSession) {
         if (RuntimeSystem.IsMacOS) {
             if (Configuration.Device.IsEmulator) {
-                var appProcess = MonoLauncher.DebugSim(Configuration.Device.Serial, Configuration.ProgramPath, Configuration.DebugPort, debugSession);
+                var appProcess = MonoLauncher.DebugSim(Configuration.Device.Serial, Configuration.ProgramPath, Configuration.DebugPort, Configuration.EnvironmentVariables, debugSession);
                 Disposables.Add(() => appProcess.Terminate());
             } else {
                 var hotReloadPortForwarding = MonoLauncher.TcpTunnel(Configuration.Device.Serial, Configuration.ReloadHostPort, debugSession);
                 Disposables.Add(() => hotReloadPortForwarding.Terminate());
                 MonoLauncher.InstallDev(Configuration.Device.Serial, Configuration.ProgramPath, debugSession);
-                var appProcess = MonoLauncher.DebugDev(Configuration.Device.Serial, Configuration.ProgramPath, Configuration.DebugPort, debugSession);
+                var appProcess = MonoLauncher.DebugDev(Configuration.Device.Serial, Configuration.ProgramPath, Configuration.DebugPort, Configuration.EnvironmentVariables, debugSession);
                 Disposables.Add(() => appProcess.Terminate());
             }
         } else {
@@ -43,15 +43,12 @@ public class NoDebugLaunchAgent : BaseLaunchAgent {
     private void LaunchMacCatalyst(IProcessLogger logger) {
         var tool = AppleSdkLocator.OpenTool();
         var processRunner = new ProcessRunner(tool, new ProcessArgumentBuilder().AppendQuoted(Configuration.ProgramPath));
-        var result = processRunner.WaitForExit();
+        foreach (var env in Configuration.EnvironmentVariables)
+            processRunner.SetEnvironmentVariable(env.Key, env.Value);
 
+        var result = processRunner.WaitForExit();
         if (!result.Success)
             throw ServerExtensions.GetProtocolException(string.Join(Environment.NewLine, result.StandardError));
-    }
-    private void LaunchWindows(IProcessLogger logger) {
-        var program = new FileInfo(Configuration.ProgramPath);
-        var process = new ProcessRunner(program, new ProcessArgumentBuilder(), logger).Start();
-        Disposables.Add(() => process.Terminate());
     }
     private void LaunchAndroid(IProcessLogger logger) {
         var applicationId = Configuration.GetApplicationName();
@@ -65,6 +62,8 @@ public class NoDebugLaunchAgent : BaseLaunchAgent {
             AndroidDebugBridge.Uninstall(Configuration.Device.Serial, applicationId, logger);
 
         AndroidDebugBridge.Install(Configuration.Device.Serial, Configuration.ProgramPath, logger);
+        if (Configuration.EnvironmentVariables.Count != 0)
+            AndroidDebugBridge.Shell(Configuration.Device.Serial, "setprop", "debug.mono.env", Configuration.EnvironmentVariables.ToEnvString());
 
         AndroidFastDev.TryPushAssemblies(Configuration.Device, Configuration.AssetsPath, applicationId, logger);
 

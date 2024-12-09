@@ -47,14 +47,14 @@ public class DebugLaunchAgent : BaseLaunchAgent {
     private void LaunchAppleMobile(DebugSession debugSession) {
         if (RuntimeSystem.IsMacOS) {
             if (Configuration.Device.IsEmulator) {
-                var debugProcess = MonoLauncher.DebugSim(Configuration.Device.Serial, Configuration.ProgramPath, Configuration.DebugPort, debugSession);
+                var debugProcess = MonoLauncher.DebugSim(Configuration.Device.Serial, Configuration.ProgramPath, Configuration.DebugPort, Configuration.EnvironmentVariables, debugSession);
                 Disposables.Add(() => debugProcess.Terminate());
             } else {
                 var debugPortForwarding = MonoLauncher.TcpTunnel(Configuration.Device.Serial, Configuration.DebugPort, debugSession);
                 var hotReloadPortForwarding = MonoLauncher.TcpTunnel(Configuration.Device.Serial, Configuration.ReloadHostPort, debugSession);
                 MonoLauncher.InstallDev(Configuration.Device.Serial, Configuration.ProgramPath, debugSession);
 
-                var debugProcess = MonoLauncher.DebugDev(Configuration.Device.Serial, Configuration.ProgramPath, Configuration.DebugPort, debugSession);
+                var debugProcess = MonoLauncher.DebugDev(Configuration.Device.Serial, Configuration.ProgramPath, Configuration.DebugPort, Configuration.EnvironmentVariables, debugSession);
                 Disposables.Add(() => debugProcess.Terminate());
                 Disposables.Add(() => debugPortForwarding.Terminate());
                 Disposables.Add(() => hotReloadPortForwarding.Terminate());
@@ -74,8 +74,10 @@ public class DebugLaunchAgent : BaseLaunchAgent {
         var processRunner = new ProcessRunner(tool, new ProcessArgumentBuilder().AppendQuoted(Configuration.ProgramPath));
         processRunner.SetEnvironmentVariable("__XAMARIN_DEBUG_HOSTS__", "127.0.0.1");
         processRunner.SetEnvironmentVariable("__XAMARIN_DEBUG_PORT__", Configuration.DebugPort.ToString());
-        var result = processRunner.WaitForExit();
+        foreach (var env in Configuration.EnvironmentVariables)
+            processRunner.SetEnvironmentVariable(env.Key, env.Value);
 
+        var result = processRunner.WaitForExit();
         if (!result.Success)
             throw ServerExtensions.GetProtocolException(string.Join(Environment.NewLine, result.StandardError));
     }
@@ -92,6 +94,9 @@ public class DebugLaunchAgent : BaseLaunchAgent {
 
         AndroidDebugBridge.Install(Configuration.Device.Serial, Configuration.ProgramPath, logger);
         AndroidDebugBridge.Shell(Configuration.Device.Serial, "setprop", "debug.mono.connect", $"port={Configuration.DebugPort}");
+        if (Configuration.EnvironmentVariables.Count != 0)
+            AndroidDebugBridge.Shell(Configuration.Device.Serial, "setprop", "debug.mono.env", Configuration.EnvironmentVariables.ToEnvString());
+        
         AndroidDebugBridge.Shell(Configuration.Device.Serial, "am", "set-debug-app", applicationId);
 
         AndroidFastDev.TryPushAssemblies(Configuration.Device, Configuration.AssetsPath, applicationId, logger);

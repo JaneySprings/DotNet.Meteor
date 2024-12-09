@@ -76,8 +76,11 @@ public static class MonoExtensions {
             return null;
 
         foreach (var remap in session.Options.SourceCodeMappings) {
-            if (location.FileName.Contains(remap.Key))
-                return location.FileName.Replace(remap.Key, remap.Value).ToPlatformPath();
+            var filePath = location.FileName.ToPlatformPath();
+            var key = remap.Key.ToPlatformPath();
+            var value = remap.Value.ToPlatformPath();
+            if (filePath.StartsWith(key, StringComparison.OrdinalIgnoreCase))
+                return filePath.Replace(key, value);
         }
 
         return location.FileName;

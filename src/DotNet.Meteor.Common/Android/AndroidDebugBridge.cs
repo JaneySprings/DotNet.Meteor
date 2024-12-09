@@ -33,7 +33,7 @@ public static class AndroidDebugBridge {
         ProcessResult result = new ProcessRunner(adb, new ProcessArgumentBuilder()
             .Append("devices")
             .Append("-l"))
-            .WaitForExit();
+            .WaitForExit(5000);
 
         if (!result.Success)
             throw new InvalidOperationException(string.Join(Environment.NewLine, result.StandardError));
@@ -167,7 +167,7 @@ public static class AndroidDebugBridge {
         ProcessResult result = new ProcessRunner(adb, new ProcessArgumentBuilder()
             .Append("-s", serial)
             .Append("emu", "avd", "name"))
-            .WaitForExit();
+            .WaitForExit(5000);
 
         if (!result.Success)
             return string.Empty;

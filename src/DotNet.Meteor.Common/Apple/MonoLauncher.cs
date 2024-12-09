@@ -15,7 +15,6 @@ public static class MonoLauncher {
             .Conditional("--use-device-ctl=false", () => !MonoLauncher.UseDeviceCtl), logger)
             .Start();
     }
-
     public static void InstallDev(string serial, string bundlePath, IProcessLogger? logger = null) {
         var tool = AppleSdkLocator.MLaunchTool();
         logger?.OnOutputDataReceived(tool.FullName);
@@ -26,72 +25,79 @@ public static class MonoLauncher {
             .Conditional("--use-device-ctl=false", () => !MonoLauncher.UseDeviceCtl), logger)
             .WaitForExit();
     }
-
-    public static void LaunchDev(string serial, string bundlePath, IProcessLogger? logger = null) {
+    private static ProcessRunner LaunchDev(string serial, string bundlePath, IEnumerable<string> arguments, Dictionary<string, string> environment, IProcessLogger? logger = null) {
         var tool = AppleSdkLocator.MLaunchTool();
-        var arguments = new ProcessArgumentBuilder()
-            .Append( "--launchdev").AppendQuoted(bundlePath)
-            .Append($"--devname={serial}");
-        var result = new ProcessRunner(tool, arguments, logger).WaitForExit();
-
-        if (!result.Success)
-            throw new InvalidOperationException(string.Join(Environment.NewLine, result.StandardError));
-    }
-
-    public static Process LaunchSim(string serial, string bundlePath, IProcessLogger? logger = null) {
-        var tool = AppleSdkLocator.MLaunchTool();
-        var arguments = new ProcessArgumentBuilder()
-            .Append( "--launchsim").AppendQuoted(bundlePath)
-            .Append($"--device=:v2:udid={serial}");
-        return new ProcessRunner(tool, arguments, logger).Start();
-    }
-
-    public static Process DebugDev(string serial, string bundlePath, int port, IProcessLogger? logger = null) {
-        var tool = AppleSdkLocator.MLaunchTool();
-        var arguments = new ProcessArgumentBuilder()
+        var argumentBuilder = new ProcessArgumentBuilder()
             .Append( "--launchdev").AppendQuoted(bundlePath)
             .Append($"--devname={serial}")
-            .Append( "--argument=-monodevelop-port")
-            .Append($"--argument={port}")
-            .Append($"--setenv=__XAMARIN_DEBUG_PORT__={port}")
             .Append( "--wait-for-exit");
-        return new ProcessRunner(tool, arguments, logger).Start();
+
+        foreach (var arg in arguments)
+            argumentBuilder.Append($"--argument={arg}");
+        foreach (var env in environment)
+            argumentBuilder.Append($"--setenv={env.Key}={env.Value}");
+
+        return new ProcessRunner(tool, argumentBuilder, logger);
+    }
+    private static ProcessRunner LaunchSim(string serial, string bundlePath, IEnumerable<string> arguments, Dictionary<string, string> environment, IProcessLogger? logger = null) {
+        var tool = AppleSdkLocator.MLaunchTool();
+        logger?.OnOutputDataReceived(tool.FullName);
+        var argumentBuilder = new ProcessArgumentBuilder()
+            .Append( "--launchsim").AppendQuoted(bundlePath)
+            .Append($"--device=:v2:udid={serial}");
+
+        foreach (var arg in arguments)
+            argumentBuilder.Append($"--argument={arg}");
+        foreach (var env in environment)
+            argumentBuilder.Append($"--setenv={env.Key}={env.Value}");
+
+        return new ProcessRunner(tool, argumentBuilder, logger);
+    }
+
+    public static Process DebugDev(string serial, string bundlePath, int port, Dictionary<string, string>? environment = null, IProcessLogger? logger = null) {
+        environment ??= new Dictionary<string, string>();
+        environment.TryAdd("__XAMARIN_DEBUG_PORT__", $"{port}");
+        return MonoLauncher.LaunchDev(serial, bundlePath,
+            arguments: new List<string> { 
+                "-monodevelop-port", $"{port}"
+            },
+            environment,
+            logger
+        ).Start();
+    }
+    public static Process DebugSim(string serial, string bundlePath, int port, Dictionary<string, string>? environment = null, IProcessLogger? logger = null) {
+        environment ??= new Dictionary<string, string>();
+        environment.TryAdd("__XAMARIN_DEBUG_PORT__", $"{port}");
+        return MonoLauncher.LaunchSim(serial, bundlePath,
+            arguments: new List<string> { 
+                "-monodevelop-port", $"{port}"
+            },
+            environment, 
+            logger
+        ).Start();
     }
 
     public static Process ProfileDev(string serial, string bundlePath, string port, IProcessLogger? logger = null) {
-        var tool = AppleSdkLocator.MLaunchTool();
-        var arguments = new ProcessArgumentBuilder()
-            .Append( "--launchdev").AppendQuoted(bundlePath)
-            .Append($"--devname={serial}")
-            .Append( "--argument=-monodevelop-port")
-            .Append($"--argument={port}")
-            .Append( "--argument=--connection-mode")
-            .Append( "--argument=none")
-            .Append($"--setenv=DOTNET_DiagnosticPorts={port}")
-            .Append( "--wait-for-exit");
-        return new ProcessRunner(tool, arguments, logger).Start();
+        return MonoLauncher.LaunchDev(serial, bundlePath,
+            arguments: new List<string> { 
+                "-monodevelop-port", $"{port}",
+                "--connection-mode", "none"
+            },
+            environment: new Dictionary<string, string> { 
+                { "DOTNET_DiagnosticPorts", $"{port}" } 
+            }, 
+            logger
+        ).Start();
     }
-
-    public static Process DebugSim(string serial, string bundlePath, int port, IProcessLogger? logger = null) {
-        var tool = AppleSdkLocator.MLaunchTool();
-        logger?.OnOutputDataReceived(tool.FullName);
-        var arguments = new ProcessArgumentBuilder()
-            .Append( "--launchsim").AppendQuoted(bundlePath)
-            .Append( "--argument=-monodevelop-port")
-            .Append($"--argument={port}")
-            .Append($"--setenv=__XAMARIN_DEBUG_PORT__={port}")
-            .Append($"--device=:v2:udid={serial}");
-        return new ProcessRunner(tool, arguments, logger).Start();
-    }
-
     public static Process ProfileSim(string serial, string bundlePath, string port, IProcessLogger? logger = null) {
-        var tool = AppleSdkLocator.MLaunchTool();
-        var arguments = new ProcessArgumentBuilder()
-            .Append( "--launchsim").AppendQuoted(bundlePath)
-            .Append("--argument", "--connection-mode")
-            .Append("--argument", "none")
-            .Append($"--setenv:DOTNET_DiagnosticPorts={port}")
-            .Append($"--device=:v2:udid={serial}");
-        return new ProcessRunner(tool, arguments, logger).Start();
+        return MonoLauncher.LaunchDev(serial, bundlePath,
+            arguments: new List<string> { 
+                "--connection-mode", "none"
+            },
+            environment: new Dictionary<string, string> { 
+                { "DOTNET_DiagnosticPorts", $"{port}" } 
+            }, 
+            logger
+        ).Start();
     }
 }
