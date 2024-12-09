@@ -61,9 +61,13 @@ public class ProcessRunner {
         return process;
     }
 
-    public ProcessResult WaitForExit() {
+    public ProcessResult WaitForExit(int timeout = -1) {
         Start();
-        process.WaitForExit();
+    
+        if (timeout > 0)
+            process.WaitForExit(timeout);
+        else
+            process.WaitForExit();
 
         var exitCode = process.ExitCode;
         process.Close();

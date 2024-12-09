@@ -188,6 +188,9 @@
               "device": {
                 "type": "object"
               },
+              "env": {
+                "type": "object"
+              },
               "profilerMode": {
                 "type": "string",
                 "enum": [

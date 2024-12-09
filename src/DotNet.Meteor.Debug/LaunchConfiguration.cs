@@ -16,6 +16,7 @@ public class LaunchConfiguration {
     public int ReloadHostPort { get; init; }
     public int ProfilerPort { get; init; }
     public string? TransportId { get; init; }
+    public Dictionary<string, string> EnvironmentVariables { get; init; }
     public DebuggerSessionOptions DebuggerSessionOptions { get; init; }
 
     private ProfilerMode Profiler { get; init; }
@@ -34,6 +35,8 @@ public class LaunchConfiguration {
         TransportId = configurationProperties.TryGetValue("transportId").ToClass<string>();
         DebuggerSessionOptions = configurationProperties.TryGetValue("debuggerOptions")?.ToClass<DebuggerSessionOptions>() 
             ?? ServerExtensions.DefaultDebuggerOptions;
+        EnvironmentVariables = configurationProperties.TryGetValue("env")?.ToClass<Dictionary<string, string>>()
+            ?? new Dictionary<string, string>();
 
         DebugPort = DebugPort == 0 ? RuntimeSystem.GetFreePort() : DebugPort;
         ProfilerPort = ProfilerPort == 0 ? RuntimeSystem.GetFreePort() : ProfilerPort;
