@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Text;
 using System.Xml.Linq;
 
-namespace DotNet.Meteor.Tests;
+namespace DotNet.Meteor.Common.Tests;
 
 [Collection("Sequential")]
 public abstract class TestFixture {

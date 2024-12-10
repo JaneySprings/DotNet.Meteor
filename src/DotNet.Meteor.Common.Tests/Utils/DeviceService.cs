@@ -1,6 +1,6 @@
 using DotNet.Meteor.Common;
 
-namespace DotNet.Meteor.Tests;
+namespace DotNet.Meteor.Common.Tests;
 
 public static class DeviceService {
     public const string Android = "android";
