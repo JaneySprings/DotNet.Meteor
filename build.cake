@@ -7,7 +7,7 @@ public string ExtensionStagingDirectory => _Path.Combine(RootDirectory, "extensi
 public string MeteorWorkspaceProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Workspace", "DotNet.Meteor.Workspace.csproj");
 public string MeteorXamlProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Xaml", "DotNet.Meteor.Xaml.LanguageServer", "DotNet.Meteor.Xaml.LanguageServer.csproj");
 public string MeteorHotReloadProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.HotReload", "DotNet.Meteor.HotReload.csproj");
-public string MeteorDebugProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Debug", "DotNet.Meteor.Debug.csproj");
+public string MeteorDebugProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Debugger", "DotNet.Meteor.Debugger.csproj");
 public string MeteorTestsProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Tests", "DotNet.Meteor.Tests.csproj");
 public string MeteorPluginProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.HotReload.Plugin", "DotNet.Meteor.HotReload.Plugin.csproj");
 public string DotNetDSRouterProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Diagnostics", "src", "Tools", "dotnet-dsrouter", "dotnet-dsrouter.csproj");
@@ -45,20 +45,21 @@ Task("hotreload").Does(() => DotNetPublish(MeteorHotReloadProjectPath, new DotNe
 	Runtime = runtime,
 }));
 Task("debugger").Does(() => DotNetPublish(MeteorDebugProjectPath, new DotNetPublishSettings {
-	Runtime = runtime,
-	Configuration = configuration,
 	MSBuildSettings = new DotNetMSBuildSettings { 
 		ArgumentCustomization = args => args.Append("/p:NuGetVersionRoslyn=4.5.0"),
 		AssemblyVersion = version
 	},
+	OutputDirectory = _Path.Combine(ExtensionStagingDirectory, "bin", "Debugger"),
+	Configuration = configuration,
+	Runtime = runtime,
 }));
 Task("dsrouter").Does(() => DotNetPublish(DotNetDSRouterProjectPath, new DotNetPublishSettings {
-	OutputDirectory = _Path.Combine(ExtensionStagingDirectory, "bin", "Debug"),
+	OutputDirectory = _Path.Combine(ExtensionStagingDirectory, "bin", "Debugger"),
 	Configuration = configuration,
 	Runtime = runtime,
 }));
 Task("gcdump").Does(() => DotNetPublish(DotNetGCDumpProjectPath, new DotNetPublishSettings {
-	OutputDirectory = _Path.Combine(ExtensionStagingDirectory, "bin", "Debug"),
+	OutputDirectory = _Path.Combine(ExtensionStagingDirectory, "bin", "Debugger"),
 	Configuration = configuration,
 	Runtime = runtime,
 }));

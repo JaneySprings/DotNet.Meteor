@@ -4,7 +4,7 @@ using DotNet.Meteor.Common.Extensions;
 using Mono.Debugging.Client;
 using Mono.Debugging.Soft;
 
-namespace DotNet.Meteor.Debug.Extensions;
+namespace DotNet.Meteor.Debugger.Extensions;
 
 public static class MonoExtensions {
     public static string ToThreadName(this string threadName, int threadId) {

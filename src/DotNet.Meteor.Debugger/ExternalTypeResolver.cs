@@ -2,7 +2,7 @@ using System.IO.Pipes;
 using Mono.Debugging.Client;
 using StreamJsonRpc;
 
-namespace DotNet.Meteor.Debug;
+namespace DotNet.Meteor.Debugger;
 
 public class ExternalTypeResolver : IDisposable {
     private readonly NamedPipeClientStream? transportStream;

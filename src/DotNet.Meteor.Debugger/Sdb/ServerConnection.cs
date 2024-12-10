@@ -1,14 +1,14 @@
 using System.Net.Sockets;
 using Mono.Debugger.Soft;
 
-namespace DotNet.Meteor.Debug.Sdb;
+namespace DotNet.Meteor.Debugger.Sdb;
 
-public class ClientConnection : Connection {
-    readonly TcpClient client;
+public class ServerConnection : Connection {
+    readonly TcpListener listener;
     readonly Stream stream;
 
-    internal ClientConnection(TcpClient client, Stream stream) {
-        this.client = client;
+    internal ServerConnection(TcpListener listener, Stream stream) {
+        this.listener = listener;
         this.stream = stream;
     }
 
@@ -21,17 +21,13 @@ public class ClientConnection : Connection {
         return this.stream.Read(buf, buf_offset, len);
     }
 
-    protected override void TransportSetTimeouts(int send_timeout, int receive_timeout) {
-        this.client.SendTimeout = send_timeout;
-        this.client.ReceiveTimeout = receive_timeout;
-    }
+    protected override void TransportSetTimeouts(int send_timeout, int receive_timeout) {}
 
     protected override void TransportClose() {
-        this.client.Close();
+        this.listener.Stop();
         this.stream.Close();
     }
     protected override void TransportShutdown() {
-        this.client.Dispose();
         this.stream.Dispose();
     }
 }

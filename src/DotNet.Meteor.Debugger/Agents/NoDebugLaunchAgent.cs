@@ -1,11 +1,11 @@
-using DotNet.Meteor.Debug.Extensions;
+using DotNet.Meteor.Debugger.Extensions;
 using DotNet.Meteor.Common;
 using Mono.Debugging.Soft;
 using DotNet.Meteor.Common.Processes;
 using DotNet.Meteor.Common.Apple;
 using DotNet.Meteor.Common.Android;
 
-namespace DotNet.Meteor.Debug;
+namespace DotNet.Meteor.Debugger;
 
 public class NoDebugLaunchAgent : BaseLaunchAgent {
     public NoDebugLaunchAgent(LaunchConfiguration configuration) : base(configuration) { }

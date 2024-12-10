@@ -1,9 +1,9 @@
 ﻿using DotNet.Meteor.Common;
-using DotNet.Meteor.Debug.Extensions;
+using DotNet.Meteor.Debugger.Extensions;
 using Newtonsoft.Json.Linq;
 using Mono.Debugging.Client;
 
-namespace DotNet.Meteor.Debug;
+namespace DotNet.Meteor.Debugger;
 
 public class LaunchConfiguration {
     public Project Project { get; init; }

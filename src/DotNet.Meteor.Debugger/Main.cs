@@ -1,4 +1,4 @@
-﻿namespace DotNet.Meteor.Debug;
+﻿namespace DotNet.Meteor.Debugger;
 
 public class Program {
     private static void Main(string[] args) {

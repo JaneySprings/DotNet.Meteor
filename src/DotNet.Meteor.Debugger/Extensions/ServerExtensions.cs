@@ -9,7 +9,7 @@ using Mono.Debugging.Soft;
 using System.Text.Json.Serialization;
 using System.Text;
 
-namespace DotNet.Meteor.Debug.Extensions;
+namespace DotNet.Meteor.Debugger.Extensions;
 
 public static class ServerExtensions {
     public static DebuggerSessionOptions DefaultDebuggerOptions { get; } = new DebuggerSessionOptions {

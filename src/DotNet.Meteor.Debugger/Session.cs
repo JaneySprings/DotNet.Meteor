@@ -4,7 +4,7 @@ using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 using DotNet.Meteor.Common;
 using DotNet.Meteor.Common.Processes;
 
-namespace DotNet.Meteor.Debug;
+namespace DotNet.Meteor.Debugger;
 
 public abstract class Session : DebugAdapterBase, IProcessLogger {
 
