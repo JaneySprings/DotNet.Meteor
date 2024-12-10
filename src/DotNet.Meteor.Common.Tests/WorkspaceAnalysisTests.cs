@@ -1,11 +1,11 @@
-using Xunit;
 using DotNet.Meteor.Workspace;
+using NUnit.Framework;
 
 namespace DotNet.Meteor.Common.Tests;
 
 public class WorkspaceAnalysisTests: TestFixture {
 
-    [Fact]
+    [Test]
     public void AnalyzeSimpleProject() {
         var projectPath = CreateMockProject(@"
         <Project Sdk=""Microsoft.NET.Sdk"">
@@ -18,16 +18,16 @@ public class WorkspaceAnalysisTests: TestFixture {
         ");
         var actual = WorkspaceAnalyzer.AnalyzeProject(projectPath);
 
-        Assert.NotNull(actual);
-        Assert.Equal(ProjectName, actual.Name);
-        Assert.Equal(projectPath, actual.Path);
-        Assert.Equal("net7.0-android", string.Join(',', actual.Frameworks));
-        Assert.Equal(2, actual.Configurations.Count());
-        Assert.Equal("Debug,Release", string.Join(',', actual.Configurations));
-        DeleteMockData();
+        Assert.Multiple(() => {
+            Assert.That(actual, Is.Not.Null);
+            Assert.That(ProjectName, Is.EqualTo(actual!.Name));
+            Assert.That(projectPath, Is.EqualTo(actual.Path));
+            Assert.That(string.Join(',', actual.Frameworks), Is.EqualTo("net7.0-android"));
+            Assert.That(actual.Configurations.Count(), Is.EqualTo(2));
+            Assert.That(string.Join(',', actual.Configurations), Is.EqualTo("Debug,Release"));
+        });
     }
-
-    [Fact]
+    [Test]
     public void AnalyzeProjectWithMultipleFrameworks() {
         var projectPath = CreateMockProject(@"
         <Project Sdk=""Microsoft.NET.Sdk"">
@@ -42,16 +42,14 @@ public class WorkspaceAnalysisTests: TestFixture {
         </Project>
         ");
         var actual = WorkspaceAnalyzer.AnalyzeProject(projectPath);
-        Assert.NotNull(actual);
-        Assertion.CollectionsAreEqual(actual.Frameworks, new List<string>() {
+        Assert.That(actual, Is.Not.Null);
+        CollectionsAreEqual(actual.Frameworks, new List<string>() {
             "net7.0-android",
             "net6.0-ios",
             "net7.0-maccatalyst",
         });
-        DeleteMockData();
     }
-
-    [Fact]
+    [Test]
     public void AnalyzeProjectWithFrameworkReference() {
         var simpleProjectPath = CreateMockProject(@"
         <Project Sdk=""Microsoft.NET.Sdk"">
@@ -65,17 +63,15 @@ public class WorkspaceAnalysisTests: TestFixture {
         </Project>
         ");
         var actual = WorkspaceAnalyzer.AnalyzeProject(simpleProjectPath);
-        Assert.NotNull(actual);
-        Assertion.CollectionsAreEqual(actual.Frameworks, new List<string>() {
+        Assert.That(actual, Is.Not.Null);
+        CollectionsAreEqual(actual.Frameworks, new List<string>() {
             "net7.0-android",
             "net7.0-maccatalyst",
             "net7.0-ios",
             "net7.0-tizen",
         });
-        DeleteMockData();
     }
-
-    [Fact]
+    [Test]
     public void AnalyzeProjectWithFrameworkCondition() {
         var simpleProjectPath = CreateMockProject(@"
         <Project Sdk=""Microsoft.NET.Sdk"">
@@ -90,15 +86,13 @@ public class WorkspaceAnalysisTests: TestFixture {
         </Project>
         ");
         var actual = WorkspaceAnalyzer.AnalyzeProject(simpleProjectPath);
-        Assert.NotNull(actual);
-        Assertion.CollectionsAreEqual(actual.Frameworks, new List<string>() {
+        Assert.That(actual, Is.Not.Null);
+        CollectionsAreEqual(actual.Frameworks, new List<string>() {
             "net7.0-maccatalyst",
             "net7.0-windows10.0.19041.0",
         });
-        DeleteMockData();
     }
-
-    [Fact]
+    [Test]
     public void AnalyzeProjectWithDirectoryProps() {
         CreateCommonProps(".", @"
         <Project>
@@ -123,14 +117,12 @@ public class WorkspaceAnalysisTests: TestFixture {
         </Project>
         ");
         var actual = WorkspaceAnalyzer.AnalyzeProject(simpleProjectPath);
-        Assert.NotNull(actual);
-        Assertion.CollectionsAreEqual(actual.Frameworks, new List<string>() {
+        Assert.That(actual, Is.Not.Null);
+        CollectionsAreEqual(actual.Frameworks, new List<string>() {
             "net7.0-maccatalyst"
         });
-        DeleteMockData();
     }
-
-    [Fact]
+    [Test]
     public void AnalyzeProjectWithCustomPropsReferences() {
         var propsReference = CreateCustomProps("Build.props", @"
         <Project>
@@ -149,14 +141,12 @@ public class WorkspaceAnalysisTests: TestFixture {
         </Project>
         ");
         var actual = WorkspaceAnalyzer.AnalyzeProject(simpleProjectPath);
-        Assert.NotNull(actual);
-        Assertion.CollectionsAreEqual(actual.Frameworks, new List<string>() {
+        Assert.That(actual, Is.Not.Null);
+        CollectionsAreEqual(actual.Frameworks, new List<string>() {
             "net7.0-ios"
         });
-        DeleteMockData();
     }
-
-    [Fact]
+    [Test]
     public void AnalyzeProjectWithDirectoryPropsReferences() {
         CreateCommonProps("..", @"
         <Project>
@@ -174,14 +164,12 @@ public class WorkspaceAnalysisTests: TestFixture {
         </Project>
         ");
         var actual = WorkspaceAnalyzer.AnalyzeProject(simpleProjectPath);
-        Assert.NotNull(actual);
-        Assertion.CollectionsAreEqual(actual.Frameworks, new List<string>() {
+        Assert.That(actual, Is.Not.Null);
+        CollectionsAreEqual(actual.Frameworks, new List<string>() {
             "net7.0-maccatalyst"
         });
-        DeleteMockData();
     }
-
-    [Fact]
+    [Test]
     public void OnlyExecutableProjectTest() {
         var simpleProjectPath = CreateMockProject(@"
         <Project Sdk=""Microsoft.NET.Sdk"">
@@ -193,15 +181,15 @@ public class WorkspaceAnalysisTests: TestFixture {
         ");
         var callbackInvokeCount = 0;
         var actual = WorkspaceAnalyzer.AnalyzeProject(simpleProjectPath, message => {
-            Assert.Contains("executable", message);
+            Assert.That(message, Does.Contain("executable"));
             callbackInvokeCount++;
         });
-        Assert.Null(actual);
-        Assert.Equal(1, callbackInvokeCount);
-        DeleteMockData();
+        Assert.Multiple(() => {
+            Assert.That(actual, Is.Null);
+            Assert.That(callbackInvokeCount, Is.EqualTo(1));
+        });
     }
-
-    [Fact]
+    [Test]
     public void IncorrectWorkspacePathTest() {
         var simpleProjectPath = CreateMockProject(@"
         <Project Sdk=""Microsoft.NET.Sdk"">
@@ -214,17 +202,17 @@ public class WorkspaceAnalysisTests: TestFixture {
         var callbackInvokeCount = 0;
         var directoryPath = Path.GetDirectoryName(simpleProjectPath)!;
         var actual = WorkspaceAnalyzer.AnalyzeWorkspace(Path.Combine(directoryPath, "MissingFolder"), message => {
-            Assert.StartsWith("Could not find", message);
+            Assert.That(message, Does.StartWith("Could not find"));
             callbackInvokeCount++;
         });
 
-        Assert.NotNull(actual);
-        Assert.Empty(actual);
-        Assert.Equal(1, callbackInvokeCount);
-        DeleteMockData();
+        Assert.Multiple(() => {
+            Assert.That(actual, Is.Not.Null);
+            Assert.That(actual, Is.Empty);
+            Assert.That(callbackInvokeCount, Is.EqualTo(1));
+        });
     }
-
-    [Fact]
+    [Test]
     public void AnalyzeProjectWithCustomPropsWithThisFileDirectoryReference() {
         var propsReference = CreateCustomProps("MyProps.props", @"
         <Project>
@@ -241,14 +229,12 @@ public class WorkspaceAnalysisTests: TestFixture {
         </Project>
         ");
         var actual = WorkspaceAnalyzer.AnalyzeProject(simpleProjectPath);
-        Assert.NotNull(actual);
-        Assertion.CollectionsAreEqual(actual.Frameworks, new List<string>() {
+        Assert.That(actual, Is.Not.Null);
+        CollectionsAreEqual(actual.Frameworks, new List<string>() {
             "net8.0-ios"
         });
-        DeleteMockData();
     }
-
-    [Fact]
+    [Test]
     public void AnalyzeProjectWithCustomPropsWithThisFileDirectoryReference_BackSlash() {
         var propsReference = CreateCustomProps("MyProps.props", @"
         <Project>
@@ -265,14 +251,12 @@ public class WorkspaceAnalysisTests: TestFixture {
         </Project>
         ");
         var actual = WorkspaceAnalyzer.AnalyzeProject(simpleProjectPath);
-        Assert.NotNull(actual);
-        Assertion.CollectionsAreEqual(actual.Frameworks, new List<string>() {
+        Assert.That(actual, Is.Not.Null);
+        CollectionsAreEqual(actual.Frameworks, new List<string>() {
             "net8.0-ios"
         });
-        DeleteMockData();
     }
-
-    [Fact]
+    [Test]
     public void AnalyzeProjectWithCustomPropsRelativePath() {
         var propsReference = CreateCustomProps("MyProps.props", @"
         <Project>
@@ -289,14 +273,12 @@ public class WorkspaceAnalysisTests: TestFixture {
         </Project>
         ");
         var actual = WorkspaceAnalyzer.AnalyzeProject(simpleProjectPath);
-        Assert.NotNull(actual);
-        Assertion.CollectionsAreEqual(actual.Frameworks, new List<string>() {
+        Assert.That(actual, Is.Not.Null);
+        CollectionsAreEqual(actual.Frameworks, new List<string>() {
             "net8.0-ios"
         });
-        DeleteMockData();
     }
-
-    [Fact]
+    [Test]
     public void AnalyzeProjectWithCustomPropsRelativePath_BackSlash() {
         var propsReference = CreateCustomProps("MyProps.props", @"
         <Project>
@@ -313,14 +295,12 @@ public class WorkspaceAnalysisTests: TestFixture {
         </Project>
         ");
         var actual = WorkspaceAnalyzer.AnalyzeProject(simpleProjectPath);
-        Assert.NotNull(actual);
-        Assertion.CollectionsAreEqual(actual.Frameworks, new List<string>() {
+        Assert.That(actual, Is.Not.Null);
+        CollectionsAreEqual(actual.Frameworks, new List<string>() {
             "net8.0-ios"
         });
-        DeleteMockData();
     }
-
-    [Fact]
+    [Test]
     public void CustomConfigurationsTest() {
         var projectPath = CreateMockProject(@"
         <Project Sdk=""Microsoft.NET.Sdk"">
@@ -334,14 +314,15 @@ public class WorkspaceAnalysisTests: TestFixture {
         ");
         var actual = WorkspaceAnalyzer.AnalyzeProject(projectPath);
 
-        Assert.NotNull(actual);
-        Assert.Equal(ProjectName, actual.Name);
-        Assert.Equal(projectPath, actual.Path);
-        Assert.Equal(3, actual.Configurations.Count());
-        Assert.Equal("Custom,Debug,Release", string.Join(',', actual.Configurations));
-        DeleteMockData();
+        Assert.Multiple(() => {
+            Assert.That(actual, Is.Not.Null);
+            Assert.That(ProjectName, Is.EqualTo(actual!.Name));
+            Assert.That(projectPath, Is.EqualTo(actual.Path));
+            Assert.That(actual.Configurations.Count(), Is.EqualTo(3));
+            Assert.That(string.Join(',', actual.Configurations), Is.EqualTo("Custom,Debug,Release"));
+        });
     }
-    [Fact]
+    [Test]
     public void CustomConfigurations2Test() {
         var projectPath = CreateMockProject(@"
         <Project Sdk=""Microsoft.NET.Sdk"">
@@ -355,14 +336,15 @@ public class WorkspaceAnalysisTests: TestFixture {
         ");
         var actual = WorkspaceAnalyzer.AnalyzeProject(projectPath);
 
-        Assert.NotNull(actual);
-        Assert.Equal(ProjectName, actual.Name);
-        Assert.Equal(projectPath, actual.Path);
-        Assert.Equal(3, actual.Configurations.Count());
-        Assert.Equal("Custom,Debug,Release", string.Join(',', actual.Configurations));
-        DeleteMockData();
+        Assert.Multiple(() => {
+            Assert.That(actual, Is.Not.Null);
+            Assert.That(ProjectName, Is.EqualTo(actual!.Name));
+            Assert.That(projectPath, Is.EqualTo(actual.Path));
+            Assert.That(actual.Configurations.Count(), Is.EqualTo(3));
+            Assert.That(string.Join(',', actual.Configurations), Is.EqualTo("Custom,Debug,Release"));
+        });
     }
-    [Fact]
+    [Test]
     public void CustomConfigurations3Test() {
         var projectPath = CreateMockProject(@"
         <Project Sdk=""Microsoft.NET.Sdk"">
@@ -376,14 +358,15 @@ public class WorkspaceAnalysisTests: TestFixture {
         ");
         var actual = WorkspaceAnalyzer.AnalyzeProject(projectPath);
 
-        Assert.NotNull(actual);
-        Assert.Equal(ProjectName, actual.Name);
-        Assert.Equal(projectPath, actual.Path);
-        Assert.Equal(2, actual.Configurations.Count());
-        Assert.Equal("Debug,Release", string.Join(',', actual.Configurations));
-        DeleteMockData();
+        Assert.Multiple(() => {
+            Assert.That(actual, Is.Not.Null);
+            Assert.That(ProjectName, Is.EqualTo(actual!.Name));
+            Assert.That(projectPath, Is.EqualTo(actual.Path));
+            Assert.That(actual.Configurations.Count(), Is.EqualTo(2));
+            Assert.That(string.Join(',', actual.Configurations), Is.EqualTo("Debug,Release"));
+        });
     }
-    [Fact]
+    [Test]
     public void CustomConfigurations4Test() {
         var propsReference = CreateCustomProps("MyProps.props", @"
         <Project>
@@ -402,11 +385,17 @@ public class WorkspaceAnalysisTests: TestFixture {
         ");
         var actual = WorkspaceAnalyzer.AnalyzeProject(projectPath);
 
-        Assert.NotNull(actual);
-        Assert.Equal(ProjectName, actual.Name);
-        Assert.Equal(projectPath, actual.Path);
-        Assert.Equal(3, actual.Configurations.Count());
-        Assert.Equal("Custom,Debug,Release", string.Join(',', actual.Configurations));
-        DeleteMockData();
+        Assert.Multiple(() => {
+            Assert.That(actual, Is.Not.Null);
+            Assert.That(ProjectName, Is.EqualTo(actual!.Name));
+            Assert.That(projectPath, Is.EqualTo(actual.Path));
+            Assert.That(actual.Configurations.Count(), Is.EqualTo(3));
+            Assert.That(string.Join(',', actual.Configurations), Is.EqualTo("Custom,Debug,Release"));
+        });
+    }
+
+    [TearDown]
+    public void TearDown() {
+        Directory.Delete(MockDataDirectory, true);
     }
 }

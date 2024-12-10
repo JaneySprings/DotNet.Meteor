@@ -1,40 +1,38 @@
-using Xunit;
-using DotNet.Meteor.Common;
 using DotNet.Meteor.Common.Extensions;
 using DotNet.Meteor.Common.Android;
+using NUnit.Framework;
 
 namespace DotNet.Meteor.Common.Tests;
 
 public class OtherTests : TestFixture {
 
-    [Fact]
+    [Test]
     public void AndroidSdkDirectoryTests() {
         var sdkLocation = AndroidSdkLocator.SdkLocation();
-        Assert.NotNull(sdkLocation);
-        Assert.True(Directory.Exists(sdkLocation));
+        Assert.Multiple(() => {
+            Assert.That(sdkLocation, Is.Not.Null.Or.Empty);
+            Assert.That(Directory.Exists(sdkLocation));
+        });
     }
-
-    [Fact]
+    [Test]
     public void HomeDirectoryValidationTest() {
         var homeDirectory = RuntimeSystem.HomeDirectory;
         if (RuntimeSystem.IsWindows)
-            Assert.StartsWith("C:\\Users", homeDirectory);
+            Assert.That(homeDirectory, Does.StartWith("C:\\Users"));
         else if (RuntimeSystem.IsMacOS)
-            Assert.StartsWith("/Users", homeDirectory);
+            Assert.That(homeDirectory, Does.StartWith("/Users"));
         else
-            Assert.StartsWith("/home", homeDirectory);
+            Assert.That(homeDirectory, Does.StartWith("/home"));
     }
-
-    [Fact]
+    [Test]
     public void ProgramFilesDirectoryValidationTest() {
         if (!RuntimeSystem.IsWindows)
             return;
 
-        var homeDirectory = RuntimeSystem.ProgramX86Directory;
-        Assert.StartsWith("C:\\Program", homeDirectory);
+        var programsDirectory = RuntimeSystem.ProgramX86Directory;
+        Assert.That(programsDirectory, Does.StartWith("C:\\Program"));
     }
-
-    [Fact]
+    [Test]
     public void DiagnosticToolsHasSameTargetFrameworkVersionTest() {
         var cwd = AppDomain.CurrentDomain.BaseDirectory;
         var dotnetTraceProjectPath = Path.Combine(cwd, "..", "..", "..", "DotNet.Diagnostics", "src", "Tools", "dotnet-trace", "dotnet-trace.csproj");
@@ -42,10 +40,12 @@ public class OtherTests : TestFixture {
         var dotnetDSRouterProjectPath = Path.Combine(cwd, "..", "..", "..", "DotNet.Diagnostics", "src", "Tools", "dotnet-dsrouter", "dotnet-dsrouter.csproj");
         var meteorPropsPath = Path.Combine(cwd, "..", "..", "..", "Common.Build.props");
 
-        Assert.True(File.Exists(dotnetTraceProjectPath), $"File not found: {Path.GetFullPath(dotnetTraceProjectPath)}");
-        Assert.True(File.Exists(dotnetGCDumpProjectPath), $"File not found: {Path.GetFullPath(dotnetGCDumpProjectPath)}");
-        Assert.True(File.Exists(dotnetDSRouterProjectPath), $"File not found: {Path.GetFullPath(dotnetDSRouterProjectPath)}");
-        Assert.True(File.Exists(meteorPropsPath), $"File not found: {Path.GetFullPath(meteorPropsPath)}");
+        Assert.Multiple(() => {
+            Assert.That(File.Exists(dotnetTraceProjectPath), $"File not found: {Path.GetFullPath(dotnetTraceProjectPath)}");
+            Assert.That(File.Exists(dotnetGCDumpProjectPath), $"File not found: {Path.GetFullPath(dotnetGCDumpProjectPath)}");
+            Assert.That(File.Exists(dotnetDSRouterProjectPath), $"File not found: {Path.GetFullPath(dotnetDSRouterProjectPath)}");
+            Assert.That(File.Exists(meteorPropsPath), $"File not found: {Path.GetFullPath(meteorPropsPath)}");
+        });
 
         var dotnetTraceProject = new Project(dotnetTraceProjectPath);
         var dotnetGCDumpProject = new Project(dotnetGCDumpProjectPath);
@@ -54,14 +54,13 @@ public class OtherTests : TestFixture {
         var expectedTargetFramework = meteorProject.EvaluateProperty("TargetFramework", "error1");
 
         Assert.Multiple(() => {
-            Assert.Equal(expectedTargetFramework, dotnetTraceProject.EvaluateProperty("TargetFramework", "error2"));
-            Assert.Equal(expectedTargetFramework, dotnetGCDumpProject.EvaluateProperty("TargetFramework", "error3"));
-            Assert.Equal(expectedTargetFramework, dotnetDSRouterProject.EvaluateProperty("TargetFramework", "error4"));
+            Assert.That(dotnetTraceProject.EvaluateProperty("TargetFramework", "error2"), Is.EqualTo(expectedTargetFramework));
+            Assert.That(dotnetGCDumpProject.EvaluateProperty("TargetFramework", "error3"), Is.EqualTo(expectedTargetFramework));
+            Assert.That(dotnetDSRouterProject.EvaluateProperty("TargetFramework", "error4"), Is.EqualTo(expectedTargetFramework));
         });
     }
-
-    [Fact]
+    [Test]
     public void ToolingDefaultsTest() {
-        Assert.False(Common.Apple.MonoLauncher.UseDeviceCtl, "UseDeviceCtl should be false: https://github.com/xamarin/xamarin-macios/issues/21664");
+        Assert.That(Common.Apple.MonoLauncher.UseDeviceCtl, Is.False, "UseDeviceCtl should be false: https://github.com/xamarin/xamarin-macios/issues/21664");
     }
 }
