@@ -155,7 +155,7 @@ class StartupProjectDecorationProvider implements vscode.FileDecorationProvider 
 
         return { 
             badge: '●',
-            color: new vscode.ThemeColor('list.focusHighlightForeground'), 
+            color: new vscode.ThemeColor('pickerGroup.foreground'), 
             tooltip: res.messageStartupProject
         };
     }
