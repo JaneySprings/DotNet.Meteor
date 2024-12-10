@@ -6,7 +6,7 @@
     <Import Project="$(MSBuildThisFileDirectory)..\Common.Build.props" />
 
     <ItemGroup>
-        <InternalsVisibleTo Include="DotNet.Meteor.Tests" />
+        <InternalsVisibleTo Include="DotNet.Meteor.Common.Tests" />
         <PackageReference Include="NLog" Version="5.2.4" />
     </ItemGroup>
 </Project>

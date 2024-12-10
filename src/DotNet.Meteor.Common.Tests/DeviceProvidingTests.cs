@@ -4,7 +4,7 @@ using DotNet.Meteor.Common.Apple;
 using DotNet.Meteor.Common.Windows;
 using Xunit;
 
-namespace DotNet.Meteor.Tests;
+namespace DotNet.Meteor.Common.Tests;
 
 public class DeviceProvidingTests: TestFixture {
 

@@ -20,7 +20,7 @@ The `src/` folder contains the source code of the repository. It has the followi
 - `DotNet.Meteor.HotReload.Plugin`: NuGet package that contains the hot reload server for .NET MAUI projects.
 - `DotNet.Meteor.Workspace`: Tools for managing the workspace and the devices.
 - `DotNet.Meteor.Xaml`: Submodule that contains XAML Language Server (LSP) for .NET MAUI project.
-- `DotNet.Meteor.Tests`: Unit tests for the projects.
+- `DotNet.Meteor.Common.Tests`: Unit tests for the projects.
 - `VSCode`: Visual Studio Code extension.
 
 ### Build the projects

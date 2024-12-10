@@ -3,7 +3,7 @@ using DotNet.Meteor.Common;
 using DotNet.Meteor.Common.Extensions;
 using DotNet.Meteor.Common.Android;
 
-namespace DotNet.Meteor.Tests;
+namespace DotNet.Meteor.Common.Tests;
 
 public class OtherTests : TestFixture {
 

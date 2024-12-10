@@ -2,7 +2,7 @@ using System.Text;
 using DotNet.Meteor.HotReload.Extensions;
 using Xunit;
 
-namespace DotNet.Meteor.Tests;
+namespace DotNet.Meteor.Common.Tests;
 
 public class HotReloadClientTests: TestFixture {
 
