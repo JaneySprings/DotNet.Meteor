@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 using Mono.Debugging.Soft;
 using DebuggerLoggingService = Mono.Debugging.Client.DebuggerLoggingService;
 
-namespace DotNet.Meteor.Debug;
+namespace DotNet.Meteor.Debugger;
 
 public abstract class BaseLaunchAgent {
     public const string CommandPrefix = "/";

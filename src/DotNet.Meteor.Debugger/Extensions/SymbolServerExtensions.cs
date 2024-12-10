@@ -2,7 +2,7 @@ using System.Reflection.PortableExecutable;
 using System.Text;
 using Mono.Debugging.Client;
 
-namespace DotNet.Meteor.Debug.Extensions;
+namespace DotNet.Meteor.Debugger.Extensions;
 
 public static class SymbolServerExtensions {
     public const string MicrosoftSymbolServerAddress = "https://msdl.microsoft.com/download/symbols";

@@ -1,12 +1,12 @@
 ﻿using Mono.Debugging.Soft;
-using DotNet.Meteor.Debug.Extensions;
-using DotNet.Meteor.Debug.Logging;
+using DotNet.Meteor.Debugger.Extensions;
+using DotNet.Meteor.Debugger.Logging;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 using MonoClient = Mono.Debugging.Client;
 using DebugProtocol = Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 
-namespace DotNet.Meteor.Debug;
+namespace DotNet.Meteor.Debugger;
 
 public class DebugSession : Session {
     private BaseLaunchAgent launchAgent = null!;

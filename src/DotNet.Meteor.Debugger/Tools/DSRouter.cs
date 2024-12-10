@@ -2,7 +2,7 @@ using System.Diagnostics;
 using DotNet.Meteor.Common;
 using DotNet.Meteor.Common.Processes;
 
-namespace DotNet.Meteor.Debug.Tools;
+namespace DotNet.Meteor.Debugger.Tools;
 
 public static class DSRouter {
     public static FileInfo DSRouterTool() {

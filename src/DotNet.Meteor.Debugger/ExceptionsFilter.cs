@@ -1,6 +1,6 @@
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 
-namespace DotNet.Meteor.Debug.Extensions;
+namespace DotNet.Meteor.Debugger.Extensions;
 
 public static class ExceptionsFilter {
     public static ExceptionBreakpointsFilter AllExceptions => new ExceptionBreakpointsFilter {

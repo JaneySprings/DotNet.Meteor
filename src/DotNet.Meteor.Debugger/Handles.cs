@@ -1,4 +1,4 @@
-﻿namespace DotNet.Meteor.Debug;
+﻿namespace DotNet.Meteor.Debugger;
 
 public class Handles<T> where T: class {
     private const int StartHandle = 1000;

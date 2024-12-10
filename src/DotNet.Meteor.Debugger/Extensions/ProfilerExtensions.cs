@@ -3,7 +3,7 @@ using System.CommandLine.IO;
 using System.Text;
 using DotNet.Meteor.Common.Processes;
 
-namespace DotNet.Meteor.Debug.Extensions;
+namespace DotNet.Meteor.Debugger.Extensions;
 
 public class ProfilerTask {
     private readonly CancellationTokenSource cancellationTokenSource;

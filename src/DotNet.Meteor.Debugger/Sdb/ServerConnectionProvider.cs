@@ -3,9 +3,9 @@ using Mono.Debugging.Client;
 using Mono.Debugging.Soft;
 using System.Net;
 using System.Net.Sockets;
-using DotNet.Meteor.Debug.Extensions;
+using DotNet.Meteor.Debugger.Extensions;
 
-namespace DotNet.Meteor.Debug.Sdb;
+namespace DotNet.Meteor.Debugger.Sdb;
 
 public class ServerConnectionProvider : SoftDebuggerStartArgs, ISoftDebuggerConnectionProvider {
     private readonly TcpListener listener;

@@ -1,7 +1,7 @@
 using Mono.Debugging.Client;
 using NLog;
 
-namespace DotNet.Meteor.Debug.Logging;
+namespace DotNet.Meteor.Debugger.Logging;
 
 public class MonoLogger : ICustomLogger {
     private readonly Logger logger = LogManager.GetCurrentClassLogger();
