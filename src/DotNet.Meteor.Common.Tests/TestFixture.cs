@@ -1,11 +1,11 @@
-using Xunit;
 using System.Reflection;
 using System.Text;
 using System.Xml.Linq;
+using NUnit.Framework;
+using NUnit.Framework.Legacy;
 
 namespace DotNet.Meteor.Common.Tests;
 
-[Collection("Sequential")]
 public abstract class TestFixture {
     protected readonly string MockDataDirectory;
     protected readonly string ProjectName = "TestApp";
@@ -82,9 +82,6 @@ public abstract class TestFixture {
 
         return assemblyPath;
     }
-    protected void DeleteMockData() {
-       Directory.Delete(MockDataDirectory, true);
-    }
     protected List<string> FindAllXNames(StringBuilder stringBuilder) {
         var names = new List<string>();
         var xaml = XDocument.Parse(stringBuilder.ToString());
@@ -97,5 +94,13 @@ public abstract class TestFixture {
         }
 
         return names;
+    }
+
+    protected void CollectionsAreEqual<TValue>(IEnumerable<TValue> expected, IEnumerable<TValue> actual) {
+        Assert.That(actual.Count(), Is.EqualTo(expected.Count()));
+        foreach (var item in expected)
+            Assert.That(actual, Does.Contain(item));
+        foreach (var item in actual)
+            Assert.That(expected, Does.Contain(item));
     }
 }

@@ -1,12 +1,12 @@
 using System.Text;
 using DotNet.Meteor.HotReload.Extensions;
-using Xunit;
+using NUnit.Framework;
 
 namespace DotNet.Meteor.Common.Tests;
 
 public class HotReloadClientTests: TestFixture {
 
-    [Fact]
+    [Test]
     public void ClassDefinitionFinderTest() {
         var xamlContent = new StringBuilder(@"
 <ContentPage
@@ -22,10 +22,9 @@ public class HotReloadClientTests: TestFixture {
 ");
         var actualClassDefinition = "DotNet.Meteor.MainPage";
         var classDefinition = MarkupExtensions.GetClassDefinition(xamlContent);
-        Assert.Equal(actualClassDefinition, classDefinition);
+        Assert.That(classDefinition, Is.EqualTo(actualClassDefinition));
     }
-
-    [Fact]
+    [Test]
     public void ElementNameChangingTest() {
         var xamlContent = new StringBuilder(@"
 <ContentPage
@@ -41,15 +40,16 @@ public class HotReloadClientTests: TestFixture {
 ");
         var transformations = MarkupExtensions.TransformReferenceNames(xamlContent);
         var names = FindAllXNames(xamlContent);
-        Assert.Single(names);
-        Assert.Single(transformations);
-        Assert.DoesNotContain("element1", names);
-        Assert.Equal("element1", transformations.Single().Key);
-        Assert.Contains("element1_", names.First());
-        Assert.Contains("element1_", transformations.Single().Value);
+        Assert.Multiple(() => {
+            Assert.That(names, Has.Count.EqualTo(1));
+            Assert.That(transformations, Has.Count.EqualTo(1));
+            Assert.That(names, Has.No.Member("element1"));
+            Assert.That(transformations.Single().Key, Is.EqualTo("element1"));
+            Assert.That(names.First(), Does.Contain("element1_"));
+            Assert.That(transformations.Single().Value, Does.Contain("element1_"));
+        });
     }
-
-    [Fact]
+    [Test]
     public void ElementMultipleNamesChangingTest() {
         var xamlContent = new StringBuilder(@"
 <ContentPage
@@ -65,23 +65,24 @@ public class HotReloadClientTests: TestFixture {
 ");
         var transformations = MarkupExtensions.TransformReferenceNames(xamlContent);
         var names = FindAllXNames(xamlContent);
-        Assert.Equal(3, names.Count);
-        Assert.Equal(3, transformations.Count);
-        Assert.DoesNotContain("element1", names);
-        Assert.DoesNotContain("element2", names);
-        Assert.DoesNotContain("element3", names);
-        Assert.Contains("element1", transformations.Keys);
-        Assert.Contains("element2", transformations.Keys);
-        Assert.Contains("element3", transformations.Keys);
-        Assert.Contains("element1_", transformations["element1"]);
-        Assert.Contains("element2_", transformations["element2"]);
-        Assert.Contains("element3_", transformations["element3"]);
-        Assert.NotNull(names.FirstOrDefault(it => it.StartsWith("element1_")));
-        Assert.NotNull(names.FirstOrDefault(it => it.StartsWith("element2_")));
-        Assert.NotNull(names.FirstOrDefault(it => it.StartsWith("element3_")));
+        Assert.Multiple(() => {
+            Assert.That(names, Has.Count.EqualTo(3));
+            Assert.That(transformations, Has.Count.EqualTo(3));
+            Assert.That(names, Has.No.Member("element1"));
+            Assert.That(names, Has.No.Member("element2"));
+            Assert.That(names, Has.No.Member("element3"));
+            Assert.That(transformations.Keys, Does.Contain("element1"));
+            Assert.That(transformations.Keys, Does.Contain("element2"));
+            Assert.That(transformations.Keys, Does.Contain("element3"));
+            Assert.That(transformations["element1"], Does.Contain("element1_"));
+            Assert.That(transformations["element2"], Does.Contain("element2_"));
+            Assert.That(transformations["element3"], Does.Contain("element3_"));
+            Assert.That(names.FirstOrDefault(it => it.StartsWith("element1_")), Is.Not.Null);
+            Assert.That(names.FirstOrDefault(it => it.StartsWith("element2_")), Is.Not.Null);
+            Assert.That(names.FirstOrDefault(it => it.StartsWith("element3_")), Is.Not.Null);
+        });
     }
-
-    [Fact]
+    [Test]
     public void ElementNameChangingWithReferenceTest() {
         var xamlContent = new StringBuilder(@"
 <ContentPage
@@ -97,14 +98,15 @@ public class HotReloadClientTests: TestFixture {
 ");
         MarkupExtensions.TransformReferenceNames(xamlContent);
         var names = FindAllXNames(xamlContent);
-        Assert.Single(names);
-        Assert.DoesNotContain("element1", names);
-        Assert.Contains("element1_", names.First());
-        Assert.Contains("lg:Reference element1_", xamlContent.ToString());
-        Assert.Equal(2, xamlContent.ToString().Split(names.First()).Length - 1);
+        Assert.Multiple(() => {
+            Assert.That(names, Has.Count.EqualTo(1));
+            Assert.That(names, Has.No.Member("element1"));
+            Assert.That(names.First(), Does.Contain("element1_"));
+            Assert.That(xamlContent.ToString(), Does.Contain("lg:Reference element1_"));
+            Assert.That(xamlContent.ToString().Split(names.First()).Length - 1, Is.EqualTo(2));
+        });
     }
-
-    [Fact]
+    [Test]
     public void ElementMultipleNameChangingWithReferencesTest() {
         var xamlContent = new StringBuilder(@"
 <ContentPage
@@ -120,18 +122,19 @@ public class HotReloadClientTests: TestFixture {
 ");
         MarkupExtensions.TransformReferenceNames(xamlContent);
         var names = FindAllXNames(xamlContent);
-        Assert.Equal(2, names.Count);
-        Assert.DoesNotContain("element1", names);
-        Assert.DoesNotContain("element2", names);
-        Assert.NotNull(names.FirstOrDefault(it => it.StartsWith("element1_")));
-        Assert.NotNull(names.FirstOrDefault(it => it.StartsWith("element2_")));
-        Assert.Contains("x:Reference element1_", xamlContent.ToString());
-        Assert.Contains("x:Reference element2_", xamlContent.ToString());
-        Assert.Equal(2, xamlContent.ToString().Split(names[0]).Length - 1);
-        Assert.Equal(2, xamlContent.ToString().Split(names[1]).Length - 1);
+        Assert.Multiple(() => {
+            Assert.That(names, Has.Count.EqualTo(2));
+            Assert.That(names, Has.No.Member("element1"));
+            Assert.That(names, Has.No.Member("element2"));
+            Assert.That(names.FirstOrDefault(it => it.StartsWith("element1_")), Is.Not.Null);
+            Assert.That(names.FirstOrDefault(it => it.StartsWith("element2_")), Is.Not.Null);
+            Assert.That(xamlContent.ToString(), Does.Contain("x:Reference element1_"));
+            Assert.That(xamlContent.ToString(), Does.Contain("x:Reference element2_"));
+            Assert.That(xamlContent.ToString().Split(names[0]).Length - 1, Is.EqualTo(2));
+            Assert.That(xamlContent.ToString().Split(names[1]).Length - 1, Is.EqualTo(2));
+        });
     }
-
-    [Fact]
+    [Test]
     public void ElementMultipleNamesWithSamePartTest() {
         var xamlContent = new StringBuilder(@"
 <ContentPage
@@ -147,19 +150,20 @@ public class HotReloadClientTests: TestFixture {
 ");
         var transformations = MarkupExtensions.TransformReferenceNames(xamlContent);
         var names = FindAllXNames(xamlContent);
-        Assert.Equal(2, names.Count);
-        Assert.Equal(2, transformations.Count);
-        Assert.DoesNotContain("element", names);
-        Assert.DoesNotContain("elementTwo", names);
-        Assert.Contains("element", transformations.Keys);
-        Assert.Contains("elementTwo", transformations.Keys);
-        Assert.Contains("element_", transformations["element"]);
-        Assert.Contains("elementTwo_", transformations["elementTwo"]);
-        Assert.NotNull(names.FirstOrDefault(it => it.StartsWith("element")));
-        Assert.NotNull(names.FirstOrDefault(it => it.StartsWith("elementTwo")));
+        Assert.Multiple(() => {
+            Assert.That(names, Has.Count.EqualTo(2));
+            Assert.That(transformations, Has.Count.EqualTo(2));
+            Assert.That(names, Has.No.Member("element"));
+            Assert.That(names, Has.No.Member("elementTwo"));
+            Assert.That(transformations.Keys, Does.Contain("element"));
+            Assert.That(transformations.Keys, Does.Contain("elementTwo"));
+            Assert.That(transformations["element"], Does.Contain("element_"));
+            Assert.That(transformations["elementTwo"], Does.Contain("elementTwo_"));
+            Assert.That(names.FirstOrDefault(it => it.StartsWith("element")), Is.Not.Null);
+            Assert.That(names.FirstOrDefault(it => it.StartsWith("elementTwo")), Is.Not.Null);
+        });
     }
-
-    [Fact]
+    [Test]
     public void ElementNameWithSamePartWithReferenceTest() {
         var xamlContent = new StringBuilder(@"
 <ContentPage
@@ -177,20 +181,21 @@ public class HotReloadClientTests: TestFixture {
 ");
         var transformations = MarkupExtensions.TransformReferenceNames(xamlContent);
         var names = FindAllXNames(xamlContent);
-        Assert.Equal(2, names.Count);
-        Assert.DoesNotContain("element", names);
-        Assert.DoesNotContain("elementTwo", names);
-        Assert.Contains("element", transformations.Keys);
-        Assert.Contains("elementTwo", transformations.Keys);
-        Assert.Contains("element_", transformations["element"]);
-        Assert.Contains("elementTwo_", transformations["elementTwo"]);
-        Assert.NotNull(names.FirstOrDefault(it => it.StartsWith("element")));
-        Assert.NotNull(names.FirstOrDefault(it => it.StartsWith("elementTwo")));
+        Assert.Multiple(() => {
+            Assert.That(names, Has.Count.EqualTo(2));
+            Assert.That(names, Has.No.Member("element"));
+            Assert.That(names, Has.No.Member("elementTwo"));
+            Assert.That(transformations.Keys, Has.Member("element"));
+            Assert.That(transformations.Keys, Has.Member("elementTwo"));
+            Assert.That(transformations["element"], Does.Contain("element_"));
+            Assert.That(transformations["elementTwo"], Does.Contain("elementTwo_"));
+            Assert.That(names.FirstOrDefault(it => it.StartsWith("element")), Is.Not.Null);
+            Assert.That(names.FirstOrDefault(it => it.StartsWith("elementTwo")), Is.Not.Null);
+        });
         foreach (var transformation in transformations) 
-            Assert.Contains($"x:Reference {transformation.Value}", xamlContent.ToString());
+            Assert.That(xamlContent.ToString(), Does.Contain($"x:Reference {transformation.Value}"));
     }
-
-    [Fact]
+    [Test]
     public void ElementNameWithFullQualifiedReferenceTest() {
         var xamlContent = new StringBuilder(@"
 <ContentPage
@@ -205,15 +210,16 @@ public class HotReloadClientTests: TestFixture {
 ");
         var transformations = MarkupExtensions.TransformReferenceNames(xamlContent);
         var names = FindAllXNames(xamlContent);
-        Assert.Single(names);
-        Assert.DoesNotContain("element", names);
-        Assert.Contains("element", transformations.Keys);
-        Assert.Contains("element_", transformations["element"]);
+        Assert.Multiple(() => {
+            Assert.That(names, Has.Count.EqualTo(1));
+            Assert.That(names, Has.No.Member("element"));
+            Assert.That(transformations.Keys, Does.Contain("element"));
+            Assert.That(transformations["element"], Does.Contain("element_"));
+        });
         foreach (var transformation in transformations) 
-            Assert.Contains($"x:Reference Name={transformation.Value}", xamlContent.ToString());
+            Assert.That(xamlContent.ToString(), Does.Contain($"x:Reference Name={transformation.Value}"));
     }
-
-    [Fact]
+    [Test]
     public void TransformOnlyPortableXamlTypesTest() {
         var xamlContent = new StringBuilder(@"
 <ContentPage
@@ -229,11 +235,12 @@ public class HotReloadClientTests: TestFixture {
 ");
         var transformations = MarkupExtensions.TransformReferenceNames(xamlContent);
         var names = FindAllXNames(xamlContent);
-        
-        Assert.Single(names);
-        Assert.Contains("element", transformations.Keys);
-        Assert.Contains("element_", transformations["element"]);
-        Assert.DoesNotContain("element2", transformations.Keys);
-        Assert.DoesNotContain("element2_", transformations.Values);
+        Assert.Multiple(() => {
+            Assert.That(names, Has.Count.EqualTo(1));
+            Assert.That(transformations.Keys, Has.Member("element"));
+            Assert.That(transformations["element"], Does.Contain("element_"));
+            Assert.That(transformations.Keys, Has.No.Member("element2"));
+            Assert.That(transformations.Values, Has.No.Member("element2_"));
+        });
     }
 }
