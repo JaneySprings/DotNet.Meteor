@@ -63,11 +63,12 @@ public class ProcessRunner {
 
     public ProcessResult WaitForExit(int timeout = -1) {
         Start();
-    
-        if (timeout > 0)
-            process.WaitForExit(timeout);
-        else
-            process.WaitForExit();
+        process.WaitForExit();
+        //TODO: Not working with node.js child_process
+        // if (timeout > 0)
+        //     process.WaitForExit(timeout);
+        // else
+        //     process.WaitForExit();
 
         var exitCode = process.ExitCode;
         process.Close();
