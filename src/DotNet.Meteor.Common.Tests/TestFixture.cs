@@ -2,7 +2,6 @@ using System.Reflection;
 using System.Text;
 using System.Xml.Linq;
 using NUnit.Framework;
-using NUnit.Framework.Legacy;
 
 namespace DotNet.Meteor.Common.Tests;
 
