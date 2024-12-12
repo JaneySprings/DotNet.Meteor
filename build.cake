@@ -8,7 +8,6 @@ public string MeteorWorkspaceProjectPath => _Path.Combine(RootDirectory, "src", 
 public string MeteorXamlProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Xaml", "DotNet.Meteor.Xaml.LanguageServer", "DotNet.Meteor.Xaml.LanguageServer.csproj");
 public string MeteorHotReloadProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.HotReload", "DotNet.Meteor.HotReload.csproj");
 public string MeteorDebugProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Debugger", "DotNet.Meteor.Debugger.csproj");
-public string MeteorTestsProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Common.Tests", "DotNet.Meteor.Common.Tests.csproj");
 public string MeteorPluginProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.HotReload.Plugin", "DotNet.Meteor.HotReload.Plugin.csproj");
 public string DotNetDSRouterProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Diagnostics", "src", "Tools", "dotnet-dsrouter", "dotnet-dsrouter.csproj");
 public string DotNetGCDumpProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Diagnostics", "src", "Tools", "dotnet-gcdump", "dotnet-gcdump.csproj");
@@ -70,12 +69,22 @@ Task("plugin").Does(() => DotNetPack(MeteorPluginProjectPath, new DotNetPackSett
 		Version = version
 	},
 }));
-Task("test").Does(() => DotNetTest(MeteorTestsProjectPath, new DotNetTestSettings {  
-	Configuration = configuration,
-	Verbosity = DotNetVerbosity.Quiet,
-	ResultsDirectory = ArtifactsDirectory,
-	Loggers = new[] { "trx" }
-}));
+Task("test")
+	.Does(() => DotNetTest(_Path.Combine(RootDirectory, "src", "DotNet.Meteor.Common.Tests", "DotNet.Meteor.Common.Tests.csproj"),
+		new DotNetTestSettings {  
+			Configuration = configuration,
+			Verbosity = DotNetVerbosity.Quiet,
+			ResultsDirectory = ArtifactsDirectory,
+			Loggers = new[] { "trx" }
+		}
+	)).Does(() => DotNetTest(_Path.Combine(RootDirectory, "src", "DotNet.Meteor.Debugger.Tests", "DotNet.Meteor.Debugger.Tests.csproj"),
+		new DotNetTestSettings {  
+			Configuration = configuration,
+			Verbosity = DotNetVerbosity.Quiet,
+			ResultsDirectory = ArtifactsDirectory,
+			Loggers = new[] { "trx" }
+		}
+	));
 
 Task("vsix")
 	.IsDependentOn("clean")

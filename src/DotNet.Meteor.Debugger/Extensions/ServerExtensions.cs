@@ -208,10 +208,26 @@ public static class ServerExtensions {
 
         return sb.ToString();
     }
-    public static string ToEnvString(this Dictionary<string, string> env) {
+    public static string ToAndroidEnvString(this Dictionary<string, string> environment) {
         //https://github.com/dotnet/android/blob/b1241329f531b985b9c462b3f684e2ca3e0db98d/Documentation/workflow/SystemProperties.md#debugmonoenv
-        var envString = string.Join('|', env.Select(it => $"{it.Key}={it.Value}"));
-        return $"'{envString}'";
+        var maxEnvLength = 49;
+        var envPairs = new List<string>();
+        
+        maxEnvLength -= environment.Count - 1; // for '|' separator
+        foreach (var env in environment) {
+            if (maxEnvLength - env.Key.Length - 2 < 0)
+                break;
+
+            maxEnvLength -= env.Key.Length + 1;
+            if (maxEnvLength >= env.Value.Length)
+                envPairs.Add($"{env.Key}={env.Value}");
+            else
+                envPairs.Add($"{env.Key}={env.Value.Substring(env.Value.Length - maxEnvLength)}");
+
+            maxEnvLength -= env.Value.Length;
+        }
+    
+        return $"'{string.Join('|', envPairs)}'";
     }
 }
 
