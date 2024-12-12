@@ -63,7 +63,7 @@ public class NoDebugLaunchAgent : BaseLaunchAgent {
 
         AndroidDebugBridge.Install(Configuration.Device.Serial, Configuration.ProgramPath, logger);
         if (Configuration.EnvironmentVariables.Count != 0)
-            AndroidDebugBridge.Shell(Configuration.Device.Serial, "setprop", "debug.mono.env", Configuration.EnvironmentVariables.ToEnvString());
+            AndroidDebugBridge.Shell(Configuration.Device.Serial, "setprop", "debug.mono.env", Configuration.EnvironmentVariables.ToAndroidEnvString());
 
         AndroidFastDev.TryPushAssemblies(Configuration.Device, Configuration.AssetsPath, applicationId, logger);
 

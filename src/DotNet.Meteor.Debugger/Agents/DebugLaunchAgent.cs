@@ -95,7 +95,7 @@ public class DebugLaunchAgent : BaseLaunchAgent {
         AndroidDebugBridge.Install(Configuration.Device.Serial, Configuration.ProgramPath, logger);
         AndroidDebugBridge.Shell(Configuration.Device.Serial, "setprop", "debug.mono.connect", $"port={Configuration.DebugPort}");
         if (Configuration.EnvironmentVariables.Count != 0)
-            AndroidDebugBridge.Shell(Configuration.Device.Serial, "setprop", "debug.mono.env", Configuration.EnvironmentVariables.ToEnvString());
+            AndroidDebugBridge.Shell(Configuration.Device.Serial, "setprop", "debug.mono.env", Configuration.EnvironmentVariables.ToAndroidEnvString());
         
         AndroidDebugBridge.Shell(Configuration.Device.Serial, "am", "set-debug-app", applicationId);
 
