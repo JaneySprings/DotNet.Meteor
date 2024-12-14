@@ -9,7 +9,7 @@ namespace DotNet.Meteor.Debugger.Tests;
 public class LaunchConfigurationTests : TestFixture {
     private readonly JToken TestProjectJToken = new JObject {
         { "name", "TestProject" },
-        { "path", "C:\\Documents\\TestProject\\TestProject.csproj" },
+        { "path", $"{Root}Documents\\TestProject\\TestProject.csproj" },
         { "frameworks", new JArray { "net8.0-android", "net8.0-ios" } },
         { "configurations", new JArray { "Debug", "Release" } }
     };
@@ -22,12 +22,19 @@ public class LaunchConfigurationTests : TestFixture {
         { "is_mobile", true }
     };
 
-    private char APS => Path.DirectorySeparatorChar;
-    private char IPS {
+    private static char APS => Path.DirectorySeparatorChar;
+    private static char IPS {
         get {
             if (RuntimeSystem.IsWindows)
                 return '/';
-            return (char)47;
+            return '\\';
+        }
+    }
+    private static string Root {
+        get {
+            if (RuntimeSystem.IsWindows)
+                return $"C:{APS}";
+            return "/";
         }
     }
 
@@ -93,7 +100,7 @@ public class LaunchConfigurationTests : TestFixture {
     
     [Test]
     public void StrangeMSBuildPathFormatTest() {
-        var incorrectPath = $"C:{IPS}Documents{IPS}TestProject{IPS}obj{IPS}Debug{IPS}net8.0-android{IPS}TestProject.dll";
+        var incorrectPath = $"{Root}Documents{IPS}TestProject{IPS}obj{IPS}Debug{IPS}net8.0-android{IPS}TestProject.dll";
         var correctPath = incorrectPath.Replace(IPS, APS);
 
         var properties = new Dictionary<string, JToken>();
@@ -109,7 +116,7 @@ public class LaunchConfigurationTests : TestFixture {
     }
     [Test]
     public void StrangeMSBuildPathFormat2Test() {
-        var incorrectPath = $"C:{APS}Documents{APS}TestProject{IPS}obj{IPS}Debug{IPS}net8.0-android{APS}TestProject.dll";
+        var incorrectPath = $"{Root}Documents{APS}TestProject{IPS}obj{IPS}Debug{IPS}net8.0-android{APS}TestProject.dll";
         var correctPath = incorrectPath.Replace(IPS, APS);
 
         var properties = new Dictionary<string, JToken>();
@@ -126,7 +133,7 @@ public class LaunchConfigurationTests : TestFixture {
     [Test]
     public void StrangeMSBuildPathFormat3Test() {
         var incorrectPath = $"obj{IPS}Debug{IPS}net8.0-android{APS}TestProject.dll";
-        var correctPath =  $"C:{APS}Documents{APS}TestProject{APS}obj{APS}Debug{APS}net8.0-android{APS}TestProject.dll";
+        var correctPath =  $"{Root}Documents{APS}TestProject{APS}obj{APS}Debug{APS}net8.0-android{APS}TestProject.dll";
 
         var properties = new Dictionary<string, JToken>();
         properties.Add("project", TestProjectJToken);
@@ -142,7 +149,7 @@ public class LaunchConfigurationTests : TestFixture {
     [Test]
     public void StrangeMSBuildPathFormat4Test() {
         var incorrectPath = $"obj{IPS}{IPS}Debug{IPS}net8.0-android{APS}{APS}TestProject.dll";
-        var correctPath =  $"C:{APS}Documents{APS}TestProject{APS}obj{APS}Debug{APS}net8.0-android{APS}TestProject.dll";
+        var correctPath =  $"{Root}Documents{APS}TestProject{APS}obj{APS}Debug{APS}net8.0-android{APS}TestProject.dll";
 
         var properties = new Dictionary<string, JToken>();
         properties.Add("project", TestProjectJToken);
@@ -158,7 +165,7 @@ public class LaunchConfigurationTests : TestFixture {
 
     [Test]
     public void StrangeMSBuildPathFormatAssetsTest() {
-        var incorrectPath = $"C:{IPS}Documents{IPS}TestProject{IPS}obj{IPS}Debug{IPS}net8.0-android";
+        var incorrectPath = $"{Root}Documents{IPS}TestProject{IPS}obj{IPS}Debug{IPS}net8.0-android";
         var correctPath = incorrectPath.Replace(IPS, APS);
 
         var properties = new Dictionary<string, JToken>();
@@ -172,7 +179,7 @@ public class LaunchConfigurationTests : TestFixture {
     }
     [Test]
     public void StrangeMSBuildPathFormatAssets2Test() {
-        var incorrectPath = $"C:{APS}Documents{APS}TestProject{IPS}obj{IPS}Debug{IPS}net8.0-android";
+        var incorrectPath = $"{Root}Documents{APS}TestProject{IPS}obj{IPS}Debug{IPS}net8.0-android";
         var correctPath = incorrectPath.Replace(IPS, APS);
 
         var properties = new Dictionary<string, JToken>();
@@ -187,7 +194,7 @@ public class LaunchConfigurationTests : TestFixture {
     [Test]
     public void StrangeMSBuildPathFormatAssets3Test() {
         var incorrectPath = $"obj{IPS}Debug{IPS}net8.0-android{APS}";
-        var correctPath =  $"C:{APS}Documents{APS}TestProject{APS}obj{APS}Debug{APS}net8.0-android";
+        var correctPath =  $"{Root}Documents{APS}TestProject{APS}obj{APS}Debug{APS}net8.0-android";
 
         var properties = new Dictionary<string, JToken>();
         properties.Add("project", TestProjectJToken);
@@ -201,7 +208,7 @@ public class LaunchConfigurationTests : TestFixture {
     [Test]
     public void StrangeMSBuildPathFormatAssets4Test() {
         var incorrectPath = $"obj{IPS}{IPS}Debug{IPS}net8.0-android{APS}{APS}";
-        var correctPath =  $"C:{APS}Documents{APS}TestProject{APS}obj{APS}Debug{APS}net8.0-android";
+        var correctPath =  $"{Root}Documents{APS}TestProject{APS}obj{APS}Debug{APS}net8.0-android";
 
         var properties = new Dictionary<string, JToken>();
         properties.Add("project", TestProjectJToken);
