@@ -9,7 +9,7 @@ namespace DotNet.Meteor.Debugger.Tests;
 public class LaunchConfigurationTests : TestFixture {
     private readonly JToken TestProjectJToken = new JObject {
         { "name", "TestProject" },
-        { "path", $"{Root}Documents\\TestProject\\TestProject.csproj" },
+        { "path", $"{Root}Documents{APS}TestProject{APS}TestProject.csproj" },
         { "frameworks", new JArray { "net8.0-android", "net8.0-ios" } },
         { "configurations", new JArray { "Debug", "Release" } }
     };
