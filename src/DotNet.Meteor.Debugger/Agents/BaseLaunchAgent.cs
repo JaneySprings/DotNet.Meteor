@@ -41,9 +41,9 @@ public abstract class BaseLaunchAgent {
         foreach (var disposable in Disposables) {
             try {
                 disposable.Invoke();
-                DebuggerLoggingService.CustomLogger.LogMessage($"Disposing {disposable.Method.Name}");
+                DebuggerLoggingService.CustomLogger?.LogMessage($"Disposing {disposable.Method.Name}");
             } catch (Exception ex) {
-                DebuggerLoggingService.CustomLogger.LogMessage($"Error while disposing {disposable.Method.Name}: {ex.Message}");
+                DebuggerLoggingService.CustomLogger?.LogMessage($"Error while disposing {disposable.Method.Name}: {ex.Message}");
             }
         }
 

@@ -22,7 +22,7 @@ public static class SymbolServerExtensions {
     }
     public static string? DownloadSourceFile(string uri) {
         if (!Uri.TryCreate(uri, UriKind.Absolute, out var sourceLinkUri)) {
-            DebuggerLoggingService.CustomLogger.LogMessage($"Invalid source link '{uri}'");
+            DebuggerLoggingService.CustomLogger?.LogMessage($"Invalid source link '{uri}'");
             return null;
         }
 
@@ -123,7 +123,7 @@ public static class SymbolServerExtensions {
                 peReader.ReadPdbChecksumDebugDirectoryData(checkSumEntries.First())
             );
         } catch (Exception ex) {
-            DebuggerLoggingService.CustomLogger.LogError($"Error reading assembly '{assemblyPath}'", ex);
+            DebuggerLoggingService.CustomLogger?.LogError($"Error reading assembly '{assemblyPath}'", ex);
             return null;
         }
     }

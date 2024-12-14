@@ -525,12 +525,12 @@ public class DebugSession : Session {
     }
 
     private bool OnExceptionHandled(Exception ex) {
-        MonoClient.DebuggerLoggingService.CustomLogger.LogError($"[Handled] {ex.Message}", ex);
+        MonoClient.DebuggerLoggingService.CustomLogger?.LogError($"[Handled] {ex.Message}", ex);
         return true;
     }
     private void OnSessionLog(bool isError, string message) {
-        if (isError) MonoClient.DebuggerLoggingService.CustomLogger.LogError($"[Error] {message.Trim()}", null);
-        else MonoClient.DebuggerLoggingService.CustomLogger.LogMessage($"[Info] {message.Trim()}");
+        if (isError) MonoClient.DebuggerLoggingService.CustomLogger?.LogError($"[Error] {message.Trim()}", null);
+        else MonoClient.DebuggerLoggingService.CustomLogger?.LogMessage($"[Info] {message.Trim()}");
 
         OnOutputDataReceived($"[Mono] {message.Trim()}");
     }

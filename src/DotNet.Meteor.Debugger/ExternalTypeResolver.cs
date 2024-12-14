@@ -20,9 +20,9 @@ public class ExternalTypeResolver : IDisposable {
         try {
             transportStream.Connect(timeoutMs);
             rpcServer = JsonRpc.Attach(transportStream);
-            DebuggerLoggingService.CustomLogger.LogMessage("Debugger connected to external type resolver");
+            DebuggerLoggingService.CustomLogger?.LogMessage("Debugger connected to external type resolver");
         } catch (Exception e) {
-            DebuggerLoggingService.CustomLogger.LogMessage($"Failed to connect to external type resolver: {e}");
+            DebuggerLoggingService.CustomLogger?.LogMessage($"Failed to connect to external type resolver: {e}");
             return false;
         }
 

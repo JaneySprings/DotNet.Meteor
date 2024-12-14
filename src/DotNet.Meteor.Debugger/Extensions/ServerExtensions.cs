@@ -64,7 +64,7 @@ public static class ServerExtensions {
             finalizer?.Invoke();
             if (ex is ProtocolException)
                 throw;
-            DebuggerLoggingService.CustomLogger.LogError($"[Handled] {ex.Message}", ex);
+            DebuggerLoggingService.CustomLogger?.LogError($"[Handled] {ex.Message}", ex);
             throw GetProtocolException(ex.Message);
         }
     }

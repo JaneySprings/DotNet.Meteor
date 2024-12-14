@@ -86,8 +86,11 @@ public class LaunchConfiguration {
     private string FindProgramPath(string programPath) {
         if (string.IsNullOrEmpty(programPath))
             throw ServerExtensions.GetProtocolException("Program path is null or empty");
-        
+
         var programDirectory = Path.GetDirectoryName(programPath)!;
+        if (!Directory.Exists(programDirectory))
+            throw ServerExtensions.GetProtocolException($"Incorrect path to program: '{ProgramPath}'");
+
         if (Device.IsAndroid) {
             var apkPaths = Directory.GetFiles(programDirectory, "*-Signed.apk");
             if (apkPaths.Length == 1)
