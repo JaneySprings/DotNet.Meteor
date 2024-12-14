@@ -39,10 +39,10 @@ public abstract class Session : DebugAdapterBase, IProcessLogger {
         });
     }
     private void LogMessage(object? sender, LogEventArgs args) {
-        DebuggerLoggingService.CustomLogger.LogMessage(args.Message);
+        DebuggerLoggingService.CustomLogger?.LogMessage(args.Message);
     }
     private void LogError(object? sender, DispatcherErrorEventArgs args) {
-        DebuggerLoggingService.CustomLogger.LogError($"[Fatal] {args.Exception.Message}", args.Exception);
+        DebuggerLoggingService.CustomLogger?.LogError($"[Fatal] {args.Exception.Message}", args.Exception);
         OnUnhandledException(args.Exception);
     }
 }

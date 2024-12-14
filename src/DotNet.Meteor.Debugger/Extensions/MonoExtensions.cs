@@ -98,7 +98,7 @@ public static class MonoExtensions {
             try {
                 var assemblyName = AssemblyName.GetAssemblyName(assemblyPath);
                 if (string.IsNullOrEmpty(assemblyName.FullName) || string.IsNullOrEmpty(assemblyName.Name)) {
-                    DebuggerLoggingService.CustomLogger.LogMessage($"Assembly '{assemblyPath}' has no name");
+                    DebuggerLoggingService.CustomLogger?.LogMessage($"Assembly '{assemblyPath}' has no name");
                     continue;
                 }
 
@@ -108,7 +108,7 @@ public static class MonoExtensions {
                 if (string.IsNullOrEmpty(assemblySymbolsFilePath) && options.SearchNuGetSymbolServer)
                     assemblySymbolsFilePath = SymbolServerExtensions.DownloadSourceSymbols(assemblyPath, assemblyName.Name, SymbolServerExtensions.NuGetSymbolServerAddress);
                 if (string.IsNullOrEmpty(assemblySymbolsFilePath))
-                    DebuggerLoggingService.CustomLogger.LogMessage($"No symbols found for '{assemblyPath}'");
+                    DebuggerLoggingService.CustomLogger?.LogMessage($"No symbols found for '{assemblyPath}'");
 
                 if (!string.IsNullOrEmpty(assemblySymbolsFilePath))
                     assemblySymbolPathMap.Add(assemblyName.FullName, assemblySymbolsFilePath);
@@ -116,10 +116,10 @@ public static class MonoExtensions {
                 if (options.ProjectAssembliesOnly && SymbolServerExtensions.HasDebugSymbols(assemblyPath, useSymbolServers)) {
                     assemblyPathMap.TryAdd(assemblyName.FullName, assemblyPath);
                     assemblyNames.Add(assemblyName);
-                    DebuggerLoggingService.CustomLogger.LogMessage($"User assembly '{assemblyName.Name}' added");
+                    DebuggerLoggingService.CustomLogger?.LogMessage($"User assembly '{assemblyName.Name}' added");
                 }
             } catch (Exception e) {
-                DebuggerLoggingService.CustomLogger.LogError($"Error while processing assembly '{assemblyPath}'", e);
+                DebuggerLoggingService.CustomLogger?.LogError($"Error while processing assembly '{assemblyPath}'", e);
             }
         }
 
