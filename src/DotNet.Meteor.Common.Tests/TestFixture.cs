@@ -43,45 +43,8 @@ public abstract class TestFixture {
 
         return propsPath;
     }
-    protected string CreateOutputAssembly(string target, string framework, string? runtime, string name, bool includeWinDir) {
-        string projectDir = Path.Combine(MockDataDirectory, ProjectName);
-        string assemblyDir = runtime == null
-            ? Path.Combine(projectDir, "bin", target, framework)
-            : Path.Combine(projectDir, "bin", target, framework, runtime);
 
-        if (includeWinDir)
-            assemblyDir = Path.Combine(assemblyDir, "win-x64");
-
-        string assemblyPath = Path.Combine(assemblyDir, name);
-
-        Directory.CreateDirectory(assemblyDir);
-        using var writer = File.CreateText(assemblyPath);
-        writer.WriteLine("bin-data...");
-
-        return assemblyPath;
-    }
-    protected string CreateOutputBundle(string target, string framework, string runtime, string name) {
-        string projectDir = Path.Combine(MockDataDirectory, ProjectName);
-        string assemblyDir = runtime == null
-            ? Path.Combine(projectDir, "bin", target, framework, name)
-            : Path.Combine(projectDir, "bin", target, framework, runtime, name);
-        string assemblyPath = Path.Combine(assemblyDir, "mock");
-
-        Directory.CreateDirectory(assemblyDir);
-        using var writer = File.CreateText(assemblyPath);
-        writer.WriteLine("bin-data...");
-
-        return assemblyDir;
-    }
-
-    protected string CreateOutputAssemblyFile(string path, string name) {
-        string assemblyPath = Path.Combine(path, name);
-        using var writer = File.CreateText(assemblyPath);
-        writer.WriteLine("bin-data...");
-
-        return assemblyPath;
-    }
-    protected List<string> FindAllXNames(StringBuilder stringBuilder) {
+    protected static List<string> FindAllXNames(StringBuilder stringBuilder) {
         var names = new List<string>();
         var xaml = XDocument.Parse(stringBuilder.ToString());
         var xElements = xaml.Descendants().ToList();
@@ -94,8 +57,7 @@ public abstract class TestFixture {
 
         return names;
     }
-
-    protected void CollectionsAreEqual<TValue>(IEnumerable<TValue> expected, IEnumerable<TValue> actual) {
+    protected static void CollectionsAreEqual<TValue>(IEnumerable<TValue> expected, IEnumerable<TValue> actual) {
         Assert.That(actual.Count(), Is.EqualTo(expected.Count()));
         foreach (var item in expected)
             Assert.That(actual, Does.Contain(item));

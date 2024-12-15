@@ -1,17 +1,15 @@
-using DotNet.Meteor.Debugger.Extensions;
+using DotNet.Meteor.Profiler.Extensions;
 using DotNet.Meteor.Common;
-using Mono.Debugging.Soft;
 using DotNet.Meteor.Common.Processes;
 using DotNet.Meteor.Common.Apple;
 using DotNet.Meteor.Common.Android;
-using DotNet.Meteor.Debugger.Tools;
+using DotNet.Meteor.Profiler.Tools;
 
-namespace DotNet.Meteor.Debugger;
+namespace DotNet.Meteor.Profiler;
 
 public class TraceLaunchAgent : BaseLaunchAgent {
     public TraceLaunchAgent(LaunchConfiguration configuration) : base(configuration) { }
-    public override void Connect(SoftDebuggerSession session) { }
-    public override void Launch(DebugSession debugSession) {
+    public override void Launch(ProfileSession debugSession) {
         var nettracePath = Path.Combine(Path.GetDirectoryName(Configuration.Project.Path)!, $"{Configuration.GetApplicationName()}.nettrace");
         var diagnosticPort = Path.Combine(RuntimeSystem.HomeDirectory, $"{Configuration.Device.Platform}-port.lock");
         ServerExtensions.TryDeleteFile(diagnosticPort);

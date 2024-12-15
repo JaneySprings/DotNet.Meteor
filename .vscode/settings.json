@@ -6,6 +6,7 @@
     "dotrush.roslyn.projectFiles": [
         "src/DotNet.Meteor.Common.Tests/DotNet.Meteor.Common.Tests.csproj",
         "src/DotNet.Meteor.Debugger.Tests/DotNet.Meteor.Debugger.Tests.csproj",
+        "src/DotNet.Meteor.Profiler.Tests/DotNet.Meteor.Profiler.Tests.csproj",
         "src/DotNet.Meteor.HotReload.Plugin/DotNet.Meteor.HotReload.Plugin.csproj",
         "src/DotNet.Meteor.Xaml/DotNet.Meteor.Xaml.LanguageServer/DotNet.Meteor.Xaml.LanguageServer.csproj"
     ],
