@@ -355,11 +355,6 @@ public class DebugSession : Session {
     #region Evaluate
     protected override EvaluateResponse HandleEvaluateRequest(EvaluateArguments arguments) {
         return ServerExtensions.DoSafe(() => {
-            if (arguments.Expression.StartsWith(BaseLaunchAgent.CommandPrefix)) {
-                launchAgent?.HandleCommand(arguments.Expression, this);
-                throw new ProtocolException($"command handled by {launchAgent}");
-            }
-
             var expression = arguments.TrimExpression();
             var frame = frameHandles.Get(arguments.FrameId ?? 0, null);
             if (frame == null)
@@ -421,9 +416,6 @@ public class DebugSession : Session {
     #region Completions
     protected override CompletionsResponse HandleCompletionsRequest(CompletionsArguments arguments) {
         return ServerExtensions.DoSafe(() => {
-            if (arguments.Text.StartsWith(BaseLaunchAgent.CommandPrefix))
-                return new CompletionsResponse(launchAgent?.GetCompletionItems());
-
             var frame = frameHandles.Get(arguments.FrameId ?? 0, null);
             if (frame == null)
                 throw new ProtocolException("no active stackframe");

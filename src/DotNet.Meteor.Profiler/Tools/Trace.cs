@@ -1,8 +1,8 @@
 using DotNet.Meteor.Common.Processes;
-using DotNet.Meteor.Debugger.Extensions;
+using DotNet.Meteor.Profiler.Extensions;
 using TraceCollectHandler = Microsoft.Diagnostics.Tools.Trace.CollectCommandHandler;
 
-namespace DotNet.Meteor.Debugger.Tools;
+namespace DotNet.Meteor.Profiler.Tools;
 
 public static class Trace {
 

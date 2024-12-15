@@ -2,7 +2,7 @@ using System.Diagnostics;
 using DotNet.Meteor.Common;
 using DotNet.Meteor.Common.Processes;
 
-namespace DotNet.Meteor.Debugger.Tools;
+namespace DotNet.Meteor.Profiler.Tools;
 
 public static class GCDump {
     public static FileInfo GCDumpTool() {

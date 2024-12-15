@@ -4,13 +4,6 @@ using _Path = System.IO.Path;
 public string RootDirectory => MakeAbsolute(Directory("./")).ToString();
 public string ArtifactsDirectory => _Path.Combine(RootDirectory, "artifacts");
 public string ExtensionStagingDirectory => _Path.Combine(RootDirectory, "extension");
-public string MeteorWorkspaceProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Workspace", "DotNet.Meteor.Workspace.csproj");
-public string MeteorXamlProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Xaml", "DotNet.Meteor.Xaml.LanguageServer", "DotNet.Meteor.Xaml.LanguageServer.csproj");
-public string MeteorHotReloadProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.HotReload", "DotNet.Meteor.HotReload.csproj");
-public string MeteorDebugProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.Debugger", "DotNet.Meteor.Debugger.csproj");
-public string MeteorPluginProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Meteor.HotReload.Plugin", "DotNet.Meteor.HotReload.Plugin.csproj");
-public string DotNetDSRouterProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Diagnostics", "src", "Tools", "dotnet-dsrouter", "dotnet-dsrouter.csproj");
-public string DotNetGCDumpProjectPath => _Path.Combine(RootDirectory, "src", "DotNet.Diagnostics", "src", "Tools", "dotnet-gcdump", "dotnet-gcdump.csproj");
 
 var target = Argument("target", "vsix");
 var version = Argument("release-version", "1.0.0");
@@ -25,50 +18,61 @@ Task("clean").Does(() => {
 	CleanDirectories(_Path.Combine(RootDirectory, "src", "**", "obj"));
 });
 
-Task("workspace").Does(() => DotNetPublish(MeteorWorkspaceProjectPath, new DotNetPublishSettings {
+
+Task("workspace").Does(() => DotNetPublish(_Path.Combine(RootDirectory, "src", "DotNet.Meteor.Workspace", "DotNet.Meteor.Workspace.csproj"), new DotNetPublishSettings {
 	MSBuildSettings = new DotNetMSBuildSettings { AssemblyVersion = version },
 	OutputDirectory = _Path.Combine(ExtensionStagingDirectory, "bin", "Workspace"),
 	Configuration = configuration,
 	Runtime = runtime,
 }));
-Task("xaml").Does(() => DotNetPublish(MeteorXamlProjectPath, new DotNetPublishSettings {
+Task("xaml").Does(() => DotNetPublish(_Path.Combine(RootDirectory, "src", "DotNet.Meteor.Xaml", "DotNet.Meteor.Xaml.LanguageServer", "DotNet.Meteor.Xaml.LanguageServer.csproj"), new DotNetPublishSettings {
 	MSBuildSettings = new DotNetMSBuildSettings { AssemblyVersion = version },
 	OutputDirectory = _Path.Combine(ExtensionStagingDirectory, "bin", "Xaml"),
 	Configuration = configuration,
 	Runtime = runtime,
 }));
-Task("hotreload").Does(() => DotNetPublish(MeteorHotReloadProjectPath, new DotNetPublishSettings {
+Task("hotreload").Does(() => DotNetPublish(_Path.Combine(RootDirectory, "src", "DotNet.Meteor.HotReload", "DotNet.Meteor.HotReload.csproj"), new DotNetPublishSettings {
 	MSBuildSettings = new DotNetMSBuildSettings { AssemblyVersion = version },
 	OutputDirectory = _Path.Combine(ExtensionStagingDirectory, "bin", "HotReload"),
 	Configuration = configuration,
 	Runtime = runtime,
 }));
-Task("debugger").Does(() => DotNetPublish(MeteorDebugProjectPath, new DotNetPublishSettings {
-	MSBuildSettings = new DotNetMSBuildSettings { 
-		ArgumentCustomization = args => args.Append("/p:NuGetVersionRoslyn=4.5.0"),
-		AssemblyVersion = version
-	},
-	OutputDirectory = _Path.Combine(ExtensionStagingDirectory, "bin", "Debugger"),
-	Configuration = configuration,
-	Runtime = runtime,
-}));
-Task("dsrouter").Does(() => DotNetPublish(DotNetDSRouterProjectPath, new DotNetPublishSettings {
-	OutputDirectory = _Path.Combine(ExtensionStagingDirectory, "bin", "Debugger"),
-	Configuration = configuration,
-	Runtime = runtime,
-}));
-Task("gcdump").Does(() => DotNetPublish(DotNetGCDumpProjectPath, new DotNetPublishSettings {
-	OutputDirectory = _Path.Combine(ExtensionStagingDirectory, "bin", "Debugger"),
-	Configuration = configuration,
-	Runtime = runtime,
-}));
-Task("plugin").Does(() => DotNetPack(MeteorPluginProjectPath, new DotNetPackSettings {
+Task("plugin").Does(() => DotNetPack(_Path.Combine(RootDirectory, "src", "DotNet.Meteor.HotReload.Plugin", "DotNet.Meteor.HotReload.Plugin.csproj"), new DotNetPackSettings {
 	Configuration = configuration,
 	MSBuildSettings = new DotNetMSBuildSettings { 
 		AssemblyVersion = version, 
 		Version = version
 	},
 }));
+
+
+Task("debugger")
+	.Does(() => DotNetPublish(_Path.Combine(RootDirectory, "src", "DotNet.Meteor.Debugger", "DotNet.Meteor.Debugger.csproj"), new DotNetPublishSettings {
+		MSBuildSettings = new DotNetMSBuildSettings { 
+			ArgumentCustomization = args => args.Append("/p:NuGetVersionRoslyn=4.5.0"),
+			AssemblyVersion = version
+		},
+		OutputDirectory = _Path.Combine(ExtensionStagingDirectory, "bin", "Debugger"),
+		Configuration = configuration,
+		Runtime = runtime,
+	}));
+Task("profiler")
+	.Does(() => DotNetPublish(_Path.Combine(RootDirectory, "src", "DotNet.Diagnostics", "src", "Tools", "dotnet-dsrouter", "dotnet-dsrouter.csproj"), new DotNetPublishSettings {
+		OutputDirectory = _Path.Combine(ExtensionStagingDirectory, "bin", "Profiler"),
+		Configuration = configuration,
+		Runtime = runtime,
+	})).Does(() => DotNetPublish(_Path.Combine(RootDirectory, "src", "DotNet.Diagnostics", "src", "Tools", "dotnet-gcdump", "dotnet-gcdump.csproj"), new DotNetPublishSettings {
+		OutputDirectory = _Path.Combine(ExtensionStagingDirectory, "bin", "Profiler"),
+		Configuration = configuration,
+		Runtime = runtime,
+	})).Does(() => DotNetPublish(_Path.Combine(RootDirectory, "src", "DotNet.Meteor.Profiler", "DotNet.Meteor.Profiler.csproj"), new DotNetPublishSettings {
+		MSBuildSettings = new DotNetMSBuildSettings { AssemblyVersion = version },
+		OutputDirectory = _Path.Combine(ExtensionStagingDirectory, "bin", "Profiler"),
+		Configuration = configuration,
+		Runtime = runtime,
+	}));
+
+
 Task("test")
 	.Does(() => DotNetTest(_Path.Combine(RootDirectory, "src", "DotNet.Meteor.Common.Tests", "DotNet.Meteor.Common.Tests.csproj"),
 		new DotNetTestSettings {  
@@ -84,7 +88,15 @@ Task("test")
 			ResultsDirectory = ArtifactsDirectory,
 			Loggers = new[] { "trx" }
 		}
+	)).Does(() => DotNetTest(_Path.Combine(RootDirectory, "src", "DotNet.Meteor.Profiler.Tests", "DotNet.Meteor.Profiler.Tests.csproj"),
+		new DotNetTestSettings {  
+			Configuration = configuration,
+			Verbosity = DotNetVerbosity.Quiet,
+			ResultsDirectory = ArtifactsDirectory,
+			Loggers = new[] { "trx" }
+		}
 	));
+
 
 Task("vsix")
 	.IsDependentOn("clean")
@@ -92,8 +104,7 @@ Task("vsix")
 	.IsDependentOn("xaml")
 	.IsDependentOn("hotreload")
 	.IsDependentOn("debugger")
-	.IsDependentOn("dsrouter")
-	.IsDependentOn("gcdump")
+	.IsDependentOn("profiler")
 	.Does(() => {
 		var vsruntime = runtime.Replace("win-", "win32-").Replace("osx-", "darwin-");
 		var output = _Path.Combine(ArtifactsDirectory, $"DotNet.Meteor.v{version}_{vsruntime}.vsix");
