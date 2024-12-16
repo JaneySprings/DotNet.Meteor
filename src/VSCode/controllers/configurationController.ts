@@ -152,16 +152,17 @@ export class ConfigurationController {
         if (targetPath === undefined)
             return undefined;
 
+        if (ConfigurationController.isVsdbgRequired()) {
+            const execExtension = process.platform === 'win32' ? '.exe' : '';
+            const targetDirectory = path.dirname(targetPath);
+            const targetFile = path.basename(targetPath, '.dll');
+            return path.join(targetDirectory, targetFile + execExtension);
+        }
         if (ConfigurationController.isAndroid()) {
             const outDir = path.dirname(targetPath);
             const packageName = Interop.getPropertyValue('ApplicationId', project, configuration, device);
             if (packageName !== undefined)
                 return path.join(outDir, packageName + '-Signed.apk');
-        }
-        if (ConfigurationController.isWindows()) {
-            const targetDirectory = path.dirname(targetPath);
-            const targetFile = path.basename(targetPath, '.dll');
-            return path.join(targetDirectory, targetFile + '.exe');
         }
         if (ConfigurationController.isAppleMobile() || ConfigurationController.isMacCatalyst()) {
             const outDir = path.dirname(targetPath);
