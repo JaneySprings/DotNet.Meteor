@@ -90,7 +90,7 @@ public static class MonoLauncher {
         ).Start();
     }
     public static Process ProfileSim(string serial, string bundlePath, string port, IProcessLogger? logger = null) {
-        return MonoLauncher.LaunchDev(serial, bundlePath,
+        return MonoLauncher.LaunchSim(serial, bundlePath,
             arguments: new List<string> { 
                 "--connection-mode", "none"
             },
