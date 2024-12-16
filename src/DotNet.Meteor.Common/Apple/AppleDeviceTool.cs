@@ -58,7 +58,8 @@ public static class AppleDeviceTool {
                 IsEmulator = false,
                 IsRunning = true,
                 IsMobile = false,
-                RuntimeId = Runtimes.MacArm64,
+                // Use default for other Frameworks like Avalonia
+                // RuntimeId = Runtimes.MacArm64,
                 OSVersion = osVersion,
                 Detail = Details.MacCatalyst,
                 Platform = Platforms.MacCatalyst,
@@ -70,7 +71,8 @@ public static class AppleDeviceTool {
             IsEmulator = false,
             IsRunning = true,
             IsMobile = false,
-            RuntimeId = Runtimes.MacX64,
+            // Use default for other Frameworks like Avalonia
+            RuntimeId = RuntimeSystem.IsAarch64 ? Runtimes.MacX64 : string.Empty,
             OSVersion = osVersion,
             Detail = Details.MacCatalyst,
             Platform = Platforms.MacCatalyst,
