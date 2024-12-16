@@ -28,10 +28,14 @@ public class DeviceProvidingTests: TestFixture {
             return;
         var result = AppleDeviceTool.MacintoshDevices();
 
-        if (RuntimeSystem.IsAarch64) 
+        if (RuntimeSystem.IsAarch64) {
             Assert.That(result, Has.Count.EqualTo(2));
-        else 
+            Assert.That(result[0].RuntimeId, Is.Null.Or.Empty);
+            Assert.That(result[1].RuntimeId, Is.EqualTo(Runtimes.MacX64));
+        } else{
             Assert.That(result, Has.Count.EqualTo(1));
+            Assert.That(result[0].RuntimeId, Is.Null.Or.Empty);
+        } 
     }
     [Test]
     public void WindowsDeviceTest() {
