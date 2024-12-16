@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+	</PropertyGroup>
+
+	<Import Project="..\Common.Build.props" />
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.VisualStudio.Shared.VSCodeDebugProtocol" Version="17.2.60629.1" />
+		<ProjectReference Include="..\DotNet.Meteor.Common\DotNet.Meteor.Common.csproj" />
+		<ProjectReference Include="..\DotNet.Diagnostics\src\Tools\dotnet-trace\dotnet-trace.csproj" />
+	</ItemGroup>
+
+</Project>

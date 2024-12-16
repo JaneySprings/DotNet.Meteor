@@ -146,9 +146,9 @@
           "xaml",
           "xml"
         ],
-        "program": "./extension/bin/Debug/DotNet.Meteor.Debug",
+        "program": "./extension/bin/Debugger/DotNet.Meteor.Debugger",
         "windows": {
-          "program": "./extension/bin/Debug/DotNet.Meteor.Debug.exe"
+          "program": "./extension/bin/Debugger/DotNet.Meteor.Debugger.exe"
         },
         "initialConfigurations": [
           {
