@@ -190,14 +190,60 @@
               },
               "env": {
                 "type": "object"
+              }
+            }
+          }
+        }
+      },
+      {
+        "type": "dotnet-meteor.profiler",
+        "label": "%profiler.meteor.title%",
+        "languages": [
+          "csharp",
+          "fsharp",
+          "razor",
+          "aspnetcorerazor",
+          "xaml",
+          "xml"
+        ],
+        "program": "./extension/bin/Profiler/DotNet.Meteor.Profiler",
+        "windows": {
+          "program": "./extension/bin/Profiler/DotNet.Meteor.Profiler.exe"
+        },
+        "initialConfigurations": [
+          {
+            "name": "%profiler.meteor.title%",
+            "type": "dotnet-meteor.profiler",
+            "request": "launch",
+            "preLaunchTask": "dotnet-meteor: Build"
+          }
+        ],
+        "configurationSnippets": [
+          {
+            "label": "%profiler.meteor.title%",
+            "description": "%profiler.meteor.description%",
+            "body": {
+              "name": "%profiler.meteor.title%",
+              "type": "dotnet-meteor.profiler",
+              "request": "launch",
+              "preLaunchTask": "dotnet-meteor: Build"
+            }
+          }
+        ],
+        "configurationAttributes": {
+          "launch": {
+            "properties": {
+              "program": {
+                "type": "string"
               },
-              "profilerMode": {
-                "type": "string",
-                "enum": [
-                  "trace",
-                  "gcdump"
-                ],
-                "description": "%debugger.meteor.description.profilerMode%"
+              "project": {
+                "type": "object"
+              },
+              "configuration": {
+                "type": "string"
+              },
+              "device": {
+                "type": "object"
               }
             }
           }

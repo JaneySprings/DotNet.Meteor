@@ -1,4 +1,5 @@
 import { ConfigurationController } from '../controllers/configurationController';
+import { ProfileConfigurationProvider } from './profileConfigurationProvider';
 import { ExternalTypeResolver } from '../features/externalTypeResolver';
 import * as res from '../resources/constants';
 import * as vscode from 'vscode';
@@ -8,15 +9,17 @@ export class MonoDebugConfigurationProvider implements vscode.DebugConfiguration
 									config: vscode.DebugConfiguration, 
 									token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration | undefined> {
 		
-		ConfigurationController.profiler = config.profilerMode;
+		//TODO: Legacy (Remove in future versions)
+		if (config.profilerMode) {
+			const provider = new ProfileConfigurationProvider();
+			return provider.resolveDebugConfiguration(folder, config, token);
+		}
+
+		ConfigurationController.profiler = false;
 		ConfigurationController.noDebug = config.noDebug;
 		
 		if (!ConfigurationController.isActive())
 			return undefined;
-
-		// It adds a delay to the start of the debug session
-		// await StatusBarController.update();
-
 		if (!ConfigurationController.isValid())
 			return undefined;
 
@@ -50,7 +53,6 @@ export class MonoDebugConfigurationProvider implements vscode.DebugConfiguration
 		config.debuggingPort = ConfigurationController.getDebuggingPort();
 		config.uninstallApp = ConfigurationController.getUninstallAppOption();
 		config.reloadHost = ConfigurationController.getReloadHostPort();
-		config.profilerPort = ConfigurationController.getProfilerPort();
 		config.debuggerOptions = ConfigurationController.getDebuggerOptions();
 		
         return config;

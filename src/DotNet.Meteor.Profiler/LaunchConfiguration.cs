@@ -41,7 +41,8 @@ public class LaunchConfiguration {
         if (Profiler == ProfilerMode.GCDump)
             return new GCDumpLaunchAgent(this);
         
-        throw ServerExtensions.GetProtocolException("Profiler mode is not specified");
+        //return new UniversalLaunchAgent(this);
+        return new TraceLaunchAgent(this);
     }
 
     private string FindProgramPath(string programPath) {

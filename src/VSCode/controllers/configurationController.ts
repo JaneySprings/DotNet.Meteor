@@ -9,7 +9,7 @@ import * as path from 'path';
 export class ConfigurationController {
     public static androidSdkDirectory: string | undefined;
     public static noDebug: boolean | undefined;
-    public static profiler: string | undefined;
+    public static profiler: boolean | undefined;
     public static project: Project | undefined;
     public static device: Device | undefined;
     public static configuration: string | undefined;
@@ -46,10 +46,6 @@ export class ConfigurationController {
             vscode.window.showErrorMessage(res.messageNoFrameworkFound, { modal: true });
             return false;
         }
-        if (!ConfigurationController.noDebug && ConfigurationController.profiler) {
-			vscode.window.showErrorMessage(res.messageDebugWithProfilerNotSupported, { modal: true });
-			return false;
-		}
         if (!StatusBarController.devices.some(it => it.name === ConfigurationController.device?.name)) {
             vscode.window.showErrorMessage(res.messageDeviceNotExists, { modal: true });
             return false;
