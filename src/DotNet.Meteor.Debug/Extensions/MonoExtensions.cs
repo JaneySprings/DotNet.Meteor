@@ -24,7 +24,8 @@ public static class MonoExtensions {
     public static StackFrame? GetFrameSafe(this Backtrace bt, int n) {
         try {
             return bt.GetFrame(n);
-        } catch (Exception) {
+        } catch (Exception e) {
+            DebuggerLoggingService.CustomLogger?.LogError($"Error while getting frame [{n}]", e);
             return null;
         }
     }
