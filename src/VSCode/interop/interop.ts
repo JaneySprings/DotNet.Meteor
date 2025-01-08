@@ -35,7 +35,7 @@ export class Interop {
             .append("--android-sdk-path"));
     }
     public static getPropertyValue(propertyName: string, project: Project, configuration: string, device: Device) : string | undefined {
-        const targetFramework = project.frameworks.find(it => it.includes(device.platform ?? 'undefined'));
+        const targetFramework = ConfigurationController.getTargetFramework();
         const runtimeIdentifier = device?.runtime_id;
 
         return ProcessRunner.runSync(new ProcessArgumentBuilder("dotnet")

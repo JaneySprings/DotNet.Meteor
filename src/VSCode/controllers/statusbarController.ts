@@ -1,7 +1,6 @@
 import { ConfigurationController } from './configurationController';
 import { Interop } from "../interop/interop";
 import { StateController } from './stateController';
-import { PublicExports } from '../publicExports';
 import { Project } from '../models/project';
 import { ProjectItem } from '../models/projectItem';
 import { Device } from '../models/device';
@@ -10,85 +9,117 @@ import { SeparatorItem } from '../models/separatorItem';
 import { Icons } from '../resources/icons';
 import * as res from '../resources/constants';
 import * as vscode from 'vscode';
-import * as path from 'path';
 
 export class StatusBarController {
-    private static projectStatusItem: vscode.StatusBarItem;
-    private static targetStatusItem: vscode.StatusBarItem;
-    private static deviceStatusItem: vscode.StatusBarItem;
-    private static projectDecorationProvider: StartupProjectDecorationProvider;
+    private static projectStatusItem: vscode.StatusBarItem | undefined;
+    private static targetStatusItem: vscode.StatusBarItem | undefined;
+    private static deviceStatusItem: vscode.StatusBarItem | undefined;
 
     public static projects: Project[];
     public static devices: Device[];
 
-    public static activate(context: vscode.ExtensionContext) {
-        StatusBarController.projectStatusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
-        StatusBarController.targetStatusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 90);
-        StatusBarController.deviceStatusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 80);
-        StatusBarController.projectDecorationProvider = new StartupProjectDecorationProvider();
+    public static async activate(context: vscode.ExtensionContext): Promise<void> {
+        if (vscode.extensions.getExtension(res.dotrushExtensionId) !== undefined)
+            return StatusBarController.activateWithDotRush(context);
+        
+        StatusBarController.createProjectStatusBarItem(context);
+        StatusBarController.createConfigurationStatusBarItem(context);
+        StatusBarController.createDeviceStatusBarItem(context);
 
-        StatusBarController.targetStatusItem.command = res.commandIdSelectActiveConfiguration;
-        StatusBarController.projectStatusItem.command = res.commandIdSelectActiveProject;
-        StatusBarController.deviceStatusItem.command = res.commandIdSelectActiveDevice;
-
-        context.subscriptions.push(StatusBarController.projectStatusItem);
-        context.subscriptions.push(StatusBarController.targetStatusItem);
-        context.subscriptions.push(StatusBarController.deviceStatusItem);
-
-        context.subscriptions.push(vscode.commands.registerCommand(res.commandIdSelectActiveProject, StatusBarController.showQuickPickProject));
-        context.subscriptions.push(vscode.commands.registerCommand(res.commandIdSelectActiveConfiguration, StatusBarController.showQuickPickConfiguration));
-        context.subscriptions.push(vscode.commands.registerCommand(res.commandIdSelectActiveDevice, StatusBarController.showQuickPickDevice));
-        context.subscriptions.push(vscode.window.registerFileDecorationProvider(StatusBarController.projectDecorationProvider));
-
-        context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(StatusBarController.update));
+        context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(_ => {
+            StatusBarController.updateProjectStatusBarItem();
+        }));
         context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(ev => {
             if (ev.fileName.endsWith('proj') || ev.fileName.endsWith('.props'))
-                StatusBarController.update();
+                StatusBarController.updateProjectStatusBarItem();
         }));
+
+        StatusBarController.updateProjectStatusBarItem();
+        StatusBarController.updateDeviceStatusBarItem();
     }
-    public static async update() : Promise<void> {
+    public static async activateWithDotRush(context: vscode.ExtensionContext): Promise<void> {
+        const exports = await vscode.extensions.getExtension(res.dotrushExtensionId)?.activate();
+        exports?.onActiveProjectChanged?.add((p: Project) => ConfigurationController.project = p);
+        exports?.onActiveConfigurationChanged?.add((c: string) => ConfigurationController.configuration = c);
+        exports?.onActiveFrameworkChanged?.add((f: string) => ConfigurationController.framework = f);
+    
+        StatusBarController.createDeviceStatusBarItem(context);
+        StatusBarController.updateDeviceStatusBarItem();
+    }
+
+    private static createProjectStatusBarItem(context: vscode.ExtensionContext) {
+        StatusBarController.projectStatusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
+        StatusBarController.projectStatusItem.command = res.commandIdSelectActiveProject;
+        context.subscriptions.push(StatusBarController.projectStatusItem);
+        context.subscriptions.push(vscode.commands.registerCommand(res.commandIdSelectActiveProject, StatusBarController.showQuickPickProject));
+    }
+    private static createConfigurationStatusBarItem(context: vscode.ExtensionContext) {
+        StatusBarController.targetStatusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 90);
+        StatusBarController.targetStatusItem.command = res.commandIdSelectActiveConfiguration;
+        context.subscriptions.push(StatusBarController.targetStatusItem);
+        context.subscriptions.push(vscode.commands.registerCommand(res.commandIdSelectActiveConfiguration, StatusBarController.showQuickPickConfiguration));
+    }
+    private static createDeviceStatusBarItem(context: vscode.ExtensionContext) {
+        StatusBarController.deviceStatusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 80);
+        StatusBarController.deviceStatusItem.command = res.commandIdSelectActiveDevice;
+        context.subscriptions.push(StatusBarController.deviceStatusItem);
+        context.subscriptions.push(vscode.commands.registerCommand(res.commandIdSelectActiveDevice, StatusBarController.showQuickPickDevice));
+    }
+
+    private static async updateProjectStatusBarItem(): Promise<void> {
+        if (StatusBarController.projectStatusItem === undefined)
+            return;
+
         const folders = vscode.workspace.workspaceFolders!.map(it => it.uri.fsPath);
         StatusBarController.projects = await Interop.getProjects(folders);
-        StatusBarController.devices = await Interop.getDevices();
+        if (StatusBarController.projects.length === 0)
+            return StatusBarController.projectStatusItem.hide();
 
-        if (StatusBarController.projects.length === 0 || StatusBarController.devices.length === 0) {
-            StatusBarController.projectStatusItem.hide();
-            StatusBarController.targetStatusItem.hide();
-            StatusBarController.deviceStatusItem.hide();
-            PublicExports.instance.invokeAll();
-            return;
-        }
-        
-        StateController.load();
-        StatusBarController.performSelectProject(ConfigurationController.project);
-        StatusBarController.performSelectConfiguration(ConfigurationController.configuration);
-        StatusBarController.performSelectDevice(ConfigurationController.device);
-
-        StatusBarController.targetStatusItem.show();
-        StatusBarController.deviceStatusItem.show();
-        StatusBarController.projects.length === 1 
-            ? StatusBarController.projectStatusItem.hide() 
+        StatusBarController.performSelectProject(StateController.getProject());
+        StatusBarController.projects.length === 1
+            ? StatusBarController.projectStatusItem.hide()
             : StatusBarController.projectStatusItem.show();
+
+        StatusBarController.updateConfigurationStatusBarItem();
+    }
+    private static async updateConfigurationStatusBarItem(): Promise<void> {
+        if (StatusBarController.targetStatusItem === undefined)
+            return;
+
+        if (StatusBarController.projects.length === 0)
+            return StatusBarController.targetStatusItem.hide();
+
+        StatusBarController.performSelectConfiguration(StateController.getConfiguration());
+        StatusBarController.targetStatusItem.show();
+    }
+    private static async updateDeviceStatusBarItem(): Promise<void> {
+        if (StatusBarController.deviceStatusItem === undefined)
+            return;
+
+        StatusBarController.devices = await Interop.getDevices();
+        if (StatusBarController.devices.length === 0)
+            return StatusBarController.deviceStatusItem.hide();
+
+        StatusBarController.performSelectDevice(StateController.getDevice());
+        StatusBarController.deviceStatusItem.show();
     }
 
     public static performSelectProject(item: Project | undefined = undefined) {
         ConfigurationController.project = item ?? StatusBarController.projects[0];
-        StatusBarController.projectStatusItem.text = `${Icons.project} ${ConfigurationController.project?.name}`;
-        PublicExports.instance.onActiveProjectChanged.invoke(ConfigurationController.project);
-        StatusBarController.projectDecorationProvider.update(item);
+        if (StatusBarController.projectStatusItem !== undefined)
+            StatusBarController.projectStatusItem.text = `${Icons.project} ${ConfigurationController.project?.name}`;
         StateController.saveProject();
     }
     public static performSelectConfiguration(item: string | undefined = undefined) {
         ConfigurationController.configuration = item ?? 'Debug';
-        StatusBarController.targetStatusItem.text = `${Icons.target} ${ConfigurationController.configuration} | Any CPU`;
-        PublicExports.instance.onActiveConfigurationChanged.invoke(ConfigurationController.configuration);
-        StateController.saveTarget();
+        if (StatusBarController.targetStatusItem !== undefined)
+            StatusBarController.targetStatusItem.text = `${Icons.target} ${ConfigurationController.configuration} | Any CPU`;
+        StateController.saveConfiguration();
     }
     public static performSelectDevice(item: Device | undefined = undefined) {
         ConfigurationController.device = item ?? StatusBarController.devices[0];
-        StatusBarController.deviceStatusItem.text = `${Icons.deviceKind(ConfigurationController.device)} ${ConfigurationController.device?.name}`;
-        PublicExports.instance.onActiveDeviceChanged.invoke(ConfigurationController.device);
-        PublicExports.instance.onActiveFrameworkChanged.invoke(ConfigurationController.getTargetFramework());
+        if (StatusBarController.deviceStatusItem !== undefined)
+            StatusBarController.deviceStatusItem.text = `${Icons.deviceKind(ConfigurationController.device)} ${ConfigurationController.device?.name}`;
         StateController.saveDevice();
     }
 
@@ -106,7 +137,7 @@ export class StatusBarController {
         const items = ConfigurationController.project?.configurations ?? [];
         const options = { placeHolder: res.commandTitleSelectActiveConfiguration };
         const selectedItem = await vscode.window.showQuickPick(items, options);
-        
+
         if (selectedItem !== undefined)
             StatusBarController.performSelectConfiguration(selectedItem);
     }
@@ -128,48 +159,14 @@ export class StatusBarController {
 
         const items: vscode.QuickPickItem[] = [];
         for (let i of StatusBarController.devices.keys()) {
-            if (i == 0 || StatusBarController.devices[i].detail !== StatusBarController.devices[i-1].detail) 
+            if (i == 0 || StatusBarController.devices[i].detail !== StatusBarController.devices[i - 1].detail)
                 items.push(new SeparatorItem(StatusBarController.devices[i].detail));
 
-            items.push(new DeviceItem(StatusBarController.devices[i]));    
+            items.push(new DeviceItem(StatusBarController.devices[i]));
         }
-        
+
         picker.items = items;
         picker.placeholder = res.commandTitleSelectActiveDevice;
         picker.busy = false;
-    }
-}
-
-class StartupProjectDecorationProvider implements vscode.FileDecorationProvider {
-    private _onDidChangeFileDecorations: vscode.EventEmitter<vscode.Uri | vscode.Uri[] | undefined> = new vscode.EventEmitter<vscode.Uri | vscode.Uri[] | undefined>();
-    private startupProjectUri: vscode.Uri | undefined;
-    private startupProjectDirectoryUri: vscode.Uri | undefined;
-
-    public onDidChangeFileDecorations?: vscode.Event<vscode.Uri | vscode.Uri[] | undefined> | undefined = this._onDidChangeFileDecorations.event;
-    public provideFileDecoration(uri: vscode.Uri, token: vscode.CancellationToken): vscode.ProviderResult<vscode.FileDecoration> {
-        if (this.startupProjectUri === undefined || this.startupProjectDirectoryUri === undefined)
-            return undefined;
-
-        if (uri.fsPath !== this.startupProjectUri.fsPath && uri.fsPath !== this.startupProjectDirectoryUri.fsPath)
-            return undefined;
-
-        return { 
-            badge: '●',
-            color: new vscode.ThemeColor('pickerGroup.foreground'), 
-            tooltip: res.messageStartupProject
-        };
-    }
-
-    public update(project: Project | undefined) {
-        if (project === undefined) {
-            this.startupProjectUri = undefined;
-            this.startupProjectDirectoryUri = undefined;
-            this._onDidChangeFileDecorations.fire(undefined);
-            return;
-        }
-
-        this.startupProjectUri = vscode.Uri.file(project.path);
-        this.startupProjectDirectoryUri = vscode.Uri.file(path.dirname(project.path));
-        this._onDidChangeFileDecorations.fire(undefined);
     }
 }
