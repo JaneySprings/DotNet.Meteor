@@ -3,7 +3,7 @@
         "NuGetVersionRoslyn=4.5.0",
         "TargetFramework=net6.0"
     ],
-    "dotrush.roslyn.projectFiles": [
+    "dotrush.roslyn.projectOrSolutionFiles": [
         "src/DotNet.Meteor.Debug/DotNet.Meteor.Debug.csproj",
         "src/DotNet.Meteor.Tests/DotNet.Meteor.Tests.csproj",
         "src/DotNet.Meteor.HotReload.Plugin/DotNet.Meteor.HotReload.Plugin.csproj",

@@ -4,7 +4,6 @@ import { ConfigurationController } from './controllers/configurationController';
 import { StatusBarController } from './controllers/statusbarController';
 import { Interop } from './interop/interop';
 import { StateController } from './controllers/stateController';
-import { PublicExports } from './publicExports';
 import { ModulesView } from './features/modulesView';
 import { MauiEssentials } from './features/mauiEssentials';
 import { ExternalTypeResolver } from './features/externalTypeResolver';
@@ -13,18 +12,15 @@ import * as res from './resources/constants';
 import * as vscode from 'vscode';
 
 
-export function activate(context: vscode.ExtensionContext): PublicExports | undefined {
+export function activate(context: vscode.ExtensionContext) {
 	Interop.initialize(context.extensionPath);
 
 	if (vscode.workspace.workspaceFolders === undefined) 
 		return undefined;
-
-	const exports = new PublicExports();
 	
 	ConfigurationController.activate(context);
 	StateController.activate(context);
 	StatusBarController.activate(context);
-	StatusBarController.update();
 
 	ModulesView.feature.activate(context);
 	MauiEssentials.feature.activate(context);
