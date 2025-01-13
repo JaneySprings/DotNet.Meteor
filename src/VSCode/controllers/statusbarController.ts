@@ -41,7 +41,6 @@ export class StatusBarController {
         const exports = await vscode.extensions.getExtension(res.dotrushExtensionId)?.activate();
         exports?.onActiveProjectChanged?.add((p: Project) => ConfigurationController.project = p);
         exports?.onActiveConfigurationChanged?.add((c: string) => ConfigurationController.configuration = c);
-        exports?.onActiveFrameworkChanged?.add((f: string) => ConfigurationController.framework = f);
     
         StatusBarController.createDeviceStatusBarItem(context);
         StatusBarController.updateDeviceStatusBarItem();
