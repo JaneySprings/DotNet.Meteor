@@ -13,7 +13,6 @@ export class ConfigurationController {
     public static project: Project | undefined;
     public static device: Device | undefined;
     public static configuration: string | undefined;
-    public static framework: string | undefined;
 
     public static onWindows: boolean = process.platform === 'win32';
     public static onLinux: boolean = process.platform === 'linux';
@@ -90,9 +89,6 @@ export class ConfigurationController {
         return ConfigurationController.getSetting<boolean>(res.configIdUninstallApplicationBeforeInstalling, true);
     }
     public static getTargetFramework(): string | undefined {
-        if (ConfigurationController.framework !== undefined)
-            return ConfigurationController.framework;
-
         const framework = ConfigurationController.project?.frameworks.find(it => it.includes(ConfigurationController.device?.platform ?? 'undefined'));
         if (framework === undefined && (ConfigurationController.isWindows() || ConfigurationController.isMacCatalyst()))
             return ConfigurationController.project?.frameworks.find(it => !it.includes('-'));
