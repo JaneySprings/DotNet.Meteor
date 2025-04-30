@@ -1,14 +1,9 @@
 {
     "dotrush.roslyn.workspaceProperties": [
-        "NuGetVersionRoslyn=4.5.0",
-        "TargetFramework=net6.0"
+        "NuGetVersionRoslyn=4.5.0"
     ],
-    "dotrush.roslyn.projectFiles": [
-        "src/DotNet.Meteor.Common.Tests/DotNet.Meteor.Common.Tests.csproj",
-        "src/DotNet.Meteor.Debugger.Tests/DotNet.Meteor.Debugger.Tests.csproj",
-        "src/DotNet.Meteor.Profiler.Tests/DotNet.Meteor.Profiler.Tests.csproj",
-        "src/DotNet.Meteor.HotReload.Plugin/DotNet.Meteor.HotReload.Plugin.csproj",
-        "src/DotNet.Meteor.Xaml/DotNet.Meteor.Xaml.LanguageServer/DotNet.Meteor.Xaml.LanguageServer.csproj"
+    "dotrush.roslyn.projectOrSolutionFiles": [
+        "src\\DotNet.Meteor.sln"
     ],
     "files.exclude": {
         "src/**/bin": true,
@@ -19,5 +14,5 @@
         ".config": true,
         ".gitignore": true,
         ".gitmodules": true
-    }
+    },
 }

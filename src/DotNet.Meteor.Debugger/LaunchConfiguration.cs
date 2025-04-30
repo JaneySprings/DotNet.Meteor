@@ -1,7 +1,7 @@
 ﻿using DotNet.Meteor.Common;
 using DotNet.Meteor.Debugger.Extensions;
-using Newtonsoft.Json.Linq;
 using Mono.Debugging.Client;
+using Newtonsoft.Json.Linq;
 
 namespace DotNet.Meteor.Debugger;
 
@@ -14,10 +14,12 @@ public class LaunchConfiguration {
     public bool UninstallApp { get; init; }
     public int DebugPort { get; init; }
     public int ReloadHostPort { get; init; }
+    public int ProfilerPort { get; init; }
     public string? TransportId { get; init; }
     public Dictionary<string, string> EnvironmentVariables { get; init; }
     public DebuggerSessionOptions DebuggerSessionOptions { get; init; }
 
+    private ProfilerMode Profiler { get; init; }
     private bool SkipDebug { get; init; }
 
     public LaunchConfiguration(Dictionary<string, JToken> configurationProperties) {
@@ -28,6 +30,8 @@ public class LaunchConfiguration {
         SkipDebug = configurationProperties.TryGetValue("skipDebug").ToValue<bool>();
         DebugPort = configurationProperties.TryGetValue("debuggingPort").ToValue<int>();
         ReloadHostPort = configurationProperties.TryGetValue("reloadHost").ToValue<int>();
+        ProfilerPort = configurationProperties.TryGetValue("profilerPort").ToValue<int>();
+        Profiler = configurationProperties.TryGetValue("profilerMode").ToValue<ProfilerMode>();
         TransportId = configurationProperties.TryGetValue("transportId").ToClass<string>();
         DebuggerSessionOptions = configurationProperties.TryGetValue("debuggerOptions")?.ToClass<DebuggerSessionOptions>() 
             ?? ServerExtensions.DefaultDebuggerOptions;
@@ -35,6 +39,7 @@ public class LaunchConfiguration {
             ?? new Dictionary<string, string>();
 
         DebugPort = DebugPort == 0 ? RuntimeSystem.GetFreePort() : DebugPort;
+        ProfilerPort = ProfilerPort == 0 ? RuntimeSystem.GetFreePort() : ProfilerPort;
 
         ProgramPath = Project.GetRelativePath(configurationProperties.TryGetValue("program").ToClass<string>());
         if (!File.Exists(ProgramPath) && !Directory.Exists(ProgramPath))
@@ -51,7 +56,14 @@ public class LaunchConfiguration {
         return assemblyName.Replace("-Signed", "");
     }
     public BaseLaunchAgent GetLaunchAgent() {
-        return SkipDebug ? new NoDebugLaunchAgent(this) : new DebugLaunchAgent(this);
+        if (Profiler == ProfilerMode.Trace)
+            return new TraceLaunchAgent(this);
+        if (Profiler == ProfilerMode.GCDump)
+            return new GCDumpLaunchAgent(this);
+        if (!SkipDebug)
+            return new DebugLaunchAgent(this);
+
+        return new NoDebugLaunchAgent(this);
     }
     public string GetAssembliesPath() {
         if (!Device.IsAndroid)
@@ -74,11 +86,8 @@ public class LaunchConfiguration {
     private string FindProgramPath(string programPath) {
         if (string.IsNullOrEmpty(programPath))
             throw ServerExtensions.GetProtocolException("Program path is null or empty");
-
+        
         var programDirectory = Path.GetDirectoryName(programPath)!;
-        if (!Directory.Exists(programDirectory))
-            throw ServerExtensions.GetProtocolException($"Incorrect path to program: '{ProgramPath}'");
-
         if (Device.IsAndroid) {
             var apkPaths = Directory.GetFiles(programDirectory, "*-Signed.apk");
             if (apkPaths.Length == 1)
@@ -93,4 +102,6 @@ public class LaunchConfiguration {
 
         throw ServerExtensions.GetProtocolException($"Incorrect path to program: '{ProgramPath}'");
     }
+
+    private enum ProfilerMode { None, Trace, GCDump }
 }

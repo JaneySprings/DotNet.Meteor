@@ -36,6 +36,11 @@ public static class ServerExtensions {
     };
 
 
+    public static bool TryDeleteFile(string path) {
+        if (File.Exists(path))
+            File.Delete(path);
+        return !File.Exists(path);
+    }
     public static ProtocolException GetProtocolException(string message) {
         return new ProtocolException(message, 0, message, url: $"file://{LogConfig.DebugLogFile}");
     }
