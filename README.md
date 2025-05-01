@@ -93,7 +93,7 @@ public static class MauiProgram
 * If you use the `gcdump` mode, type a `/dump` command in the `Debug Console` to capture the report. You will see the message:
 ```
 Writing gcdump to '/Users/You/.../Project/MauiProf.gcdump'...
-command handled by DotNet.Meteor.Debug.GCDumpLaunchAgent
+command handled by DotNet.Meteor.Debugger.GCDumpLaunchAgent
 Finished writing 2759872 bytes.
 ```
 
@@ -116,7 +116,7 @@ Conversion complete
 - `Workspace/Logs` - logs from the current workspace.
 - `Xaml/Logs` - logs from the XAML IntelliSense server.
 - `HotReload/Logs` - logs from the Hot Reload server.
-- `Debug/Logs` - log from the debugger and profiler.
+- `Debugger/Logs` - log from the debugger and profiler.
 
 If checking the logs didn’t solve the issue, please open a new issue in this GitHub repository. Be sure to include a description of the problem along with the log files.
 

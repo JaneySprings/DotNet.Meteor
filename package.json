@@ -81,10 +81,7 @@
         "command": "dotnet-meteor.triggerHotReload",
         "category": "%extension.displayName%",
         "title": "%command.title.triggerHotReload%",
-        "icon": {
-          "light": "assets/hotreload_light.svg",
-          "dark": "assets/hotreload_dark.svg"
-        }
+        "icon": "$(symbol-event)"
       }
     ],
     "taskDefinitions": [
@@ -146,9 +143,9 @@
           "xaml",
           "xml"
         ],
-        "program": "./extension/bin/Debug/DotNet.Meteor.Debug",
+        "program": "./extension/bin/Debugger/DotNet.Meteor.Debugger",
         "windows": {
-          "program": "./extension/bin/Debug/DotNet.Meteor.Debug.exe"
+          "program": "./extension/bin/Debugger/DotNet.Meteor.Debugger.exe"
         },
         "initialConfigurations": [
           {
@@ -218,183 +215,193 @@
         {
           "id": "dotnet-meteor.modulesView",
           "name": "Modules",
+          "type": "tree",
           "when": "debugType == dotnet-meteor.debugger"
         }
       ]
     },
-    "configuration": {
-      "title": "%extension.displayName%",
-      "properties": {
-        "dotnetMeteor.monoSdbDebuggerPortAndroid": {
-          "type": "integer",
-          "default": 10000,
-          "minimum": 0,
-          "description": "%configuration.description.monoSdbDebuggerPortAndroid%"
-        },
-        "dotnetMeteor.monoSdbDebuggerPortApple": {
-          "type": "integer",
-          "default": 55551,
-          "minimum": 0,
-          "description": "%configuration.description.monoSdbDebuggerPortApple%"
-        },
-        "dotnetMeteor.hotReloadHostPort": {
-          "type": "integer",
-          "default": 9988,
-          "minimum": 0,
-          "description": "%configuration.description.hotReloadHostPort%"
-        },
-        "dotnetMeteor.profilerHostPort": {
-          "type": "integer",
-          "default": 9000,
-          "minimum": 0,
-          "description": "%configuration.description.profilerHostPort%"
-        },
-        "dotnetMeteor.uninstallApplicationBeforeInstalling": {
-          "type": "boolean",
-          "default": true,
-          "description": "%configuration.description.uninstallApplicationBeforeInstalling%"
-        },
-        "dotnetMeteor.applyHotReloadChangesOnSave": {
-          "type": "boolean",
-          "default": true,
-          "description": "%configuration.description.applyHotReloadChangesOnSave%"
-        },
-        "dotnetMeteor.debuggerOptions.evaluationTimeout": {
-          "type": "integer",
-          "default": 1000,
-          "description": "%configuration.description.debuggerOptions.evaluationTimeout%"
-        },
-        "dotnetMeteor.debuggerOptions.memberEvaluationTimeout": {
-          "type": "integer",
-          "default": 5000,
-          "description": "%configuration.description.debuggerOptions.memberEvaluationTimeout%"
-        },
-        "dotnetMeteor.debuggerOptions.allowTargetInvoke": {
-          "type": "boolean",
-          "default": true,
-          "description": "%configuration.description.debuggerOptions.allowTargetInvoke%"
-        },
-        "dotnetMeteor.debuggerOptions.allowMethodEvaluation": {
-          "type": "boolean",
-          "default": true,
-          "description": "%configuration.description.debuggerOptions.allowMethodEvaluation%"
-        },
-        "dotnetMeteor.debuggerOptions.allowToStringCalls": {
-          "type": "boolean",
-          "default": true,
-          "markdownDescription": "%configuration.description.debuggerOptions.allowToStringCalls%"
-        },
-        "dotnetMeteor.debuggerOptions.flattenHierarchy": {
-          "type": "boolean",
-          "default": false,
-          "description": "%configuration.description.debuggerOptions.flattenHierarchy%"
-        },
-        "dotnetMeteor.debuggerOptions.groupPrivateMembers": {
-          "type": "boolean",
-          "default": true,
-          "description": "%configuration.description.debuggerOptions.groupPrivateMembers%"
-        },
-        "dotnetMeteor.debuggerOptions.groupStaticMembers": {
-          "type": "boolean",
-          "default": true,
-          "description": "%configuration.description.debuggerOptions.groupStaticMembers%"
-        },
-        "dotnetMeteor.debuggerOptions.useExternalTypeResolver": {
-          "type": "boolean",
-          "default": true,
-          "markdownDescription": "%configuration.description.debuggerOptions.useExternalTypeResolver%"
-        },
-        "dotnetMeteor.debuggerOptions.currentExceptionTag": {
-          "type": "string",
-          "default": "$exception",
-          "description": "%configuration.description.debuggerOptions.currentExceptionTag%"
-        },
-        "dotnetMeteor.debuggerOptions.ellipsizeStrings": {
-          "type": "boolean",
-          "default": true,
-          "description": "%configuration.description.debuggerOptions.ellipsizeStrings%"
-        },
-        "dotnetMeteor.debuggerOptions.ellipsizedLength": {
-          "type": "integer",
-          "default": 260,
-          "minimum": 0,
-          "description": "%configuration.description.debuggerOptions.ellipsizedLength%"
-        },
-        "dotnetMeteor.debuggerOptions.projectAssembliesOnly": {
-          "type": "boolean",
-          "default": true,
-          "description": "%configuration.description.debuggerOptions.projectAssembliesOnly%"
-        },
-        "dotnetMeteor.debuggerOptions.stepOverPropertiesAndOperators": {
-          "type": "boolean",
-          "default": false,
-          "description": "%configuration.description.debuggerOptions.stepOverPropertiesAndOperators%"
-        },
-        "dotnetMeteor.debuggerOptions.searchMicrosoftSymbolServer": {
-          "type": "boolean",
-          "default": false,
-          "description": "%configuration.description.debuggerOptions.searchMicrosoftSymbolServer%"
-        },
-        "dotnetMeteor.debuggerOptions.automaticSourcelinkDownload": {
-          "type": "boolean",
-          "default": true,
-          "description": "%configuration.description.debuggerOptions.automaticSourcelinkDownload%"
-        },
-        "dotnetMeteor.debuggerOptions.integerDisplayFormat": {
-          "type": "string",
-          "default": "Decimal",
-          "description": "%configuration.description.debuggerOptions.integerDisplayFormat%",
-          "enum": [
-            "Decimal",
-            "Hexadecimal"
-          ]
-        },
-        "dotnetMeteor.debuggerOptions.sourceCodeMappings": {
-          "type": "object",
-          "description": "%configuration.description.debuggerOptions.sourceCodeMappings%",
-          "additionalProperties": {
-            "type": "string"
+    "configuration": [
+      {
+        "title": "Common",
+        "order": 0,
+        "properties": {
+          "dotnetMeteor.monoSdbDebuggerPortAndroid": {
+            "type": "integer",
+            "default": 10000,
+            "minimum": 0,
+            "description": "%configuration.description.monoSdbDebuggerPortAndroid%"
+          },
+          "dotnetMeteor.monoSdbDebuggerPortApple": {
+            "type": "integer",
+            "default": 55551,
+            "minimum": 0,
+            "description": "%configuration.description.monoSdbDebuggerPortApple%"
+          },
+          "dotnetMeteor.hotReloadHostPort": {
+            "type": "integer",
+            "default": 9988,
+            "minimum": 0,
+            "description": "%configuration.description.hotReloadHostPort%"
+          },
+          "dotnetMeteor.profilerHostPort": {
+            "type": "integer",
+            "default": 9000,
+            "minimum": 0,
+            "description": "%configuration.description.profilerHostPort%"
+          },
+          "dotnetMeteor.uninstallApplicationBeforeInstalling": {
+            "type": "boolean",
+            "default": true,
+            "description": "%configuration.description.uninstallApplicationBeforeInstalling%"
+          },
+          "dotnetMeteor.applyHotReloadChangesOnSave": {
+            "type": "boolean",
+            "default": true,
+            "description": "%configuration.description.applyHotReloadChangesOnSave%"
           }
-        },
-        "dotnetMeteor.debuggerOptions.symbolSearchPaths": {
-          "type": "array",
-          "description": "%configuration.description.debuggerOptions.symbolSearchPaths%",
-          "items": {
-            "type": "string"
+        }
+      },
+      {
+        "title": "Debugger",
+        "order": 1,
+        "properties": {
+          "dotnetMeteor.debuggerOptions.evaluationTimeout": {
+            "type": "integer",
+            "default": 1000,
+            "description": "%configuration.description.debuggerOptions.evaluationTimeout%"
+          },
+          "dotnetMeteor.debuggerOptions.memberEvaluationTimeout": {
+            "type": "integer",
+            "default": 5000,
+            "description": "%configuration.description.debuggerOptions.memberEvaluationTimeout%"
+          },
+          "dotnetMeteor.debuggerOptions.allowTargetInvoke": {
+            "type": "boolean",
+            "default": true,
+            "description": "%configuration.description.debuggerOptions.allowTargetInvoke%"
+          },
+          "dotnetMeteor.debuggerOptions.allowMethodEvaluation": {
+            "type": "boolean",
+            "default": true,
+            "description": "%configuration.description.debuggerOptions.allowMethodEvaluation%"
+          },
+          "dotnetMeteor.debuggerOptions.allowToStringCalls": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "%configuration.description.debuggerOptions.allowToStringCalls%"
+          },
+          "dotnetMeteor.debuggerOptions.flattenHierarchy": {
+            "type": "boolean",
+            "default": false,
+            "description": "%configuration.description.debuggerOptions.flattenHierarchy%"
+          },
+          "dotnetMeteor.debuggerOptions.groupPrivateMembers": {
+            "type": "boolean",
+            "default": true,
+            "description": "%configuration.description.debuggerOptions.groupPrivateMembers%"
+          },
+          "dotnetMeteor.debuggerOptions.groupStaticMembers": {
+            "type": "boolean",
+            "default": true,
+            "description": "%configuration.description.debuggerOptions.groupStaticMembers%"
+          },
+          "dotnetMeteor.debuggerOptions.useExternalTypeResolver": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "%configuration.description.debuggerOptions.useExternalTypeResolver%"
+          },
+          "dotnetMeteor.debuggerOptions.currentExceptionTag": {
+            "type": "string",
+            "default": "$exception",
+            "description": "%configuration.description.debuggerOptions.currentExceptionTag%"
+          },
+          "dotnetMeteor.debuggerOptions.ellipsizeStrings": {
+            "type": "boolean",
+            "default": true,
+            "description": "%configuration.description.debuggerOptions.ellipsizeStrings%"
+          },
+          "dotnetMeteor.debuggerOptions.ellipsizedLength": {
+            "type": "integer",
+            "default": 260,
+            "minimum": 0,
+            "description": "%configuration.description.debuggerOptions.ellipsizedLength%"
+          },
+          "dotnetMeteor.debuggerOptions.projectAssembliesOnly": {
+            "type": "boolean",
+            "default": true,
+            "description": "%configuration.description.debuggerOptions.projectAssembliesOnly%"
+          },
+          "dotnetMeteor.debuggerOptions.stepOverPropertiesAndOperators": {
+            "type": "boolean",
+            "default": false,
+            "description": "%configuration.description.debuggerOptions.stepOverPropertiesAndOperators%"
+          },
+          "dotnetMeteor.debuggerOptions.searchMicrosoftSymbolServer": {
+            "type": "boolean",
+            "default": false,
+            "description": "%configuration.description.debuggerOptions.searchMicrosoftSymbolServer%"
+          },
+          "dotnetMeteor.debuggerOptions.automaticSourcelinkDownload": {
+            "type": "boolean",
+            "default": true,
+            "description": "%configuration.description.debuggerOptions.automaticSourcelinkDownload%"
+          },
+          "dotnetMeteor.debuggerOptions.integerDisplayFormat": {
+            "type": "string",
+            "default": "Decimal",
+            "description": "%configuration.description.debuggerOptions.integerDisplayFormat%",
+            "enum": [
+              "Decimal",
+              "Hexadecimal"
+            ]
+          },
+          "dotnetMeteor.debuggerOptions.sourceCodeMappings": {
+            "type": "object",
+            "description": "%configuration.description.debuggerOptions.sourceCodeMappings%",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "dotnetMeteor.debuggerOptions.symbolSearchPaths": {
+            "type": "array",
+            "description": "%configuration.description.debuggerOptions.symbolSearchPaths%",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dotnetMeteor.debuggerOptions.skipNativeTransitions": {
+            "type": "boolean",
+            "default": true,
+            "description": "%configuration.description.debuggerOptions.skipNativeTransitions%"
+          },
+          "dotnetMeteor.debuggerOptions.stackFrameFormat.module": {
+            "type": "boolean",
+            "default": true,
+            "description": "%configuration.description.debuggerOptions.stackFrameFormat.module%"
+          },
+          "dotnetMeteor.debuggerOptions.stackFrameFormat.parameterTypes": {
+            "type": "boolean",
+            "default": false,
+            "description": "%configuration.description.debuggerOptions.stackFrameFormat.parameterTypes%"
+          },
+          "dotnetMeteor.debuggerOptions.stackFrameFormat.parameterValues": {
+            "type": "boolean",
+            "default": false,
+            "description": "%configuration.description.debuggerOptions.stackFrameFormat.parameterValues%"
+          },
+          "dotnetMeteor.debuggerOptions.stackFrameFormat.parameterNames": {
+            "type": "boolean",
+            "default": false,
+            "description": "%configuration.description.debuggerOptions.stackFrameFormat.parameterNames%"
+          },
+          "dotnetMeteor.debuggerOptions.stackFrameFormat.language": {
+            "type": "boolean",
+            "default": false,
+            "description": "%configuration.description.debuggerOptions.stackFrameFormat.language%"
           }
-        },
-        "dotnetMeteor.debuggerOptions.skipNativeTransitions": {
-          "type": "boolean",
-          "default": true,
-          "description": "%configuration.description.debuggerOptions.skipNativeTransitions%"
-        },
-        "dotnetMeteor.debuggerOptions.stackFrameFormat.module": {
-          "type": "boolean",
-          "default": true,
-          "description": "%configuration.description.debuggerOptions.stackFrameFormat.module%"
-        },
-        "dotnetMeteor.debuggerOptions.stackFrameFormat.parameterTypes": {
-          "type": "boolean",
-          "default": false,
-          "description": "%configuration.description.debuggerOptions.stackFrameFormat.parameterTypes%"
-        },
-        "dotnetMeteor.debuggerOptions.stackFrameFormat.parameterValues": {
-          "type": "boolean",
-          "default": false,
-          "description": "%configuration.description.debuggerOptions.stackFrameFormat.parameterValues%"
-        },
-        "dotnetMeteor.debuggerOptions.stackFrameFormat.parameterNames": {
-          "type": "boolean",
-          "default": false,
-          "description": "%configuration.description.debuggerOptions.stackFrameFormat.parameterNames%"
-        },
-        "dotnetMeteor.debuggerOptions.stackFrameFormat.language": {
-          "type": "boolean",
-          "default": false,
-          "description": "%configuration.description.debuggerOptions.stackFrameFormat.language%"
         }
       }
-    },
+    ],
     "configurationDefaults": {
       "debug.hideSlowPreLaunchWarning": true,
       "explorer.fileNesting.expand": false,
