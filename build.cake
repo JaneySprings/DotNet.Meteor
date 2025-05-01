@@ -47,27 +47,21 @@ Task("plugin").Does(() => DotNetPack(_Path.Combine(RootDirectory, "src", "DotNet
 
 
 Task("debugger")
+	.Does(() => DotNetPublish(_Path.Combine(RootDirectory, "src", "DotNet.Diagnostics", "src", "Tools", "dotnet-dsrouter", "dotnet-dsrouter.csproj"), new DotNetPublishSettings {
+		OutputDirectory = _Path.Combine(ExtensionStagingDirectory, "bin", "Debugger"),
+		Configuration = configuration,
+		Runtime = runtime,
+	})).Does(() => DotNetPublish(_Path.Combine(RootDirectory, "src", "DotNet.Diagnostics", "src", "Tools", "dotnet-gcdump", "dotnet-gcdump.csproj"), new DotNetPublishSettings {
+		OutputDirectory = _Path.Combine(ExtensionStagingDirectory, "bin", "Debugger"),
+		Configuration = configuration,
+		Runtime = runtime,
+	}))
 	.Does(() => DotNetPublish(_Path.Combine(RootDirectory, "src", "DotNet.Meteor.Debugger", "DotNet.Meteor.Debugger.csproj"), new DotNetPublishSettings {
 		MSBuildSettings = new DotNetMSBuildSettings { 
 			ArgumentCustomization = args => args.Append("/p:NuGetVersionRoslyn=4.5.0"),
 			AssemblyVersion = version
 		},
 		OutputDirectory = _Path.Combine(ExtensionStagingDirectory, "bin", "Debugger"),
-		Configuration = configuration,
-		Runtime = runtime,
-	}));
-Task("profiler")
-	.Does(() => DotNetPublish(_Path.Combine(RootDirectory, "src", "DotNet.Diagnostics", "src", "Tools", "dotnet-dsrouter", "dotnet-dsrouter.csproj"), new DotNetPublishSettings {
-		OutputDirectory = _Path.Combine(ExtensionStagingDirectory, "bin", "Profiler"),
-		Configuration = configuration,
-		Runtime = runtime,
-	})).Does(() => DotNetPublish(_Path.Combine(RootDirectory, "src", "DotNet.Diagnostics", "src", "Tools", "dotnet-gcdump", "dotnet-gcdump.csproj"), new DotNetPublishSettings {
-		OutputDirectory = _Path.Combine(ExtensionStagingDirectory, "bin", "Profiler"),
-		Configuration = configuration,
-		Runtime = runtime,
-	})).Does(() => DotNetPublish(_Path.Combine(RootDirectory, "src", "DotNet.Meteor.Profiler", "DotNet.Meteor.Profiler.csproj"), new DotNetPublishSettings {
-		MSBuildSettings = new DotNetMSBuildSettings { AssemblyVersion = version },
-		OutputDirectory = _Path.Combine(ExtensionStagingDirectory, "bin", "Profiler"),
 		Configuration = configuration,
 		Runtime = runtime,
 	}));
@@ -104,7 +98,6 @@ Task("vsix")
 	.IsDependentOn("xaml")
 	.IsDependentOn("hotreload")
 	.IsDependentOn("debugger")
-	.IsDependentOn("profiler")
 	.Does(() => {
 		var vsruntime = runtime.Replace("win-", "win32-").Replace("osx-", "darwin-");
 		var output = _Path.Combine(ArtifactsDirectory, $"DotNet.Meteor.v{version}_{vsruntime}.vsix");
