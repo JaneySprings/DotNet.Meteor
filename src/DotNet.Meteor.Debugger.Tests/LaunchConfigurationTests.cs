@@ -89,11 +89,11 @@ public class LaunchConfigurationTests : TestFixture {
 
         properties["profilerMode"] = "trace";
         configuration = new LaunchConfiguration(properties);
-        Assert.That(configuration.GetLaunchAgent(), Is.InstanceOf<NoDebugLaunchAgent>());
+        Assert.That(configuration.GetLaunchAgent(), Is.InstanceOf<TraceLaunchAgent>());
 
         properties["profilerMode"] = "gcdump";
         configuration = new LaunchConfiguration(properties);
-        Assert.That(configuration.GetLaunchAgent(), Is.InstanceOf<NoDebugLaunchAgent>());
+        Assert.That(configuration.GetLaunchAgent(), Is.InstanceOf<GCDumpLaunchAgent>());
     }
     
     [Test]
