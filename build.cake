@@ -82,13 +82,6 @@ Task("test")
 			ResultsDirectory = ArtifactsDirectory,
 			Loggers = new[] { "trx" }
 		}
-	)).Does(() => DotNetTest(_Path.Combine(RootDirectory, "src", "DotNet.Meteor.Profiler.Tests", "DotNet.Meteor.Profiler.Tests.csproj"),
-		new DotNetTestSettings {  
-			Configuration = configuration,
-			Verbosity = DotNetVerbosity.Quiet,
-			ResultsDirectory = ArtifactsDirectory,
-			Loggers = new[] { "trx" }
-		}
 	));
 
 
