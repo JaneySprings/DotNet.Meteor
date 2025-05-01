@@ -9,7 +9,7 @@ public class Project {
     [JsonPropertyName("path")] public string Path { get; set; }
     [JsonPropertyName("frameworks")] public IEnumerable<string> Frameworks { get; set; }
     [JsonPropertyName("configurations")] public IEnumerable<string> Configurations { get; set; }
-
+    //TODO: May return Root dir if path separator is not valid for the platform
     [JsonIgnore] public string Directory => SystemPath.GetDirectoryName(Path)!;
 
     public Project(string path) {
