@@ -150,14 +150,23 @@ public class DebugSession : Session {
             return new SetExceptionBreakpointsResponse();
 
         foreach (var option in arguments.FilterOptions) {
-            if (option.FilterId == ExceptionsFilter.AllExceptions.Filter) {
-                var exceptionFilter = typeof(Exception).ToString();
+            if (option.FilterId != ExceptionsFilter.AllExceptions.Filter)
+                continue;
 
-                if (!string.IsNullOrEmpty(option.Condition))
-                    exceptionFilter = option.Condition;
+            var allExceptionFilter = typeof(Exception).ToString();
+            if (string.IsNullOrEmpty(option.Condition)) {
+                session.Breakpoints.AddCatchpoint(allExceptionFilter);
+                continue;
+            }
 
-                foreach (var exception in exceptionFilter.Split(','))
-                    session.Breakpoints.AddCatchpoint(exception);
+            if (option.Condition.StartsWith('!')) {
+                var catchpoint = session.Breakpoints.AddCatchpoint(allExceptionFilter);
+                foreach (var condition in option.Condition.Substring(1).Split(',', StringSplitOptions.RemoveEmptyEntries))
+                    catchpoint.AddIgnore(condition.Trim());
+            }
+            else {
+                foreach (var condition in option.Condition.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                    session.Breakpoints.AddCatchpoint(condition.Trim());
             }
         }
         return new SetExceptionBreakpointsResponse();
