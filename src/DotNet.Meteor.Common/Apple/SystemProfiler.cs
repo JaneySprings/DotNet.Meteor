@@ -13,10 +13,13 @@ public static class SystemProfiler {
             .Append("SPUSBDataType"))
             .WaitForExit();
 
-        if (!result.Success)
-            throw new InvalidOperationException(string.Join(Environment.NewLine, result.StandardError));
-
         var output = string.Join(Environment.NewLine, result.StandardOutput);
+        if (string.IsNullOrWhiteSpace(output)) {
+            result = new ProcessRunner(profiler, new ProcessArgumentBuilder()
+                .Append("SPUSBHostDataType"))
+                .WaitForExit();
+            output = string.Join(Environment.NewLine, result.StandardOutput);
+        }
 
         foreach (Match match in regex.Matches(output)) {
             var version = match.Groups["ver"].Value;
