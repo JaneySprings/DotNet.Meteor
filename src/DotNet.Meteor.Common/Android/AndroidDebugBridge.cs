@@ -142,8 +142,7 @@ public static class AndroidDebugBridge {
             .Append("-v", "tag");
         return new ProcessRunner(adb, arguments, logger).Start();
     }
-    public static Process Logcat(string serial, IProcessLogger logger)
-    {
+    public static Process Logcat(string serial, IProcessLogger logger) {
         var adb = AndroidSdkLocator.AdbTool();
         var arguments = new ProcessArgumentBuilder()
             .Append("-s", serial)
