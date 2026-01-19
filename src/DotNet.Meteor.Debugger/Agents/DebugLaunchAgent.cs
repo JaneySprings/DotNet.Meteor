@@ -96,7 +96,7 @@ public class DebugLaunchAgent : BaseLaunchAgent {
         AndroidDebugBridge.Shell(Configuration.Device.Serial, "setprop", "debug.mono.connect", $"port={Configuration.DebugPort}");
         if (Configuration.EnvironmentVariables.Count != 0)
             AndroidDebugBridge.Shell(Configuration.Device.Serial, "setprop", "debug.mono.env", Configuration.EnvironmentVariables.ToAndroidEnvString());
-        
+
         AndroidDebugBridge.Shell(Configuration.Device.Serial, "am", "set-debug-app", applicationId);
 
         AndroidFastDev.TryPushAssemblies(Configuration.Device, Configuration.AssetsPath, applicationId, logger);
@@ -104,7 +104,7 @@ public class DebugLaunchAgent : BaseLaunchAgent {
         AndroidDebugBridge.Launch(Configuration.Device.Serial, applicationId, logger);
         AndroidDebugBridge.Flush(Configuration.Device.Serial);
 
-        var logcatProcess = AndroidDebugBridge.Logcat(Configuration.Device.Serial, logger);
+        var logcatProcess = AndroidDebugBridge.Logcat(Configuration.Device.Serial, applicationId, logger);
 
         Disposables.Add(() => logcatProcess.Terminate());
         Disposables.Add(() => AndroidDebugBridge.RemoveForward(Configuration.Device.Serial));
