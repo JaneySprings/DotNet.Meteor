@@ -150,6 +150,21 @@ public static class AndroidDebugBridge {
             .Append("-v", "tag");
         return new ProcessRunner(adb, arguments, logger).Start();
     }
+    public static Process Logcat(string serial, string applicationId, IProcessLogger logger) {
+        string applicationProcessId = Shell(serial, "pidof", "-s", applicationId).Trim();
+
+        // If we can't get the current app PID, return full logcat
+        if (string.IsNullOrEmpty(applicationProcessId))
+            return Logcat(serial, logger);
+
+        var adb = AndroidSdkLocator.AdbTool();
+        var arguments = new ProcessArgumentBuilder()
+            .Append("-s", serial)
+            .Append("logcat")
+            .Append("--pid", applicationProcessId)
+            .Append("-v", "tag");
+        return new ProcessRunner(adb, arguments, logger).Start();
+    }
     public static void Push(string serial, string source, string destination, IProcessLogger? logger = null) {
         var adb = AndroidSdkLocator.AdbTool();
         var arguments = new ProcessArgumentBuilder()
