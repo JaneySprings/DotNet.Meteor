@@ -55,6 +55,10 @@ Task("debugger")
 		OutputDirectory = _Path.Combine(ExtensionStagingDirectory, "bin", "Debugger"),
 		Configuration = configuration,
 		Runtime = runtime,
+	})).Does(() => DotNetPublish(_Path.Combine(RootDirectory, "src", "DotNet.Diagnostics", "src", "Tools", "dotnet-trace", "dotnet-trace.csproj"), new DotNetPublishSettings {
+		OutputDirectory = _Path.Combine(ExtensionStagingDirectory, "bin", "Debugger"),
+		Configuration = configuration,
+		Runtime = runtime,
 	}))
 	.Does(() => DotNetPublish(_Path.Combine(RootDirectory, "src", "DotNet.Meteor.Debugger", "DotNet.Meteor.Debugger.csproj"), new DotNetPublishSettings {
 		MSBuildSettings = new DotNetMSBuildSettings { 
