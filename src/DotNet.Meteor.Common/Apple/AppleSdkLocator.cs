@@ -69,7 +69,7 @@ public static class AppleSdkLocator {
         var sdkPath = string.Empty;
         var dotnetPacksPath = Path.Combine(AppleSdkLocator.DotNetRootLocation(), "packs");
         var sdkPaths = Directory.GetDirectories(dotnetPacksPath, "Microsoft.iOS.Windows.Sdk.net*");
-        
+
         if (sdkPaths.Length > 0)
             sdkPath = sdkPaths.OrderByDescending(x => Path.GetFileName(x)).First();
         if (string.IsNullOrEmpty(sdkPath))
@@ -90,7 +90,7 @@ public static class AppleSdkLocator {
 
         if (!String.IsNullOrEmpty(Environment.GetEnvironmentVariable("USBMUXD_CHECK_BYPASS")))
             return true;
-        
+
         var processName = RuntimeSystem.IsWindows ? "AppleMobileDeviceProcess" : "usbmuxd";
         var process = Process.GetProcessesByName(processName);
         return process.Length > 0;
@@ -113,7 +113,7 @@ public static class AppleSdkLocator {
         var sdkPath = string.Empty;
         var dotnetPacksPath = Path.Combine(AppleSdkLocator.DotNetRootLocation(), "packs");
         var sdkPaths = Directory.GetDirectories(dotnetPacksPath, "Microsoft.iOS.Sdk.net*");
-        
+
         if (sdkPaths.Length > 0)
             sdkPath = sdkPaths.OrderByDescending(x => Path.GetFileName(x)).First();
         if (string.IsNullOrEmpty(sdkPath))
