@@ -30,12 +30,20 @@ public static class DeviceProvider {
                 devices.AddRange(AppleDeviceTool.MacintoshDevices());
                 debugHandler?.Invoke("MacOS devices added.");
 
-                devices.AddRange(AppleDeviceTool.PhysicalDevices().OrderBy(x => x.Name));
+                try {
+                    // XCRun.PhysicalDevices() uses `devicectl` which is available on Xcode 15+.
+                    // For older Xcode versions or if something happens while fetching the
+                    // physical devices, use old method.
+                    devices.AddRange(XCRun.PhysicalDevices().OrderBy(x => x.Name));
+                } catch (Exception) {
+                    devices.AddRange(AppleDeviceTool.PhysicalDevices().OrderBy(x => x.Name));
+                }
+
                 debugHandler?.Invoke("Apple physical devices added.");
 
                 devices.AddRange(AppleDeviceTool.VirtualDevices().OrderBy(x => !x.IsRunning).ThenBy(x => x.Name));
                 debugHandler?.Invoke("Apple virtual devices added.");
-            } 
+            }
             else if (AppleSdkLocator.IsAppleDriverRunning()) {
                 devices.AddRange(IDeviceTool.Info());
                 debugHandler?.Invoke("iOS device added.");

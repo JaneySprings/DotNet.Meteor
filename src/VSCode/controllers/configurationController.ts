@@ -74,7 +74,7 @@ export class ConfigurationController {
 
         if (ConfigurationController.isAppleMobile() && !ConfigurationController.device?.is_emulator)
             return ConfigurationController.onMac
-                ? ConfigurationController.getSetting(res.configIdMonoSdbDebuggerPortApple, res.configDefaultMonoSdbDebuggerPortApple) 
+                ? ConfigurationController.getSetting(res.configIdMonoSdbDebuggerPortApple, res.configDefaultMonoSdbDebuggerPortApple)
                 : 10000; /* We can't specify the port on Windows or Linux, so we use the default one */
 
         return 0;
@@ -181,4 +181,4 @@ export class ConfigurationController {
         const assembliesDir = Interop.getPropertyValue('MonoAndroidIntermediateAssemblyDir', project, configuration, device);
         return assembliesDir;
     }
-} 
+}

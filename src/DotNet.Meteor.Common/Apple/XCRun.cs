@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using DotNet.Meteor.Common.Processes;
 
@@ -46,6 +47,87 @@ public static class XCRun {
         return devices;
     }
     public static List<DeviceData> PhysicalDevices() {
+        FileInfo tool = AppleSdkLocator.XCRunTool();
+
+        // Create a temporary file to store the JSON output of devicectl
+        string tempFilePath = Path.Combine(Path.GetTempPath(), $"{Path.GetTempFileName()}.json");
+
+        try {
+            ProcessResult result = new ProcessRunner(tool, new ProcessArgumentBuilder()
+                .Append("devicectl")
+                .Append("list")
+                .Append("devices")
+                .Append("--filter", "\"State BEGINSWITH 'available' AND Platform == 'iOS'\"")
+                .Append("-j", tempFilePath))
+                .WaitForExit();
+
+            if (!result.Success)
+                throw new InvalidOperationException(string.Join(Environment.NewLine, result.StandardError));
+
+            // Read the JSON file
+            if (!File.Exists(tempFilePath))
+                throw new InvalidOperationException("devicectl did not create the expected JSON output file");
+
+            string jsonContent = File.ReadAllText(tempFilePath);
+            var devices = new List<DeviceData>();
+
+            // Parse the JSON
+            using (JsonDocument document = JsonDocument.Parse(jsonContent)) {
+                JsonElement root = document.RootElement;
+
+                // Navigate to result.devices array
+                if (root.TryGetProperty("result", out JsonElement resultElement) &&
+                    resultElement.TryGetProperty("devices", out JsonElement devicesArray)) {
+
+                    foreach (JsonElement deviceElement in devicesArray.EnumerateArray()) {
+                        string name = string.Empty;
+                        string osVersionNumber = string.Empty;
+
+                        if (deviceElement.TryGetProperty("deviceProperties", out JsonElement deviceProps)) {
+                            if (deviceProps.TryGetProperty("name", out JsonElement nameElement))
+                                name = nameElement.GetString() ?? string.Empty;
+
+                            if (deviceProps.TryGetProperty("osVersionNumber", out JsonElement osVersionElement))
+                                osVersionNumber = osVersionElement.GetString() ?? string.Empty;
+                        }
+
+                        string udid = string.Empty;
+                        string marketingName = string.Empty;
+
+                        if (deviceElement.TryGetProperty("hardwareProperties", out JsonElement hardwareProps)) {
+                            if (hardwareProps.TryGetProperty("udid", out JsonElement udidElement))
+                                udid = udidElement.GetString() ?? string.Empty;
+
+                            if (hardwareProps.TryGetProperty("marketingName", out JsonElement marketingNameElement))
+                                marketingName = marketingNameElement.GetString() ?? string.Empty;
+                        }
+
+                        // Build the device name: Name (OS Build, Model)
+                        var deviceName = $"{name} ({osVersionNumber}, {marketingName})";
+
+                        devices.Add(new DeviceData {
+                            IsEmulator = false,
+                            IsRunning = true,
+                            IsMobile = true,
+                            Name = name,
+                            Detail = Details.iOSDevice,
+                            Platform = Platforms.iOS,
+                            RuntimeId = Runtimes.iOSArm64,
+                            OSVersion = $"iOS {osVersionNumber}",
+                            Serial = udid
+                        });
+                    }
+                }
+            }
+
+            return devices;
+        } finally {
+            // Clean up the temporary file
+            if (File.Exists(tempFilePath))
+                File.Delete(tempFilePath);
+        }
+    }
+    public static List<DeviceData> LegacyPhysicalDevices() {
         FileInfo tool = AppleSdkLocator.XCRunTool();
         ProcessResult result = new ProcessRunner(tool, new ProcessArgumentBuilder()
             .Append("xctrace")
