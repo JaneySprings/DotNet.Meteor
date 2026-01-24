@@ -80,6 +80,12 @@ public static class XCRun {
                     resultElement.TryGetProperty("devices", out JsonElement devicesArray)) {
 
                     foreach (JsonElement deviceElement in devicesArray.EnumerateArray()) {
+                        // Filter by wired devices only, as wireless debugging is not supported yet.
+                        if (!deviceElement.TryGetProperty("connectionProperties", out JsonElement connectionProps) ||
+                            !connectionProps.TryGetProperty("transportType", out JsonElement transportTypeElement) ||
+                            transportTypeElement.GetString() != "wired")
+                            continue;
+
                         string name = string.Empty;
                         string osVersionNumber = string.Empty;
 
