@@ -10,6 +10,12 @@ export class MonoDebugConfigurationProvider implements vscode.DebugConfiguration
 		
 		ConfigurationController.profiler = config.profilerMode;
 		ConfigurationController.noDebug = config.noDebug;
+		/*
+		  add the ability for the user to override environment variables
+		  through the launch.json 'env' property without modifying the 
+		  system environment variables
+		*/
+		ConfigurationController.overrideEnvironments = config?.env;
 		
 		if (!ConfigurationController.isActive())
 			return undefined;

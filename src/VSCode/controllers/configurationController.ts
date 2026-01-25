@@ -13,6 +13,7 @@ export class ConfigurationController {
     public static project: Project | undefined;
     public static device: Device | undefined;
     public static configuration: string | undefined;
+    public static overrideEnvironments: { [key: string]: string } | undefined;
 
     public static onWindows: boolean = process.platform === 'win32';
     public static onLinux: boolean = process.platform === 'linux';

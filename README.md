@@ -38,6 +38,26 @@ Your can build and debug projects, written in the `F#` language.
 
 ![image](https://github.com/JaneySprings/DotNet.Meteor/raw/main/assets/demo_dbg.gif)
 
+## Override Environment Variables
+
+You can provide environment-specific overrides for the debugger through the env property in the `launch.json` file.
+For example, to specify an alternative Java SDK to be used for Android builds (without modifying the system-wide `JAVA_HOME`), you can add the following configuration:
+```json
+{
+    "name": ".NET Meteor Debugger",
+    "type": "dotnet-meteor.debugger",
+    "request": "launch",
+    "env": {
+        "DOTNET_METEOR_JAVA_HOME": "/path/to/your/jdk"
+    },
+    "preLaunchTask": "dotnet-meteor: Build"
+}
+```
+
+When set, `DOTNET_METEOR_JAVA_HOME` is used to configure the Java SDK for Android builds.
+If not provided, the debugger falls back to the default MAUI Java resolution behavior (e.g. `JAVA_HOME`).
+
+**Note:** Currently, only Java SDK selection is supported via environment overrides.
 
 ## Enable XAML Hot Reload
 

@@ -3,6 +3,7 @@ import { ConfigurationController } from '../controllers/configurationController'
 import { RemoteHostProvider } from '../features/removeHostProvider';
 import * as res from '../resources/constants';
 import * as vscode from 'vscode';
+import { Interop } from '../interop/interop';
 
 
 export class DotNetTaskProvider implements vscode.TaskProvider {
@@ -20,9 +21,11 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
             .append(`-p:Configuration=${ConfigurationController.configuration}`)
             .append(`-p:TargetFramework=${ConfigurationController.getTargetFramework()}`)
             .conditional(`-p:RuntimeIdentifier=${ConfigurationController.device?.runtime_id}`, () => ConfigurationController.device?.runtime_id)
+            
 
         if (ConfigurationController.isAndroid()) {
             builder.append(`-p:AndroidSdkDirectory=${ConfigurationController.androidSdkDirectory}`);
+            builder.conditional(`-p:JavaSdkDirectory=${Interop.getOverrideJDKPath()}`, () => Interop.getOverrideJDKPath());
             builder.conditional('-p:EmbedAssembliesIntoApk=true', () => ConfigurationController.profiler);
             builder.conditional('-p:AndroidEnableProfiler=true', () => ConfigurationController.profiler);
             // TODO: https://github.com/dotnet/android/issues/9567

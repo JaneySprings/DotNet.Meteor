@@ -34,6 +34,10 @@ export class Interop {
         return ProcessRunner.runSync(new ProcessArgumentBuilder(Interop.workspaceToolPath)
             .append("--android-sdk-path"));
     }
+
+    public static getOverrideJDKPath(): string | undefined {
+        return ConfigurationController.overrideEnvironments?.['DOTNET_METEOR_JAVA_HOME'];
+    }
     public static getPropertyValue(propertyName: string, project: Project, configuration: string, device: Device) : string | undefined {
         const targetFramework = ConfigurationController.getTargetFramework();
         const runtimeIdentifier = device?.runtime_id;
