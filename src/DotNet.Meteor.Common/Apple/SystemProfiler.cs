@@ -7,7 +7,6 @@ public static class SystemProfiler {
     public static List<DeviceData> PhysicalDevices() {
         var profiler = AppleSdkLocator.SystemProfilerTool();
         var devices = new List<DeviceData>();
-        var regex = new Regex(@"(?<dev>iPhone|iPad):[^,]*?(?:Version:\s+(?<ver>\d+.\d+)[^,]*?)?Serial\sNumber:\s+(?<id>\S+)");
 
         ProcessResult result = new ProcessRunner(profiler, new ProcessArgumentBuilder()
             .Append("SPUSBDataType"))
@@ -21,6 +20,7 @@ public static class SystemProfiler {
             output = string.Join(Environment.NewLine, result.StandardOutput);
         }
 
+        var regex = new Regex(@"(?<dev>iPhone|iPad):(?s:(?!iPhone:|iPad:).)*?(?:(?:Version:\s+(?<ver>[\w\.]+)(?s:(?!iPhone:|iPad:).)*?Serial\sNumber:\s+(?<id>\S+))|(?:Serial\sNumber:\s+(?<id>\S+)(?:(?s:(?!iPhone:|iPad:).)*?Version:\s+(?<ver>[\w\.]+))?))");
         foreach (Match match in regex.Matches(output)) {
             var version = match.Groups["ver"].Value;
             var device = match.Groups["dev"].Value;
