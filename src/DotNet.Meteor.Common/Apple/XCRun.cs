@@ -57,7 +57,7 @@ public static class XCRun {
                 .Append("devicectl")
                 .Append("list")
                 .Append("devices")
-                .Append("--filter", "\"State BEGINSWITH 'available' AND Platform == 'iOS'\"")
+                .Append("--filter").AppendQuoted("(State BEGINSWITH 'available' OR State == 'connected') AND Platform == 'iOS'")
                 .Append("-j", tempFilePath))
                 .WaitForExit();
 
