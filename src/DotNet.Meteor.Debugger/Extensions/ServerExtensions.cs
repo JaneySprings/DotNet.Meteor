@@ -54,7 +54,11 @@ public static class ServerExtensions {
         return Math.Abs(key.GetHashCode());
     }
     public static string? TrimExpression(this DebugProtocol.EvaluateArguments args) {
-        return args.Expression?.TrimEnd(';')?.Replace("?.", ".");
+        var expression = args.Expression?.Trim();
+        if (string.IsNullOrEmpty(expression))
+            return expression;
+
+        return expression.TrimEnd(';').Replace("?.", ".");
     }
 
     public static T DoSafe<T>(Func<T> handler, Action? finalizer = null) {
@@ -229,4 +233,3 @@ public static class ServerExtensions {
         return $"'{string.Join('|', envPairs)}'";
     }
 }
-

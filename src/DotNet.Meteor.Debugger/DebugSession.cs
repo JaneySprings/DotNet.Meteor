@@ -330,12 +330,25 @@ public class DebugSession : Session {
             var variables = new List<DebugProtocol.Variable>();
 
             if (variableHandles.TryGet(reference, out Func<MonoClient.ObjectValue[]>? getChildrenDelegate)) {
-                var children = getChildrenDelegate?.Invoke();
+                MonoClient.ObjectValue[]? children = null;
+                try {
+                    children = getChildrenDelegate?.Invoke();
+                } catch (Mono.Debugger.Soft.InvalidStackFrameException ex) {
+                    MonoClient.DebuggerLoggingService.CustomLogger?.LogError("[Handled] invalid stack frame while resolving children", ex);
+                    return new VariablesResponse(variables);
+                }
+
                 if (children != null && children.Length > 0) {
                     foreach (var v in children) {
-                        // Not matter how many variables, callbacks start automatically after 'GetChildren' is called
-                        v.WaitHandle.WaitOne(session.EvaluationOptions.EvaluationTimeout);
-                        variables.Add(CreateVariable(v));
+                        try {
+                            // No matter how many variables, callbacks start automatically after 'GetChildren' is called.
+                            v.WaitHandle.WaitOne(session.EvaluationOptions.EvaluationTimeout);
+                            variables.Add(CreateVariable(v));
+                        } catch (Mono.Debugger.Soft.InvalidStackFrameException ex) {
+                            MonoClient.DebuggerLoggingService.CustomLogger?.LogError("[Handled] invalid stack frame while creating variable", ex);
+                        } catch (Exception ex) {
+                            MonoClient.DebuggerLoggingService.CustomLogger?.LogError("[Handled] variable creation failed", ex);
+                        }
                     }
                 }
             }
@@ -364,12 +377,16 @@ public class DebugSession : Session {
     #region Evaluate
     protected override EvaluateResponse HandleEvaluateRequest(EvaluateArguments arguments) {
         return ServerExtensions.DoSafe(() => {
-            if (arguments.Expression.StartsWith(BaseLaunchAgent.CommandPrefix)) {
-                launchAgent?.HandleCommand(arguments.Expression, this);
+            var sourceExpression = arguments.Expression ?? string.Empty;
+            if (sourceExpression.StartsWith(BaseLaunchAgent.CommandPrefix, StringComparison.Ordinal)) {
+                launchAgent?.HandleCommand(sourceExpression, this);
                 throw new ProtocolException($"command handled by {launchAgent}");
             }
 
             var expression = arguments.TrimExpression();
+            if (string.IsNullOrWhiteSpace(expression))
+                throw new ProtocolException("invalid expression");
+
             var frame = frameHandles.Get(arguments.FrameId ?? 0, null);
             if (frame == null)
                 throw new ProtocolException("no active stackframe");
@@ -378,8 +395,14 @@ public class DebugSession : Session {
             if (arguments.Context == EvaluateArguments.ContextValue.Hover)
                 options.UseExternalTypeResolver = false;
 
-            var value = frame.GetExpressionValue(expression, options);
-            value.WaitHandle.WaitOne(options.EvaluationTimeout);
+            MonoClient.ObjectValue value;
+            try {
+                value = frame.GetExpressionValue(expression, options);
+                value.WaitHandle.WaitOne(options.EvaluationTimeout);
+            } catch (Mono.Debugger.Soft.InvalidStackFrameException ex) {
+                MonoClient.DebuggerLoggingService.CustomLogger?.LogError("[Handled] invalid stack frame while evaluating expression", ex);
+                throw new ProtocolException("not available");
+            }
 
             if (value.IsEvaluating)
                 throw new ProtocolException("evaluation timeout expected");
@@ -456,18 +479,28 @@ public class DebugSession : Session {
     #endregion Completions
     #region SetVariable
     protected override SetVariableResponse HandleSetVariableRequest(SetVariableArguments arguments) {
-        var variablesDelegate = variableHandles.Get(arguments.VariablesReference, null);
-        if (variablesDelegate == null)
-            throw new ProtocolException("VariablesReference not found");
+        return ServerExtensions.DoSafe(() => {
+            var variablesDelegate = variableHandles.Get(arguments.VariablesReference, null);
+            if (variablesDelegate == null)
+                throw new ProtocolException("VariablesReference not found");
 
-        var variables = variablesDelegate.Invoke();
-        var variable = variables.FirstOrDefault(v => v.Name == arguments.Name);
-        if (variable == null)
-            throw new ProtocolException("variable not found");
-        // No way to use ExternalTypeResolver for setting variables. Use hardcoded value
-        variable.SetValue(variable.ResolveValue(arguments.Value), session.Options.EvaluationOptions);
-        variable.Refresh();
-        return CreateVariable(variable).ToSetVariableResponse();
+            MonoClient.ObjectValue[] variables;
+            try {
+                variables = variablesDelegate.Invoke();
+            } catch (Mono.Debugger.Soft.InvalidStackFrameException ex) {
+                MonoClient.DebuggerLoggingService.CustomLogger?.LogError("[Handled] invalid stack frame while setting variable", ex);
+                throw new ProtocolException("not available");
+            }
+
+            var variable = variables.FirstOrDefault(v => v.Name == arguments.Name);
+            if (variable == null)
+                throw new ProtocolException("variable not found");
+
+            // No way to use ExternalTypeResolver for setting variables. Use hardcoded value.
+            variable.SetValue(variable.ResolveValue(arguments.Value), session.Options.EvaluationOptions);
+            variable.Refresh();
+            return CreateVariable(variable).ToSetVariableResponse();
+        });
     }
     #endregion SetVariable
     #region GotoTargets
