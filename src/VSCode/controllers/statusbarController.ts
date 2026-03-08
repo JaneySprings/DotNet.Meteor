@@ -21,7 +21,7 @@ export class StatusBarController {
     public static async activate(context: vscode.ExtensionContext): Promise<void> {
         if (vscode.extensions.getExtension(res.dotrushExtensionId) !== undefined)
             return StatusBarController.activateWithDotRush(context);
-        
+
         StatusBarController.createProjectStatusBarItem(context);
         StatusBarController.createConfigurationStatusBarItem(context);
         StatusBarController.createDeviceStatusBarItem(context);
@@ -41,7 +41,7 @@ export class StatusBarController {
         const exports = await vscode.extensions.getExtension(res.dotrushExtensionId)?.activate();
         exports?.onActiveProjectChanged?.add((p: Project) => ConfigurationController.project = p);
         exports?.onActiveConfigurationChanged?.add((c: string) => ConfigurationController.configuration = c);
-    
+
         StatusBarController.createDeviceStatusBarItem(context);
         StatusBarController.updateDeviceStatusBarItem();
     }
