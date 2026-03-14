@@ -95,6 +95,9 @@ public class LaunchConfiguration {
             var apkPaths = Directory.GetFiles(programDirectory, "*-Signed.apk");
             if (apkPaths.Length == 1)
                 return apkPaths[0];
+            var aabPaths = Directory.GetFiles(programDirectory, "*-Signed.aab");
+            if (aabPaths.Length == 1)
+                return aabPaths[0];
         }
         if (Device.IsMacCatalyst || Device.IsIPhone) {
             var appExtension = RuntimeSystem.IsMacOS ? ".app" : ".ipa";

@@ -161,8 +161,10 @@ export class ConfigurationController {
         if (ConfigurationController.isAndroid()) {
             const outDir = path.dirname(targetPath);
             const packageName = Interop.getPropertyValue('ApplicationId', project, configuration, device);
-            if (packageName !== undefined)
-                return path.join(outDir, packageName + '-Signed.apk');
+            if (packageName !== undefined) {
+                const packageFormat = Interop.getPropertyValue('AndroidPackageFormat', project, configuration, device) ?? 'apk';
+                return path.join(outDir, packageName + '-Signed.' + packageFormat);
+            }
         }
         if (ConfigurationController.isAppleMobile() || ConfigurationController.isMacCatalyst()) {
             const outDir = path.dirname(targetPath);
