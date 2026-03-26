@@ -1,3 +1,5 @@
+using DotNet.Meteor.Common.Apple;
+
 namespace DotNet.Meteor.Common.Android;
 
 public static class AndroidSdkLocator {
@@ -78,5 +80,49 @@ public static class AndroidSdkLocator {
             throw new FileNotFoundException("Could not find avdmanager tool");
 
         return newestTool;
+    }
+    public static FileInfo BundleToolJar() {
+        var dotnetPacksPath = Path.Combine(AppleSdkLocator.DotNetRootLocation(), "packs");
+        foreach (var sdkDir in Directory.GetDirectories(dotnetPacksPath, "Microsoft.Android.Sdk.*").OrderByDescending(x => x)) {
+            foreach (var versionDir in Directory.GetDirectories(sdkDir).OrderByDescending(x => x)) {
+                var candidate = Path.Combine(versionDir, "tools", "bundletool.jar");
+                if (File.Exists(candidate))
+                    return new FileInfo(candidate);
+            }
+        }
+        throw new FileNotFoundException("Could not find bundletool.jar in dotnet Android SDK packs");
+    }
+    public static FileInfo Aapt2Tool() {
+        var dotnetPacksPath = Path.Combine(AppleSdkLocator.DotNetRootLocation(), "packs");
+        foreach (var sdkDir in Directory.GetDirectories(dotnetPacksPath, "Microsoft.Android.Sdk.*").OrderByDescending(x => x)) {
+            foreach (var versionDir in Directory.GetDirectories(sdkDir).OrderByDescending(x => x)) {
+                var candidate = Path.Combine(versionDir, "tools", "aapt2" + RuntimeSystem.ExecExtension);
+                if (File.Exists(candidate))
+                    return new FileInfo(candidate);
+            }
+        }
+        throw new FileNotFoundException("Could not find aapt2 tool in dotnet Android SDK packs");
+    }
+    public static FileInfo JavaTool() {
+        // 1. Check JAVA_HOME
+        var javaHome = Environment.GetEnvironmentVariable("JAVA_HOME");
+        if (!string.IsNullOrEmpty(javaHome)) {
+            var path = Path.Combine(javaHome, "bin", "java" + RuntimeSystem.ExecExtension);
+            if (File.Exists(path))
+                return new FileInfo(path);
+        }
+        // 2. Check Visual Studio's bundled OpenJDK on Windows (Program Files\Android\openjdk\jdk-*)
+        if (RuntimeSystem.IsWindows) {
+            var programFiles = Environment.GetEnvironmentVariable("ProgramFiles") ?? @"C:\Program Files";
+            var openjdkDir = Path.Combine(programFiles, "Android", "openjdk");
+            if (Directory.Exists(openjdkDir)) {
+                foreach (var jdkDir in Directory.GetDirectories(openjdkDir, "jdk-*").OrderByDescending(x => x)) {
+                    var path = Path.Combine(jdkDir, "bin", "java" + RuntimeSystem.ExecExtension);
+                    if (File.Exists(path))
+                        return new FileInfo(path);
+                }
+            }
+        }
+        throw new FileNotFoundException("Could not find java tool. Set the JAVA_HOME environment variable.");
     }
 }

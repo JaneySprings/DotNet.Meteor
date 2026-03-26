@@ -92,7 +92,13 @@ public class DebugLaunchAgent : BaseLaunchAgent {
         if (Configuration.UninstallApp)
             AndroidDebugBridge.Uninstall(Configuration.Device.Serial, applicationId, logger);
 
-        AndroidDebugBridge.Install(Configuration.Device.Serial, Configuration.ProgramPath, logger);
+        if (Configuration.IsAab) {
+            var apksPath = Path.ChangeExtension(Configuration.ProgramPath, ".apks");
+            AndroidBundleTool.BuildApks(Configuration.ProgramPath, apksPath, Configuration.Device.Serial, Configuration.Keystore!, Configuration.BundleToolExtraArgs, logger);
+            AndroidBundleTool.InstallApks(apksPath, Configuration.Device.Serial, logger);
+        } else {
+            AndroidDebugBridge.Install(Configuration.Device.Serial, Configuration.ProgramPath, logger);
+        }
         AndroidDebugBridge.Shell(Configuration.Device.Serial, "setprop", "debug.mono.connect", $"port={Configuration.DebugPort}");
         if (Configuration.EnvironmentVariables.Count != 0)
             AndroidDebugBridge.Shell(Configuration.Device.Serial, "setprop", "debug.mono.env", Configuration.EnvironmentVariables.ToAndroidEnvString());
