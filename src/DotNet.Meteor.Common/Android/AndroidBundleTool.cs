@@ -9,6 +9,9 @@ public static class AndroidBundleTool {
         var adb = AndroidSdkLocator.AdbTool();
         var aapt2 = AndroidSdkLocator.Aapt2Tool();
 
+        if (File.Exists(apksOutputPath))
+            File.Delete(apksOutputPath);
+
         var arguments = new ProcessArgumentBuilder()
             .Append("-Xmx1G")
             .Append("-jar").AppendQuoted(bundleTool.FullName)
