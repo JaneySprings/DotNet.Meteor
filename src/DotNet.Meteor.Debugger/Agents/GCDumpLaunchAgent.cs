@@ -87,7 +87,13 @@ public class GCDumpLaunchAgent : BaseLaunchAgent {
 
         if (Configuration.UninstallApp)
             AndroidDebugBridge.Uninstall(Configuration.Device.Serial, applicationId, logger);
-        AndroidDebugBridge.Install(Configuration.Device.Serial, Configuration.ProgramPath, logger);
+        if (Configuration.IsAab) {
+            var apksPath = Path.ChangeExtension(Configuration.ProgramPath, ".apks");
+            AndroidBundleTool.BuildApks(Configuration.ProgramPath, apksPath, Configuration.Device.Serial, Configuration.Keystore!, Configuration.BundleToolExtraArgs, logger);
+            AndroidBundleTool.InstallApks(apksPath, Configuration.Device.Serial, logger);
+        } else {
+            AndroidDebugBridge.Install(Configuration.Device.Serial, Configuration.ProgramPath, logger);
+        }
         AndroidDebugBridge.Launch(Configuration.Device.Serial, applicationId, logger);
 
         Disposables.Add(() => AndroidDebugBridge.Shell(Configuration.Device.Serial, "am", "force-stop", applicationId));
