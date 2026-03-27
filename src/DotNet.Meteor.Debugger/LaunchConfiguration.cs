@@ -16,8 +16,12 @@ public class LaunchConfiguration {
     public int ReloadHostPort { get; init; }
     public int ProfilerPort { get; init; }
     public string? TransportId { get; init; }
+    public KeystoreInfo? Keystore { get; init; }
+    public string BundleToolExtraArgs { get; init; }
     public Dictionary<string, string> EnvironmentVariables { get; init; }
     public DebuggerSessionOptions DebuggerSessionOptions { get; init; }
+
+    public bool IsAab => ProgramPath.EndsWith(".aab", StringComparison.OrdinalIgnoreCase);
 
     private ProfilerMode Profiler { get; init; }
     private bool SkipDebug { get; init; }
@@ -46,6 +50,8 @@ public class LaunchConfiguration {
             ProgramPath = FindProgramPath(ProgramPath); // Last chance to get program path
 
         AssetsPath = Project.GetRelativePath(configurationProperties.TryGetValue("assets").ToClass<string>());
+        Keystore = configurationProperties.TryGetValue("keystoreInfo")?.ToClass<KeystoreInfo>();
+        BundleToolExtraArgs = configurationProperties.TryGetValue("bundleToolExtraArgs").ToClass<string>() ?? string.Empty;
     }
 
     public string GetApplicationName() {
@@ -95,6 +101,11 @@ public class LaunchConfiguration {
             var apkPaths = Directory.GetFiles(programDirectory, "*-Signed.apk");
             if (apkPaths.Length == 1)
                 return apkPaths[0];
+            var aabPaths = Directory.GetFiles(programDirectory, "*.aab")
+                .Where(p => !p.EndsWith("-Signed.aab", StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+            if (aabPaths.Length == 1)
+                return aabPaths[0];
         }
         if (Device.IsMacCatalyst || Device.IsIPhone) {
             var appExtension = RuntimeSystem.IsMacOS ? ".app" : ".ipa";

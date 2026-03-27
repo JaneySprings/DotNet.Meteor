@@ -5,6 +5,7 @@ import { Device } from '../models/device';
 import * as res from '../resources/constants';
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as fs from 'fs';
 
 export class ConfigurationController {
     public static androidSdkDirectory: string | undefined;
@@ -161,8 +162,12 @@ export class ConfigurationController {
         if (ConfigurationController.isAndroid()) {
             const outDir = path.dirname(targetPath);
             const packageName = Interop.getPropertyValue('ApplicationId', project, configuration, device);
-            if (packageName !== undefined)
+            if (packageName !== undefined) {
+                const packageFormat = Interop.getPropertyValue('AndroidPackageFormat', project, configuration, device);
+                if (packageFormat?.toLowerCase() === 'aab')
+                    return path.join(outDir, packageName + '.aab');
                 return path.join(outDir, packageName + '-Signed.apk');
+            }
         }
         if (ConfigurationController.isAppleMobile() || ConfigurationController.isMacCatalyst()) {
             const outDir = path.dirname(targetPath);
@@ -181,4 +186,41 @@ export class ConfigurationController {
         const assembliesDir = Interop.getPropertyValue('MonoAndroidIntermediateAssemblyDir', project, configuration, device);
         return assembliesDir;
     }
-} 
+    public static getKeystoreInfo(project: Project, configuration: string, device: Device): any {
+        const useCustomKeystore = Interop.getPropertyValue('AndroidKeyStore', project, configuration, device);
+        if (useCustomKeystore?.toLowerCase() === 'true') {
+            return {
+                keyStorePath: Interop.getPropertyValue('AndroidSigningKeyStore', project, configuration, device),
+                keyAlias: Interop.getPropertyValue('AndroidSigningKeyAlias', project, configuration, device),
+                storePass: Interop.getPropertyValue('AndroidSigningStorePass', project, configuration, device),
+                keyPass: Interop.getPropertyValue('AndroidSigningKeyPass', project, configuration, device),
+            };
+        }
+
+        const homeDirectory = process.env['HOME'] ?? '';
+        const localAppData = process.env['LOCALAPPDATA'] ?? '';
+        const candidates: string[] = ConfigurationController.onWindows
+            ? [path.join(localAppData, 'Xamarin', 'Mono for Android', 'debug.keystore')]
+            : ConfigurationController.onMac
+                ? [
+                    path.join(homeDirectory, 'Library', 'Application Support', 'Xamarin', 'Mono for Android', 'debug.keystore'),
+                    path.join(homeDirectory, '.android', 'debug.keystore'),
+                    path.join(homeDirectory, '.local', 'share', 'Xamarin', 'Mono for Android', 'debug.keystore'),
+                ]
+                : [
+                    path.join(homeDirectory, '.android', 'debug.keystore'),
+                    path.join(homeDirectory, '.local', 'share', 'Xamarin', 'Mono for Android', 'debug.keystore'),
+                ];
+
+        const debugKeystore = candidates.find(it => fs.existsSync(it)) ?? candidates[0];
+        return {
+            keyStorePath: debugKeystore,
+            keyAlias: 'androiddebugkey',
+            storePass: 'android',
+            keyPass: 'android',
+        };
+    }
+    public static getBundleToolExtraArgs(project: Project, configuration: string, device: Device): string | undefined {
+        return Interop.getPropertyValue('AndroidBundleToolExtraArgs', project, configuration, device);
+    }
+}
