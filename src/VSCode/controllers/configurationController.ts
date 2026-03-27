@@ -5,6 +5,7 @@ import { Device } from '../models/device';
 import * as res from '../resources/constants';
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as fs from 'fs';
 
 export class ConfigurationController {
     public static androidSdkDirectory: string | undefined;
@@ -195,10 +196,23 @@ export class ConfigurationController {
                 keyPass: Interop.getPropertyValue('AndroidSigningKeyPass', project, configuration, device),
             };
         }
-        // Default Xamarin/Android debug keystore
-        const debugKeystore = ConfigurationController.onWindows
-            ? path.join(process.env['LOCALAPPDATA'] ?? '', 'Xamarin', 'Mono for Android', 'debug.keystore')
-            : path.join(process.env['HOME'] ?? '', '.android', 'debug.keystore');
+
+        const homeDirectory = process.env['HOME'] ?? '';
+        const localAppData = process.env['LOCALAPPDATA'] ?? '';
+        const candidates: string[] = ConfigurationController.onWindows
+            ? [path.join(localAppData, 'Xamarin', 'Mono for Android', 'debug.keystore')]
+            : ConfigurationController.onMac
+                ? [
+                    path.join(homeDirectory, 'Library', 'Application Support', 'Xamarin', 'Mono for Android', 'debug.keystore'),
+                    path.join(homeDirectory, '.android', 'debug.keystore'),
+                    path.join(homeDirectory, '.local', 'share', 'Xamarin', 'Mono for Android', 'debug.keystore'),
+                ]
+                : [
+                    path.join(homeDirectory, '.android', 'debug.keystore'),
+                    path.join(homeDirectory, '.local', 'share', 'Xamarin', 'Mono for Android', 'debug.keystore'),
+                ];
+
+        const debugKeystore = candidates.find(it => fs.existsSync(it)) ?? candidates[0];
         return {
             keyStorePath: debugKeystore,
             keyAlias: 'androiddebugkey',
@@ -209,4 +223,4 @@ export class ConfigurationController {
     public static getBundleToolExtraArgs(project: Project, configuration: string, device: Device): string | undefined {
         return Interop.getPropertyValue('AndroidBundleToolExtraArgs', project, configuration, device);
     }
-} 
+}
