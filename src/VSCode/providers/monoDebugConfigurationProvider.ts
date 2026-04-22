@@ -36,6 +36,12 @@ export class MonoDebugConfigurationProvider implements vscode.DebugConfiguration
 			config.program = ConfigurationController.getProgramPath(config.project, config.configuration, config.device);
 		if (config.assets === undefined)
 			config.assets = ConfigurationController.getAssetsPath(config.project, config.configuration, config.device);
+		if (ConfigurationController.isAndroid() && config.program?.endsWith('.aab')) {
+			if (config.keystoreInfo === undefined)
+				config.keystoreInfo = ConfigurationController.getKeystoreInfo(config.project, config.configuration, config.device);
+			if (config.bundleToolExtraArgs === undefined)
+				config.bundleToolExtraArgs = ConfigurationController.getBundleToolExtraArgs(config.project, config.configuration, config.device);
+		}
 
 		if (ConfigurationController.isVsdbgRequired()) {
 			config.type = res.debuggerVsdbgId;
