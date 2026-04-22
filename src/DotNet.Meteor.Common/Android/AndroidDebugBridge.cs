@@ -38,7 +38,7 @@ public static class AndroidDebugBridge {
         if (!result.Success)
             throw new InvalidOperationException(string.Join(Environment.NewLine, result.StandardError));
 
-        string regex = @"^(?<serial>\S+?)(\s+?)\s+(?<state>\S+)";
+        string regex = @"^(?<serial>\S+)\s+(?<state>\S+)";
         var devices = new List<string>();
 
         foreach (string line in result.StandardOutput) {
