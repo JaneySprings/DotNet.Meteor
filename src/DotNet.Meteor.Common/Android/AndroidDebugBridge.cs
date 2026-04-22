@@ -41,7 +41,7 @@ public static class AndroidDebugBridge {
         string regex = @"^(?<serial>\S+)\s+(?<state>\S+)";
         var devices = new List<string>();
 
-        foreach (string line in result.StandardOutput) {
+        foreach (string line in result.StandardOutput.Skip(1)) { // Skip "List of devices attached"
             MatchCollection matches = Regex.Matches(line, regex, RegexOptions.Singleline);
             if (matches.Count == 0)
                 continue;
