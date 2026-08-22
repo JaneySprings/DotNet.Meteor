@@ -21,15 +21,15 @@ stages:
     dependsOn: []
     jobs:
 #//////////////////////////////////////////////////////////////////////
-#// Linux 
+#// Universal VSIX (all platforms in one package)
 #//////////////////////////////////////////////////////////////////////
-      - job: Linux
+      - job: Universal
         pool:
           vmImage: ubuntu-latest
-        timeoutInMinutes: 10
+        timeoutInMinutes: 30
         variables:
           - name: version
-            value: $[ replace(variables['Build.SourceBranch'], 'refs/tags/', '') ] 
+            value: $[ replace(variables['Build.SourceBranch'], 'refs/tags/', '') ]
         steps:
         - task: UseDotNet@2
           inputs:
@@ -40,75 +40,20 @@ stages:
         - script: npm install -g vsce webpack webpack-cli
           displayName: 'Install Node tools'
 
-        - script: dotnet cake --target=vsix --release-version=$(version) --configuration=release --arch=linux-x64
-          displayName: 'Build VSIX (linux-x64)'
-        - script: dotnet cake --target=vsix --release-version=$(version) --configuration=release --arch=linux-arm64
-          displayName: 'Build VSIX (linux-arm64)'
+        - script: dotnet cake --target=vsix --release-version=$(version) --configuration=release
+          displayName: 'Build universal VSIX (all platforms)'
+          env:
+            NODE_ENV: ''
 
         - publish: '$(System.DefaultWorkingDirectory)/artifacts'
           displayName: 'Publish Artifacts'
-          artifact: 'Linux Build'
-#//////////////////////////////////////////////////////////////////////
-#// MacOS 
-#//////////////////////////////////////////////////////////////////////
-      - job: MacOS
-        pool:
-          vmImage: macos-latest
-        timeoutInMinutes: 10
-        variables:
-          - name: version
-            value: $[ replace(variables['Build.SourceBranch'], 'refs/tags/', '') ] 
-        steps:
-        - task: UseDotNet@2
-          inputs:
-            version: '9.x'
-            includePreviewVersions: true
-        - script: dotnet tool restore
-          displayName: 'Restore .NET tools'
-        - script: npm install -g vsce webpack webpack-cli
-          displayName: 'Install Node tools'
+          artifact: 'Universal Build'
 
-        - script: dotnet cake --target=vsix --release-version=$(version) --configuration=release --arch=osx-x64
-          displayName: 'Build VSIX (osx-x64)'
-        - script: dotnet cake --target=vsix --release-version=$(version) --configuration=release --arch=osx-arm64
-          displayName: 'Build VSIX (osx-arm64)'
-
-        - publish: '$(System.DefaultWorkingDirectory)/artifacts'
-          displayName: 'Publish Artifacts'
-          artifact: 'MacOS Build'
-#//////////////////////////////////////////////////////////////////////
-#// Windows 
-#//////////////////////////////////////////////////////////////////////
-      - job: Windows
-        pool:
-          vmImage: windows-latest
-        timeoutInMinutes: 15
-        variables:
-          - name: version
-            value: $[ replace(variables['Build.SourceBranch'], 'refs/tags/', '') ] 
-        steps:
-        - task: UseDotNet@2
-          inputs:
-            version: '9.x'
-            includePreviewVersions: true
-        - script: dotnet tool restore
-          displayName: 'Restore .NET tools'
-        - script: npm install -g vsce webpack webpack-cli
-          displayName: 'Install Node tools'
-
-        - script: dotnet cake --target=vsix --release-version=$(version) --configuration=release --arch=win-x64
-          displayName: 'Build VSIX (win-x64)'
-        - script: dotnet cake --target=vsix --release-version=$(version) --configuration=release --arch=win-arm64
-          displayName: 'Build VSIX (win-arm64)'
-
-        - publish: '$(System.DefaultWorkingDirectory)/artifacts'
-          displayName: 'Publish Artifacts'
-          artifact: 'Windows Build'
 #//////////////////////////////////////////////////////////////////////
 #// Publish
 #//////////////////////////////////////////////////////////////////////
       - job: Publish
-        dependsOn: [Linux, MacOS, Windows]
+        dependsOn: [Universal]
         condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')
         pool:
           vmImage: ubuntu-latest
@@ -117,11 +62,7 @@ stages:
         timeoutInMinutes: 4 
         steps:
         - download: current
-          artifact: 'Linux Build'
-        - download: current
-          artifact: 'MacOS Build'
-        - download: current
-          artifact: 'Windows Build'
+          artifact: 'Universal Build'
         - task: GitHubRelease@1
           inputs:
             gitHubConnection: 'upstream'
@@ -141,7 +82,6 @@ stages:
               for filename in $(Pipeline.Workspace)/**/*.vsix; do
                 vsce publish --packagePath "$filename" -p $VS_TOKEN
               done
-
 
 
   - stage: Tests
@@ -217,4 +157,3 @@ stages:
             testResultsFiles: 'artifacts/*.trx'
             failTaskOnFailedTests: true
             failTaskOnMissingResultsFile: true
-

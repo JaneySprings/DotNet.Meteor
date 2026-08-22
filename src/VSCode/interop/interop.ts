@@ -3,6 +3,7 @@ import { ProcessArgumentBuilder } from './processArgumentBuilder';
 import { ProcessRunner } from './processRunner';
 import { Project } from '../models/project';
 import { Device } from '../models/device';
+import { getRuntimeIdentifier, getExecutableExtension } from '../resources/runtime';
 import * as path from 'path';
 
 
@@ -10,8 +11,8 @@ export class Interop {
     private static workspaceToolPath: string;
 
     public static initialize(extensionPath : string) {
-        const executableExtension = ConfigurationController.onWindows ? '.exe' : '';
-        Interop.workspaceToolPath = path.join(extensionPath, "extension", "bin", "Workspace", "DotNet.Meteor.Workspace" + executableExtension);
+        const executableExtension = getExecutableExtension();
+        Interop.workspaceToolPath = path.join(extensionPath, "extension", "bin", getRuntimeIdentifier(), "Workspace", "DotNet.Meteor.Workspace" + executableExtension);
         Interop.init();
     }
 

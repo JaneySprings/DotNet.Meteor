@@ -1,6 +1,7 @@
 import { ConfigurationController } from "../controllers/configurationController";
 import { LanguageClient, ServerOptions } from "vscode-languageclient/node";
 import { ChildProcess, spawn } from "child_process";
+import { getRuntimeIdentifier, getExecutableExtension } from '../resources/runtime';
 import * as res from '../resources/constants';
 import * as vscode from 'vscode';
 import * as path from "path";
@@ -23,8 +24,8 @@ export class MauiEssentials {
             return;
 
         // Hot Reload
-        const agentExecutable = path.join(context.extensionPath, "extension", "bin", "HotReload", "DotNet.Meteor.HotReload");
-        const agentExtension = ConfigurationController.onWindows ? '.exe' : '';
+        const agentExecutable = path.join(context.extensionPath, "extension", "bin", getRuntimeIdentifier(), "HotReload", "DotNet.Meteor.HotReload");
+        const agentExtension = getExecutableExtension();
         MauiEssentials.reloadAgentPath = agentExecutable + agentExtension;
 
         let isProgrammaticalySaving = false;
@@ -68,8 +69,8 @@ export class MauiEssentials {
         }));
         
         // Language Server
-        const serverExecutable = path.join(context.extensionPath, "extension", "bin", "Xaml", "DotNet.Meteor.Xaml.LanguageServer");
-        const serverExtension = ConfigurationController.onWindows ? '.exe' : '';
+        const serverExecutable = path.join(context.extensionPath, "extension", "bin", getRuntimeIdentifier(), "Xaml", "DotNet.Meteor.Xaml.LanguageServer");
+        const serverExtension = getExecutableExtension();
         MauiEssentials.languageServerPath = serverExecutable + serverExtension;
 
         context.subscriptions.push(vscode.tasks.onDidEndTaskProcess(ev => {
