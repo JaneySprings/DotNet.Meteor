@@ -1,6 +1,6 @@
 <img src="https://github.com/JaneySprings/DotNet.Meteor/raw/main/assets/header.jpg" width="1180px" alt=".NET Meteor" align="center" />
 
-> **Fork notice**: This is a maintained community fork of [nromanov.dotnet-meteor](https://marketplace.visualstudio.com/items?itemName=nromanov.dotnet-meteor) ([upstream](https://github.com/JaneySprings/DotNet.Meteor)), which currently does not accept community contributions (issues and pull requests are disabled). This fork adds fixes on top of upstream, e.g. duplicate Android devices in the device picker when using WiFi debugging.
+> **Fork notice**: This is a maintained fork of [nromanov.dotnet-meteor](https://marketplace.visualstudio.com/items?itemName=nromanov.dotnet-meteor) ([upstream](https://github.com/JaneySprings/DotNet.Meteor)), which currently does not accept community contributions (issues and pull requests are disabled). This fork adds fixes on top of upstream, e.g. duplicate Android devices in the device picker when using WiFi debugging.
 >
 > Extension identifier: `happypig375.dotnet-meteor-fork`. The published VSIX is **universal**: one package contains native binaries for Windows, macOS and Linux (x64 & arm64) and picks the right one at runtime.
 
