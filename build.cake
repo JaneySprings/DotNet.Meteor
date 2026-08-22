@@ -94,7 +94,7 @@ Task("vsix")
 	.Does(() => {
 		var vsruntime = runtime.Replace("win-", "win32-").Replace("osx-", "darwin-");
 		var output = _Path.Combine(ArtifactsDirectory, $"DotNet.Meteor.v{version}_{vsruntime}.vsix");
-		ExecuteCommand("npm", "install");
+		ExecuteCommand("npm", "install --include=dev");
 		ExecuteCommand("vsce", $"package --target {vsruntime} --out {output} --no-git-tag-version {version}");
 	});
 
