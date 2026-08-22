@@ -51,13 +51,20 @@ public static class AndroidDeviceTool {
     }
     public static List<DeviceData> PhysicalDevices() {
         var runningDevices = AndroidDebugBridge.Devices();
-        var devices = new List<DeviceData>();
+        var devices = new Dictionary<string, DeviceData>();
 
         foreach(var serial in runningDevices) {
             if (serial.StartsWith("emulator-"))
                 continue;
 
-            devices.Add(new DeviceData {
+            string hardwareId = AndroidDebugBridge.Shell(serial, "getprop", "ro.serialno").Trim();
+            // WiFi debugging exposes the same phone under several serials (pair-time
+            // mDNS entry and the manual connect entry), so identify it by hardware id.
+            // Fall back to the serial if the property is unavailable.
+            if (string.IsNullOrEmpty(hardwareId))
+                hardwareId = serial;
+
+            if (!devices.TryAdd(hardwareId, new DeviceData {
                 Name = AndroidDebugBridge.Shell(serial, "getprop", "ro.product.model"),
                 OSVersion = $"android-{AndroidDebugBridge.Shell(serial, "getprop", "ro.build.version.sdk")}",
                 Platform = Platforms.Android,
@@ -66,9 +73,10 @@ public static class AndroidDeviceTool {
                 IsRunning = true,
                 IsMobile = true,
                 Serial = serial
-            });
+            }))
+                continue;
         }
 
-        return devices;
+        return devices.Values.ToList();
     }
 }

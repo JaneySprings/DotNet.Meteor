@@ -38,15 +38,22 @@ public static class AndroidDebugBridge {
         if (!result.Success)
             throw new InvalidOperationException(string.Join(Environment.NewLine, result.StandardError));
 
-        string regex = @"^(?<serial>\S+?)(\s+?)\s+(?<state>\S+)";
+        return ParseDeviceSerials(result.StandardOutput);
+    }
+    public static List<string> ParseDeviceSerials(IEnumerable<string> lines) {
+        string regex = @"^(?<serial>\S+)\s+(?<state>\S+)";
         var devices = new List<string>();
 
-        foreach (string line in result.StandardOutput) {
-            MatchCollection matches = Regex.Matches(line, regex, RegexOptions.Singleline);
-            if (matches.Count == 0)
+        foreach (string line in lines) {
+            Match match = Regex.Match(line, regex);
+            if (!match.Success)
                 continue;
 
-            devices.Add(matches.First().Groups["serial"].Value);
+            // Only fully connected devices are usable for deployment and debugging.
+            if (!match.Groups["state"].Value.Equals("device", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            devices.Add(match.Groups["serial"].Value);
         }
 
         return devices;
