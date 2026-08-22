@@ -1,5 +1,7 @@
 <img src="https://github.com/JaneySprings/DotNet.Meteor/raw/main/assets/header.jpg" width="1180px" alt=".NET Meteor" align="center" />
 
+> **Fork notice**: This is a maintained fork of [nromanov.dotnet-meteor](https://marketplace.visualstudio.com/items?itemName=nromanov.dotnet-meteor) ([upstream](https://github.com/JaneySprings/DotNet.Meteor)), which currently does not accept community contributions (issues and pull requests are disabled). This fork adds fixes on top of upstream, e.g. duplicate Android devices in the device picker when using WiFi debugging.
+
 ## Overview
 
 &emsp;The .NET Meteor extension allows you to build, debug and deploy **.NET apps** to devices or emulators.

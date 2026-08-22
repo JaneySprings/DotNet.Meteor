@@ -1,22 +1,19 @@
 {
   "name": "dotnet-meteor",
-  "publisher": "nromanov",
+  "publisher": "happypig375",
   "version": "1.0.0",
-  "description": "Run and Debug .NET Apps (MAUI, Avalonia, Xamarin.Native)",
+  "description": "Run and Debug .NET Apps (MAUI, Avalonia, Xamarin.Native). Fork of nromanov.dotnet-meteor with WiFi debugging fixes.",
   "displayName": ".NET Meteor",
-  "author": "Nikita Romanov",
+  "author": "Nikita Romanov (maintained by Hadrian Tang)",
   "license": "MIT",
   "icon": "assets/logo.png",
   "preview": false,
   "bugs": {
-    "url": "https://github.com/JaneySprings/DotNet.Meteor/issues"
+    "url": "https://github.com/Happypig375/DotNet.Meteor/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/JaneySprings/DotNet.Meteor.git"
-  },
-  "sponsor": {
-    "url": "https://github.com/sponsors/JaneySprings"
+    "url": "https://github.com/Happypig375/DotNet.Meteor.git"
   },
   "categories": [
     "Debuggers"

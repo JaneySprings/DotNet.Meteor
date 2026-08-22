@@ -1,5 +1,5 @@
 export const extensionId = "dotnet-meteor";
-export const extensionPublisher = "nromanov";
+export const extensionPublisher = "happypig375";
 export const extensionDisplayName = ".NET Meteor";
 
 export const dotrushExtensionId = "nromanov.dotrush";
