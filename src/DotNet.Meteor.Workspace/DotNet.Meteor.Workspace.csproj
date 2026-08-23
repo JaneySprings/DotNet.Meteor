@@ -1,11 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-		<OutputType>Exe</OutputType>
-	</PropertyGroup>
-
 	<Import Project="..\Common.Build.props" />
 
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<AssemblyName>meteor</AssemblyName>
+		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+		<OutputPath>$(AssetsPath)Workspace</OutputPath>
+        <PublishDir>$(OutputPath)</PublishDir>
+	</PropertyGroup>
+
 	<ItemGroup>
-		<ProjectReference Include="..\DotNet.Meteor.Common\DotNet.Meteor.Common.csproj" />
+		<PackageReference Include="Nlog" Version="6.1.3" />
+		<PackageReference Include="System.CommandLine" Version="2.0.9" />
+		<ProjectReference Include="../clrdbg/DotNet.Debugging.Common/DotNet.Debugging.Common.csproj" />
+		
+		<None Update="Resources\CopyRemoteCoreclrTargetLibrary.targets" CopyToOutputDirectory="PreserveNewest" Link="CopyRemoteCoreclrTargetLibrary.targets" />
 	</ItemGroup>
 </Project>

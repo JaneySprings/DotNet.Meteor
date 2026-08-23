@@ -1,14 +1,13 @@
 <Project>
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <RollForward>major</RollForward>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-        <PublishDir>$(OutputPath)</PublishDir>
+        <AssetsPath>$(MSBuildThisFileDirectory)..\extension\bin\</AssetsPath>
         <SelfContained>false</SelfContained>
-        <!-- <PublishTrimmed>true</PublishTrimmed> -->
-		<!-- <TrimMode>partial</TrimMode> -->
+        <NoWarn>$(NoWarn);SYSLIB1045</NoWarn>
     </PropertyGroup>
 </Project>

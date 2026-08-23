@@ -4,18 +4,8 @@ export const extensionDisplayName = ".NET Meteor";
 
 export const dotrushExtensionId = "nromanov.dotrush";
 
-export const commandIdSelectActiveProject = "dotnet-meteor.selectActiveProject";
-export const commandTitleSelectActiveProject = "Select workspace project";
-
-export const commandIdSelectActiveConfiguration = "dotnet-meteor.selectActiveConfiguration";
-export const commandTitleSelectActiveConfiguration = "Select project configuration";
-
 export const commandIdSelectActiveDevice = "dotnet-meteor.selectActiveDevice";
 export const commandTitleSelectActiveDevice = "Select device";
-
-export const commandIdActiveProjectPath = "dotnet-meteor.activeProjectPath";
-export const commandIdActiveConfiguration = "dotnet-meteor.activeConfiguration";
-export const commandIdActiveTargetFramework = "dotnet-meteor.activeTargetFramework";
 export const commandIdActiveDeviceName = "dotnet-meteor.activeDeviceName";
 export const commandIdActiveDeviceSerial = "dotnet-meteor.activeDeviceSerial";
 export const commandIdTriggerHotReload = "dotnet-meteor.triggerHotReload";
@@ -29,11 +19,8 @@ export const taskProblemMatcherId = "dotnet-meteor.problemMatcher";
 
 export const debuggerMeteorId = "dotnet-meteor.debugger";
 export const debuggerMeteorTitle = ".NET Meteor Debugger";
-export const debuggerVsdbgId = "coreclr";
 
-export const extendedViewIdModules = "dotnet-meteor.modulesView";
-
-export const messageDebugWithProfilerNotSupported = "Unable to debug an application when profiler is enabled. Run the application without debugger.";
+export const messageInvalidDotnetSdk = "Failed to run the .NET SDK 10. Please make sure the .NET SDK 10 or newer is installed.";
 export const messageRemoteHostNotSupported = "Remote build is not supported on this platform.";
 export const messageDeviceNotExists = "Selected device does not exist anymore. Make sure that the chosen device is connected to your machine.";
 export const messageNoFrameworkFound = "Supported framework not found. Make sure you have selected a correct device.";
@@ -43,52 +30,21 @@ export const messageDeviceLoading = "Fetching devices...";
 export const messageRemoteHostAddress = "Hostname or IP address";
 export const messageRemoteHostUsername = "Username";
 export const messageRemoteHostPassword = "Password";
-export const messageStartupProject = "Startup Project";
+export const messageMissingCoreclrHost = "The 'dotnetMeteor.debuggerOptions.remoteCoreclrHost' setting is not configured. Please set it in VS Code settings and try again.";
+export const messageMissingCoreclrTarget = "The 'dotnetMeteor.debuggerOptions.remoteCoreclrTarget' setting is not configured. Please set it in VS Code settings and try again.";
 
 export const configId = "dotnetMeteor";
 
-export const configIdMonoSdbDebuggerPortAndroid = "monoSdbDebuggerPortAndroid";
-export const configDefaultMonoSdbDebuggerPortAndroid = 10000;
-
-export const configIdMonoSdbDebuggerPortApple = "monoSdbDebuggerPortApple";
-export const configDefaultMonoSdbDebuggerPortApple = 55551;
-
 export const configIdHotReloadHostPort = "hotReloadHostPort";
-export const configDefaultHotReloadHostPort = 9988;
-
-export const configIdProfilerHostPort = "profilerHostPort";
-export const configDefaultProfilerHostPort = 9000;
-
 export const configIdUninstallApplicationBeforeInstalling = "uninstallApplicationBeforeInstalling";
 export const configIdApplyHotReloadChangesOnSave = "applyHotReloadChangesOnSave";
-
-export const configIdDebuggerOptions = "debuggerOptions";
-export const configIdStackFrameFormat = `${configIdDebuggerOptions}.stackFrameFormat`;
-
-export const configIdDebuggerOptionsEvaluationTimeout = `${configIdDebuggerOptions}.evaluationTimeout`;
-export const configIdDebuggerOptionsMemberEvaluationTimeout = `${configIdDebuggerOptions}.memberEvaluationTimeout`;
-export const configIdDebuggerOptionsAllowTargetInvoke = `${configIdDebuggerOptions}.allowTargetInvoke`;
-export const configIdDebuggerOptionsAllowMethodEvaluation = `${configIdDebuggerOptions}.allowMethodEvaluation`;
-export const configIdDebuggerOptionsAllowToStringCalls = `${configIdDebuggerOptions}.allowToStringCalls`;
-export const configIdDebuggerOptionsFlattenHierarchy = `${configIdDebuggerOptions}.flattenHierarchy`;
-export const configIdDebuggerOptionsGroupPrivateMembers = `${configIdDebuggerOptions}.groupPrivateMembers`;
-export const configIdDebuggerOptionsGroupStaticMembers = `${configIdDebuggerOptions}.groupStaticMembers`;
-export const configIdDebuggerOptionsUseExternalTypeResolver = `${configIdDebuggerOptions}.useExternalTypeResolver`;
-export const configIdDebuggerOptionsIntegerDisplayFormat = `${configIdDebuggerOptions}.integerDisplayFormat`;
-export const configIdDebuggerOptionsCurrentExceptionTag = `${configIdDebuggerOptions}.currentExceptionTag`;
-export const configIdDebuggerOptionsEllipsizeStrings = `${configIdDebuggerOptions}.ellipsizeStrings`;
-export const configIdDebuggerOptionsEllipsizedLength = `${configIdDebuggerOptions}.ellipsizedLength`;
-export const configIdDebuggerOptionsProjectAssembliesOnly = `${configIdDebuggerOptions}.projectAssembliesOnly`;
-export const configIdDebuggerOptionsStepOverPropertiesAndOperators = `${configIdDebuggerOptions}.stepOverPropertiesAndOperators`;
-export const configIdDebuggerOptionsSearchMicrosoftSymbolServer = `${configIdDebuggerOptions}.searchMicrosoftSymbolServer`;
-export const configIdDebuggerOptionsSearchNuGetSymbolServer = `${configIdDebuggerOptions}.searchNugetSymbolServer`;
-export const configIdDebuggerOptionsSourceCodeMappings = `${configIdDebuggerOptions}.sourceCodeMappings`;
-export const configIdDebuggerOptionsAutomaticSourcelinkDownload = `${configIdDebuggerOptions}.automaticSourcelinkDownload`;
-export const configIdDebuggerOptionsSymbolSearchPaths = `${configIdDebuggerOptions}.symbolSearchPaths`;
-export const configIdDebuggerOptionsSkipNativeTransitions = `${configIdDebuggerOptions}.skipNativeTransitions`;
-
-export const configIdDebuggerOptionsStackFrameFormatModule = `${configIdStackFrameFormat}.module`;
-export const configIdDebuggerOptionsStackFrameFormatParameterTypes = `${configIdStackFrameFormat}.parameterTypes`;
-export const configIdDebuggerOptionsStackFrameFormatParameterValues = `${configIdStackFrameFormat}.parameterValues`;
-export const configIdDebuggerOptionsStackFrameFormatParameterNames = `${configIdStackFrameFormat}.parameterNames`;
-export const configIdDebuggerOptionsStackFrameFormatLanguage = `${configIdStackFrameFormat}.language`;
+export const configIdAndroidPort = "debuggerOptions.androidPort";
+export const configIdApplePort = "debuggerOptions.applePort";
+export const configIdRemoteCoreclrTarget = "debuggerOptions.remoteCoreclrTarget";
+export const configIdRemoteCoreclrHost = "debuggerOptions.remoteCoreclrHost";
+export const configIdProjectAssembliesOnly = "debuggerOptions.projectAssembliesOnly";
+export const configIdStepOverPropertiesAndOperators = "debuggerOptions.stepOverPropertiesAndOperators";
+export const configIdSearchMicrosoftSymbolServer = "debuggerOptions.searchMicrosoftSymbolServer";
+export const configIdSourceCodeMappings = "debuggerOptions.sourceCodeMappings";
+export const configIdAutomaticSourcelinkDownload = "debuggerOptions.automaticSourcelinkDownload";
+export const configIdSymbolSearchPaths = "debuggerOptions.symbolSearchPaths";

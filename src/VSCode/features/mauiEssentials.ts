@@ -1,31 +1,24 @@
 import { ConfigurationController } from "../controllers/configurationController";
 import { LanguageClient, ServerOptions } from "vscode-languageclient/node";
 import { ChildProcess, spawn } from "child_process";
+import { Interop } from "../interop/interop";
 import * as res from '../resources/constants';
 import * as vscode from 'vscode';
 import * as path from "path";
 
 export class MauiEssentials {
-    public static feature : MauiEssentials = new MauiEssentials();
+    public static feature: MauiEssentials = new MauiEssentials();
 
     private static hotReloadEnabledKey: string = `${res.extensionId}.hotReloadEnabled`;
 
     private static languageServerPath: string;
     private lanuageServerClient: LanguageClient | undefined;
-    
-    private static reloadAgentPath: string;
     private reloadAgent: ChildProcess | undefined;
-
 
     public async activate(context: vscode.ExtensionContext): Promise<void> {
         // Deactivate if no XAML files are found
         if ((await vscode.workspace.findFiles('**/*.xaml')).length <= 0)
             return;
-
-        // Hot Reload
-        const agentExecutable = path.join(context.extensionPath, "extension", "bin", "HotReload", "DotNet.Meteor.HotReload");
-        const agentExtension = ConfigurationController.onWindows ? '.exe' : '';
-        MauiEssentials.reloadAgentPath = agentExecutable + agentExtension;
 
         let isProgrammaticalySaving = false;
         context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(ev => {
@@ -44,11 +37,11 @@ export class MauiEssentials {
             }
         }));
         context.subscriptions.push(vscode.debug.onDidStartDebugSession(ev => {
-            if ((ev.type === res.debuggerMeteorId || ev.type === res.debuggerVsdbgId))
+            if (ev.type === res.debuggerMeteorId)
                 MauiEssentials.feature.startAgent();
         }));
         context.subscriptions.push(vscode.debug.onDidTerminateDebugSession(ev => {
-            if (ev.type === res.debuggerMeteorId || ev.type === res.debuggerVsdbgId)
+            if (ev.type === res.debuggerMeteorId)
                 MauiEssentials.feature.stopAgent();
         }));
         context.subscriptions.push(vscode.commands.registerCommand(res.commandIdXamlReplaceCode, async (edit) => {
@@ -66,25 +59,22 @@ export class MauiEssentials {
                     await doc.save();
             });
         }));
-        
+
         // Language Server
-        const serverExecutable = path.join(context.extensionPath, "extension", "bin", "Xaml", "DotNet.Meteor.Xaml.LanguageServer");
-        const serverExtension = ConfigurationController.onWindows ? '.exe' : '';
-        MauiEssentials.languageServerPath = serverExecutable + serverExtension;
+        MauiEssentials.languageServerPath = path.join(context.extensionPath, "extension", "bin", "Xaml", "DotNet.Meteor.Xaml.LanguageServer.dll");
 
         context.subscriptions.push(vscode.tasks.onDidEndTaskProcess(ev => {
             if (ev.execution.task.definition.type.includes(res.taskDefinitionId) && ev.exitCode === 0)
                 MauiEssentials.feature.restartServer();
         }));
-        
+
         MauiEssentials.feature.startServer();
         if (MauiEssentials.feature.lanuageServerClient !== undefined)
             context.subscriptions.push(MauiEssentials.feature.lanuageServerClient);
     }
 
     public startServer() {
-        const serverArguments: string[] = [ /*ConfigurationController.project?.path ?? ""*/ ]; //TODO: Wait for initialization
-        const serverOptions: ServerOptions = { command: MauiEssentials.languageServerPath, args: serverArguments };
+        const serverOptions: ServerOptions = { command: 'dotnet', args: [MauiEssentials.languageServerPath] };
         MauiEssentials.feature.lanuageServerClient = new LanguageClient(res.extensionId, res.extensionId, serverOptions, {
             diagnosticCollectionName: res.extensionDisplayName,
             synchronize: {
@@ -108,15 +98,20 @@ export class MauiEssentials {
     private startAgent() {
         if (MauiEssentials.feature.reloadAgent !== undefined)
             MauiEssentials.feature.stopAgent();
-        
-        const args = [ process.pid.toString(), ConfigurationController.getReloadHostPort().toString(), 'universal'];
-        MauiEssentials.feature.reloadAgent = spawn(MauiEssentials.reloadAgentPath, args);
+
+        const args = [
+            Interop.workspaceToolPath, 'hotreload',
+            '--host-pid', process.pid.toString(),
+            '--port', ConfigurationController.getReloadHostPort().toString(),
+            '--mode', 'universal'
+        ];
+        MauiEssentials.feature.reloadAgent = spawn('dotnet', args);
         vscode.commands.executeCommand('setContext', MauiEssentials.hotReloadEnabledKey, true);
     }
     private stopAgent() {
         if (MauiEssentials.feature.reloadAgent === undefined)
             return;
-        
+
         MauiEssentials.feature.reloadAgent.kill();
         MauiEssentials.feature.reloadAgent = undefined;
         vscode.commands.executeCommand('setContext', MauiEssentials.hotReloadEnabledKey, false);

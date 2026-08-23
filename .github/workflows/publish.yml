@@ -1,0 +1,47 @@
+name: Publish
+permissions:
+  contents: write
+
+on:
+  push:
+    tags:
+      - '*'
+
+env:
+  DOTNET_VERSION: '10.x'
+  VERSION: ${{ github.ref_name }}
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      
+      - name: Restore .NET tools
+        run: dotnet tool restore
+
+      - name: Install Node tools
+        run: npm install -g @vscode/vsce webpack-cli
+
+      - name: Build VSIX
+        run: dotnet cake --target=vsix --configuration=Release --release-version=$VERSION
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$VERSION" \
+            --title "$VERSION" \
+            --generate-notes \
+            --latest \
+            artifacts/*.vsix
+
+      # publish vsix

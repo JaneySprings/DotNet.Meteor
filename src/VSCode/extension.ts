@@ -1,33 +1,32 @@
-import { MonoDebugConfigurationProvider } from './providers/monoDebugConfigurationProvider';
+import { CoreClrConfigurationProvider } from './providers/coreClrConfigurationProvider';
 import { DotNetTaskProvider } from './providers/dotnetTaskProvider';
 import { ConfigurationController } from './controllers/configurationController';
 import { StatusBarController } from './controllers/statusbarController';
 import { Interop } from './interop/interop';
 import { StateController } from './controllers/stateController';
-import { ModulesView } from './features/modulesView';
 import { MauiEssentials } from './features/mauiEssentials';
-import { ExternalTypeResolver } from './features/externalTypeResolver';
 import { RemoteHostProvider } from './features/removeHostProvider';
 import * as res from './resources/constants';
 import * as vscode from 'vscode';
 
 
 export function activate(context: vscode.ExtensionContext) {
-	Interop.initialize(context.extensionPath);
-
-	if (vscode.workspace.workspaceFolders === undefined) 
+	if (!Interop.initialize(context.extensionPath)) {
+		vscode.window.showErrorMessage(res.messageInvalidDotnetSdk, { modal: true });
 		return undefined;
-	
+	}
+
+	if (vscode.workspace.workspaceFolders === undefined)
+		return undefined;
+
 	ConfigurationController.activate(context);
 	StateController.activate(context);
 	StatusBarController.activate(context);
 
-	ModulesView.feature.activate(context);
 	MauiEssentials.feature.activate(context);
-	ExternalTypeResolver.feature.activate(context);
 	RemoteHostProvider.feature.activate(context);
 
-	context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider(res.debuggerMeteorId, new MonoDebugConfigurationProvider()));
+	context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider(res.debuggerMeteorId, new CoreClrConfigurationProvider()));
 	context.subscriptions.push(vscode.tasks.registerTaskProvider(res.taskDefinitionId, new DotNetTaskProvider()));
 
 	return exports;

@@ -1,0 +1,23 @@
+<Project>
+    <Target Name="_CopyRemoteCoreclrTargetLibrary" 
+            BeforeTargets="_ComputePublishLocation"
+            Condition="'$(RemoteCoreclrTargetDir)' != ''">
+
+        <PropertyGroup>
+            <_RemoteCoreclrTarget>$(RemoteCoreclrTargetDir)\$(_TargetFrameworkPlatform)\$(RuntimeIdentifier)\libvsdbgremotecoreclrtarget.dylib</_RemoteCoreclrTarget>
+        </PropertyGroup>
+    
+        <ItemGroup>
+            <ResolvedFileToPublish Include="$(_RemoteCoreclrTarget)" RelativePath="libvsdbgremotecoreclrtarget.dylib" PublishFolderType="DynamicLibrary" Kind="Dynamic" />
+        </ItemGroup>
+    </Target>
+
+    <!-- <Target Name="_CopyRemoteCoreclrTargetLibrary" 
+            BeforeTargets="?"
+            Condition="'$(RemoteCoreclrTargetDir)' != ''">
+
+        <ItemGroup>
+            <AndroidNativeLibrary Include="$(RemoteCoreclrTargetDir)\android\**\*.so" />
+        </ItemGroup>
+    </Target> -->
+</Project>

@@ -7,35 +7,44 @@ import * as path from 'path';
 
 
 export class Interop {
-    private static workspaceToolPath: string;
+    public static workspaceToolPath: string;
+    public static customTargetsPath: string;
 
-    public static initialize(extensionPath : string) {
-        const executableExtension = ConfigurationController.onWindows ? '.exe' : '';
-        Interop.workspaceToolPath = path.join(extensionPath, "extension", "bin", "Workspace", "DotNet.Meteor.Workspace" + executableExtension);
+    public static initialize(extensionPath: string): boolean {
+        Interop.workspaceToolPath = path.join(extensionPath, "extension", "bin", "Workspace", "meteor.dll");
+        Interop.customTargetsPath = path.join(extensionPath, "extension", "bin", "Workspace", "CopyRemoteCoreclrTargetLibrary.targets");
+
+        if (Interop.getMeteorVersion() === undefined)
+            return false;
+
         Interop.init();
+        return true;
     }
 
     private static init() {
         // This call is hanging because the child processes is not exiting
-        ProcessRunner.runAsync<boolean>(new ProcessArgumentBuilder(Interop.workspaceToolPath)
+        ProcessRunner.runAsync<boolean>(new ProcessArgumentBuilder("dotnet")
+            .append(Interop.workspaceToolPath)
             .append("--initialize"));
     }
 
     public static async getDevices(): Promise<Device[]> {
-        return await ProcessRunner.runAsync<Device[]>(new ProcessArgumentBuilder(Interop.workspaceToolPath)
+        return await ProcessRunner.runAsync<Device[]>(new ProcessArgumentBuilder("dotnet")
+            .append(Interop.workspaceToolPath)
             .append("--all-devices"));
     }
-    public static async getProjects(folders: string[]): Promise<Project[]> {
-        return await ProcessRunner.runAsync<Project[]>(new ProcessArgumentBuilder(Interop.workspaceToolPath)
-            .append("--analyze-workspace")
-            .append(...folders));
+    public static getMeteorVersion(): string | undefined {
+        return ProcessRunner.runSync(new ProcessArgumentBuilder("dotnet")
+            .append(Interop.workspaceToolPath)
+            .append("--version"));
     }
     public static getAndroidSdk(): string | undefined {
-        return ProcessRunner.runSync(new ProcessArgumentBuilder(Interop.workspaceToolPath)
+        return ProcessRunner.runSync(new ProcessArgumentBuilder("dotnet")
+            .append(Interop.workspaceToolPath)
             .append("--android-sdk-path"));
     }
-    public static getPropertyValue(propertyName: string, project: Project, configuration: string, device: Device) : string | undefined {
-        const targetFramework = ConfigurationController.getTargetFramework();
+    public static getPropertyValue(propertyName: string, project: Project, configuration: string, device: Device): string | undefined {
+        const targetFramework = ConfigurationController.targetFramework;
         const runtimeIdentifier = device?.runtime_id;
 
         return ProcessRunner.runSync(new ProcessArgumentBuilder("dotnet")

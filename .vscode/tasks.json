@@ -3,8 +3,8 @@
     "tasks": [
         {
             "label": "tsc: watch",
-            "command": "tsc",
             "type": "shell",
+            "command": "tsc",
             "args": [
                 "-w",
                 "-p",
@@ -14,21 +14,6 @@
             "problemMatcher": [
                 "$tsc-watch"
             ]
-        },
-        {
-            "label": "vsix",
-            "command": "dotnet",
-            "type": "process",
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "args": [
-                "cake",
-                "--target=vsix",
-                "--configuration=release",
-                "--release-version=7.0.0"
-            ],
-            "problemMatcher": []
         }
     ]
 }

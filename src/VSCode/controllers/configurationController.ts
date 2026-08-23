@@ -1,5 +1,5 @@
-import { Interop } from '../interop/interop';
 import { StatusBarController } from "./statusbarController";
+import { Interop } from '../interop/interop';
 import { Project } from '../models/project';
 import { Device } from '../models/device';
 import * as res from '../resources/constants';
@@ -8,22 +8,16 @@ import * as path from 'path';
 
 export class ConfigurationController {
     public static androidSdkDirectory: string | undefined;
-    public static noDebug: boolean | undefined;
-    public static profiler: string | undefined;
     public static project: Project | undefined;
     public static device: Device | undefined;
     public static configuration: string | undefined;
+    public static targetFramework: string | undefined;
 
     public static onWindows: boolean = process.platform === 'win32';
-    public static onLinux: boolean = process.platform === 'linux';
     public static onMac: boolean = process.platform === 'darwin';
 
     public static activate(context: vscode.ExtensionContext) {
         ConfigurationController.androidSdkDirectory = Interop.getAndroidSdk();
-
-        context.subscriptions.push(vscode.commands.registerCommand(res.commandIdActiveTargetFramework, () => ConfigurationController.getTargetFramework()));
-        context.subscriptions.push(vscode.commands.registerCommand(res.commandIdActiveConfiguration, () => ConfigurationController.configuration));
-        context.subscriptions.push(vscode.commands.registerCommand(res.commandIdActiveProjectPath, () => ConfigurationController.project?.path));
         context.subscriptions.push(vscode.commands.registerCommand(res.commandIdActiveDeviceName, () => ConfigurationController.device?.name));
         context.subscriptions.push(vscode.commands.registerCommand(res.commandIdActiveDeviceSerial, () => ConfigurationController.device?.serial));
     }
@@ -42,14 +36,10 @@ export class ConfigurationController {
             vscode.window.showErrorMessage(res.messageNoDeviceFound, { modal: true });
             return false;
         }
-        if (!ConfigurationController.getTargetFramework()) {
+        if (!ConfigurationController.targetFramework) {
             vscode.window.showErrorMessage(res.messageNoFrameworkFound, { modal: true });
             return false;
         }
-        if (!ConfigurationController.noDebug && ConfigurationController.profiler) {
-			vscode.window.showErrorMessage(res.messageDebugWithProfilerNotSupported, { modal: true });
-			return false;
-		}
         if (!StatusBarController.devices.some(it => it.name === ConfigurationController.device?.name)) {
             vscode.window.showErrorMessage(res.messageDeviceNotExists, { modal: true });
             return false;
@@ -60,103 +50,48 @@ export class ConfigurationController {
     public static isActive(): boolean {
         return ConfigurationController.project !== undefined && ConfigurationController.device !== undefined;
     }
-    public static isVsdbgRequired(): boolean {
-        const framework = ConfigurationController.getTargetFramework();
-        if (framework === undefined)
-            return true;
-
-        return !framework.includes('-android') && !framework.includes('-ios') && !framework.includes('-maccatalyst');
-    }
 
     public static getDebuggingPort(): number {
         if (ConfigurationController.isAndroid())
-            return ConfigurationController.getSetting(res.configIdMonoSdbDebuggerPortAndroid, res.configDefaultMonoSdbDebuggerPortAndroid);
+            return ConfigurationController.getSetting(res.configIdAndroidPort, 10000);
 
         if (ConfigurationController.isAppleMobile() && !ConfigurationController.device?.is_emulator)
             return ConfigurationController.onMac
-                ? ConfigurationController.getSetting(res.configIdMonoSdbDebuggerPortApple, res.configDefaultMonoSdbDebuggerPortApple) 
+                ? ConfigurationController.getSetting(res.configIdApplePort, 55551)
                 : 10000; /* We can't specify the port on Windows or Linux, so we use the default one */
 
         return 0;
     }
     public static getReloadHostPort(): number {
-        return ConfigurationController.getSetting<number>(res.configIdHotReloadHostPort, res.configDefaultHotReloadHostPort);
-    }
-    public static getProfilerPort(): number {
-        return ConfigurationController.getSetting<number>(res.configIdProfilerHostPort, res.configDefaultProfilerHostPort);
+        return ConfigurationController.getSetting<number>(res.configIdHotReloadHostPort, 9988);
     }
     public static getUninstallAppOption(): boolean {
         return ConfigurationController.getSetting<boolean>(res.configIdUninstallApplicationBeforeInstalling, true);
     }
-    public static getTargetFramework(): string | undefined {
-        const framework = ConfigurationController.project?.frameworks.find(it => it.includes(ConfigurationController.device?.platform ?? 'undefined'));
-        if (framework === undefined && (ConfigurationController.isWindows() || ConfigurationController.isMacCatalyst()))
-            return ConfigurationController.project?.frameworks.find(it => !it.includes('-'));
+    // public static getTargetFramework(): string | undefined {
+    //     const framework = ConfigurationController.project?.frameworks.find(it => it.includes(ConfigurationController.device?.platform ?? 'undefined'));
+    //     if (framework === undefined && (ConfigurationController.isWindows() || ConfigurationController.isMacCatalyst()))
+    //         return ConfigurationController.project?.frameworks.find(it => !it.includes('-'));
 
-        return framework;
-    }
-    public static getDebuggerOptions(): any {
-        return {
-            evaluationOptions: {
-                evaluationTimeout: ConfigurationController.getSettingOrDefault<number>(res.configIdDebuggerOptionsEvaluationTimeout),
-                memberEvaluationTimeout: ConfigurationController.getSettingOrDefault<number>(res.configIdDebuggerOptionsMemberEvaluationTimeout),
-                allowTargetInvoke: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsAllowTargetInvoke),
-                allowMethodEvaluation: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsAllowMethodEvaluation),
-                allowToStringCalls: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsAllowToStringCalls),
-                flattenHierarchy: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsFlattenHierarchy),
-                groupPrivateMembers: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsGroupPrivateMembers),
-                groupStaticMembers: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsGroupStaticMembers),
-                useExternalTypeResolver: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsUseExternalTypeResolver),
-                integerDisplayFormat: ConfigurationController.getSettingOrDefault<string>(res.configIdDebuggerOptionsIntegerDisplayFormat),
-                currentExceptionTag: ConfigurationController.getSettingOrDefault<string>(res.configIdDebuggerOptionsCurrentExceptionTag),
-                ellipsizeStrings: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsEllipsizeStrings),
-                ellipsizedLength: ConfigurationController.getSettingOrDefault<number>(res.configIdDebuggerOptionsEllipsizedLength),
-                stackFrameFormat: {
-                    line: false, // VSCode already shows the line number
-                    module: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsStackFrameFormatModule),
-                    parameterTypes: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsStackFrameFormatParameterTypes),
-                    parameterValues: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsStackFrameFormatParameterValues),
-                    parameterNames: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsStackFrameFormatParameterNames),
-                    language: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsStackFrameFormatLanguage),
-                },
-            },
-            stepOverPropertiesAndOperators: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsStepOverPropertiesAndOperators),
-            projectAssembliesOnly: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsProjectAssembliesOnly),
-            automaticSourceLinkDownload: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsAutomaticSourcelinkDownload),
-            symbolSearchPaths: ConfigurationController.getSettingOrDefault<string[]>(res.configIdDebuggerOptionsSymbolSearchPaths),
-            sourceCodeMappings: ConfigurationController.getSettingOrDefault<any>(res.configIdDebuggerOptionsSourceCodeMappings),
-            searchMicrosoftSymbolServer: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsSearchMicrosoftSymbolServer),
-            skipNativeTransitions: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsSkipNativeTransitions),
-        };
-    }
-    public static getVsdbgOptions(config: vscode.DebugConfiguration): vscode.DebugConfiguration {
-        config.justMyCode = false; //ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsProjectAssembliesOnly);
-        config.enableStepFiltering = ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsStepOverPropertiesAndOperators);
-        config.symbolOptions = {
-            searchPaths: ConfigurationController.getSettingOrDefault<string[]>(res.configIdDebuggerOptionsSymbolSearchPaths),
-            searchMicrosoftSymbolServer: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsSearchMicrosoftSymbolServer),
-        };
-        config.sourceLinkOptions = {
-            "*": { enabled: ConfigurationController.getSettingOrDefault<boolean>(res.configIdDebuggerOptionsAutomaticSourcelinkDownload) }
-        }
-        return config;
-    }
+    //     return framework;
+    // }
+
     public static getSetting<TResult>(id: string, fallback: TResult): TResult {
         return vscode.workspace.getConfiguration(res.configId).get(id) ?? fallback;
     }
     public static getSettingOrDefault<TResult>(id: string): TResult | undefined {
         return vscode.workspace.getConfiguration(res.configId).get(id);
     }
+
     public static getProgramPath(project: Project, configuration: string, device: Device): string | undefined {
         const targetPath = Interop.getPropertyValue('TargetPath', project, configuration, device);
         if (targetPath === undefined)
             return undefined;
 
-        if (ConfigurationController.isVsdbgRequired()) {
-            const execExtension = process.platform === 'win32' ? '.exe' : '';
+        if (ConfigurationController.isWindows()) {
             const targetDirectory = path.dirname(targetPath);
             const targetFile = path.basename(targetPath, '.dll');
-            return path.join(targetDirectory, targetFile + execExtension);
+            return path.join(targetDirectory, targetFile + '.exe');
         }
         if (ConfigurationController.isAndroid()) {
             const outDir = path.dirname(targetPath);
@@ -174,11 +109,18 @@ export class ConfigurationController {
 
         return targetPath;
     }
-    public static getAssetsPath(project: Project, configuration: string, device: Device): string | undefined {
-        if (!ConfigurationController.isAndroid())
-            return undefined;
-
-        const assembliesDir = Interop.getPropertyValue('MonoAndroidIntermediateAssemblyDir', project, configuration, device);
-        return assembliesDir;
+    public static getAssetsPath(program: string, project: Project, configuration: string, device: Device): string | undefined {
+        if (ConfigurationController.isAndroid()) {
+            const assembliesDir = Interop.getPropertyValue('MonoAndroidIntermediateAssemblyDir', project, configuration, device);
+            return assembliesDir;
+        }
+        if (ConfigurationController.isMacCatalyst()) {
+            const assembliesDir = path.join(program, "Contents", "MonoBundle");
+            return assembliesDir;
+        }
+        if (ConfigurationController.isAppleMobile()) {
+            return program;
+        }
+        return path.dirname(program);
     }
 } 
