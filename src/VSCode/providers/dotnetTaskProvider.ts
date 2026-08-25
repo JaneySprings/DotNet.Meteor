@@ -31,10 +31,10 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
 
         if (ConfigurationController.isAndroid()) {
             // builder.append('-t:Run')
+            // builder.append(`-p:AndroidSdbTargetPort=${ConfigurationController.getDebuggingPort()}`);
+            // builder.append(`-p:AndroidSdbHostPort=${ConfigurationController.getDebuggingPort()}`);
             builder.conditional(`-p:AdbTarget=-s%20${ConfigurationController.device?.serial}`, () => ConfigurationController.device?.serial);
             builder.append('-p:AndroidAttachDebugger=true');
-            builder.append(`-p:AndroidSdbTargetPort=${ConfigurationController.getDebuggingPort()}`);
-            builder.append(`-p:AndroidSdbHostPort=${ConfigurationController.getDebuggingPort()}`);
             builder.append(`-p:AndroidSdkDirectory=${ConfigurationController.androidSdkDirectory}`);
         }
         if (ConfigurationController.isAppleMobile()) {

@@ -14,12 +14,5 @@
 
     <ItemGroup Condition="'$(RemoteCoreclrTargetDir)' != '' AND '$(AndroidAttachDebugger)' == 'true'">
         <AndroidNativeLibrary Include="$(RemoteCoreclrTargetDir)\android\**\*.so" />
-
-        <RuntimeEnvironmentVariable Include="CORECLR_ENABLE_PROFILING" Value="1" />
-        <RuntimeEnvironmentVariable Include="CORECLR_PROFILER" Value="{9DC623E8-C88F-4FD5-AD99-77E67E1D9631}" />
-        <RuntimeEnvironmentVariable Include="CORECLR_PROFILER_PATH" Value="libvsdbgremotecoreclrtarget.so" />
-        <RuntimeEnvironmentVariable Include="CORECLR_REMOTE_DEBUGGER_IP" Value="127.0.0.1" />
-        <RuntimeEnvironmentVariable Include="CORECLR_REMOTE_DEBUGGER_PORT" Value="$(AndroidSdbTargetPort)" />
-        <RuntimeEnvironmentVariable Include="CORECLR_REMOTE_DEBUGGER_ISSERVER" Value="1" />
     </ItemGroup>
 </Project>
