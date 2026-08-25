@@ -25,20 +25,21 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
         if (remoteCoreclrTarget !== undefined) {
             builder.append(`-p:CustomAfterMicrosoftCommonTargets="${Interop.customTargetsPath}"`);
             builder.append(`-p:RemoteCoreclrTargetDir=${remoteCoreclrTarget}`);
-            builder.append('-p:UseMonoRuntime=false')
+            builder.append('-p:UseMonoRuntime=false');
+            builder.append('-p:EnableDiagnostics=true');
         }
 
         if (ConfigurationController.isAndroid()) {
-            builder.append(`-p:AndroidSdkDirectory=${ConfigurationController.androidSdkDirectory}`);
-            // TODO: https://github.com/dotnet/android/issues/9567
+            // builder.append('-t:Run')
             builder.conditional(`-p:AdbTarget=-s%20${ConfigurationController.device?.serial}`, () => ConfigurationController.device?.serial);
+            builder.append('-p:AndroidAttachDebugger=true');
+            builder.append(`-p:AndroidSdbTargetPort=${ConfigurationController.getDebuggingPort()}`);
+            builder.append(`-p:AndroidSdbHostPort=${ConfigurationController.getDebuggingPort()}`);
+            builder.append(`-p:AndroidSdkDirectory=${ConfigurationController.androidSdkDirectory}`);
         }
         if (ConfigurationController.isAppleMobile()) {
-            builder.append('-p:EnableDiagnostics=true');
-            builder.conditional('-p:BuildIpa=true', () => !ConfigurationController.onMac);
         }
         if (ConfigurationController.isMacCatalyst()) {
-            builder.append('-p:EnableDiagnostics=True');
         }
         if (ConfigurationController.isWindows()) {
             builder.append('-p:WindowsPackageType=None');

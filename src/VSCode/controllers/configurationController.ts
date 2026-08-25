@@ -13,9 +13,6 @@ export class ConfigurationController {
     public static configuration: string | undefined;
     public static targetFramework: string | undefined;
 
-    public static onWindows: boolean = process.platform === 'win32';
-    public static onMac: boolean = process.platform === 'darwin';
-
     public static activate(context: vscode.ExtensionContext) {
         ConfigurationController.androidSdkDirectory = Interop.getAndroidSdk();
         context.subscriptions.push(vscode.commands.registerCommand(res.commandIdActiveDeviceName, () => ConfigurationController.device?.name));
@@ -54,12 +51,8 @@ export class ConfigurationController {
     public static getDebuggingPort(): number {
         if (ConfigurationController.isAndroid())
             return ConfigurationController.getSetting(res.configIdAndroidPort, 10000);
-
         if (ConfigurationController.isAppleMobile() && !ConfigurationController.device?.is_emulator)
-            return ConfigurationController.onMac
-                ? ConfigurationController.getSetting(res.configIdApplePort, 55551)
-                : 10000; /* We can't specify the port on Windows or Linux, so we use the default one */
-
+            return ConfigurationController.getSetting(res.configIdApplePort, 55551)
         return 0;
     }
     public static getReloadHostPort(): number {
@@ -102,9 +95,8 @@ export class ConfigurationController {
         if (ConfigurationController.isAppleMobile() || ConfigurationController.isMacCatalyst()) {
             const outDir = path.dirname(targetPath);
             const bundleName = Interop.getPropertyValue('_AppBundleName', project, configuration, device);
-            const bundleExt = ConfigurationController.onMac ? '.app' : '.ipa';
             if (bundleName !== undefined)
-                return path.join(outDir, bundleName + bundleExt);
+                return path.join(outDir, bundleName + '.app');
         }
 
         return targetPath;
