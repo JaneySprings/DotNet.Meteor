@@ -1,5 +1,3 @@
-using DotNet.Debugging.Common.Apple;
-
 namespace DotNet.Meteor.Workspace.Devices;
 
 public static class DeviceProvider {
@@ -32,9 +30,9 @@ public static class DeviceProvider {
 
                 devices.AddRange(AppleDeviceTool.VirtualDevices().OrderBy(x => !x.IsRunning).ThenBy(x => x.Name));
                 debugHandler?.Invoke("Apple virtual devices added.");
-            } else if (AppleSdkLocator.IsAppleDriverRunning()) {
-                devices.AddRange(IDeviceTool.Info());
-                debugHandler?.Invoke("iOS device added.");
+                // } else if (AppleSdkLocator.IsAppleDriverRunning()) {
+                //     devices.AddRange(IDeviceTool.Info());
+                //     debugHandler?.Invoke("iOS device added.");
             }
         } catch (Exception e) { errorHandler?.Invoke(e); }
 

@@ -28,14 +28,11 @@ public static class AppleDeviceTool {
             if (tokens.Length > 1)
                 osVersion = $"{tokens[0]} {string.Join('.', tokens.Skip(1))}";
 
-            devices.Add(new DeviceData {
+            devices.Add(new DeviceData(extractor.Extract("name") ?? "Unknown", Categories.iOSSimulator, Platforms.iOS) {
                 IsEmulator = true,
                 IsMobile = true,
                 IsRunning = extractor.Extract("state", "integer")?.Equals("3") == true,
-                Name = extractor.Extract("name") ?? "Unknown",
                 RuntimeId = runtimeId,
-                Category = Categories.iOSSimulator,
-                Platform = Platforms.iOS,
                 OSVersion = osVersion,
                 Serial = extractor.Extract("UDID") ?? string.Empty
             });
@@ -50,16 +47,13 @@ public static class AppleDeviceTool {
     public static List<DeviceData> MacintoshDevices() {
         var devices = new List<DeviceData>();
         var tokens = Environment.OSVersion.VersionString.Split(' ');
-        devices.Add(new DeviceData {
+        devices.Add(new DeviceData(Environment.MachineName, Categories.MacCatalyst, Platforms.MacCatalyst) {
             IsEmulator = false,
             IsRunning = true,
             IsMobile = false,
             // Xamarin shows 'missing rid' error for maccatalyst-arm64
             // RuntimeId = RuntimeInfo.IsAarch64 ? Runtimes.MacArm64 : Runtimes.MacX64,
             OSVersion = $"MacOS {tokens.Last()}",
-            Category = Categories.MacCatalyst,
-            Platform = Platforms.MacCatalyst,
-            Name = Environment.MachineName,
         });
 
         return devices;

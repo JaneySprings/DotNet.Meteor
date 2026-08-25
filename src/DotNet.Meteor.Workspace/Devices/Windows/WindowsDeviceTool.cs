@@ -2,16 +2,11 @@ namespace DotNet.Meteor.Workspace.Devices;
 
 public static class WindowsDeviceTool {
     public static DeviceData WindowsDevice() {
-        string version = Environment.OSVersion.VersionString;
-        string osVersion = version.Split(' ').Last();
-        return new DeviceData {
+        return new DeviceData(Environment.MachineName, Categories.Windows, Platforms.Windows) {
             IsEmulator = false,
             IsRunning = true,
             IsMobile = false,
-            Name = Environment.MachineName,
-            OSVersion = osVersion,
-            Category = Categories.Windows,
-            Platform = Platforms.Windows
+            OSVersion = Environment.OSVersion.VersionString.Split(' ').Last(),
         };
     }
 }

@@ -5,7 +5,6 @@ import { StatusBarController } from './controllers/statusbarController';
 import { Interop } from './interop/interop';
 import { StateController } from './controllers/stateController';
 import { MauiEssentials } from './features/mauiEssentials';
-import { RemoteHostProvider } from './features/removeHostProvider';
 import * as res from './resources/constants';
 import * as vscode from 'vscode';
 
@@ -24,7 +23,6 @@ export function activate(context: vscode.ExtensionContext) {
 	StatusBarController.activate(context);
 
 	MauiEssentials.feature.activate(context);
-	RemoteHostProvider.feature.activate(context);
 
 	context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider(res.debuggerMeteorId, new CoreClrConfigurationProvider()));
 	context.subscriptions.push(vscode.tasks.registerTaskProvider(res.taskDefinitionId, new DotNetTaskProvider()));

@@ -29,14 +29,11 @@ public static class SystemProfiler {
             if (serial.Length == 24)
                 serial = serial.Insert(8, "-");
 
-            devices.Add(new DeviceData {
+            devices.Add(new DeviceData($"{device} {version}", Categories.iOSDevice, Platforms.iOS) {
                 IsEmulator = false,
                 IsRunning = true,
                 IsMobile = true,
                 RuntimeId = Runtimes.iOSArm64,
-                Name = $"{device} {version}",
-                Category = Categories.iOSDevice,
-                Platform = Platforms.iOS,
                 Serial = serial
             });
         }

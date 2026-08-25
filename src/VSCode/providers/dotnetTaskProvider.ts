@@ -1,6 +1,5 @@
 import { ProcessArgumentBuilder } from '../interop/processArgumentBuilder';
 import { ConfigurationController } from '../controllers/configurationController';
-import { RemoteHostProvider } from '../features/removeHostProvider';
 import { Interop } from '../interop/interop';
 import * as res from '../resources/constants';
 import * as vscode from 'vscode';
@@ -46,20 +45,11 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
             builder.append('-p:WinUISDKReferences=false');
         }
 
-        if (ConfigurationController.isAppleMobile() && ConfigurationController.onWindows)
-            RemoteHostProvider.feature.connect(builder);
-
         definition.args?.forEach((arg: string) => builder.override(arg));
-
-        const task = new vscode.Task(
+        return new vscode.Task(
             definition, vscode.TaskScope.Workspace,
             res.taskDefinitionDefaultTargetCapitalized, res.extensionId,
             new vscode.ShellExecution(builder.getCommand(), builder.getArguments()), `$${res.taskProblemMatcherId}`
         );
-
-        if (ConfigurationController.isAppleMobile() && ConfigurationController.onWindows)
-            task.presentationOptions = { echo: false } /* Hide pair to mac commandline arguments */;
-
-        return task;
     }
 }

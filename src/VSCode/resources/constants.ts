@@ -21,15 +21,11 @@ export const debuggerMeteorId = "dotnet-meteor.debugger";
 export const debuggerMeteorTitle = ".NET Meteor Debugger";
 
 export const messageInvalidDotnetSdk = "Failed to run the .NET SDK 10. Please make sure the .NET SDK 10 or newer is installed.";
-export const messageRemoteHostNotSupported = "Remote build is not supported on this platform.";
 export const messageDeviceNotExists = "Selected device does not exist anymore. Make sure that the chosen device is connected to your machine.";
 export const messageNoFrameworkFound = "Supported framework not found. Make sure you have selected a correct device.";
 export const messageNoProjectFound = "Selected project not found. Make sure you have selected a project in the status bar.";
 export const messageNoDeviceFound = "Incorrect selected device. Make sure you have selected a device.";
 export const messageDeviceLoading = "Fetching devices...";
-export const messageRemoteHostAddress = "Hostname or IP address";
-export const messageRemoteHostUsername = "Username";
-export const messageRemoteHostPassword = "Password";
 export const messageMissingCoreclrHost = "The 'dotnetMeteor.debuggerOptions.remoteCoreclrHost' setting is not configured. Please set it in VS Code settings and try again.";
 export const messageMissingCoreclrTarget = "The 'dotnetMeteor.debuggerOptions.remoteCoreclrTarget' setting is not configured. Please set it in VS Code settings and try again.";
 

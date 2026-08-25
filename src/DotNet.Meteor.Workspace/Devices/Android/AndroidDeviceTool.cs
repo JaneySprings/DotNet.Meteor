@@ -19,11 +19,8 @@ public static class AndroidDeviceTool {
             foreach (var file in Directory.GetFiles(avdHome, "*.ini")) {
                 var ini = new IniFile(file);
                 var name = Path.GetFileNameWithoutExtension(file);
-                avds.Add(new DeviceData {
-                    Name = name,
-                    Serial = runningAvds.TryGetValue(name, out string? value) ? value : string.Empty,
-                    Category = Categories.AndroidEmulator,
-                    Platform = Platforms.Android,
+                avds.Add(new DeviceData(name, Categories.AndroidEmulator, Platforms.Android) {
+                    Serial = runningAvds.TryGetValue(name, out string? value) ? value : null,
                     OSVersion = ini.GetField("target") ?? "Unknown",
                     IsRunning = runningAvds.ContainsKey(name),
                     IsEmulator = true,
@@ -36,11 +33,8 @@ public static class AndroidDeviceTool {
 
         // Add all running AVDs that aren't in the AVD folder
         foreach (var avd in runningAvds) {
-            avds.Add(new DeviceData {
-                Name = avd.Key,
+            avds.Add(new DeviceData(avd.Key, Categories.AndroidEmulator, Platforms.Android) {
                 Serial = avd.Value,
-                Category = Categories.AndroidEmulator,
-                Platform = Platforms.Android,
                 OSVersion = $"android-{AndroidDebugBridge.Shell(avd.Value, "getprop", "ro.build.version.sdk")}",
                 IsRunning = true,
                 IsEmulator = true,
@@ -58,11 +52,8 @@ public static class AndroidDeviceTool {
             if (serial.StartsWith("emulator-"))
                 continue;
 
-            devices.Add(new DeviceData {
-                Name = AndroidDebugBridge.Shell(serial, "getprop", "ro.product.model"),
+            devices.Add(new DeviceData(AndroidDebugBridge.Shell(serial, "getprop", "ro.product.model"), Categories.AndroidDevice, Platforms.Android) {
                 OSVersion = $"android-{AndroidDebugBridge.Shell(serial, "getprop", "ro.build.version.sdk")}",
-                Platform = Platforms.Android,
-                Category = Categories.AndroidDevice,
                 IsEmulator = false,
                 IsRunning = true,
                 IsMobile = true,

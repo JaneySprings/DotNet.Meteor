@@ -112,7 +112,9 @@ export class ConfigurationController {
     public static getAssetsPath(program: string, project: Project, configuration: string, device: Device): string | undefined {
         if (ConfigurationController.isAndroid()) {
             const assembliesDir = Interop.getPropertyValue('MonoAndroidIntermediateAssemblyDir', project, configuration, device);
-            return assembliesDir;
+            if (assembliesDir === undefined || path.isAbsolute(assembliesDir))
+                return assembliesDir;
+            return path.join(path.dirname(project.path), assembliesDir);
         }
         if (ConfigurationController.isMacCatalyst()) {
             const assembliesDir = path.join(program, "Contents", "MonoBundle");
