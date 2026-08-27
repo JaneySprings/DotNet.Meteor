@@ -54,7 +54,7 @@ export class CoreClrConfigurationProvider implements vscode.DebugConfigurationPr
 				port: ConfigurationController.getDebuggingPort(),
 				assetsPath: ConfigurationController.getAssetsPath(config.program, project, configuration, device),
 				uninstallApp: ConfigurationController.getUninstallAppOption(),
-				device: device.serial ?? device.name,
+				device: ConfigurationController.isAndroid() && device.is_emulator ? device.name : device.serial,
 				isDevice: !device.is_emulator,
 				tcpTunnel: [
 					ConfigurationController.getReloadHostPort()

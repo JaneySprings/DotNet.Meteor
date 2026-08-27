@@ -15,21 +15,15 @@ export class StatusBarController {
         const exports = await vscode.extensions.getExtension(res.dotrushExtensionId)?.activate();
         exports?.onActiveProjectChanged?.add((p: Project) => ConfigurationController.project = p);
         exports?.onActiveConfigurationChanged?.add((c: string) => ConfigurationController.configuration = c);
-        exports?.onActiveFrameworkChanged?.add((f: string) => ConfigurationController.targetFramework = f);
+        exports?.onActiveFrameworkChanged?.add((f: string) => {
+            ConfigurationController.targetFramework = f;
+            StatusBarController.performSelectDevice(undefined); // Autoselect best candidate
+        });
 
-        StatusBarController.createDeviceStatusBarItem(context);
-        StatusBarController.updateDeviceStatusBarItem();
-    }
-
-    private static createDeviceStatusBarItem(context: vscode.ExtensionContext) {
         StatusBarController.deviceStatusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 80);
         StatusBarController.deviceStatusItem.command = res.commandIdSelectActiveDevice;
         context.subscriptions.push(StatusBarController.deviceStatusItem);
         context.subscriptions.push(vscode.commands.registerCommand(res.commandIdSelectActiveDevice, StatusBarController.showQuickPickDevice));
-    }
-    private static async updateDeviceStatusBarItem(): Promise<void> {
-        if (StatusBarController.deviceStatusItem === undefined)
-            return;
 
         StatusBarController.devices = await Interop.getDevices();
         if (StatusBarController.devices.length === 0)
@@ -40,6 +34,15 @@ export class StatusBarController {
     }
 
     public static performSelectDevice(item: Device | undefined = undefined) {
+        if (StatusBarController.devices === undefined)
+            return;
+
+        if (item === undefined && ConfigurationController.targetFramework !== undefined) {
+            const compatibleDevices = StatusBarController.devices.filter(d => ConfigurationController.targetFramework?.includes(d.platform.toLocaleLowerCase()))
+            const runningDevices = compatibleDevices.filter(d => d.is_running);
+            item = runningDevices.length > 0 ? runningDevices[0] : compatibleDevices.length > 0 ? compatibleDevices[0] : undefined;
+        }
+
         ConfigurationController.device = item ?? StatusBarController.devices[0];
         if (StatusBarController.deviceStatusItem !== undefined)
             StatusBarController.deviceStatusItem.text = `${Icons.deviceKind(ConfigurationController.device)} ${ConfigurationController.device?.name}`;
