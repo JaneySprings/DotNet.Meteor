@@ -9,7 +9,7 @@ public static class AndroidDeviceTool {
         var avds = new List<DeviceData>();
         var avdHome = GetEmulatorsDirectory();
 
-        foreach (var serial in AndroidEmulator.GetDevices()) {
+        foreach (var serial in AndroidDebugBridge.GetDevices()) {
             if (!serial.StartsWith("emulator-"))
                 continue;
             runningAvds.Add(AndroidEmulator.GetEmulatorName(serial), serial);
@@ -45,7 +45,7 @@ public static class AndroidDeviceTool {
         return avds;
     }
     public static List<DeviceData> PhysicalDevices() {
-        var runningDevices = AndroidEmulator.GetDevices();
+        var runningDevices = AndroidDebugBridge.GetDevices();
         var devices = new List<DeviceData>();
 
         foreach (var serial in runningDevices) {
