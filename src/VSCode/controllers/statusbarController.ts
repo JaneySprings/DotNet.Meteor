@@ -1,6 +1,6 @@
 import { ConfigurationController } from './configurationController';
 import { StateController } from './stateController';
-import { Device, DeviceItem, SeparatorItem } from '../models/device';
+import { Device, DeviceItem } from '../models/device';
 import { Project } from '../models/project';
 import { Interop } from "../interop/interop";
 import { Icons } from '../resources/icons';
@@ -9,7 +9,7 @@ import * as vscode from 'vscode';
 
 export class StatusBarController {
     private static deviceStatusItem: vscode.StatusBarItem | undefined;
-    public static devices: Device[];
+    private static devices: Device[];
 
     public static async activate(context: vscode.ExtensionContext): Promise<void> {
         const exports = await vscode.extensions.getExtension(res.dotrushExtensionId)?.activate();
@@ -25,30 +25,34 @@ export class StatusBarController {
         context.subscriptions.push(StatusBarController.deviceStatusItem);
         context.subscriptions.push(vscode.commands.registerCommand(res.commandIdSelectActiveDevice, StatusBarController.showQuickPickDevice));
 
-        StatusBarController.devices = await Interop.getDevices();
-        if (StatusBarController.devices.length === 0)
-            return StatusBarController.deviceStatusItem.hide();
-
-        StatusBarController.performSelectDevice(StateController.getDevice());
-        StatusBarController.deviceStatusItem.show();
+        await StatusBarController.fetchAllDevices();
+        if (StatusBarController.devices.length !== 0)
+            StatusBarController.performSelectDevice(undefined);
     }
 
-    public static performSelectDevice(item: Device | undefined = undefined) {
+    private static performSelectDevice(item: Device | undefined = undefined) {
         if (StatusBarController.devices === undefined)
             return;
 
-        if (item === undefined && ConfigurationController.targetFramework !== undefined) {
-            const compatibleDevices = StatusBarController.devices.filter(d => ConfigurationController.targetFramework?.includes(d.platform.toLocaleLowerCase()))
-            const runningDevices = compatibleDevices.filter(d => d.is_running);
-            item = runningDevices.length > 0 ? runningDevices[0] : compatibleDevices.length > 0 ? compatibleDevices[0] : undefined;
+        item ??= StateController.getDevice(StatusBarController.devices, ConfigurationController.targetFramework);
+        if (item === undefined) {
+            const filteredDevices = StatusBarController.filterDevices(StatusBarController.devices);
+            if (filteredDevices.length !== 0)
+                item = filteredDevices[0];
         }
 
-        ConfigurationController.device = item ?? StatusBarController.devices[0];
-        if (StatusBarController.deviceStatusItem !== undefined)
+        ConfigurationController.device = item;
+        if (ConfigurationController.device === undefined) {
+            StatusBarController.deviceStatusItem?.hide();
+            return;
+        }
+        if (StatusBarController.deviceStatusItem !== undefined) {
             StatusBarController.deviceStatusItem.text = `${Icons.deviceKind(ConfigurationController.device)} ${ConfigurationController.device?.name}`;
-        StateController.saveDevice();
+            StatusBarController.deviceStatusItem.show();
+        }
+        StateController.saveDevice(ConfigurationController.device, ConfigurationController.targetFramework);
     }
-    public static async showQuickPickDevice() {
+    private static async showQuickPickDevice() {
         const picker = vscode.window.createQuickPick();
         picker.placeholder = res.messageDeviceLoading;
         picker.matchOnDetail = true;
@@ -62,18 +66,20 @@ export class StatusBarController {
             picker.hide();
         });
 
-        StatusBarController.devices = await Interop.getDevices();
-
-        const items: vscode.QuickPickItem[] = [];
-        for (let i of StatusBarController.devices.keys()) {
-            if (i == 0 || StatusBarController.devices[i].category !== StatusBarController.devices[i - 1].category)
-                items.push(new SeparatorItem(StatusBarController.devices[i].category));
-
-            items.push(new DeviceItem(StatusBarController.devices[i]));
-        }
-
-        picker.items = items;
-        picker.placeholder = res.commandTitleSelectActiveDevice;
+        const devices = await StatusBarController.fetchAllDevices();
+        picker.items = StatusBarController.filterDevices(devices).map(d => new DeviceItem(d));
+        picker.placeholder = `${ConfigurationController.project?.name} (${ConfigurationController.targetFramework}): ${res.commandTitleSelectActiveDevice}`
         picker.busy = false;
+    }
+
+    private static filterDevices(devices: Device[]): Device[] {
+        if (ConfigurationController.targetFramework === undefined)
+            return devices;
+
+        return devices.filter(d => ConfigurationController.targetFramework?.includes(d.platform.toLocaleLowerCase()))
+    }
+    private static async fetchAllDevices(): Promise<Device[]> {
+        StatusBarController.devices = await Interop.getDevices();
+        return StatusBarController.devices;
     }
 }

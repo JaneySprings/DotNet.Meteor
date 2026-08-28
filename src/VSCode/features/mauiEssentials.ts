@@ -25,7 +25,7 @@ export class MauiEssentials {
             if (isProgrammaticalySaving)
                 return;
             if (ConfigurationController.getSetting<boolean>(res.configIdApplyHotReloadChangesOnSave, true))
-                this.reloadDocumentChanges(ev.fileName);
+                this.sendAgentNotification(ev.fileName);
         }));
         context.subscriptions.push(vscode.commands.registerCommand(res.commandIdTriggerHotReload, async () => {
             if (vscode.window.activeTextEditor !== undefined) {
@@ -33,7 +33,7 @@ export class MauiEssentials {
                 await vscode.window.activeTextEditor.document.save();
                 isProgrammaticalySaving = false;
 
-                this.reloadDocumentChanges(vscode.window.activeTextEditor.document.fileName);
+                this.sendAgentNotification(vscode.window.activeTextEditor.document.fileName);
             }
         }));
         context.subscriptions.push(vscode.debug.onDidStartDebugSession(ev => {
@@ -95,17 +95,17 @@ export class MauiEssentials {
         MauiEssentials.feature.startServer();
     }
 
+
     private startAgent() {
         if (MauiEssentials.feature.reloadAgent !== undefined)
             MauiEssentials.feature.stopAgent();
 
-        const args = [
+        MauiEssentials.feature.reloadAgent = spawn('dotnet', [
             Interop.workspaceToolPath, 'hotreload',
             '--host-pid', process.pid.toString(),
-            '--port', ConfigurationController.getReloadHostPort().toString(),
+            '--port', ConfigurationController.getSetting<number>(res.configIdHotReloadHostPort, 9988).toString(),
             '--mode', 'universal'
-        ];
-        MauiEssentials.feature.reloadAgent = spawn('dotnet', args);
+        ]);
         vscode.commands.executeCommand('setContext', MauiEssentials.hotReloadEnabledKey, true);
     }
     private stopAgent() {
@@ -116,7 +116,7 @@ export class MauiEssentials {
         MauiEssentials.feature.reloadAgent = undefined;
         vscode.commands.executeCommand('setContext', MauiEssentials.hotReloadEnabledKey, false);
     }
-    private reloadDocumentChanges(path: string) {
+    private sendAgentNotification(path: string) {
         if (MauiEssentials.feature.reloadAgent !== undefined && path.endsWith('.xaml'))
             MauiEssentials.feature.reloadAgent.stdin?.write(`${path}\n`);
     }

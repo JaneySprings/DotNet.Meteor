@@ -1,5 +1,3 @@
-import { ConfigurationController } from './configurationController';
-import { StatusBarController } from './statusbarController';
 import { ExtensionContext } from 'vscode';
 import { Device } from '../models/device';
 
@@ -13,26 +11,26 @@ export class StateController {
         StateController.context = undefined;
     }
 
-    public static saveDevice() {
+    public static saveDevice(device: Device, framework: string | undefined) {
         if (StateController.context !== undefined)
-            StateController.context.workspaceState.update('device', StateController.getDeviceId(ConfigurationController.device));
+            StateController.context.workspaceState.update(`device_${framework}`, StateController.toDeviceId(device));
     }
-    public static getDevice(): Device | undefined {
+    public static getDevice(devices: Device[], framework: string | undefined): Device | undefined {
         if (StateController.context === undefined)
             return undefined;
 
-        const device = StateController.context.workspaceState.get<string>('device');
-        return StatusBarController.devices.find(it => StateController.getDeviceId(it) === device);
+        const deviceId = StateController.context.workspaceState.get<string>(`device_${framework}`);
+        return devices.find(d => StateController.toDeviceId(d) === deviceId);
     }
 
-    public static getGlobal<TValue>(key: string): TValue | undefined {
-        return StateController.context?.globalState.get<TValue>(key);
-    }
-    public static putGlobal(key: string, value: any) {
-        StateController.context?.globalState.update(key, value);
-    }
+    // public static getGlobal<TValue>(key: string): TValue | undefined {
+    //     return StateController.context?.globalState.get<TValue>(key);
+    // }
+    // public static putGlobal(key: string, value: any) {
+    //     StateController.context?.globalState.update(key, value);
+    // }
 
-    private static getDeviceId(device: Device | undefined): string {
+    private static toDeviceId(device: Device | undefined): string {
         return device ? `${device.name}_${device.platform}_${device.os_version}` : 'null';
     }
 }

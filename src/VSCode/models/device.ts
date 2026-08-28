@@ -24,11 +24,3 @@ export class DeviceItem implements QuickPickItem {
         this.item = device;
     }
 }
-export class SeparatorItem implements QuickPickItem {
-    kind: QuickPickItemKind = QuickPickItemKind.Separator;
-    label: string;
-
-    constructor(label: string | undefined) {
-        this.label = label ?? '';
-    }
-}

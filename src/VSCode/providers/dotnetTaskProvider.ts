@@ -7,10 +7,15 @@ import * as vscode from 'vscode';
 
 export class DotNetTaskProvider implements vscode.TaskProvider {
     resolveTask(task: vscode.Task, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Task> {
-        return ConfigurationController.isActive() ? this.getTask(task.definition) : task;
+        return this.isConfigured() ? this.getTask(task.definition) : task;
     }
     provideTasks(token: vscode.CancellationToken): vscode.ProviderResult<vscode.Task[]> {
-        return ConfigurationController.isActive() ? [this.getTask({ type: res.taskDefinitionId })] : undefined;
+        return this.isConfigured() ? [this.getTask({ type: res.taskDefinitionId })] : undefined;
+    }
+    isConfigured(): boolean {
+        return ConfigurationController.project !== undefined
+            && ConfigurationController.configuration !== undefined
+            && ConfigurationController.targetFramework !== undefined;
     }
 
     private getTask(definition: vscode.TaskDefinition): vscode.Task {

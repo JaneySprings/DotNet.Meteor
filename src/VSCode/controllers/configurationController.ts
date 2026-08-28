@@ -1,4 +1,3 @@
-import { StatusBarController } from "./statusbarController";
 import { Interop } from '../interop/interop';
 import { Project } from '../models/project';
 import { Device } from '../models/device';
@@ -24,30 +23,6 @@ export class ConfigurationController {
     public static isAndroid() { return ConfigurationController.device?.platform === 'android'; }
     public static isAppleMobile() { return ConfigurationController.device?.platform === 'ios'; }
 
-    public static isValid(): boolean {
-        if (!ConfigurationController.project?.path) {
-            vscode.window.showErrorMessage(res.messageNoProjectFound, { modal: true });
-            return false;
-        }
-        if (!ConfigurationController.device?.platform) {
-            vscode.window.showErrorMessage(res.messageNoDeviceFound, { modal: true });
-            return false;
-        }
-        if (!ConfigurationController.targetFramework) {
-            vscode.window.showErrorMessage(res.messageNoFrameworkFound, { modal: true });
-            return false;
-        }
-        if (!StatusBarController.devices.some(it => it.name === ConfigurationController.device?.name)) {
-            vscode.window.showErrorMessage(res.messageDeviceNotExists, { modal: true });
-            return false;
-        }
-
-        return true;
-    }
-    public static isActive(): boolean {
-        return ConfigurationController.project !== undefined && ConfigurationController.device !== undefined;
-    }
-
     public static getDebuggingPort(): number {
         if (ConfigurationController.isAndroid())
             return ConfigurationController.getSetting(res.configIdAndroidPort, 10000);
@@ -55,19 +30,6 @@ export class ConfigurationController {
             return ConfigurationController.getSetting(res.configIdApplePort, 55551)
         return 0;
     }
-    public static getReloadHostPort(): number {
-        return ConfigurationController.getSetting<number>(res.configIdHotReloadHostPort, 9988);
-    }
-    public static getUninstallAppOption(): boolean {
-        return ConfigurationController.getSetting<boolean>(res.configIdUninstallApplicationBeforeInstalling, true);
-    }
-    // public static getTargetFramework(): string | undefined {
-    //     const framework = ConfigurationController.project?.frameworks.find(it => it.includes(ConfigurationController.device?.platform ?? 'undefined'));
-    //     if (framework === undefined && (ConfigurationController.isWindows() || ConfigurationController.isMacCatalyst()))
-    //         return ConfigurationController.project?.frameworks.find(it => !it.includes('-'));
-
-    //     return framework;
-    // }
 
     public static getSetting<TResult>(id: string, fallback: TResult): TResult {
         return vscode.workspace.getConfiguration(res.configId).get(id) ?? fallback;

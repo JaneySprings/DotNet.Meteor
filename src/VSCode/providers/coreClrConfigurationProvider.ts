@@ -10,8 +10,18 @@ export class CoreClrConfigurationProvider implements vscode.DebugConfigurationPr
 		config.remoteCoreclrTarget = ConfigurationController.getSettingOrDefault<string>(res.configIdRemoteCoreclrTarget);
 		config.remoteCoreclrHost = ConfigurationController.getSettingOrDefault<string>(res.configIdRemoteCoreclrHost);
 
-		if (!ConfigurationController.isActive() || !ConfigurationController.isValid())
+		if (!ConfigurationController.project?.path) {
+			vscode.window.showErrorMessage(res.messageNoProjectFound, { modal: true });
 			return undefined;
+		}
+		if (!ConfigurationController.device?.platform) {
+			vscode.window.showErrorMessage(res.messageNoDeviceFound, { modal: true });
+			return undefined;
+		}
+		if (!ConfigurationController.targetFramework) {
+			vscode.window.showErrorMessage(res.messageNoFrameworkFound, { modal: true });
+			return undefined;
+		}
 		if (!config.remoteCoreclrTarget) {
 			vscode.window.showErrorMessage(res.messageMissingCoreclrTarget, { modal: true });
 			return undefined;
@@ -53,11 +63,11 @@ export class CoreClrConfigurationProvider implements vscode.DebugConfigurationPr
 				ip: "127.0.0.1",
 				port: ConfigurationController.getDebuggingPort(),
 				assetsPath: ConfigurationController.getAssetsPath(config.program, project, configuration, device),
-				uninstallApp: ConfigurationController.getUninstallAppOption(),
+				uninstallApp: ConfigurationController.getSetting(res.configIdUninstallApplication, true),
 				device: ConfigurationController.isAndroid() && device.is_emulator ? device.name : device.serial,
 				isDevice: !device.is_emulator,
 				tcpTunnel: [
-					ConfigurationController.getReloadHostPort()
+					ConfigurationController.getSetting(res.configIdHotReloadHostPort, 9988)
 				]
 			}
 		}

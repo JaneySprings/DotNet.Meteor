@@ -5,7 +5,7 @@ export const extensionDisplayName = ".NET Meteor";
 export const dotrushExtensionId = "nromanov.dotrush";
 
 export const commandIdSelectActiveDevice = "dotnet-meteor.selectActiveDevice";
-export const commandTitleSelectActiveDevice = "Select device";
+export const commandTitleSelectActiveDevice = "select device";
 export const commandIdActiveDeviceName = "dotnet-meteor.activeDeviceName";
 export const commandIdActiveDeviceSerial = "dotnet-meteor.activeDeviceSerial";
 export const commandIdTriggerHotReload = "dotnet-meteor.triggerHotReload";
@@ -32,7 +32,7 @@ export const messageMissingCoreclrTarget = "The 'dotnetMeteor.debuggerOptions.re
 export const configId = "dotnetMeteor";
 
 export const configIdHotReloadHostPort = "hotReloadHostPort";
-export const configIdUninstallApplicationBeforeInstalling = "uninstallApplicationBeforeInstalling";
+export const configIdUninstallApplication = "uninstallApplicationBeforeInstalling";
 export const configIdApplyHotReloadChangesOnSave = "applyHotReloadChangesOnSave";
 export const configIdAndroidPort = "debuggerOptions.androidPort";
 export const configIdApplePort = "debuggerOptions.applePort";
