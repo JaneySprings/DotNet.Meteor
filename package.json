@@ -32,7 +32,7 @@
     "workspaceContains:**/*.{csproj,fsproj,sln,slnf,csx}"
   ],
   "engines": {
-    "vscode": "^1.73.0"
+    "vscode": "^1.83.0"
   },
   "extensionDependencies": [
     "nromanov.dotrush"
@@ -44,13 +44,13 @@
     "package": "webpack --mode production"
   },
   "dependencies": {
-    "vscode-languageclient": "^8.1.0"
+    "vscode-languageclient": "^9.0.1"
   },
   "devDependencies": {
     "@types/node": "26.x",
-    "@types/vscode": "^1.134.0",
+    "@types/vscode": "^1.83.0",
     "ts-loader": "^9.6.2",
-    "typescript": "^7.0.2",
+    "typescript": "^5.9.2",
     "webpack": "^5.110.1",
     "webpack-cli": "^7.2.3"
   },
