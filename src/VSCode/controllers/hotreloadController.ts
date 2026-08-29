@@ -10,13 +10,9 @@ export class HotReloadController {
     private static reloadAgent: ChildProcess | undefined;
 
     public static async activate(context: vscode.ExtensionContext): Promise<void> {
-        context.subscriptions.push(vscode.workspace.onWillSaveTextDocument(ev => {
-            const extName = path.extname(ev.document.fileName);
-            if (!ev.document.isDirty || extName !== '.xaml')
-                return;
-
+        context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(ev => {
             if (ConfigurationController.getSetting<boolean>(res.configIdApplyHotReloadChangesOnSave, true))
-                HotReloadController.sendAgentNotification(ev.document.fileName);
+                HotReloadController.sendAgentNotification(ev.fileName);
         }));
         context.subscriptions.push(vscode.commands.registerCommand(res.commandIdTriggerHotReload, () => {
             if (vscode.window.activeTextEditor === undefined)
