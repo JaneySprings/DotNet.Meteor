@@ -30,7 +30,6 @@ export class ConfigurationController {
             return ConfigurationController.getSetting(res.configIdApplePort, 55551)
         return 0;
     }
-
     public static getSetting<TResult>(id: string, fallback: TResult): TResult {
         return vscode.workspace.getConfiguration(res.configId).get(id) ?? fallback;
     }
@@ -63,9 +62,9 @@ export class ConfigurationController {
 
         return targetPath;
     }
-    public static getAssetsPath(program: string, project: Project, configuration: string, device: Device): string | undefined {
+    public static getAssetsPath(program: string, project: Project, configuration: string): string | undefined {
         if (ConfigurationController.isAndroid()) {
-            const assembliesDir = Interop.getPropertyValue('MonoAndroidIntermediateAssemblyDir', project, configuration, device);
+            const assembliesDir = Interop.getPropertyValue('MonoAndroidIntermediateAssemblyDir', project, configuration, undefined);
             if (assembliesDir === undefined || path.isAbsolute(assembliesDir))
                 return assembliesDir;
             return path.join(path.dirname(project.path), assembliesDir);

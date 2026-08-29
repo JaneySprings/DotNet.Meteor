@@ -28,7 +28,7 @@ public static class AppleDeviceTool {
             if (tokens.Length > 1)
                 osVersion = $"{tokens[0]} {string.Join('.', tokens.Skip(1))}";
 
-            devices.Add(new DeviceData(extractor.Extract("name") ?? "Unknown", Categories.iOSSimulator, Platforms.iOS) {
+            devices.Add(new DeviceData(extractor.Extract("name") ?? "Unknown", Platforms.iOS) {
                 IsEmulator = true,
                 IsMobile = true,
                 IsRunning = extractor.Extract("state", "integer")?.Equals("3") == true,
@@ -47,7 +47,7 @@ public static class AppleDeviceTool {
     public static List<DeviceData> MacintoshDevices() {
         var devices = new List<DeviceData>();
         var tokens = Environment.OSVersion.VersionString.Split(' ');
-        devices.Add(new DeviceData(Environment.MachineName, Categories.MacCatalyst, Platforms.MacCatalyst) {
+        devices.Add(new DeviceData(Environment.MachineName, Platforms.MacCatalyst) {
             IsEmulator = false,
             IsRunning = true,
             IsMobile = false,

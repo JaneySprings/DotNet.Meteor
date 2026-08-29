@@ -2,7 +2,7 @@ namespace DotNet.Meteor.Workspace.Devices;
 
 public static class WindowsDeviceTool {
     public static DeviceData WindowsDevice() {
-        return new DeviceData(Environment.MachineName, Categories.Windows, Platforms.Windows) {
+        return new DeviceData(Environment.MachineName, Platforms.Windows) {
             IsEmulator = false,
             IsRunning = true,
             IsMobile = false,

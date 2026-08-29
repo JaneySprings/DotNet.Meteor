@@ -3,7 +3,6 @@ import { Icons } from "../resources/icons";
 
 export interface Device {
     name: string;
-    category: string;
     platform: string;
     serial: string | undefined;
     os_version: string | undefined;

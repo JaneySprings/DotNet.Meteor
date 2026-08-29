@@ -45,15 +45,15 @@ export class CoreClrConfigurationProvider implements vscode.DebugConfigurationPr
 		if (config.program === undefined)
 			config.program = ConfigurationController.getProgramPath(project, configuration, device);
 
-		config.justMyCode = ConfigurationController.getSettingOrDefault(res.configIdProjectAssembliesOnly);
-		config.enableStepFiltering = ConfigurationController.getSettingOrDefault(res.configIdStepOverPropertiesAndOperators);
-		config.sourceFileMap = ConfigurationController.getSettingOrDefault(res.configIdSourceCodeMappings);
+		// config.sourceFileMap = CoreClrConfigurationProvider.getSetting(res.configIdSourceCodeMappings);
+		config.justMyCode = CoreClrConfigurationProvider.getSetting(res.configIdProjectAssembliesOnly);
+		config.enableStepFiltering = CoreClrConfigurationProvider.getSetting(res.configIdStepOverPropertiesAndOperators);
 		config.symbolOptions = {
-			searchPaths: ConfigurationController.getSettingOrDefault(res.configIdSymbolSearchPaths),
-			searchMicrosoftSymbolServer: ConfigurationController.getSettingOrDefault(res.configIdSearchMicrosoftSymbolServer),
+			searchPaths: CoreClrConfigurationProvider.getSetting(res.configIdSymbolSearchPaths),
+			searchMicrosoftSymbolServer: CoreClrConfigurationProvider.getSetting(res.configIdSearchMicrosoftSymbolServer),
 		}
 		config.sourceLinkOptions = {
-			"*": { enabled: ConfigurationController.getSettingOrDefault(res.configIdAutomaticSourcelinkDownload) }
+			"*": { enabled: CoreClrConfigurationProvider.getSetting(res.configIdAutomaticSourcelinkDownload) }
 		}
 
 		if (!ConfigurationController.isWindows()) {
@@ -62,7 +62,7 @@ export class CoreClrConfigurationProvider implements vscode.DebugConfigurationPr
 				platform: device.platform,
 				ip: "127.0.0.1",
 				port: ConfigurationController.getDebuggingPort(),
-				assetsPath: ConfigurationController.getAssetsPath(config.program, project, configuration, device),
+				assetsPath: ConfigurationController.getAssetsPath(config.program, project, configuration),
 				uninstallApp: ConfigurationController.getSetting(res.configIdUninstallApplication, true),
 				device: ConfigurationController.isAndroid() && device.is_emulator ? device.name : device.serial,
 				isDevice: !device.is_emulator,
@@ -73,5 +73,9 @@ export class CoreClrConfigurationProvider implements vscode.DebugConfigurationPr
 		}
 
 		return config;
+	}
+
+	private static getSetting<TResult>(id: string): TResult | undefined {
+		return vscode.workspace.getConfiguration(res.configDotRushId).get(id);
 	}
 }

@@ -30,6 +30,7 @@ export const messageMissingCoreclrHost = "The 'dotnetMeteor.debuggerOptions.remo
 export const messageMissingCoreclrTarget = "The 'dotnetMeteor.debuggerOptions.remoteCoreclrTarget' setting is not configured. Please set it in VS Code settings and try again.";
 
 export const configId = "dotnetMeteor";
+export const configDotRushId = "dotrush";
 
 export const configIdHotReloadHostPort = "hotReloadHostPort";
 export const configIdUninstallApplication = "uninstallApplicationBeforeInstalling";
@@ -38,9 +39,10 @@ export const configIdAndroidPort = "debuggerOptions.androidPort";
 export const configIdApplePort = "debuggerOptions.applePort";
 export const configIdRemoteCoreclrTarget = "debuggerOptions.remoteCoreclrTarget";
 export const configIdRemoteCoreclrHost = "debuggerOptions.remoteCoreclrHost";
-export const configIdProjectAssembliesOnly = "debuggerOptions.projectAssembliesOnly";
-export const configIdStepOverPropertiesAndOperators = "debuggerOptions.stepOverPropertiesAndOperators";
-export const configIdSearchMicrosoftSymbolServer = "debuggerOptions.searchMicrosoftSymbolServer";
-export const configIdSourceCodeMappings = "debuggerOptions.sourceCodeMappings";
-export const configIdAutomaticSourcelinkDownload = "debuggerOptions.automaticSourcelinkDownload";
-export const configIdSymbolSearchPaths = "debuggerOptions.symbolSearchPaths";
+
+export const configIdProjectAssembliesOnly = "debugger.projectAssembliesOnly";
+export const configIdStepOverPropertiesAndOperators = "debugger.stepOverPropertiesAndOperators";
+export const configIdSymbolSearchPaths = "debugger.symbolSearchPaths";
+export const configIdSearchMicrosoftSymbolServer = "debugger.searchMicrosoftSymbolServer";
+export const configIdAutomaticSourcelinkDownload = "debugger.automaticSourcelinkDownload";
+// export const configIdSourceCodeMappings = "debuggerOptions.sourceCodeMappings";

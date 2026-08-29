@@ -9,10 +9,12 @@ import * as path from 'path';
 export class Interop {
     public static workspaceToolPath: string;
     public static customTargetsPath: string;
+    public static xamlServerPath: string;
 
     public static initialize(extensionPath: string): boolean {
         Interop.workspaceToolPath = path.join(extensionPath, "extension", "bin", "Workspace", "meteor.dll");
         Interop.customTargetsPath = path.join(extensionPath, "extension", "bin", "Workspace", "CopyRemoteCoreclrTargetLibrary.targets");
+        Interop.xamlServerPath = path.join(extensionPath, "extension", "bin", "Xaml", "DotNet.Meteor.Xaml.LanguageServer.dll");
 
         if (Interop.getMeteorVersion() === undefined)
             return false;
@@ -43,7 +45,7 @@ export class Interop {
             .append(Interop.workspaceToolPath)
             .append("--android-sdk-path"));
     }
-    public static getPropertyValue(propertyName: string, project: Project, configuration: string, device: Device): string | undefined {
+    public static getPropertyValue(propertyName: string, project: Project, configuration: string, device: Device | undefined): string | undefined {
         const targetFramework = ConfigurationController.targetFramework;
         const runtimeIdentifier = device?.runtime_id;
 

@@ -44,4 +44,10 @@ jobs:
             --latest \
             artifacts/*.vsix
 
-      # publish vsix
+      - name: Publish to VSMarketplace
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          for filename in artifacts/*.vsix; do
+            vsce publish --packagePath "$filename" -p $VSCE_PAT
+          done

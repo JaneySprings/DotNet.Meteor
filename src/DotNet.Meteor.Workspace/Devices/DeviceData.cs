@@ -4,7 +4,6 @@ namespace DotNet.Meteor.Workspace.Devices;
 
 public class DeviceData {
     [JsonPropertyName("name")] public string Name { get; set; }
-    [JsonPropertyName("category")] public string Category { get; set; }
     [JsonPropertyName("platform")] public string Platform { get; set; }
     [JsonPropertyName("serial")] public string? Serial { get; set; }
     [JsonPropertyName("runtime_id")] public string? RuntimeId { get; set; }
@@ -13,23 +12,10 @@ public class DeviceData {
     [JsonPropertyName("is_running")] public bool IsRunning { get; set; }
     [JsonPropertyName("is_mobile")] public bool IsMobile { get; set; }
 
-    public DeviceData(string name, string category, string platform) {
+    public DeviceData(string name, string platform) {
         Name = name;
-        Category = category;
         Platform = platform;
     }
-}
-
-public static class Categories {
-    public const string AndroidEmulator = "Android Emulators";
-    public const string AndroidDevice = "Android Devices";
-    public const string iOSSimulator = "iOS Simulators";
-    public const string iOSDevice = "iOS Devices";
-    public const string MacCatalyst = "Mac";
-    public const string Windows = "Windows";
-
-    public const string MacArm = "Apple Silicon";
-    public const string MacX64 = "Intel";
 }
 
 public static class Platforms {

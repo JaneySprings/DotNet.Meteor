@@ -12,7 +12,10 @@ Debugging CoreCLR apps relies on the `VsdbgRemoteCoreclrHost` and `VsdbgRemoteCo
   - `dotnetMeteor.debuggerOptions.remoteCoreclrHost`
   - `dotnetMeteor.debuggerOptions.remoteCoreclrTarget`
 
-  Debugging will not start until both settings are configured.
+
+- **Requires the `DotRush` extension** </br>
+This version requires the [DotRush](https://github.com/JaneySprings/DotRush) extension — a Roslyn-based language server that provides better integration with the project system, IntelliSense, and other C# editor features. It is listed as an extension dependency, so VSCode will install it automatically alongside .NET Meteor.
+
 
 ## Run the Application
 

@@ -28,7 +28,7 @@ public static class XCRun {
             foreach (Match deviceMatch in deviceRegex.Matches(content)) {
                 var state = deviceMatch.Groups["state"].Value;
 
-                devices.Add(new DeviceData(deviceMatch.Groups["name"].Value, Categories.iOSSimulator, Platforms.iOS) {
+                devices.Add(new DeviceData(deviceMatch.Groups["name"].Value, Platforms.iOS) {
                     IsEmulator = true,
                     IsMobile = true,
                     IsRunning = state.Contains("Booted", StringComparison.OrdinalIgnoreCase),
@@ -60,7 +60,7 @@ public static class XCRun {
             var content = match.Groups["content"].Value;
 
             foreach (Match deviceMatch in deviceRegex.Matches(content)) {
-                devices.Add(new DeviceData(deviceMatch.Groups["name"].Value, Categories.iOSDevice, Platforms.iOS) {
+                devices.Add(new DeviceData(deviceMatch.Groups["name"].Value, Platforms.iOS) {
                     IsEmulator = false,
                     IsRunning = true,
                     IsMobile = true,

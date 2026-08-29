@@ -47,12 +47,12 @@
     "vscode-languageclient": "^8.1.0"
   },
   "devDependencies": {
-    "@types/node": "16.x",
-    "@types/vscode": "^1.73.0",
-    "ts-loader": "^9.4.1",
-    "typescript": "^4.8.4",
-    "webpack": "^5.74.0",
-    "webpack-cli": "^4.10.0"
+    "@types/node": "26.x",
+    "@types/vscode": "^1.134.0",
+    "ts-loader": "^9.6.2",
+    "typescript": "^7.0.2",
+    "webpack": "^5.110.1",
+    "webpack-cli": "^7.2.3"
   },
   "main": "./extension/extension.js",
   "contributes": {
@@ -202,40 +202,6 @@
             "default": 55551,
             "minimum": 0,
             "description": "%configuration.description.applePort%"
-          },
-          "dotnetMeteor.debuggerOptions.projectAssembliesOnly": {
-            "type": "boolean",
-            "default": true,
-            "description": "%configuration.description.debuggerOptions.projectAssembliesOnly%"
-          },
-          "dotnetMeteor.debuggerOptions.stepOverPropertiesAndOperators": {
-            "type": "boolean",
-            "default": false,
-            "description": "%configuration.description.debuggerOptions.stepOverPropertiesAndOperators%"
-          },
-          "dotnetMeteor.debuggerOptions.searchMicrosoftSymbolServer": {
-            "type": "boolean",
-            "default": false,
-            "description": "%configuration.description.debuggerOptions.searchMicrosoftSymbolServer%"
-          },
-          "dotnetMeteor.debuggerOptions.automaticSourcelinkDownload": {
-            "type": "boolean",
-            "default": true,
-            "description": "%configuration.description.debuggerOptions.automaticSourcelinkDownload%"
-          },
-          "dotnetMeteor.debuggerOptions.sourceCodeMappings": {
-            "type": "object",
-            "description": "%configuration.description.debuggerOptions.sourceCodeMappings%",
-            "additionalProperties": {
-              "type": "string"
-            }
-          },
-          "dotnetMeteor.debuggerOptions.symbolSearchPaths": {
-            "type": "array",
-            "description": "%configuration.description.debuggerOptions.symbolSearchPaths%",
-            "items": {
-              "type": "string"
-            }
           }
         }
       }
