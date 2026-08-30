@@ -44,13 +44,13 @@ public class DeviceProvidingTests : TestFixture {
         // Unique
         devices.Add(new DeviceData("AndroidEmu", Platforms.Android) { Serial = "123", IsRunning = false });
         devices.Add(new DeviceData("AndroidEmu", Platforms.Android) { Serial = "123", OSVersion = "Android-44" });
-        devices.Add(new DeviceData("AndroidEmu", Platforms.Android) { Serial = "321", OSVersion = "Android-44" });
-        devices.Add(new DeviceData("AndroidEmu", Platforms.Android) { Serial = "321" });
+        devices.Add(new DeviceData("AndroidEmu", Platforms.Android) { Serial = "321", OSVersion = "Android-45" });
         // Existed
+        devices.Add(new DeviceData("AndroidEmu", Platforms.Android) { Serial = "321", OSVersion = "Android-44" });
         devices.Add(new DeviceData("AndroidEmu", Platforms.Android) { Serial = "123", IsRunning = true });
         devices.Add(new DeviceData("AndroidEmu", Platforms.Android) { Serial = "321" });
         devices.Add(new DeviceData("AndroidEmu", Platforms.Android) { Serial = "321", IsEmulator = true });
 
-        Assert.That(devices, Has.Count.EqualTo(4));
+        Assert.That(devices, Has.Count.EqualTo(3));
     }
 }

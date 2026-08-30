@@ -27,7 +27,7 @@ internal class DeviceDataEqualityComparer : IEqualityComparer<DeviceData> {
         return false;
     }
     public int GetHashCode(DeviceData obj) {
-        return HashCode.Combine(obj.Serial, obj.Name, obj.OSVersion);
+        return HashCode.Combine(obj.Name, obj.OSVersion, obj.RuntimeId);
     }
 }
 

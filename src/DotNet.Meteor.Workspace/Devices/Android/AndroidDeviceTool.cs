@@ -52,16 +52,12 @@ public static class AndroidDeviceTool {
             if (serial.StartsWith("emulator-"))
                 continue;
 
-            var roSerial = AndroidDebugBridge.Shell(serial, "getprop", "ro.serialno");
-            if (string.IsNullOrEmpty(roSerial))
-                roSerial = serial;
-
             devices.Add(new DeviceData(AndroidDebugBridge.Shell(serial, "getprop", "ro.product.model"), Platforms.Android) {
                 OSVersion = $"android-{AndroidDebugBridge.Shell(serial, "getprop", "ro.build.version.sdk")}",
                 IsEmulator = false,
                 IsRunning = true,
                 IsMobile = true,
-                Serial = roSerial
+                Serial = serial
             });
         }
 
