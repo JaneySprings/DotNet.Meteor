@@ -44,20 +44,24 @@ public static class AndroidDeviceTool {
 
         return avds;
     }
-    public static List<DeviceData> PhysicalDevices() {
+    public static HashSet<DeviceData> PhysicalDevices() {
         var runningDevices = AndroidDebugBridge.GetDevices();
-        var devices = new List<DeviceData>();
+        var devices = new HashSet<DeviceData>(DeviceDataEqualityComparer.Instance);
 
         foreach (var serial in runningDevices) {
             if (serial.StartsWith("emulator-"))
                 continue;
+
+            var roSerial = AndroidDebugBridge.Shell(serial, "getprop", "ro.serialno");
+            if (string.IsNullOrEmpty(roSerial))
+                roSerial = serial;
 
             devices.Add(new DeviceData(AndroidDebugBridge.Shell(serial, "getprop", "ro.product.model"), Platforms.Android) {
                 OSVersion = $"android-{AndroidDebugBridge.Shell(serial, "getprop", "ro.build.version.sdk")}",
                 IsEmulator = false,
                 IsRunning = true,
                 IsMobile = true,
-                Serial = serial
+                Serial = roSerial
             });
         }
 

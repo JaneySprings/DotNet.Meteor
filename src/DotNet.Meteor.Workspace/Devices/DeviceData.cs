@@ -18,6 +18,19 @@ public class DeviceData {
     }
 }
 
+internal class DeviceDataEqualityComparer : IEqualityComparer<DeviceData> {
+    public static IEqualityComparer<DeviceData> Instance { get; } = new DeviceDataEqualityComparer();
+
+    public bool Equals(DeviceData? x, DeviceData? y) {
+        if (x != null && y != null)
+            return GetHashCode(x) == GetHashCode(y);
+        return false;
+    }
+    public int GetHashCode(DeviceData obj) {
+        return HashCode.Combine(obj.Serial, obj.Name, obj.OSVersion);
+    }
+}
+
 public static class Platforms {
     public const string Android = "android";
     public const string iOS = "ios";

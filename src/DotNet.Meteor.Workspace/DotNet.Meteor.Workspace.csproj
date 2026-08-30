@@ -13,6 +13,8 @@
 		<PackageReference Include="Nlog" Version="6.1.3" />
 		<PackageReference Include="System.CommandLine" Version="2.0.9" />
 		<ProjectReference Include="../clrdbg/DotNet.Debugging.Common/DotNet.Debugging.Common.csproj" />
+
+		<InternalsVisibleTo Include="DotNet.Meteor.Tests" />
 		
 		<None Update="Resources\CopyRemoteCoreclrTargetLibrary.targets" CopyToOutputDirectory="PreserveNewest" Link="CopyRemoteCoreclrTargetLibrary.targets" />
 	</ItemGroup>
