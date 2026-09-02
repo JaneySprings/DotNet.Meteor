@@ -31,6 +31,16 @@ export class CoreClrConfigurationProvider implements vscode.DebugConfigurationPr
 			return undefined;
 		}
 
+		// Special case for net10.0-ios + mac
+		if (ConfigurationController.targetFramework === 'net10.0-ios') {
+			vscode.window.showErrorMessage(res.messageClrIosNotSupported, { modal: true });
+			return undefined;
+		}
+		if (ConfigurationController.targetFramework === 'net10.0-maccatalyst') {
+			vscode.window.showErrorMessage(res.messageClrMacNotSupported, { modal: true });
+			return undefined;
+		}
+
 		if (!config.type && !config.request && !config.name) {
 			config.preLaunchTask = `${res.extensionId}: ${res.taskDefinitionDefaultTargetCapitalized}`
 			config.name = res.debuggerMeteorTitle;

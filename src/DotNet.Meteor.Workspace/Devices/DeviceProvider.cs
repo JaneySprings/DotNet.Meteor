@@ -25,7 +25,7 @@ public static class DeviceProvider {
                 devices.AddRange(AppleDeviceTool.MacintoshDevices());
                 debugHandler?.Invoke("MacOS devices added.");
 
-                devices.AddRange(XCRun.PhysicalDevices().OrderBy(x => x.Name));
+                devices.AddRange(AppleDeviceTool.PhysicalDevices().OrderBy(x => x.Name));
                 debugHandler?.Invoke("Apple physical devices added.");
 
                 devices.AddRange(AppleDeviceTool.VirtualDevices().OrderBy(x => !x.IsRunning).ThenBy(x => x.Name));

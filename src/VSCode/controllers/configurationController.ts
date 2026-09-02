@@ -25,9 +25,9 @@ export class ConfigurationController {
 
     public static getDebuggingPort(): number {
         if (ConfigurationController.isAndroid())
-            return ConfigurationController.getSetting(res.configIdAndroidPort, 10000);
-        if (ConfigurationController.isAppleMobile() && !ConfigurationController.device?.is_emulator)
-            return ConfigurationController.getSetting(res.configIdApplePort, 55551)
+            return ConfigurationController.getSetting(res.configIdAndroidPort, 0);
+        if (ConfigurationController.isAppleMobile())
+            return ConfigurationController.getSetting(res.configIdApplePort, 0)
         return 0;
     }
     public static getSetting<TResult>(id: string, fallback: TResult): TResult {

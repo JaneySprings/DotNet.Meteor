@@ -193,14 +193,14 @@
           },
           "dotnetMeteor.debuggerOptions.androidPort": {
             "type": "integer",
-            "default": 10000,
             "minimum": 0,
+            "maximum": 65535,
             "description": "%configuration.description.androidPort%"
           },
           "dotnetMeteor.debuggerOptions.applePort": {
             "type": "integer",
-            "default": 55551,
             "minimum": 0,
+            "maximum": 65535,
             "description": "%configuration.description.applePort%"
           }
         }

@@ -74,7 +74,7 @@ export class StatusBarController {
 
     private static filterDevices(devices: Device[]): Device[] {
         if (ConfigurationController.targetFramework === undefined)
-            return devices;
+            return [];
 
         return devices.filter(d => ConfigurationController.targetFramework?.includes(d.platform.toLocaleLowerCase()))
     }
