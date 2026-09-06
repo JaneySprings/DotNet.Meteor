@@ -60,12 +60,12 @@
       {
         "command": "dotnet-meteor.selectActiveDevice",
         "category": "%extension.displayName%",
-        "title": "%command.title.selectActiveDevice%"
+        "title": "%title.selectActiveDevice%"
       },
       {
         "command": "dotnet-meteor.triggerHotReload",
         "category": "%extension.displayName%",
-        "title": "%command.title.triggerHotReload%",
+        "title": "%title.triggerHotReload%",
         "icon": "$(symbol-event)"
       }
     ],
@@ -165,17 +165,17 @@
             "type": "integer",
             "default": 9988,
             "minimum": 0,
-            "description": "%configuration.description.hotReloadHostPort%"
+            "description": "%configuration.hotReloadHostPort%"
           },
           "dotnetMeteor.uninstallApplicationBeforeInstalling": {
             "type": "boolean",
             "default": true,
-            "description": "%configuration.description.uninstallApplicationBeforeInstalling%"
+            "description": "%configuration.uninstallApplicationBeforeInstalling%"
           },
           "dotnetMeteor.applyHotReloadChangesOnSave": {
             "type": "boolean",
             "default": true,
-            "description": "%configuration.description.applyHotReloadChangesOnSave%"
+            "description": "%configuration.applyHotReloadChangesOnSave%"
           }
         }
       },
@@ -185,23 +185,23 @@
         "properties": {
           "dotnetMeteor.debuggerOptions.remoteCoreclrTarget": {
             "type": "string",
-            "description": "%configuration.description.remoteCoreclrTarget%"
+            "description": "%configuration.remoteCoreclrTarget%"
           },
           "dotnetMeteor.debuggerOptions.remoteCoreclrHost": {
             "type": "string",
-            "description": "%configuration.description.remoteCoreclrHost%"
+            "description": "%configuration.remoteCoreclrHost%"
           },
           "dotnetMeteor.debuggerOptions.androidPort": {
             "type": "integer",
             "minimum": 0,
             "maximum": 65535,
-            "description": "%configuration.description.androidPort%"
+            "description": "%configuration.androidPort%"
           },
           "dotnetMeteor.debuggerOptions.applePort": {
             "type": "integer",
             "minimum": 0,
             "maximum": 65535,
-            "description": "%configuration.description.applePort%"
+            "description": "%configuration.applePort%"
           }
         }
       }

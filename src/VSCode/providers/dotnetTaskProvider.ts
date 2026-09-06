@@ -54,8 +54,8 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
         definition.args?.forEach((arg: string) => builder.override(arg));
         return new vscode.Task(
             definition, vscode.TaskScope.Workspace,
-            res.taskDefinitionDefaultTargetCapitalized, res.extensionId,
-            new vscode.ShellExecution(builder.getCommand(), builder.getArguments()), `$${res.taskProblemMatcherId}`
+            'Build', res.extensionId,
+            new vscode.ShellExecution(builder.getCommand(), builder.getArguments())
         );
     }
 }

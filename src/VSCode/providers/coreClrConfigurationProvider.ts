@@ -42,10 +42,10 @@ export class CoreClrConfigurationProvider implements vscode.DebugConfigurationPr
 		}
 
 		if (!config.type && !config.request && !config.name) {
-			config.preLaunchTask = `${res.extensionId}: ${res.taskDefinitionDefaultTargetCapitalized}`
-			config.name = res.debuggerMeteorTitle;
 			config.type = res.debuggerMeteorId;
+			config.name = '.NET Meteor Debugger';
 			config.request = 'launch';
+			config.preLaunchTask = `${res.extensionId}: Build`
 		}
 
 		const project = ConfigurationController.project!;
@@ -55,15 +55,16 @@ export class CoreClrConfigurationProvider implements vscode.DebugConfigurationPr
 		if (config.program === undefined)
 			config.program = ConfigurationController.getProgramPath(project, configuration, device);
 
-		// config.sourceFileMap = CoreClrConfigurationProvider.getSetting(res.configIdSourceCodeMappings);
-		config.justMyCode = CoreClrConfigurationProvider.getSetting(res.configIdProjectAssembliesOnly);
-		config.enableStepFiltering = CoreClrConfigurationProvider.getSetting(res.configIdStepOverPropertiesAndOperators);
+		// config.sourceFileMap = CoreClrConfigurationProvider.getSetting('');
+		config.justMyCode = CoreClrConfigurationProvider.getSetting('debugger.projectAssembliesOnly');
+		config.enableStepFiltering = CoreClrConfigurationProvider.getSetting('debugger.stepOverPropertiesAndOperators');
 		config.symbolOptions = {
-			searchPaths: CoreClrConfigurationProvider.getSetting(res.configIdSymbolSearchPaths),
-			searchMicrosoftSymbolServer: CoreClrConfigurationProvider.getSetting(res.configIdSearchMicrosoftSymbolServer),
+			searchPaths: CoreClrConfigurationProvider.getSetting('debugger.symbolSearchPaths'),
+			searchMicrosoftSymbolServer: CoreClrConfigurationProvider.getSetting('debugger.searchMicrosoftSymbolServer'),
+			searchNuGetOrgSymbolServer: CoreClrConfigurationProvider.getSetting('debugger.searchNugetSymbolServer'),
 		}
 		config.sourceLinkOptions = {
-			"*": { enabled: CoreClrConfigurationProvider.getSetting(res.configIdAutomaticSourcelinkDownload) }
+			"*": { enabled: CoreClrConfigurationProvider.getSetting('debugger.automaticSourcelinkDownload') }
 		}
 
 		if (!ConfigurationController.isWindows()) {

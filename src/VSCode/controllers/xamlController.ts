@@ -36,7 +36,7 @@ export class XamlController {
     private static startServer() {
         const serverOptions: ServerOptions = { command: 'dotnet', args: [Interop.xamlServerPath] };
         XamlController.lanuageServerClient = new LanguageClient(res.extensionId, res.extensionId, serverOptions, {
-            diagnosticCollectionName: res.extensionDisplayName,
+            diagnosticCollectionName: '.NET Meteor',
             synchronize: {
                 configurationSection: res.extensionId,
             },

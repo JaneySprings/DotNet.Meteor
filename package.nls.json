@@ -1,20 +1,19 @@
 {
 	"extension.displayName": ".NET Meteor",
 
-	"command.title.selectActiveDevice": "Select device",
-	"command.title.triggerHotReload": "Trigger Hot Reload",
+	"title.selectActiveDevice": "Select device",
+	"title.triggerHotReload": "Trigger Hot Reload",
 
 	"task.meteor.description.args": "Sets or overrides msbuild properties.",
 
 	"debugger.meteor.title": ".NET Meteor Debugger",
 	"debugger.meteor.description": "A new configuration for launching .NET apps.",
 
-	"configuration.description.androidPort": "Android's default port of the CoreClr debugger.",
-	"configuration.description.applePort": "iOS's default port of the CoreClr debugger.",
-	"configuration.description.hotReloadHostPort": "The port of the Hot Reload server.",
-	"configuration.description.uninstallApplicationBeforeInstalling": "Uninstalls the application before installing it again.",
-	"configuration.description.applyHotReloadChangesOnSave": "Controls whether the Hot Reload server should apply changes automatically on document save.",
-
-	"configuration.description.remoteCoreclrTarget": "Path to the VsdbgRemoteCoreclrTarget folder bundled with the Microsoft .NET MAUI extension.",
-	"configuration.description.remoteCoreclrHost": "Path to the VsdbgRemoteCoreclrHost folder bundled with the Microsoft .NET MAUI extension."
+	"configuration.androidPort": "Android's default port of the CoreClr debugger.",
+	"configuration.applePort": "iOS's default port of the CoreClr debugger.",
+	"configuration.hotReloadHostPort": "The port of the Hot Reload server.",
+	"configuration.uninstallApplicationBeforeInstalling": "Uninstalls the application before installing it again.",
+	"configuration.applyHotReloadChangesOnSave": "Controls whether the Hot Reload server should apply changes automatically on document save.",
+	"configuration.remoteCoreclrTarget": "Path to the VsdbgRemoteCoreclrTarget folder bundled with the Microsoft .NET MAUI extension.",
+	"configuration.remoteCoreclrHost": "Path to the VsdbgRemoteCoreclrHost folder bundled with the Microsoft .NET MAUI extension."
 }
