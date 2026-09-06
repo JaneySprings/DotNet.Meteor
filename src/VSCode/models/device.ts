@@ -1,4 +1,4 @@
-import { QuickPickItem, QuickPickItemKind } from "vscode";
+import { QuickPickItem } from "vscode";
 import { Icons } from "../resources/icons";
 
 export interface Device {

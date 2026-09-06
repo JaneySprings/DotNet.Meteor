@@ -3,7 +3,6 @@ import { ChildProcess, spawn } from "child_process";
 import { Interop } from "../interop/interop";
 import * as res from '../resources/constants';
 import * as vscode from 'vscode';
-import * as path from 'path';
 
 export class HotReloadController {
     private static hotReloadEnabledKey: string = `${res.extensionId}.hotReloadEnabled`;
@@ -11,7 +10,7 @@ export class HotReloadController {
 
     public static async activate(context: vscode.ExtensionContext): Promise<void> {
         context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(ev => {
-            if (ConfigurationController.getSetting<boolean>(res.configIdApplyHotReloadChangesOnSave, true))
+            if (ConfigurationController.getSetting<boolean>(res.configIdApplyHotReloadChangesOnSave))
                 HotReloadController.sendAgentNotification(ev.fileName);
         }));
         context.subscriptions.push(vscode.commands.registerCommand(res.commandIdTriggerHotReload, () => {
@@ -19,7 +18,7 @@ export class HotReloadController {
                 return;
             if (vscode.window.activeTextEditor.document.isDirty) {
                 vscode.window.activeTextEditor.document.save();
-                if (ConfigurationController.getSetting<boolean>(res.configIdApplyHotReloadChangesOnSave, true))
+                if (ConfigurationController.getSetting<boolean>(res.configIdApplyHotReloadChangesOnSave))
                     return;
             }
             HotReloadController.sendAgentNotification(vscode.window.activeTextEditor.document.fileName);
@@ -41,7 +40,7 @@ export class HotReloadController {
         HotReloadController.reloadAgent = spawn('dotnet', [
             Interop.workspaceToolPath, 'hotreload',
             '--host-pid', process.pid.toString(),
-            '--port', ConfigurationController.getSetting<number>(res.configIdHotReloadHostPort, 9988).toString(),
+            '--port', ConfigurationController.getHotReloadPort().toString(),
             '--mode', 'universal'
         ]);
         vscode.commands.executeCommand('setContext', HotReloadController.hotReloadEnabledKey, true);

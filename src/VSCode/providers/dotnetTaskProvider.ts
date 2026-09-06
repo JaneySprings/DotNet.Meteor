@@ -26,7 +26,7 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
             .append(`-p:TargetFramework=${ConfigurationController.targetFramework}`)
             .conditional(`-p:RuntimeIdentifier=${ConfigurationController.device?.runtime_id}`, () => ConfigurationController.device?.runtime_id)
 
-        const remoteCoreclrTarget = ConfigurationController.getSettingOrDefault<string>(res.configIdRemoteCoreclrTarget);
+        const remoteCoreclrTarget = ConfigurationController.getSetting<string>(res.configIdRemoteCoreclrTarget);
         if (remoteCoreclrTarget !== undefined) {
             builder.append(`-p:CustomAfterMicrosoftCommonTargets="${Interop.customTargetsPath}"`);
             builder.append(`-p:RemoteCoreclrTargetDir=${remoteCoreclrTarget}`);

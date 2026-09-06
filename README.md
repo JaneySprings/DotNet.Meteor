@@ -22,10 +22,10 @@ This version requires the [DotRush](https://github.com/JaneySprings/DotRush) ext
 1. Open the project folder.
 2. Open the `Run and Debug` VSCode tab and click the `create a launch.json file`.
 3. In the opened panel, select the `.NET Meteor Debugger`.
-4. In the status bar, select a project (if your opened folder contains several projects) and a configuration (the debug is the default).
-5. In the status bar, click the device name and select a target device/emulator from the opened panel.
-6. Press `F5` to debug the application or `ctrl + F5` to launch the application without debugging.
-7. Enjoy!
+4. In the status bar, select a configuration (debug/release + target framework).
+5. Right-click your project file or folder and select `Set as Startup Project` if your workspace contains more than one project.
+6. In the status bar, click the device name and select a target device/emulator from the opened panel.
+7. Press `F5` to debug the application or `ctrl + F5` to launch the application without debugging.
 
 ![image](https://github.com/JaneySprings/DotNet.Meteor/raw/main/assets/demo_dbg.gif)
 

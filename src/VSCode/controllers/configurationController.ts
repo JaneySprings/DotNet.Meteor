@@ -25,15 +25,15 @@ export class ConfigurationController {
 
     public static getDebuggingPort(): number {
         if (ConfigurationController.isAndroid())
-            return ConfigurationController.getSetting(res.configIdAndroidPort, 0);
+            return ConfigurationController.getSetting<number>(res.configIdAndroidPort) ?? 0;
         if (ConfigurationController.isAppleMobile())
-            return ConfigurationController.getSetting(res.configIdApplePort, 0)
+            return ConfigurationController.getSetting<number>(res.configIdApplePort) ?? 0
         return 0;
     }
-    public static getSetting<TResult>(id: string, fallback: TResult): TResult {
-        return vscode.workspace.getConfiguration(res.configId).get(id) ?? fallback;
+    public static getHotReloadPort(): number {
+        return ConfigurationController.getSetting<number>(res.configIdHotReloadHostPort) ?? 9988;
     }
-    public static getSettingOrDefault<TResult>(id: string): TResult | undefined {
+    public static getSetting<TResult>(id: string): TResult | undefined {
         return vscode.workspace.getConfiguration(res.configId).get(id);
     }
 

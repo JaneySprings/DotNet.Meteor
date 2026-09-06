@@ -7,8 +7,8 @@ export class CoreClrConfigurationProvider implements vscode.DebugConfigurationPr
 		config: vscode.DebugConfiguration,
 		token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration | undefined> {
 
-		config.remoteCoreclrTarget = ConfigurationController.getSettingOrDefault<string>(res.configIdRemoteCoreclrTarget);
-		config.remoteCoreclrHost = ConfigurationController.getSettingOrDefault<string>(res.configIdRemoteCoreclrHost);
+		config.remoteCoreclrTarget = ConfigurationController.getSetting<string>(res.configIdRemoteCoreclrTarget);
+		config.remoteCoreclrHost = ConfigurationController.getSetting<string>(res.configIdRemoteCoreclrHost);
 
 		if (!ConfigurationController.project?.path) {
 			vscode.window.showErrorMessage(res.messageNoProjectFound, { modal: true });
@@ -74,11 +74,11 @@ export class CoreClrConfigurationProvider implements vscode.DebugConfigurationPr
 				ip: "127.0.0.1",
 				port: ConfigurationController.getDebuggingPort(),
 				assetsPath: ConfigurationController.getAssetsPath(config.program, project, configuration),
-				uninstallApp: ConfigurationController.getSetting(res.configIdUninstallApplication, true),
+				uninstallApp: ConfigurationController.getSetting<boolean>(res.configIdUninstallApplication),
 				device: ConfigurationController.isAndroid() && device.is_emulator ? device.name : device.serial,
 				isDevice: !device.is_emulator,
 				tcpTunnel: [
-					ConfigurationController.getSetting(res.configIdHotReloadHostPort, 9988)
+					ConfigurationController.getHotReloadPort()
 				]
 			}
 		}
