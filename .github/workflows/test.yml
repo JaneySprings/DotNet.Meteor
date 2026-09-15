@@ -1,0 +1,37 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - '*'
+  # Don't run tests on tag pushes (handled by build workflow)
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '10.x'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+          # dotnet-quality: preview
+
+      - name: Restore .NET tools
+        run: dotnet tool restore
+
+      - name: Run tests
+        run: dotnet cake --target=test --configuration=Release

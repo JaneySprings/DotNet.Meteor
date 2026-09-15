@@ -1,0 +1,5 @@
+﻿<Solution>
+  <Project Path="DotNet.Meteor.Workspace/DotNet.Meteor.Workspace.csproj" />
+  <Project Path="DotNet.Meteor.Xaml/DotNet.Meteor.Xaml.LanguageServer/DotNet.Meteor.Xaml.LanguageServer.csproj" />
+  <Project Path="DotNet.Meteor.Tests/DotNet.Meteor.Tests.csproj" />
+</Solution>

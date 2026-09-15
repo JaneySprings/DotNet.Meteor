@@ -8,25 +8,25 @@
             "args": [
                 "--extensionDevelopmentPath=${workspaceFolder}"
             ],
-            "env": {
-                // "METEOR_DEBUG_WAIT": "true"
-            },
             "outFiles": [
                 "${workspaceFolder}/extension/**/*.js"
             ],
             "preLaunchTask": "tsc: watch"
         },
         {
-            "name": ".NET Core Debugger (attach)",
+            "name": ".NET Core (attach)",
             "type": "coreclr",
             "request": "attach",
             "processId": "${command:dotrush.pickProcess}"
         },
         {
-            "name": ".NET Core Debugger (launch)",
+            "name": ".NET Core (launch)",
             "type": "coreclr",
             "request": "launch",
+            "program": "${command:dotrush.activeTargetPath}",
+            "args": [
+            ],
             "preLaunchTask": "dotrush: Build"
-        }
+        },
     ]
 }

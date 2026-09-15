@@ -1,18 +1,20 @@
 {
-    "dotrush.roslyn.workspaceProperties": [
-        "NuGetVersionRoslyn=4.5.0"
-    ],
     "dotrush.roslyn.projectOrSolutionFiles": [
-        "src\\DotNet.Meteor.sln"
+        "src\\DotNet.Meteor.slnx"
     ],
     "files.exclude": {
         "src/**/bin": true,
         "src/**/obj": true,
-        "node_modules": true,
-        "tools":true,
-        "package-lock.json": true,
+        "**/node_modules": true,
         ".config": true,
+        ".editorconfig": true,
         ".gitignore": true,
         ".gitmodules": true
     },
+    "explorer.fileNesting.expand": false,
+    "explorer.fileNesting.enabled": true,
+    "explorer.fileNesting.patterns": {
+        "package.json": "package*.json",
+    },
+    "debug.onTaskErrors": "debugAnyway"
 }

@@ -1,16 +1,21 @@
 import { ProcessArgumentBuilder } from '../interop/processArgumentBuilder';
 import { ConfigurationController } from '../controllers/configurationController';
-import { RemoteHostProvider } from '../features/removeHostProvider';
+import { Interop } from '../interop/interop';
 import * as res from '../resources/constants';
 import * as vscode from 'vscode';
 
 
 export class DotNetTaskProvider implements vscode.TaskProvider {
-    resolveTask(task: vscode.Task, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Task> { 
-        return ConfigurationController.isActive() ? this.getTask(task.definition) : task;
+    resolveTask(task: vscode.Task, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Task> {
+        return this.isConfigured() ? this.getTask(task.definition) : task;
     }
     provideTasks(token: vscode.CancellationToken): vscode.ProviderResult<vscode.Task[]> {
-        return ConfigurationController.isActive() ? [this.getTask({ type: res.taskDefinitionId })] : undefined;
+        return this.isConfigured() ? [this.getTask({ type: res.taskDefinitionId })] : undefined;
+    }
+    isConfigured(): boolean {
+        return ConfigurationController.project !== undefined
+            && ConfigurationController.configuration !== undefined
+            && ConfigurationController.targetFramework !== undefined;
     }
 
     private getTask(definition: vscode.TaskDefinition): vscode.Task {
@@ -18,44 +23,39 @@ export class DotNetTaskProvider implements vscode.TaskProvider {
             .append('build')
             .append(ConfigurationController.project!.path)
             .append(`-p:Configuration=${ConfigurationController.configuration}`)
-            .append(`-p:TargetFramework=${ConfigurationController.getTargetFramework()}`)
+            .append(`-p:TargetFramework=${ConfigurationController.targetFramework}`)
             .conditional(`-p:RuntimeIdentifier=${ConfigurationController.device?.runtime_id}`, () => ConfigurationController.device?.runtime_id)
 
+        const remoteCoreclrTarget = ConfigurationController.getSetting<string>(res.configIdRemoteCoreclrTarget);
+        if (remoteCoreclrTarget !== undefined) {
+            builder.append(`-p:CustomAfterMicrosoftCommonTargets="${Interop.customTargetsPath}"`);
+            builder.append(`-p:RemoteCoreclrTargetDir=${remoteCoreclrTarget}`);
+            builder.append('-p:UseMonoRuntime=false');
+            builder.append('-p:EnableDiagnostics=true');
+        }
+
         if (ConfigurationController.isAndroid()) {
-            builder.append(`-p:AndroidSdkDirectory=${ConfigurationController.androidSdkDirectory}`);
-            builder.conditional('-p:EmbedAssembliesIntoApk=true', () => ConfigurationController.profiler);
-            builder.conditional('-p:AndroidEnableProfiler=true', () => ConfigurationController.profiler);
-            // TODO: https://github.com/dotnet/android/issues/9567
+            // builder.append('-t:Run')
+            // builder.append(`-p:AndroidSdbTargetPort=${ConfigurationController.getDebuggingPort()}`);
+            // builder.append(`-p:AndroidSdbHostPort=${ConfigurationController.getDebuggingPort()}`);
             builder.conditional(`-p:AdbTarget=-s%20${ConfigurationController.device?.serial}`, () => ConfigurationController.device?.serial);
+            builder.append('-p:AndroidAttachDebugger=true');
+            builder.append(`-p:AndroidSdkDirectory=${ConfigurationController.androidSdkDirectory}`);
         }
         if (ConfigurationController.isAppleMobile()) {
-            // TODO: https://github.com/xamarin/xamarin-macios/issues/21530
-            builder.append('-p:MtouchDebug=true');
-            builder.conditional('-p:BuildIpa=true', () => !ConfigurationController.onMac);
         }
         if (ConfigurationController.isMacCatalyst()) {
-            builder.conditional('-p:_BundlerDebug=true', () => !ConfigurationController.profiler);
-            builder.conditional('-p:Profiling=true', () => ConfigurationController.profiler);
         }
         if (ConfigurationController.isWindows()) {
             builder.append('-p:WindowsPackageType=None');
             builder.append('-p:WinUISDKReferences=false');
         }
 
-        if (ConfigurationController.isAppleMobile() && ConfigurationController.onWindows)
-            RemoteHostProvider.feature.connect(builder);
-
         definition.args?.forEach((arg: string) => builder.override(arg));
-        
-        const task = new vscode.Task(
+        return new vscode.Task(
             definition, vscode.TaskScope.Workspace,
-            res.taskDefinitionDefaultTargetCapitalized, res.extensionId,
-            new vscode.ShellExecution(builder.getCommand(), builder.getArguments()), `$${res.taskProblemMatcherId}`
+            'Build', res.extensionId,
+            new vscode.ShellExecution(builder.getCommand(), builder.getArguments())
         );
-        
-        if (ConfigurationController.isAppleMobile() && ConfigurationController.onWindows)
-            task.presentationOptions = { echo: false } /* Hide pair to mac commandline arguments */;
-
-        return task;
     }
 }
