@@ -14,6 +14,6 @@
 	"configuration.hotReloadHostPort": "The port of the Hot Reload server.",
 	"configuration.uninstallApplicationBeforeInstalling": "Uninstalls the application before installing it again.",
 	"configuration.applyHotReloadChangesOnSave": "Controls whether the Hot Reload server should apply changes automatically on document save.",
-	"configuration.remoteCoreclrTarget": "Path to the VsdbgRemoteCoreclrTarget folder bundled with the Microsoft .NET MAUI extension.",
-	"configuration.remoteCoreclrHost": "Path to the VsdbgRemoteCoreclrHost folder bundled with the Microsoft .NET MAUI extension."
+	"configuration.remoteCoreclrTarget": "Path to the custom RemoteCoreclrTarget folder used by the application.",
+	"configuration.remoteCoreclrHost": "Path to the custom RemoteCoreclrHost folder used by the debugger."
 }

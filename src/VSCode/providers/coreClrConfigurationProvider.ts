@@ -7,9 +7,6 @@ export class CoreClrConfigurationProvider implements vscode.DebugConfigurationPr
 		config: vscode.DebugConfiguration,
 		token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration | undefined> {
 
-		config.remoteCoreclrTarget = ConfigurationController.getSetting<string>(res.configIdRemoteCoreclrTarget);
-		config.remoteCoreclrHost = ConfigurationController.getSetting<string>(res.configIdRemoteCoreclrHost);
-
 		if (!ConfigurationController.project?.path) {
 			vscode.window.showErrorMessage(res.messageNoProjectFound, { modal: true });
 			return undefined;
@@ -20,14 +17,6 @@ export class CoreClrConfigurationProvider implements vscode.DebugConfigurationPr
 		}
 		if (!ConfigurationController.targetFramework) {
 			vscode.window.showErrorMessage(res.messageNoFrameworkFound, { modal: true });
-			return undefined;
-		}
-		if (!config.remoteCoreclrTarget) {
-			vscode.window.showErrorMessage(res.messageMissingCoreclrTarget, { modal: true });
-			return undefined;
-		}
-		if (!config.remoteCoreclrHost) {
-			vscode.window.showErrorMessage(res.messageMissingCoreclrHost, { modal: true });
 			return undefined;
 		}
 
@@ -53,8 +42,12 @@ export class CoreClrConfigurationProvider implements vscode.DebugConfigurationPr
 		const configuration = ConfigurationController.configuration!;
 		const device = ConfigurationController.device!;
 
-		if (config.program === undefined)
+		if (!config.program)
 			config.program = ConfigurationController.getProgramPath(project, configuration, device);
+		if (!config.remoteCoreclrTarget)
+			config.remoteCoreclrTarget = ConfigurationController.getRemoteTargetPath();
+		if (!config.remoteCoreclrHost)
+			config.remoteCoreclrHost = ConfigurationController.getRemoteHostPath();
 
 		// config.sourceFileMap = CoreClrConfigurationProvider.getSetting('');
 		config.justMyCode = CoreClrConfigurationProvider.getSetting('debugger.projectAssembliesOnly');

@@ -39,15 +39,23 @@ Task("plugin").Does(() => DotNetPack(_Path.Combine(RootDirectory, "src", "DotNet
 }));
 
 
-Task("debugger").Does(() => DotNetPublish(_Path.Combine(RootDirectory, "src", "clrdbg", "DotNet.Debugging.Adapter", "DotNet.Debugging.Adapter.csproj"), new DotNetPublishSettings {
-	MSBuildSettings = new DotNetMSBuildSettings { 
-		ArgumentCustomization = args => args.Append("/p:SelfContained=false"),
-		AssemblyVersion = version
-	},
-	OutputDirectory = _Path.Combine(ExtensionStagingDirectory, "bin", "Debugger"),
-	Configuration = configuration,
-	// Runtime = runtime,
-}));
+Task("debugger")
+	.Does(() => DotNetPublish(_Path.Combine(RootDirectory, "src", "clrdbg", "DotNet.Debugging.Adapter", "DotNet.Debugging.Adapter.csproj"), new DotNetPublishSettings {
+		MSBuildSettings = new DotNetMSBuildSettings { 
+			ArgumentCustomization = args => args.Append("/p:SelfContained=false"),
+			AssemblyVersion = version
+		},
+		OutputDirectory = _Path.Combine(ExtensionStagingDirectory, "bin", "Debugger"),
+		Configuration = configuration,
+		// Runtime = runtime,
+	}))
+	.Does(() => {
+		var remoteDirectory = _Path.Combine(ExtensionStagingDirectory, "bin", "Remote");
+		var archive = DownloadFile("https://github.com/JaneySprings/clrdbg/releases/download/18.0.0/RemoteCoreClrLibraries.zip");
+		CleanDirectory(remoteDirectory);
+		Unzip(archive, remoteDirectory);
+		DeleteFile(archive);
+	});
 
 
 Task("test").Does(() => DotNetTest(_Path.Combine(RootDirectory, "src", "DotNet.Meteor.Tests", "DotNet.Meteor.Tests.csproj"),

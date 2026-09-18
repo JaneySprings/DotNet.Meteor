@@ -7,12 +7,6 @@
 - **.NET 10+ (CoreCLR) only** </br>
 Starting with version 10, the extension targets **.NET MAUI on .NET 10+** running on the CoreCLR runtime. If your project still uses the Mono runtime, install **.NET Meteor 6.x**, the last release line with Mono support.
 
-- **Requires the `VsdbgRemoteCoreclr` native libraries** </br>
-Debugging CoreCLR apps relies on the `VsdbgRemoteCoreclrHost` and `VsdbgRemoteCoreclrTarget` native libraries. These libraries are **closed source** and are **not** distributed with this extension: they ship with the official [.NET MAUI extension](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.dotnet-maui) from Microsoft, and no standalone download is known. Install that extension, then point the following settings to the folders bundled with it:
-  - `dotnetMeteor.debuggerOptions.remoteCoreclrHost`
-  - `dotnetMeteor.debuggerOptions.remoteCoreclrTarget`
-
-
 - **Requires the `DotRush` extension** </br>
 This version requires the [DotRush](https://github.com/JaneySprings/DotRush) extension — a Roslyn-based language server that provides better integration with the project system, IntelliSense, and other C# editor features. It is listed as an extension dependency, so VSCode will install it automatically alongside .NET Meteor.
 

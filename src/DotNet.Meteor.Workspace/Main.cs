@@ -34,8 +34,14 @@ public class Program {
                 return;
             }
             if (result.GetValue(initializeOption)) {
-                // start android daemon (workaround for nodejs child_process hanging issue)
-                try { AndroidDebugBridge.StartServer(); } catch { }
+                try {
+                    // try start android daemon (workaround for nodejs child_process hanging issue)
+                    AndroidDebugBridge.StartServer();
+                    // try sign libremotecoreclrtarget.dylib for MacOS Gatekeeper
+                    var libraryPath = Path.Combine(AppContext.BaseDirectory, ".. ", "remote", "remote-host");
+                    if (Directory.Exists(libraryPath))
+                        CodeSigner.SignFiles(Directory.EnumerateFiles(libraryPath, "*.dylib", SearchOption.AllDirectories));
+                } catch { }
                 // TODO: usbmuxd
                 // run usbmuxd manually
                 Console.WriteLine(JsonSerializer.Serialize(true));

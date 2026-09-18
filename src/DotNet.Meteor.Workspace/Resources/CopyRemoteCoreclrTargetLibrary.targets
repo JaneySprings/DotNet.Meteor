@@ -4,11 +4,15 @@
             Condition="'$(RemoteCoreclrTargetDir)' != ''">
 
         <PropertyGroup>
-            <_RemoteCoreclrTarget>$(RemoteCoreclrTargetDir)\$(_TargetFrameworkPlatform)\$(RuntimeIdentifier)\libvsdbgremotecoreclrtarget.dylib</_RemoteCoreclrTarget>
+            <_VSRemoteCoreclrTarget>$(RemoteCoreclrTargetDir)\$(_TargetFrameworkPlatform)\$(RuntimeIdentifier)\libvsdbgremotecoreclrtarget.dylib</_VSRemoteCoreclrTarget>
+            <_RemoteCoreclrTarget>$(RemoteCoreclrTargetDir)\$(_TargetFrameworkPlatform)\$(RuntimeIdentifier)\libremotecoreclrtarget.dylib</_RemoteCoreclrTarget>
         </PropertyGroup>
-    
-        <ItemGroup>
-            <ResolvedFileToPublish Include="$(_RemoteCoreclrTarget)" RelativePath="libvsdbgremotecoreclrtarget.dylib" PublishFolderType="DynamicLibrary" Kind="Dynamic" />
+
+        <ItemGroup Condition="Exists('$(_VSRemoteCoreclrTarget)')">
+            <ResolvedFileToPublish Include="$(_VSRemoteCoreclrTarget)" RelativePath="libvsdbgremotecoreclrtarget.dylib" PublishFolderType="DynamicLibrary" Kind="Dynamic" />
+        </ItemGroup>
+        <ItemGroup Condition="Exists('$(_RemoteCoreclrTarget)')">
+            <ResolvedFileToPublish Include="$(_RemoteCoreclrTarget)" RelativePath="libremotecoreclrtarget.dylib" PublishFolderType="DynamicLibrary" Kind="Dynamic" />
         </ItemGroup>
     </Target>
 

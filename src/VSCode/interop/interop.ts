@@ -10,11 +10,13 @@ export class Interop {
     public static workspaceToolPath: string;
     public static customTargetsPath: string;
     public static xamlServerPath: string;
+    public static remoteLibrariesPath: string;
 
     public static initialize(extensionPath: string): boolean {
         Interop.workspaceToolPath = path.join(extensionPath, "extension", "bin", "Workspace", "meteor.dll");
         Interop.customTargetsPath = path.join(extensionPath, "extension", "bin", "Workspace", "CopyRemoteCoreclrTargetLibrary.targets");
         Interop.xamlServerPath = path.join(extensionPath, "extension", "bin", "Xaml", "DotNet.Meteor.Xaml.LanguageServer.dll");
+        Interop.remoteLibrariesPath = path.join(extensionPath, "extension", "bin", "Remote");
 
         if (Interop.getMeteorVersion() === undefined)
             return false;

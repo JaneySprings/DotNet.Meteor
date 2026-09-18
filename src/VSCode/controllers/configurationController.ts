@@ -33,6 +33,14 @@ export class ConfigurationController {
     public static getHotReloadPort(): number {
         return ConfigurationController.getSetting<number>(res.configIdHotReloadHostPort) ?? 9988;
     }
+    public static getRemoteHostPath(): string {
+        const userValue = ConfigurationController.getSetting<string>(res.configIdRemoteCoreclrHost);
+        return userValue ? userValue : path.join(Interop.remoteLibrariesPath, 'remote-host');
+    }
+    public static getRemoteTargetPath(): string {
+        const userValue = ConfigurationController.getSetting<string>(res.configIdRemoteCoreclrTarget);
+        return userValue ? userValue : path.join(Interop.remoteLibrariesPath, 'remote-target');
+    }
     public static getSetting<TResult>(id: string): TResult | undefined {
         return vscode.workspace.getConfiguration(res.configId).get(id);
     }

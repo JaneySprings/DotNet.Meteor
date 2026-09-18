@@ -14,8 +14,6 @@ export const messageMonoNotSupported = "This version supports .NET 11+ (CoreCLR)
 export const messageNoProjectFound = "Selected project not found. Make sure you have selected a project in the status bar.";
 export const messageNoDeviceFound = "Incorrect selected device. Make sure you have selected a device.";
 export const messageDeviceLoading = "Fetching devices...";
-export const messageMissingCoreclrHost = "The 'dotnetMeteor.debuggerOptions.remoteCoreclrHost' setting is not configured. Please set it in VS Code settings and try again.";
-export const messageMissingCoreclrTarget = "The 'dotnetMeteor.debuggerOptions.remoteCoreclrTarget' setting is not configured. Please set it in VS Code settings and try again.";
 
 export const taskDefinitionId = "dotnet-meteor.task";
 export const debuggerMeteorId = "dotnet-meteor.debugger";
